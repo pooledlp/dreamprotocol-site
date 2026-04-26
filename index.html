@@ -1,130 +1,318 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dream Protocol</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dream Protocol | AI Business Automation</title>
 
-    <!-- Tailwind -->
-    <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 
-    <!-- GSAP -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<style>
+  body {
+    margin: 0;
+    background: #050509;
+    color: white;
+    font-family: Inter, system-ui, sans-serif;
+    overflow-x: hidden;
+  }
 
-    <style>
-        body {
-            background: #0b0b0f;
-            overflow-x: hidden;
-        }
+  .grid-bg {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size: 70px 70px;
+    mask-image: radial-gradient(circle at center, black 0%, transparent 70%);
+    animation: drift 20s linear infinite;
+  }
 
-        .glow {
-            position: absolute;
-            width: 700px;
-            height: 700px;
-            background: radial-gradient(circle, rgba(91,140,255,0.35), transparent 70%);
-            filter: blur(120px);
-            top: 20%;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-    </style>
+  @keyframes drift {
+    from { transform: translateY(0); }
+    to { transform: translateY(70px); }
+  }
+
+  .orb {
+    width: 520px;
+    height: 520px;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(86,120,255,.8), rgba(128,64,255,.28), transparent 70%);
+    filter: blur(40px);
+    opacity: .55;
+    position: absolute;
+    animation: pulse 7s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%,100% { transform: scale(1); opacity: .45; }
+    50% { transform: scale(1.15); opacity: .8; }
+  }
+
+  .core {
+    width: 260px;
+    height: 260px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.2);
+    background: radial-gradient(circle, rgba(255,255,255,.18), rgba(91,140,255,.18), transparent 70%);
+    box-shadow: 0 0 80px rgba(91,140,255,.35);
+    animation: rotateCore 18s linear infinite;
+  }
+
+  @keyframes rotateCore {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .ring {
+    position: absolute;
+    inset: -35px;
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 999px;
+  }
+
+  .ring.two {
+    inset: -75px;
+    border-color: rgba(91,140,255,.18);
+  }
+
+  .dot {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: #8fb0ff;
+    border-radius: 999px;
+    box-shadow: 0 0 24px #8fb0ff;
+  }
+
+  .glass {
+    background: rgba(255,255,255,.055);
+    border: 1px solid rgba(255,255,255,.12);
+    backdrop-filter: blur(18px);
+  }
+
+  .gradient-text {
+    background: linear-gradient(90deg, #fff, #9bbcff, #b98cff);
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+
+  .flow-line {
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #7da2ff, transparent);
+    animation: flow 2.2s linear infinite;
+  }
+
+  @keyframes flow {
+    0% { opacity: .2; transform: scaleX(.2); }
+    50% { opacity: 1; transform: scaleX(1); }
+    100% { opacity: .2; transform: scaleX(.2); }
+  }
+
+  .step-card {
+    transition: .3s ease;
+  }
+
+  .step-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 0 60px rgba(91,140,255,.18);
+  }
+</style>
 </head>
 
-<body class="text-white font-sans">
+<body>
 
-    <!-- BACKGROUND -->
-    <div class="glow"></div>
+<nav class="fixed top-0 left-0 right-0 z-50 px-6 py-5">
+  <div class="max-w-7xl mx-auto flex justify-between items-center glass rounded-full px-6 py-3">
+    <div class="font-semibold tracking-wide">Dream Protocol</div>
+    <div class="hidden md:flex gap-8 text-sm text-gray-300">
+      <a href="#system">System</a>
+      <a href="#workflow">Workflow</a>
+      <a href="#services">Services</a>
+    </div>
+    <a href="mailto:info@dreamprotocol.ai" class="bg-white text-black px-5 py-2 rounded-full text-sm font-bold">
+      Book Demo
+    </a>
+  </div>
+</nav>
 
-    <!-- HERO -->
-    <section class="h-screen flex flex-col justify-center items-center text-center px-6">
+<section class="relative min-h-screen flex items-center overflow-hidden px-6">
+  <div class="grid-bg"></div>
+  <div class="orb top-24 right-20"></div>
+  <div class="orb bottom-0 left-0 opacity-30"></div>
 
-        <h1 id="title" class="text-5xl md:text-7xl font-bold opacity-0">
-            Your Business. Running Itself.
-        </h1>
+  <div class="relative z-10 max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center pt-24">
+    <div>
+      <div id="badge" class="inline-flex glass rounded-full px-4 py-2 text-sm text-gray-300 mb-8 opacity-0">
+        AI Automation for Business Operations
+      </div>
 
-        <p id="subtitle" class="mt-6 text-lg text-gray-400 max-w-2xl opacity-0">
-            We design and deploy AI systems that automate quoting, operations, and workflows across your business.
-        </p>
+      <h1 id="heroTitle" class="text-6xl md:text-8xl font-black leading-none tracking-tight opacity-0">
+        Technical automation<br>
+        with <span class="gradient-text">operational foresight.</span>
+      </h1>
 
-        <div id="buttons" class="mt-10 opacity-0">
-            <button class="bg-blue-500 px-8 py-3 rounded-xl mr-4 hover:scale-105 transition">
-                Book Demo
-            </button>
-            <button class="border border-gray-600 px-8 py-3 rounded-xl hover:scale-105 transition">
-                See How It Works
-            </button>
-        </div>
+      <p id="heroSub" class="mt-8 text-xl text-gray-300 max-w-2xl leading-relaxed opacity-0">
+        Dream Protocol designs, builds, and manages AI systems that automate quoting, workflows, approvals, and execution.
+      </p>
 
-    </section>
+      <div id="heroBtns" class="mt-10 flex gap-4 opacity-0">
+        <a href="mailto:info@dreamprotocol.ai" class="bg-white text-black px-8 py-4 rounded-full font-bold">
+          Start the Conversation
+        </a>
+        <a href="#workflow" class="glass px-8 py-4 rounded-full font-bold">
+          See the System
+        </a>
+      </div>
+    </div>
 
-    <!-- WORKFLOW -->
-    <section class="py-20 text-center">
-        <h2 class="text-3xl font-semibold mb-10">Automated Workflow</h2>
+    <div class="relative flex items-center justify-center min-h-[520px]">
+      <div class="relative core">
+        <div class="ring"></div>
+        <div class="ring two"></div>
+        <div class="dot" style="top: 5px; left: 125px;"></div>
+        <div class="dot" style="bottom: 20px; right: 40px;"></div>
+        <div class="dot" style="left: 12px; top: 160px;"></div>
+      </div>
 
-        <div class="flex flex-wrap justify-center gap-4 text-gray-300 text-lg">
-            <div>Lead</div>
-            <div>→</div>
-            <div>AI</div>
-            <div>→</div>
-            <div>Quote</div>
-            <div>→</div>
-            <div>Approval</div>
-            <div>→</div>
-            <div>Execution</div>
-            <div>→</div>
-            <div>Reporting</div>
-        </div>
-    </section>
+      <div class="absolute top-16 right-8 glass rounded-3xl p-5 w-56">
+        <p class="text-sm text-gray-400">Quote Generated</p>
+        <p class="text-2xl font-bold mt-2">92% Faster</p>
+      </div>
 
-    <!-- SERVICES -->
-    <section class="py-20 text-center">
-        <h2 class="text-3xl font-semibold mb-12">What We Build</h2>
+      <div class="absolute bottom-20 left-4 glass rounded-3xl p-5 w-56">
+        <p class="text-sm text-gray-400">Tasks Routed</p>
+        <p class="text-2xl font-bold mt-2">Automatically</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-        <div class="grid md:grid-cols-3 gap-8 px-6 max-w-6xl mx-auto">
+<section id="system" class="py-32 px-6">
+  <div class="max-w-7xl mx-auto">
+    <p class="reveal text-blue-300 uppercase tracking-widest text-sm mb-4">01 / The system</p>
+    <h2 class="reveal text-5xl md:text-7xl font-black max-w-5xl">
+      Where AI automation meets real business operations.
+    </h2>
+    <p class="reveal text-gray-400 text-xl mt-8 max-w-3xl">
+      Most companies do not need another app. They need connected systems that think, route, create, approve, and execute.
+    </p>
+  </div>
+</section>
 
-            <div class="p-6 border border-gray-700 rounded-xl hover:border-blue-500 transition">
-                <h3 class="text-xl font-semibold mb-2">AI Quoting</h3>
-                <p class="text-gray-400">Generate quotes and follow-ups automatically.</p>
-            </div>
+<section id="workflow" class="py-28 px-6 bg-white/[.03]">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-16">
+      <p class="reveal text-blue-300 uppercase tracking-widest text-sm mb-4">02 / Workflow</p>
+      <h2 class="reveal text-5xl md:text-7xl font-black">From request to execution.</h2>
+    </div>
 
-            <div class="p-6 border border-gray-700 rounded-xl hover:border-blue-500 transition">
-                <h3 class="text-xl font-semibold mb-2">Workflow Automation</h3>
-                <p class="text-gray-400">Connect systems and eliminate manual work.</p>
-            </div>
+    <div class="grid md:grid-cols-5 gap-5 items-center">
+      <div class="step-card glass rounded-3xl p-6">
+        <div class="text-blue-300 text-sm">01</div>
+        <h3 class="text-2xl font-bold mt-4">Lead</h3>
+        <p class="text-gray-400 mt-3">Requests enter through email, forms, CRM, or tickets.</p>
+      </div>
 
-            <div class="p-6 border border-gray-700 rounded-xl hover:border-blue-500 transition">
-                <h3 class="text-xl font-semibold mb-2">AI Operations</h3>
-                <p class="text-gray-400">Deploy AI to handle internal tasks and processes.</p>
-            </div>
+      <div class="hidden md:block flow-line"></div>
 
-        </div>
-    </section>
+      <div class="step-card glass rounded-3xl p-6">
+        <div class="text-blue-300 text-sm">02</div>
+        <h3 class="text-2xl font-bold mt-4">AI</h3>
+        <p class="text-gray-400 mt-3">The system reviews context and prepares next action.</p>
+      </div>
 
-    <!-- CTA -->
-    <section class="py-24 text-center">
-        <h2 class="text-3xl font-semibold mb-6">
-            Let Your Business Run Itself
-        </h2>
+      <div class="hidden md:block flow-line"></div>
 
-        <button class="bg-blue-500 px-10 py-4 rounded-xl hover:scale-105 transition">
-            Schedule a Demo
-        </button>
-    </section>
+      <div class="step-card glass rounded-3xl p-6">
+        <div class="text-blue-300 text-sm">03</div>
+        <h3 class="text-2xl font-bold mt-4">Execution</h3>
+        <p class="text-gray-400 mt-3">Quotes, tasks, approvals, and reports move automatically.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <!-- ANIMATION -->
-    <script>
-        gsap.to("#title", { opacity: 1, y: -20, duration: 1 });
-        gsap.to("#subtitle", { opacity: 1, y: -10, duration: 1, delay: 0.4 });
-        gsap.to("#buttons", { opacity: 1, duration: 1, delay: 0.8 });
+<section id="services" class="py-32 px-6">
+  <div class="max-w-7xl mx-auto">
+    <p class="reveal text-blue-300 uppercase tracking-widest text-sm mb-4">03 / What we build</p>
+    <h2 class="reveal text-5xl md:text-7xl font-black max-w-5xl mb-16">
+      Systems that quote, route, execute, and report.
+    </h2>
 
-        gsap.to(".glow", {
-            scale: 1.1,
-            repeat: -1,
-            yoyo: true,
-            duration: 6,
-            ease: "power1.inOut"
-        });
-    </script>
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="step-card glass rounded-3xl p-8">
+        <h3 class="text-3xl font-bold">AI Quoting Systems</h3>
+        <p class="text-gray-400 mt-4 text-lg">Turn requests into scopes, quotes, approvals, and follow-ups.</p>
+      </div>
+
+      <div class="step-card glass rounded-3xl p-8">
+        <h3 class="text-3xl font-bold">Workflow Automation</h3>
+        <p class="text-gray-400 mt-4 text-lg">Connect Microsoft 365, CRM, QuickBooks, email, documents, and tickets.</p>
+      </div>
+
+      <div class="step-card glass rounded-3xl p-8">
+        <h3 class="text-3xl font-bold">AI Operations Assistants</h3>
+        <p class="text-gray-400 mt-4 text-lg">Triage requests, draft responses, summarize work, and route action.</p>
+      </div>
+
+      <div class="step-card glass rounded-3xl p-8">
+        <h3 class="text-3xl font-bold">Managed AI Infrastructure</h3>
+        <p class="text-gray-400 mt-4 text-lg">Support the identity, security, data, and integration layer behind the automation.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-32 px-6 bg-white/[.03]">
+  <div class="max-w-7xl mx-auto text-center">
+    <p class="reveal text-blue-300 uppercase tracking-widest text-sm mb-4">04 / Dream Protocol</p>
+    <h2 class="reveal text-5xl md:text-7xl font-black">
+      Build systems that run the business.
+    </h2>
+    <p class="reveal text-gray-300 text-xl mt-8 max-w-3xl mx-auto">
+      Discover. Design. Deploy. Optimize. A practical implementation path for AI automation that actually works inside real companies.
+    </p>
+    <a href="mailto:info@dreamprotocol.ai" class="reveal inline-block mt-10 bg-white text-black px-10 py-4 rounded-full font-bold">
+      Schedule a Strategy Session
+    </a>
+  </div>
+</section>
+
+<footer class="py-8 px-6 text-gray-500 border-t border-white/10">
+  <div class="max-w-7xl mx-auto flex justify-between flex-col md:flex-row gap-4">
+    <div>DreamProtocol.ai</div>
+    <div>AI Automation • Workflow Systems • Managed Infrastructure</div>
+  </div>
+</footer>
+
+<script>
+  gsap.registerPlugin(ScrollTrigger);
+
+  gsap.to("#badge", { opacity: 1, y: -10, duration: .8 });
+  gsap.to("#heroTitle", { opacity: 1, y: -20, duration: 1, delay: .2 });
+  gsap.to("#heroSub", { opacity: 1, y: -10, duration: 1, delay: .45 });
+  gsap.to("#heroBtns", { opacity: 1, y: -10, duration: 1, delay: .7 });
+
+  gsap.utils.toArray(".reveal").forEach((el) => {
+    gsap.from(el, {
+      scrollTrigger: { trigger: el, start: "top 85%" },
+      opacity: 0,
+      y: 40,
+      duration: .9,
+      ease: "power3.out"
+    });
+  });
+
+  gsap.from(".step-card", {
+    scrollTrigger: { trigger: ".step-card", start: "top 80%" },
+    opacity: 0,
+    y: 45,
+    stagger: .12,
+    duration: .8
+  });
+</script>
 
 </body>
 </html>
