@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dream Protocol</title>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <style>
+        body {
+            background: #0b0b0f;
+            overflow-x: hidden;
+        }
+
+        .glow {
+            position: absolute;
+            width: 700px;
+            height: 700px;
+            background: radial-gradient(circle, rgba(91,140,255,0.35), transparent 70%);
+            filter: blur(120px);
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+    </style>
+</head>
+
+<body class="text-white font-sans">
+
+    <!-- BACKGROUND -->
+    <div class="glow"></div>
+
+    <!-- HERO -->
+    <section class="h-screen flex flex-col justify-center items-center text-center px-6">
+
+        <h1 id="title" class="text-5xl md:text-7xl font-bold opacity-0">
+            Your Business. Running Itself.
+        </h1>
+
+        <p id="subtitle" class="mt-6 text-lg text-gray-400 max-w-2xl opacity-0">
+            We design and deploy AI systems that automate quoting, operations, and workflows across your business.
+        </p>
+
+        <div id="buttons" class="mt-10 opacity-0">
+            <button class="bg-blue-500 px-8 py-3 rounded-xl mr-4 hover:scale-105 transition">
+                Book Demo
+            </button>
+            <button class="border border-gray-600 px-8 py-3 rounded-xl hover:scale-105 transition">
+                See How It Works
+            </button>
+        </div>
+
+    </section>
+
+    <!-- WORKFLOW -->
+    <section class="py-20 text-center">
+        <h2 class="text-3xl font-semibold mb-10">Automated Workflow</h2>
+
+        <div class="flex flex-wrap justify-center gap-4 text-gray-300 text-lg">
+            <div>Lead</div>
+            <div>→</div>
+            <div>AI</div>
+            <div>→</div>
+            <div>Quote</div>
+            <div>→</div>
+            <div>Approval</div>
+            <div>→</div>
+            <div>Execution</div>
+            <div>→</div>
+            <div>Reporting</div>
+        </div>
+    </section>
+
+    <!-- SERVICES -->
+    <section class="py-20 text-center">
+        <h2 class="text-3xl font-semibold mb-12">What We Build</h2>
+
+        <div class="grid md:grid-cols-3 gap-8 px-6 max-w-6xl mx-auto">
+
+            <div class="p-6 border border-gray-700 rounded-xl hover:border-blue-500 transition">
+                <h3 class="text-xl font-semibold mb-2">AI Quoting</h3>
+                <p class="text-gray-400">Generate quotes and follow-ups automatically.</p>
+            </div>
+
+            <div class="p-6 border border-gray-700 rounded-xl hover:border-blue-500 transition">
+                <h3 class="text-xl font-semibold mb-2">Workflow Automation</h3>
+                <p class="text-gray-400">Connect systems and eliminate manual work.</p>
+            </div>
+
+            <div class="p-6 border border-gray-700 rounded-xl hover:border-blue-500 transition">
+                <h3 class="text-xl font-semibold mb-2">AI Operations</h3>
+                <p class="text-gray-400">Deploy AI to handle internal tasks and processes.</p>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="py-24 text-center">
+        <h2 class="text-3xl font-semibold mb-6">
+            Let Your Business Run Itself
+        </h2>
+
+        <button class="bg-blue-500 px-10 py-4 rounded-xl hover:scale-105 transition">
+            Schedule a Demo
+        </button>
+    </section>
+
+    <!-- ANIMATION -->
+    <script>
+        gsap.to("#title", { opacity: 1, y: -20, duration: 1 });
+        gsap.to("#subtitle", { opacity: 1, y: -10, duration: 1, delay: 0.4 });
+        gsap.to("#buttons", { opacity: 1, duration: 1, delay: 0.8 });
+
+        gsap.to(".glow", {
+            scale: 1.1,
+            repeat: -1,
+            yoyo: true,
+            duration: 6,
+            ease: "power1.inOut"
+        });
+    </script>
+
+</body>
+</html>
