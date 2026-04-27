@@ -151,9 +151,9 @@ body::before {
 
 .workflow-card {
   position: relative;
-  z-index: 2;
   min-height: 210px;
   transition: .3s ease;
+  opacity: 1;
 }
 
 .workflow-card:hover,
@@ -175,34 +175,21 @@ body::before {
   box-shadow: 0 0 24px #8fb0ff;
 }
 
-.workflow-rail {
+.workflow-progress {
   position: absolute;
-  top: 50%;
-  left: 8%;
-  right: 8%;
-  height: 2px;
-  background: rgba(255,255,255,.1);
-  transform: translateY(-50%);
-  z-index: 0;
-}
-
-.workflow-pulse {
-  position: absolute;
-  top: -3px;
-  left: 0;
-  width: 90px;
-  height: 8px;
+  height: 100%;
+  width: 35%;
   border-radius: 999px;
-  background: linear-gradient(90deg, transparent, #8fb0ff, transparent);
+  background: linear-gradient(90deg, transparent, #8fb0ff, #bc8cff, transparent);
   box-shadow: 0 0 28px rgba(143,176,255,.8);
-  animation: workflowMove 3.2s linear infinite;
+  animation: workflowProgress 3.5s linear infinite;
 }
 
-@keyframes workflowMove {
-  0% { left: 0%; opacity: 0; }
-  10% { opacity: 1; }
-  90% { opacity: 1; }
-  100% { left: calc(100% - 90px); opacity: 0; }
+@keyframes workflowProgress {
+  0% { left: -35%; opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { left: 100%; opacity: 0; }
 }
 
 .step-card {
@@ -254,6 +241,11 @@ body::before {
 @media (max-width: 768px) {
   .core-wrap { width: 260px; height: 260px; }
   .core { width: 180px; height: 180px; }
+
+  .float-panel {
+    width: 170px;
+    padding: 14px;
+  }
 }
 </style>
 </head>
@@ -344,7 +336,7 @@ body::before {
 <section id="workflow" class="py-28 px-6 bg-white/[.025] overflow-hidden">
   <div class="max-w-7xl mx-auto">
 
-    <div class="text-center mb-16">
+    <div class="text-center mb-14">
       <p class="reveal text-blue-300 uppercase tracking-widest text-sm mb-4">Live Workflow</p>
       <h2 class="reveal text-4xl md:text-5xl lg:text-6xl font-black leading-tight">
         From request to execution.
@@ -354,59 +346,57 @@ body::before {
       </p>
     </div>
 
-    <div class="relative max-w-6xl mx-auto">
-      <div class="hidden lg:grid grid-cols-5 gap-5 relative z-10">
-
-        <div class="workflow-card glass rounded-3xl p-6">
-          <div class="text-blue-300 text-sm mb-4">01</div>
-          <h3 class="text-2xl font-bold">Lead</h3>
-          <p class="text-gray-400 mt-3 text-sm">Request enters by email, form, CRM, or ticket.</p>
-        </div>
-
-        <div class="workflow-card glass rounded-3xl p-6">
-          <div class="text-blue-300 text-sm mb-4">02</div>
-          <h3 class="text-2xl font-bold">Analyze</h3>
-          <p class="text-gray-400 mt-3 text-sm">AI reads context and identifies the next action.</p>
-        </div>
-
-        <div class="workflow-card glass rounded-3xl p-6">
-          <div class="text-blue-300 text-sm mb-4">03</div>
-          <h3 class="text-2xl font-bold">Quote</h3>
-          <p class="text-gray-400 mt-3 text-sm">Scope, pricing, and notes are drafted.</p>
-        </div>
-
-        <div class="workflow-card glass rounded-3xl p-6">
-          <div class="text-blue-300 text-sm mb-4">04</div>
-          <h3 class="text-2xl font-bold">Approve</h3>
-          <p class="text-gray-400 mt-3 text-sm">Decision makers are routed for approval.</p>
-        </div>
-
-        <div class="workflow-card glass rounded-3xl p-6">
-          <div class="text-blue-300 text-sm mb-4">05</div>
-          <h3 class="text-2xl font-bold">Execute</h3>
-          <p class="text-gray-400 mt-3 text-sm">Tasks, follow-ups, and reports are triggered.</p>
-        </div>
+    <div class="grid lg:grid-cols-5 gap-5">
+      <div class="workflow-card glass rounded-3xl p-6">
+        <div class="text-blue-300 text-sm mb-4">01</div>
+        <h3 class="text-2xl font-bold">Lead</h3>
+        <p class="text-gray-400 mt-3 text-sm">Request enters by email, form, CRM, or ticket.</p>
       </div>
 
-      <div class="hidden lg:block workflow-rail">
-        <div class="workflow-pulse"></div>
+      <div class="workflow-card glass rounded-3xl p-6">
+        <div class="text-blue-300 text-sm mb-4">02</div>
+        <h3 class="text-2xl font-bold">Analyze</h3>
+        <p class="text-gray-400 mt-3 text-sm">AI reads context and identifies the next action.</p>
       </div>
 
-      <div class="grid gap-5 lg:hidden">
-        <div class="workflow-card glass rounded-3xl p-6">
-          <h3 class="text-2xl font-bold">Lead</h3>
-          <p class="text-gray-400 mt-3">Request enters the system.</p>
-        </div>
-        <div class="workflow-card glass rounded-3xl p-6">
-          <h3 class="text-2xl font-bold">Analyze</h3>
-          <p class="text-gray-400 mt-3">AI determines the next step.</p>
-        </div>
-        <div class="workflow-card glass rounded-3xl p-6">
-          <h3 class="text-2xl font-bold">Execute</h3>
-          <p class="text-gray-400 mt-3">Work gets routed and completed.</p>
-        </div>
+      <div class="workflow-card glass rounded-3xl p-6">
+        <div class="text-blue-300 text-sm mb-4">03</div>
+        <h3 class="text-2xl font-bold">Quote</h3>
+        <p class="text-gray-400 mt-3 text-sm">Scope, pricing, and notes are drafted.</p>
+      </div>
+
+      <div class="workflow-card glass rounded-3xl p-6">
+        <div class="text-blue-300 text-sm mb-4">04</div>
+        <h3 class="text-2xl font-bold">Approve</h3>
+        <p class="text-gray-400 mt-3 text-sm">Decision makers are routed for approval.</p>
+      </div>
+
+      <div class="workflow-card glass rounded-3xl p-6">
+        <div class="text-blue-300 text-sm mb-4">05</div>
+        <h3 class="text-2xl font-bold">Execute</h3>
+        <p class="text-gray-400 mt-3 text-sm">Tasks, follow-ups, and reports are triggered.</p>
       </div>
     </div>
+
+    <div class="mt-10 glass rounded-3xl p-5 overflow-hidden">
+      <div class="flex items-center justify-between text-sm text-gray-400 mb-4">
+        <span>Automation path</span>
+        <span class="text-blue-300">Live</span>
+      </div>
+
+      <div class="relative h-3 bg-white/10 rounded-full overflow-hidden">
+        <div class="workflow-progress"></div>
+      </div>
+
+      <div class="grid grid-cols-5 text-xs text-gray-500 mt-3">
+        <span>Lead</span>
+        <span>Analyze</span>
+        <span>Quote</span>
+        <span>Approve</span>
+        <span class="text-right">Execute</span>
+      </div>
+    </div>
+
   </div>
 </section>
 
