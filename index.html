@@ -224,6 +224,25 @@ body::before {
   100% { top: 100%; opacity: 0; }
 }
 
+.protocol-flare {
+  position: absolute;
+  width: 520px;
+  height: 220px;
+  top: 35px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(130,164,255,.22), rgba(130,164,255,0) 70%);
+  filter: blur(16px);
+  pointer-events: none;
+  animation: protocolDrift 8s ease-in-out infinite;
+}
+
+@keyframes protocolDrift {
+  0%, 100% { transform: translateX(-50%) scale(1); opacity: .45; }
+  50% { transform: translateX(-50%) scale(1.08); opacity: .78; }
+}
+
 .metric-bar {
   height: 8px;
   border-radius: 999px;
@@ -522,10 +541,11 @@ body::before {
   </div>
 </section>
 
-<section id="protocol" class="py-32 px-6">
+<section id="protocol" class="relative py-32 px-6 overflow-hidden">
+  <div class="protocol-flare"></div>
   <div class="max-w-7xl mx-auto">
-    <p class="reveal text-blue-300 uppercase tracking-widest text-sm mb-4">Dream Protocol</p>
-    <h2 class="reveal text-5xl md:text-7xl font-black max-w-5xl mb-16">
+    <p class="protocol-label text-blue-300 uppercase tracking-widest text-sm mb-4">Dream Protocol</p>
+    <h2 class="protocol-title text-5xl md:text-7xl font-black max-w-5xl mb-16">
       A practical path to AI automation.
     </h2>
 
@@ -605,6 +625,23 @@ gsap.utils.toArray(".reveal").forEach((el) => {
     duration: .9,
     ease: "power3.out"
   });
+});
+
+gsap.from("#protocol .protocol-label", {
+  scrollTrigger: { trigger: "#protocol", start: "top 80%" },
+  opacity: 0,
+  y: 30,
+  duration: .75,
+  ease: "power3.out"
+});
+
+gsap.from("#protocol .protocol-title", {
+  scrollTrigger: { trigger: "#protocol", start: "top 78%" },
+  opacity: 0,
+  y: 50,
+  scale: .96,
+  duration: 1.05,
+  ease: "power4.out"
 });
 
 gsap.from(".step-card", {
