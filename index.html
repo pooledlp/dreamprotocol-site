@@ -10,164 +10,208 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 
 <style>
-  html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; }
 
-  body {
-    margin: 0;
-    background: #050509;
-    color: white;
-    font-family: Inter, system-ui, sans-serif;
-    overflow-x: hidden;
-  }
+body {
+  margin: 0;
+  background: #040409;
+  color: white;
+  font-family: Inter, system-ui, sans-serif;
+  overflow-x: hidden;
+}
 
-  .grid-bg {
-    position: absolute;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px);
-    background-size: 72px 72px;
-    mask-image: radial-gradient(circle at center, black 0%, transparent 72%);
-    animation: drift 22s linear infinite;
-  }
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(circle at 25% 15%, rgba(92,120,255,.18), transparent 35%),
+    radial-gradient(circle at 80% 20%, rgba(170,80,255,.14), transparent 35%),
+    radial-gradient(circle at 50% 90%, rgba(70,130,255,.10), transparent 45%);
+  pointer-events: none;
+  z-index: -2;
+}
 
-  @keyframes drift {
-    from { transform: translateY(0); }
-    to { transform: translateY(72px); }
-  }
+.grid-bg {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: radial-gradient(circle at center, black 0%, transparent 72%);
+  animation: drift 22s linear infinite;
+}
 
-  .orb {
-    width: 540px;
-    height: 540px;
-    border-radius: 999px;
-    background: radial-gradient(circle, rgba(86,120,255,.85), rgba(128,64,255,.28), transparent 70%);
-    filter: blur(46px);
-    opacity: .52;
-    position: absolute;
-    animation: pulse 7s ease-in-out infinite;
-  }
+@keyframes drift {
+  from { transform: translateY(0); }
+  to { transform: translateY(72px); }
+}
 
-  @keyframes pulse {
-    0%,100% { transform: scale(1); opacity: .42; }
-    50% { transform: scale(1.14); opacity: .78; }
-  }
+.noise {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: .06;
+  z-index: 80;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 220 220' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
 
-  .core-wrap {
-    position: relative;
-    width: 330px;
-    height: 330px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+.orb {
+  width: 540px;
+  height: 540px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(86,120,255,.85), rgba(128,64,255,.28), transparent 70%);
+  filter: blur(46px);
+  opacity: .52;
+  position: absolute;
+  animation: pulse 7s ease-in-out infinite;
+}
 
-  .core {
-    width: 230px;
-    height: 230px;
-    border-radius: 999px;
-    border: 1px solid rgba(255,255,255,.18);
-    background: radial-gradient(circle, rgba(255,255,255,.18), rgba(91,140,255,.2), transparent 70%);
-    box-shadow: 0 0 90px rgba(91,140,255,.34);
-    animation: rotateCore 20s linear infinite;
-  }
+@keyframes pulse {
+  0%,100% { transform: scale(1); opacity: .42; }
+  50% { transform: scale(1.14); opacity: .78; }
+}
 
-  @keyframes rotateCore {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-  }
+.glass {
+  background: rgba(255,255,255,.055);
+  border: 1px solid rgba(255,255,255,.12);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 0 55px rgba(91,140,255,.09);
+}
 
-  .ring {
-    position: absolute;
-    inset: 22px;
-    border: 1px solid rgba(255,255,255,.13);
-    border-radius: 999px;
-  }
+.gradient-text {
+  background: linear-gradient(90deg, #fff, #a9c0ff, #bc8cff);
+  -webkit-background-clip: text;
+  color: transparent;
+}
 
-  .ring.two {
-    inset: -16px;
-    border-color: rgba(91,140,255,.2);
-  }
+.core-wrap {
+  position: relative;
+  width: 360px;
+  height: 360px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-  .ring.three {
-    inset: -56px;
-    border-color: rgba(255,255,255,.08);
-  }
+.core {
+  width: 230px;
+  height: 230px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.18);
+  background: radial-gradient(circle, rgba(255,255,255,.18), rgba(91,140,255,.2), transparent 70%);
+  box-shadow: 0 0 95px rgba(91,140,255,.38);
+  animation: rotateCore 20s linear infinite;
+}
 
-  .dot {
-    position: absolute;
-    width: 10px;
-    height: 10px;
-    background: #93b2ff;
-    border-radius: 999px;
-    box-shadow: 0 0 24px #93b2ff;
-  }
+@keyframes rotateCore {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
 
-  .glass {
-    background: rgba(255,255,255,.055);
-    border: 1px solid rgba(255,255,255,.12);
-    backdrop-filter: blur(18px);
-    box-shadow: 0 0 55px rgba(91,140,255,.09);
-  }
+.ring {
+  position: absolute;
+  inset: 30px;
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 999px;
+}
 
-  .gradient-text {
-    background: linear-gradient(90deg, #fff, #9bbcff, #b98cff);
-    -webkit-background-clip: text;
-    color: transparent;
-  }
+.ring.two {
+  inset: -12px;
+  border-color: rgba(91,140,255,.2);
+}
 
-  .flow-line {
-    height: 2px;
-    background: linear-gradient(90deg, transparent, #7da2ff, transparent);
-    transform-origin: center;
-    animation: flow 2.2s linear infinite;
-  }
+.ring.three {
+  inset: -56px;
+  border-color: rgba(255,255,255,.08);
+}
 
-  @keyframes flow {
-    0% { opacity: .2; transform: scaleX(.22); }
-    50% { opacity: 1; transform: scaleX(1); }
-    100% { opacity: .2; transform: scaleX(.22); }
-  }
+.dot {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #93b2ff;
+  border-radius: 999px;
+  box-shadow: 0 0 24px #93b2ff;
+}
 
-  .step-card {
-    transition: .3s ease;
-  }
+.system-line {
+  position: absolute;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(147,178,255,.8), transparent);
+  opacity: .6;
+  animation: shimmer 3s ease-in-out infinite;
+}
 
-  .step-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 0 70px rgba(91,140,255,.18);
-    border-color: rgba(147,178,255,.42);
-  }
+@keyframes shimmer {
+  0%,100% { opacity: .16; transform: scaleX(.45); }
+  50% { opacity: .85; transform: scaleX(1); }
+}
 
-  .system-line {
-    position: absolute;
-    width: 180px;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(147,178,255,.75), transparent);
-    opacity: .55;
-    animation: shimmer 3s ease-in-out infinite;
-  }
+.flow-line {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #7da2ff, transparent);
+  transform-origin: center;
+  animation: flow 2.2s linear infinite;
+}
 
-  @keyframes shimmer {
-    0%,100% { opacity: .18; transform: scaleX(.5); }
-    50% { opacity: .8; transform: scaleX(1); }
-  }
+@keyframes flow {
+  0% { opacity: .2; transform: scaleX(.22); }
+  50% { opacity: 1; transform: scaleX(1); }
+  100% { opacity: .2; transform: scaleX(.22); }
+}
 
-  @media (max-width: 768px) {
-    .core-wrap { width: 260px; height: 260px; }
-    .core { width: 180px; height: 180px; }
-  }
+.step-card {
+  transition: .3s ease;
+}
+
+.step-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 0 70px rgba(91,140,255,.18);
+  border-color: rgba(147,178,255,.42);
+}
+
+.status-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: #7da2ff;
+  box-shadow: 0 0 20px #7da2ff;
+}
+
+.scan {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: linear-gradient(180deg, transparent, rgba(125,162,255,.12), transparent);
+  animation: scan 4s ease-in-out infinite;
+}
+
+@keyframes scan {
+  0% { top: -80px; opacity: 0; }
+  20% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+@media (max-width: 768px) {
+  .core-wrap { width: 260px; height: 260px; }
+  .core { width: 180px; height: 180px; }
+}
 </style>
 </head>
 
 <body>
+<div class="noise"></div>
 
 <nav class="fixed top-0 left-0 right-0 z-50 px-5 py-5">
   <div class="max-w-7xl mx-auto flex justify-between items-center glass rounded-full px-6 py-3">
     <a href="#" class="font-semibold tracking-wide">Dream Protocol</a>
 
     <div class="hidden md:flex gap-8 text-sm text-gray-300">
-      <a href="#system" class="hover:text-white transition">System</a>
       <a href="#workflow" class="hover:text-white transition">Workflow</a>
+      <a href="#dashboard" class="hover:text-white transition">System</a>
       <a href="#services" class="hover:text-white transition">Services</a>
       <a href="#protocol" class="hover:text-white transition">Protocol</a>
     </div>
@@ -202,27 +246,25 @@
         <a href="mailto:info@dreamprotocol.ai" class="bg-white text-black px-8 py-4 rounded-full font-bold hover:scale-105 transition">
           Start the Conversation
         </a>
-        <a href="#workflow" class="glass px-8 py-4 rounded-full font-bold hover:scale-105 transition">
+        <a href="#dashboard" class="glass px-8 py-4 rounded-full font-bold hover:scale-105 transition">
           See the System
         </a>
       </div>
     </div>
 
     <div class="relative flex items-center justify-center min-h-[430px] lg:min-h-[560px] scale-95 lg:scale-100">
-      <div class="system-line top-[25%] left-[8%] rotate-12"></div>
-      <div class="system-line bottom-[28%] right-[8%] -rotate-12"></div>
-      <div class="system-line top-[50%] right-[3%] rotate-90"></div>
+      <div class="system-line top-[26%] left-[7%] rotate-12 w-52"></div>
+      <div class="system-line bottom-[27%] right-[7%] -rotate-12 w-52"></div>
+      <div class="system-line top-[50%] right-[1%] rotate-90 w-44"></div>
 
       <div class="core-wrap">
         <div class="ring"></div>
         <div class="ring two"></div>
         <div class="ring three"></div>
-
         <div class="core"></div>
-
-        <div class="dot" style="top: 16px; left: 158px;"></div>
-        <div class="dot" style="bottom: 34px; right: 54px;"></div>
-        <div class="dot" style="left: 24px; top: 190px;"></div>
+        <div class="dot" style="top: 17px; left: 172px;"></div>
+        <div class="dot" style="bottom: 36px; right: 58px;"></div>
+        <div class="dot" style="left: 28px; top: 205px;"></div>
       </div>
 
       <div class="float-panel absolute top-8 right-4 lg:right-10 glass rounded-3xl p-5 w-56">
@@ -275,42 +317,113 @@
   </div>
 </section>
 
-<section id="system" class="py-32 px-6">
-  <div class="max-w-7xl mx-auto">
-    <p class="reveal text-blue-300 uppercase tracking-widest text-sm mb-4">01 / The system</p>
-    <h2 class="reveal text-5xl md:text-7xl font-black max-w-5xl">
-      Where AI automation meets real business operations.
-    </h2>
-    <p class="reveal text-gray-400 text-xl mt-8 max-w-3xl">
-      Most companies do not need another app. They need connected systems that think, route, create, approve, and execute.
-    </p>
+<section id="dashboard" class="relative py-32 px-6 overflow-hidden">
+  <div class="orb top-20 left-1/2 -translate-x-1/2 opacity-20"></div>
+
+  <div class="relative z-10 max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
+    <div>
+      <p class="reveal text-blue-300 uppercase tracking-widest text-sm mb-4">System Activity</p>
+      <h2 class="reveal text-5xl md:text-7xl font-black leading-tight">
+        Real work moving through intelligent workflows.
+      </h2>
+      <p class="reveal text-gray-400 text-xl mt-8 max-w-2xl">
+        Visualize intake, routing, quoting, approvals, execution, and reporting as one connected operating system.
+      </p>
+    </div>
+
+    <div class="relative glass rounded-[2rem] p-6 overflow-hidden">
+      <div class="scan"></div>
+
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <p class="text-gray-400 text-sm">Dream Protocol Console</p>
+          <h3 class="text-2xl font-bold">Automation Live</h3>
+        </div>
+        <div class="flex items-center gap-2 text-sm text-blue-200">
+          <span class="status-dot"></span> Active
+        </div>
+      </div>
+
+      <div class="grid grid-cols-3 gap-4 mb-5">
+        <div class="glass rounded-2xl p-4">
+          <p class="text-gray-400 text-sm">Quotes</p>
+          <p class="text-2xl font-bold mt-2">18</p>
+        </div>
+        <div class="glass rounded-2xl p-4">
+          <p class="text-gray-400 text-sm">Approvals</p>
+          <p class="text-2xl font-bold mt-2">7</p>
+        </div>
+        <div class="glass rounded-2xl p-4">
+          <p class="text-gray-400 text-sm">Tasks</p>
+          <p class="text-2xl font-bold mt-2">42</p>
+        </div>
+      </div>
+
+      <div class="space-y-3">
+        <div class="activity glass rounded-2xl p-4 flex justify-between items-center">
+          <div>
+            <p class="font-bold">Quote generated</p>
+            <p class="text-gray-400 text-sm">Scope drafted and routed for approval</p>
+          </div>
+          <span class="text-blue-300 text-sm">Complete</span>
+        </div>
+
+        <div class="activity glass rounded-2xl p-4 flex justify-between items-center">
+          <div>
+            <p class="font-bold">Approval requested</p>
+            <p class="text-gray-400 text-sm">Decision maker notified automatically</p>
+          </div>
+          <span class="text-purple-300 text-sm">In progress</span>
+        </div>
+
+        <div class="activity glass rounded-2xl p-4 flex justify-between items-center">
+          <div>
+            <p class="font-bold">Task assigned</p>
+            <p class="text-gray-400 text-sm">Internal execution workflow created</p>
+          </div>
+          <span class="text-blue-300 text-sm">Done</span>
+        </div>
+
+        <div class="activity glass rounded-2xl p-4 flex justify-between items-center">
+          <div>
+            <p class="font-bold">Customer follow-up</p>
+            <p class="text-gray-400 text-sm">Email response prepared for review</p>
+          </div>
+          <span class="text-gray-300 text-sm">Queued</span>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
 <section id="services" class="py-32 px-6 bg-white/[.025]">
   <div class="max-w-7xl mx-auto">
-    <p class="reveal text-blue-300 uppercase tracking-widest text-sm mb-4">02 / What we build</p>
+    <p class="reveal text-blue-300 uppercase tracking-widest text-sm mb-4">Modules</p>
     <h2 class="reveal text-5xl md:text-7xl font-black max-w-5xl mb-16">
       Systems that quote, route, execute, and report.
     </h2>
 
     <div class="grid md:grid-cols-2 gap-6">
       <div class="step-card glass rounded-3xl p-8">
+        <div class="text-blue-300 text-sm mb-5">01</div>
         <h3 class="text-3xl font-bold">AI Quoting Systems</h3>
         <p class="text-gray-400 mt-4 text-lg">Turn requests into scopes, quotes, approvals, and follow-ups.</p>
       </div>
 
       <div class="step-card glass rounded-3xl p-8">
+        <div class="text-blue-300 text-sm mb-5">02</div>
         <h3 class="text-3xl font-bold">Workflow Automation</h3>
         <p class="text-gray-400 mt-4 text-lg">Connect Microsoft 365, CRM, QuickBooks, email, documents, and tickets.</p>
       </div>
 
       <div class="step-card glass rounded-3xl p-8">
+        <div class="text-blue-300 text-sm mb-5">03</div>
         <h3 class="text-3xl font-bold">AI Operations Assistants</h3>
         <p class="text-gray-400 mt-4 text-lg">Triage requests, draft responses, summarize work, and route action.</p>
       </div>
 
       <div class="step-card glass rounded-3xl p-8">
+        <div class="text-blue-300 text-sm mb-5">04</div>
         <h3 class="text-3xl font-bold">Managed AI Infrastructure</h3>
         <p class="text-gray-400 mt-4 text-lg">Support the identity, security, data, and integration layer behind the automation.</p>
       </div>
@@ -320,7 +433,7 @@
 
 <section id="protocol" class="py-32 px-6">
   <div class="max-w-7xl mx-auto">
-    <p class="reveal text-blue-300 uppercase tracking-widest text-sm mb-4">03 / Dream Protocol</p>
+    <p class="reveal text-blue-300 uppercase tracking-widest text-sm mb-4">Dream Protocol</p>
     <h2 class="reveal text-5xl md:text-7xl font-black max-w-5xl mb-16">
       A practical path to AI automation.
     </h2>
@@ -356,7 +469,7 @@
 <section class="relative py-32 px-6 bg-white/[.025] overflow-hidden">
   <div class="orb top-0 left-1/2 -translate-x-1/2 opacity-25"></div>
   <div class="relative z-10 max-w-7xl mx-auto text-center">
-    <p class="reveal text-blue-300 uppercase tracking-widest text-sm mb-4">04 / Start</p>
+    <p class="reveal text-blue-300 uppercase tracking-widest text-sm mb-4">Start</p>
     <h2 class="reveal text-5xl md:text-7xl font-black">
       Build systems that run the business.
     </h2>
@@ -377,39 +490,47 @@
 </footer>
 
 <script>
-  gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger);
 
-  gsap.to("#badge", { opacity: 1, y: -10, duration: .8 });
-  gsap.to("#heroTitle", { opacity: 1, y: -20, duration: 1, delay: .2 });
-  gsap.to("#heroSub", { opacity: 1, y: -10, duration: 1, delay: .45 });
-  gsap.to("#heroBtns", { opacity: 1, y: -10, duration: 1, delay: .7 });
+gsap.to("#badge", { opacity: 1, y: -10, duration: .8 });
+gsap.to("#heroTitle", { opacity: 1, y: -20, duration: 1, delay: .2 });
+gsap.to("#heroSub", { opacity: 1, y: -10, duration: 1, delay: .45 });
+gsap.to("#heroBtns", { opacity: 1, y: -10, duration: 1, delay: .7 });
 
-  gsap.to(".float-panel", {
-    y: -12,
-    repeat: -1,
-    yoyo: true,
-    duration: 3.2,
-    stagger: .35,
-    ease: "power1.inOut"
-  });
+gsap.to(".float-panel", {
+  y: -12,
+  repeat: -1,
+  yoyo: true,
+  duration: 3.2,
+  stagger: .35,
+  ease: "power1.inOut"
+});
 
-  gsap.utils.toArray(".reveal").forEach((el) => {
-    gsap.from(el, {
-      scrollTrigger: { trigger: el, start: "top 85%" },
-      opacity: 0,
-      y: 40,
-      duration: .9,
-      ease: "power3.out"
-    });
-  });
-
-  gsap.from(".step-card", {
-    scrollTrigger: { trigger: ".step-card", start: "top 80%" },
+gsap.utils.toArray(".reveal").forEach((el) => {
+  gsap.from(el, {
+    scrollTrigger: { trigger: el, start: "top 85%" },
     opacity: 0,
-    y: 45,
-    stagger: .1,
-    duration: .8
+    y: 40,
+    duration: .9,
+    ease: "power3.out"
   });
+});
+
+gsap.from(".step-card", {
+  scrollTrigger: { trigger: ".step-card", start: "top 80%" },
+  opacity: 0,
+  y: 45,
+  stagger: .1,
+  duration: .8
+});
+
+gsap.from(".activity", {
+  scrollTrigger: { trigger: ".activity", start: "top 82%" },
+  opacity: 0,
+  x: 30,
+  stagger: .12,
+  duration: .7
+});
 </script>
 
 </body>
