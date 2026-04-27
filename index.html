@@ -157,7 +157,8 @@ body::before {
 }
 
 .workflow-card:hover,
-.step-card:hover {
+.step-card:hover,
+.service-card:hover {
   transform: translateY(-8px);
   box-shadow: 0 0 70px rgba(91,140,255,.18);
   border-color: rgba(147,178,255,.42);
@@ -193,6 +194,10 @@ body::before {
 }
 
 .step-card {
+  transition: .3s ease;
+}
+
+.service-card {
   transition: .3s ease;
 }
 
@@ -333,12 +338,12 @@ body::before {
   </div>
 </section>
 
-<section id="workflow" class="py-28 px-6 bg-white/[.025] overflow-hidden">
+<section id="workflow" class="py-28 px-6 bg-white/[.025]">
   <div class="max-w-7xl mx-auto">
 
     <div class="text-center mb-14">
       <p class="reveal text-blue-300 uppercase tracking-widest text-sm mb-4">Live Workflow</p>
-      <h2 class="reveal text-4xl md:text-5xl lg:text-6xl font-black leading-tight">
+      <h2 class="reveal text-4xl md:text-5xl lg:text-6xl font-black leading-tight max-w-4xl mx-auto">
         From request to execution.
       </h2>
       <p class="reveal text-gray-400 mt-5 text-lg max-w-2xl mx-auto">
@@ -346,7 +351,7 @@ body::before {
       </p>
     </div>
 
-    <div class="grid lg:grid-cols-5 gap-5">
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
       <div class="workflow-card glass rounded-3xl p-6">
         <div class="text-blue-300 text-sm mb-4">01</div>
         <h3 class="text-2xl font-bold">Lead</h3>
@@ -484,31 +489,31 @@ body::before {
 
 <section id="services" class="py-32 px-6 bg-white/[.025]">
   <div class="max-w-7xl mx-auto">
-    <p class="reveal text-blue-300 uppercase tracking-widest text-sm mb-4">Modules</p>
-    <h2 class="reveal text-5xl md:text-7xl font-black max-w-5xl mb-16">
+    <p class="text-blue-300 uppercase tracking-widest text-sm mb-4">Modules</p>
+    <h2 class="text-5xl md:text-7xl font-black max-w-5xl mb-16">
       Systems that quote, route, execute, and report.
     </h2>
 
     <div class="grid md:grid-cols-2 gap-6">
-      <div class="step-card glass rounded-3xl p-8">
+      <div class="service-card glass rounded-3xl p-8">
         <div class="text-blue-300 text-sm mb-5">01</div>
         <h3 class="text-3xl font-bold">AI Quoting Systems</h3>
         <p class="text-gray-400 mt-4 text-lg">Turn requests into scopes, quotes, approvals, and follow-ups.</p>
       </div>
 
-      <div class="step-card glass rounded-3xl p-8">
+      <div class="service-card glass rounded-3xl p-8">
         <div class="text-blue-300 text-sm mb-5">02</div>
         <h3 class="text-3xl font-bold">Workflow Automation</h3>
         <p class="text-gray-400 mt-4 text-lg">Connect Microsoft 365, CRM, QuickBooks, email, documents, and tickets.</p>
       </div>
 
-      <div class="step-card glass rounded-3xl p-8">
+      <div class="service-card glass rounded-3xl p-8">
         <div class="text-blue-300 text-sm mb-5">03</div>
         <h3 class="text-3xl font-bold">AI Operations Assistants</h3>
         <p class="text-gray-400 mt-4 text-lg">Triage requests, draft responses, summarize work, and route action.</p>
       </div>
 
-      <div class="step-card glass rounded-3xl p-8">
+      <div class="service-card glass rounded-3xl p-8">
         <div class="text-blue-300 text-sm mb-5">04</div>
         <h3 class="text-3xl font-bold">Managed AI Infrastructure</h3>
         <p class="text-gray-400 mt-4 text-lg">Support the identity, security, data, and integration layer behind the automation.</p>
