@@ -52,9 +52,22 @@ body::before {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  opacity: .06;
+  opacity: .055;
   z-index: 80;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 220 220' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.glass {
+  background: rgba(255,255,255,.055);
+  border: 1px solid rgba(255,255,255,.12);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 0 55px rgba(91,140,255,.09);
+}
+
+.gradient-text {
+  background: linear-gradient(90deg, #fff, #a9c0ff, #bc8cff);
+  -webkit-background-clip: text;
+  color: transparent;
 }
 
 .orb {
@@ -71,19 +84,6 @@ body::before {
 @keyframes pulse {
   0%,100% { transform: scale(1); opacity: .42; }
   50% { transform: scale(1.14); opacity: .78; }
-}
-
-.glass {
-  background: rgba(255,255,255,.055);
-  border: 1px solid rgba(255,255,255,.12);
-  backdrop-filter: blur(18px);
-  box-shadow: 0 0 55px rgba(91,140,255,.09);
-}
-
-.gradient-text {
-  background: linear-gradient(90deg, #fff, #a9c0ff, #bc8cff);
-  -webkit-background-clip: text;
-  color: transparent;
 }
 
 .core-wrap {
@@ -149,27 +149,64 @@ body::before {
   50% { opacity: .85; transform: scaleX(1); }
 }
 
-.flow-line {
-  height: 2px;
-  background: linear-gradient(90deg, transparent, #7da2ff, transparent);
-  transform-origin: center;
-  animation: flow 2.2s linear infinite;
-}
-
-@keyframes flow {
-  0% { opacity: .2; transform: scaleX(.22); }
-  50% { opacity: 1; transform: scaleX(1); }
-  100% { opacity: .2; transform: scaleX(.22); }
-}
-
-.step-card {
+.workflow-card {
+  position: relative;
+  z-index: 2;
+  min-height: 210px;
   transition: .3s ease;
 }
 
+.workflow-card:hover,
 .step-card:hover {
   transform: translateY(-8px);
   box-shadow: 0 0 70px rgba(91,140,255,.18);
   border-color: rgba(147,178,255,.42);
+}
+
+.workflow-card::after {
+  content: "";
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: #8fb0ff;
+  box-shadow: 0 0 24px #8fb0ff;
+}
+
+.workflow-rail {
+  position: absolute;
+  top: 50%;
+  left: 8%;
+  right: 8%;
+  height: 2px;
+  background: rgba(255,255,255,.1);
+  transform: translateY(-50%);
+  z-index: 0;
+}
+
+.workflow-pulse {
+  position: absolute;
+  top: -3px;
+  left: 0;
+  width: 90px;
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, #8fb0ff, transparent);
+  box-shadow: 0 0 28px rgba(143,176,255,.8);
+  animation: workflowMove 3.2s linear infinite;
+}
+
+@keyframes workflowMove {
+  0% { left: 0%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { left: calc(100% - 90px); opacity: 0; }
+}
+
+.step-card {
+  transition: .3s ease;
 }
 
 .status-dot {
@@ -193,6 +230,25 @@ body::before {
   0% { top: -80px; opacity: 0; }
   20% { opacity: 1; }
   100% { top: 100%; opacity: 0; }
+}
+
+.metric-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.08);
+  overflow: hidden;
+}
+
+.metric-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #7da2ff, #bc8cff);
+  animation: fillPulse 4s ease-in-out infinite;
+}
+
+@keyframes fillPulse {
+  0%,100% { filter: brightness(1); }
+  50% { filter: brightness(1.45); }
 }
 
 @media (max-width: 768px) {
@@ -285,34 +341,71 @@ body::before {
   </div>
 </section>
 
-<section id="workflow" class="py-24 px-6 bg-white/[.025]">
+<section id="workflow" class="py-28 px-6 bg-white/[.025] overflow-hidden">
   <div class="max-w-7xl mx-auto">
-    <div class="text-center mb-14">
+
+    <div class="text-center mb-16">
       <p class="reveal text-blue-300 uppercase tracking-widest text-sm mb-4">Live Workflow</p>
-      <h2 class="reveal text-4xl md:text-6xl font-black">From request to execution.</h2>
+      <h2 class="reveal text-4xl md:text-5xl lg:text-6xl font-black leading-tight">
+        From request to execution.
+      </h2>
       <p class="reveal text-gray-400 mt-5 text-lg max-w-2xl mx-auto">
-        A simple operational path, rebuilt as an intelligent system.
+        A connected automation path that moves work from intake to output.
       </p>
     </div>
 
-    <div class="hidden lg:flex justify-center items-center gap-6 text-lg">
-      <div class="step-card glass rounded-2xl px-7 py-5 font-bold">Lead</div>
-      <div class="flow-line w-20"></div>
-      <div class="step-card glass rounded-2xl px-7 py-5 font-bold">AI</div>
-      <div class="flow-line w-20"></div>
-      <div class="step-card glass rounded-2xl px-7 py-5 font-bold">Quote</div>
-      <div class="flow-line w-20"></div>
-      <div class="step-card glass rounded-2xl px-7 py-5 font-bold">Approval</div>
-      <div class="flow-line w-20"></div>
-      <div class="step-card glass rounded-2xl px-7 py-5 font-bold">Execution</div>
-    </div>
+    <div class="relative max-w-6xl mx-auto">
+      <div class="hidden lg:grid grid-cols-5 gap-5 relative z-10">
 
-    <div class="grid md:grid-cols-2 gap-5 lg:hidden">
-      <div class="step-card glass rounded-3xl p-6">Lead</div>
-      <div class="step-card glass rounded-3xl p-6">AI</div>
-      <div class="step-card glass rounded-3xl p-6">Quote</div>
-      <div class="step-card glass rounded-3xl p-6">Approval</div>
-      <div class="step-card glass rounded-3xl p-6 md:col-span-2">Execution</div>
+        <div class="workflow-card glass rounded-3xl p-6">
+          <div class="text-blue-300 text-sm mb-4">01</div>
+          <h3 class="text-2xl font-bold">Lead</h3>
+          <p class="text-gray-400 mt-3 text-sm">Request enters by email, form, CRM, or ticket.</p>
+        </div>
+
+        <div class="workflow-card glass rounded-3xl p-6">
+          <div class="text-blue-300 text-sm mb-4">02</div>
+          <h3 class="text-2xl font-bold">Analyze</h3>
+          <p class="text-gray-400 mt-3 text-sm">AI reads context and identifies the next action.</p>
+        </div>
+
+        <div class="workflow-card glass rounded-3xl p-6">
+          <div class="text-blue-300 text-sm mb-4">03</div>
+          <h3 class="text-2xl font-bold">Quote</h3>
+          <p class="text-gray-400 mt-3 text-sm">Scope, pricing, and notes are drafted.</p>
+        </div>
+
+        <div class="workflow-card glass rounded-3xl p-6">
+          <div class="text-blue-300 text-sm mb-4">04</div>
+          <h3 class="text-2xl font-bold">Approve</h3>
+          <p class="text-gray-400 mt-3 text-sm">Decision makers are routed for approval.</p>
+        </div>
+
+        <div class="workflow-card glass rounded-3xl p-6">
+          <div class="text-blue-300 text-sm mb-4">05</div>
+          <h3 class="text-2xl font-bold">Execute</h3>
+          <p class="text-gray-400 mt-3 text-sm">Tasks, follow-ups, and reports are triggered.</p>
+        </div>
+      </div>
+
+      <div class="hidden lg:block workflow-rail">
+        <div class="workflow-pulse"></div>
+      </div>
+
+      <div class="grid gap-5 lg:hidden">
+        <div class="workflow-card glass rounded-3xl p-6">
+          <h3 class="text-2xl font-bold">Lead</h3>
+          <p class="text-gray-400 mt-3">Request enters the system.</p>
+        </div>
+        <div class="workflow-card glass rounded-3xl p-6">
+          <h3 class="text-2xl font-bold">Analyze</h3>
+          <p class="text-gray-400 mt-3">AI determines the next step.</p>
+        </div>
+        <div class="workflow-card glass rounded-3xl p-6">
+          <h3 class="text-2xl font-bold">Execute</h3>
+          <p class="text-gray-400 mt-3">Work gets routed and completed.</p>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -348,14 +441,17 @@ body::before {
         <div class="glass rounded-2xl p-4">
           <p class="text-gray-400 text-sm">Quotes</p>
           <p class="text-2xl font-bold mt-2">18</p>
+          <div class="metric-bar mt-3"><div class="metric-fill w-[82%]"></div></div>
         </div>
         <div class="glass rounded-2xl p-4">
           <p class="text-gray-400 text-sm">Approvals</p>
           <p class="text-2xl font-bold mt-2">7</p>
+          <div class="metric-bar mt-3"><div class="metric-fill w-[58%]"></div></div>
         </div>
         <div class="glass rounded-2xl p-4">
           <p class="text-gray-400 text-sm">Tasks</p>
           <p class="text-2xl font-bold mt-2">42</p>
+          <div class="metric-bar mt-3"><div class="metric-fill w-[91%]"></div></div>
         </div>
       </div>
 
@@ -514,6 +610,15 @@ gsap.utils.toArray(".reveal").forEach((el) => {
     duration: .9,
     ease: "power3.out"
   });
+});
+
+gsap.from(".workflow-card", {
+  scrollTrigger: { trigger: ".workflow-card", start: "top 82%" },
+  opacity: 0,
+  y: 35,
+  stagger: .12,
+  duration: .75,
+  ease: "power3.out"
 });
 
 gsap.from(".step-card", {
