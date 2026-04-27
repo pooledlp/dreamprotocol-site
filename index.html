@@ -644,13 +644,17 @@ gsap.from("#protocol .protocol-title", {
   ease: "power4.out"
 });
 
-gsap.from(".step-card", {
-  scrollTrigger: { trigger: ".step-card", start: "top 80%" },
-  opacity: 0,
-  y: 45,
-  stagger: .1,
-  duration: .8
-});
+gsap.fromTo(".step-card",
+  { opacity: .9, y: 28 },
+  {
+    scrollTrigger: { trigger: "#protocol", start: "top 78%", once: true },
+    opacity: 1,
+    y: 0,
+    stagger: .08,
+    duration: .55,
+    ease: "power2.out"
+  }
+);
 
 gsap.from(".activity", {
   scrollTrigger: { trigger: ".activity", start: "top 82%" },
