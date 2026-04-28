@@ -203,27 +203,57 @@ body::before {
   transition: .3s ease;
 }
 
-.service-card {
-  transition: .3s ease;
-  overflow: hidden;
+.services-rail {
   position: relative;
+  overflow: hidden;
 }
 
-.service-card::before {
-  content: "";
+.service-line {
   position: absolute;
-  inset: -120% -30%;
-  background: linear-gradient(120deg, transparent 35%, rgba(169,192,255,.18) 50%, transparent 65%);
-  transform: translateX(-35%) rotate(8deg);
-  animation: serviceSweep 8s linear infinite;
+  top: 36px;
+  bottom: 36px;
+  left: 30px;
+  width: 1px;
+  background: linear-gradient(180deg, rgba(125,162,255,.08), rgba(125,162,255,.55), rgba(125,162,255,.08));
+}
+
+.flow-beam {
+  position: absolute;
+  left: 24px;
+  width: 13px;
+  height: 80px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(125,162,255,0), rgba(125,162,255,.9), rgba(125,162,255,0));
+  filter: blur(1px);
+  animation: flowBeam 4s ease-in-out infinite;
   pointer-events: none;
 }
 
-@keyframes serviceSweep {
-  0% { transform: translateX(-55%) rotate(8deg); opacity: .1; }
-  15% { opacity: .35; }
-  60% { opacity: .1; }
-  100% { transform: translateX(55%) rotate(8deg); opacity: 0; }
+.service-node {
+  position: relative;
+  padding: 1.1rem 1.1rem 1.1rem 3.2rem;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 18px;
+  background: rgba(255,255,255,.03);
+}
+
+.service-dot {
+  position: absolute;
+  left: 24px;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #8fb0ff;
+  box-shadow: 0 0 18px #8fb0ff;
+}
+
+@keyframes flowBeam {
+  0% { top: 26px; opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { top: calc(100% - 90px); opacity: 0; }
 }
 
 .status-dot {
@@ -538,29 +568,42 @@ body::before {
       Systems that quote, route, execute, and report.
     </h2>
 
-    <div class="grid md:grid-cols-2 gap-6">
-      <div class="service-card glass rounded-3xl p-8">
-        <div class="text-blue-300 text-sm mb-5">01</div>
-        <h3 class="text-3xl font-bold">AI Quoting Systems</h3>
-        <p class="text-gray-400 mt-4 text-lg">Turn requests into scopes, quotes, approvals, and follow-ups.</p>
-      </div>
+    <div class="services-rail glass rounded-[2rem] p-6 md:p-10">
+      <div class="service-line"></div>
+      <div class="flow-beam"></div>
 
-      <div class="service-card glass rounded-3xl p-8">
-        <div class="text-blue-300 text-sm mb-5">02</div>
-        <h3 class="text-3xl font-bold">Workflow Automation</h3>
-        <p class="text-gray-400 mt-4 text-lg">Connect Microsoft 365, CRM, QuickBooks, email, documents, and tickets.</p>
-      </div>
+      <div class="space-y-5 md:space-y-6">
+        <div class="service-node">
+          <span class="service-dot"></span>
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div>
+              <p class="text-blue-300 text-xs tracking-widest">01</p>
+              <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Quoting Systems</h3>
+              <p class="text-gray-400 mt-3 text-base md:text-lg">Turn requests into scopes, quotes, approvals, and follow-ups.</p>
+            </div>
+          </div>
+        </div>
 
-      <div class="service-card glass rounded-3xl p-8">
-        <div class="text-blue-300 text-sm mb-5">03</div>
-        <h3 class="text-3xl font-bold">AI Operations Assistants</h3>
-        <p class="text-gray-400 mt-4 text-lg">Triage requests, draft responses, summarize work, and route action.</p>
-      </div>
+        <div class="service-node">
+          <span class="service-dot"></span>
+          <p class="text-blue-300 text-xs tracking-widest">02</p>
+          <h3 class="text-2xl md:text-3xl font-bold mt-2">Workflow Automation</h3>
+          <p class="text-gray-400 mt-3 text-base md:text-lg">Connect Microsoft 365, CRM, QuickBooks, email, documents, and tickets.</p>
+        </div>
 
-      <div class="service-card glass rounded-3xl p-8">
-        <div class="text-blue-300 text-sm mb-5">04</div>
-        <h3 class="text-3xl font-bold">Managed AI Infrastructure</h3>
-        <p class="text-gray-400 mt-4 text-lg">Support the identity, security, data, and integration layer behind the automation.</p>
+        <div class="service-node">
+          <span class="service-dot"></span>
+          <p class="text-blue-300 text-xs tracking-widest">03</p>
+          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Operations Assistants</h3>
+          <p class="text-gray-400 mt-3 text-base md:text-lg">Triage requests, draft responses, summarize work, and route action.</p>
+        </div>
+
+        <div class="service-node">
+          <span class="service-dot"></span>
+          <p class="text-blue-300 text-xs tracking-widest">04</p>
+          <h3 class="text-2xl md:text-3xl font-bold mt-2">Managed AI Infrastructure</h3>
+          <p class="text-gray-400 mt-3 text-base md:text-lg">Support the identity, security, data, and integration layer behind the automation.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -669,22 +712,21 @@ gsap.from("#protocol .protocol-title", {
   ease: "power4.out"
 });
 
-gsap.from(".service-card", {
+gsap.from(".service-node", {
   scrollTrigger: { trigger: "#services", start: "top 78%", once: true },
   opacity: 0,
-  y: 42,
-  scale: .96,
+  x: 55,
   stagger: .12,
-  duration: .82,
-  ease: "back.out(1.4)"
+  duration: .72,
+  ease: "power3.out"
 });
 
-gsap.to(".service-card", {
-  y: -6,
+gsap.to(".service-dot", {
+  scale: 1.28,
   repeat: -1,
   yoyo: true,
-  duration: 3,
-  stagger: .2,
+  duration: 1.3,
+  stagger: .18,
   ease: "sine.inOut"
 });
 
