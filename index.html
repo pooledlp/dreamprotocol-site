@@ -156,6 +156,12 @@ body::before {
   opacity: 1;
 }
 
+.workflow-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+}
+
 .workflow-card:hover,
 .step-card:hover {
   transform: translateY(-8px);
@@ -410,7 +416,7 @@ body::before {
 
     <div class="text-center mb-14">
       <p class="reveal text-blue-300 uppercase tracking-widest text-sm mb-4">Live Workflow</p>
-      <h2 class="reveal text-4xl md:text-5xl lg:text-6xl font-black leading-tight max-w-4xl mx-auto">
+      <h2 class="reveal text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-tight max-w-4xl mx-auto">
         From request to execution.
       </h2>
       <p class="reveal text-gray-400 mt-5 text-lg max-w-2xl mx-auto">
@@ -418,7 +424,7 @@ body::before {
       </p>
     </div>
 
-    <div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
+    <div class="workflow-grid">
       <div class="workflow-card glass rounded-3xl p-6">
         <div class="text-blue-300 text-sm mb-4">01</div>
         <h3 class="text-2xl font-bold">Lead</h3>
