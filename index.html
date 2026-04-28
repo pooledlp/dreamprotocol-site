@@ -343,9 +343,9 @@ body::before {
       <a href="#protocol" class="hover:text-white transition">Protocol</a>
     </div>
 
-    <a href="mailto:info@dreamprotocol.ai" class="bg-white text-black px-5 py-2 rounded-full text-sm font-bold hover:scale-105 transition">
-      Start
-    </a>
+    <button onclick="openAssessment()" class="bg-white text-black px-5 py-2 rounded-full text-sm font-bold hover:scale-105 transition">
+      AI Assessment
+    </button>
   </div>
 </nav>
 
@@ -370,9 +370,9 @@ body::before {
       </p>
 
       <div id="heroBtns" class="mt-10 flex flex-col sm:flex-row gap-4 opacity-0">
-        <a href="mailto:info@dreamprotocol.ai" class="bg-white text-black px-8 py-4 rounded-full font-bold hover:scale-105 transition">
-          Start the Conversation
-        </a>
+        <button onclick="openAssessment()" class="bg-white text-black px-8 py-4 rounded-full font-bold hover:scale-105 transition">
+          Start AI Assessment
+        </button>
         <a href="#dashboard" class="glass px-8 py-4 rounded-full font-bold hover:scale-105 transition">
           See the System
         </a>
@@ -655,11 +655,45 @@ body::before {
     <p class="reveal text-gray-300 text-xl mt-8 max-w-3xl mx-auto">
       Discover. Design. Deploy. Optimize. A practical implementation path for AI automation inside real companies.
     </p>
-    <a href="mailto:info@dreamprotocol.ai" class="reveal inline-block mt-10 bg-white text-black px-10 py-4 rounded-full font-bold hover:scale-105 transition">
-      Schedule a Strategy Session
-    </a>
+    <button onclick="openAssessment()" class="reveal inline-block mt-10 bg-white text-black px-10 py-4 rounded-full font-bold hover:scale-105 transition">
+      Start AI Assessment
+    </button>
   </div>
 </section>
+
+<div id="assessmentModal" class="fixed inset-0 z-[120] hidden">
+  <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeAssessment()"></div>
+  <div class="relative z-10 min-h-full flex items-center justify-center p-4">
+    <div class="glass w-full max-w-2xl rounded-3xl p-6 md:p-8 border border-white/20">
+      <div class="flex justify-between items-center mb-5">
+        <h3 class="text-2xl md:text-3xl font-black">AI Assessment</h3>
+        <button onclick="closeAssessment()" class="text-gray-300 hover:text-white text-xl">✕</button>
+      </div>
+
+      <form id="assessmentForm" class="space-y-4">
+        <div class="grid md:grid-cols-2 gap-4">
+          <input name="name" required placeholder="Your name" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300">
+          <input name="email" type="email" required placeholder="Work email" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300">
+        </div>
+
+        <input name="company" placeholder="Company name" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300">
+
+        <textarea name="goals" rows="3" required placeholder="What are you looking for? (e.g., AI receptionist, intake, support, scheduling, invoicing...)" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300"></textarea>
+
+        <textarea name="bottleneck" rows="3" placeholder="Biggest current bottleneck in your operations" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300"></textarea>
+
+        <div class="grid md:grid-cols-2 gap-4">
+          <input name="timeline" placeholder="Preferred timeline (e.g., ASAP, 30 days)" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300">
+          <input name="budget" placeholder="Estimated monthly budget (optional)" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300">
+        </div>
+
+        <button type="submit" class="w-full bg-white text-black py-3 rounded-xl font-bold hover:scale-[1.01] transition">
+          Send Assessment
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
 
 <footer class="py-8 px-6 text-gray-500 border-t border-white/10">
   <div class="max-w-7xl mx-auto flex justify-between flex-col md:flex-row gap-4">
@@ -748,6 +782,48 @@ gsap.from(".activity", {
   x: 30,
   stagger: .12,
   duration: .7
+});
+
+function openAssessment() {
+  document.getElementById("assessmentModal").classList.remove("hidden");
+  document.body.style.overflow = "hidden";
+}
+
+function closeAssessment() {
+  document.getElementById("assessmentModal").classList.add("hidden");
+  document.body.style.overflow = "";
+}
+
+document.getElementById("assessmentForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  const data = new FormData(e.target);
+  const get = (key) => (data.get(key) || "").toString().trim();
+
+  const subject = encodeURIComponent(`AI Assessment Request - ${get("company") || get("name") || "New Lead"}`);
+  const body = encodeURIComponent(
+`AI Assessment Submission
+
+Name: ${get("name")}
+Email: ${get("email")}
+Company: ${get("company")}
+
+What they are looking for:
+${get("goals")}
+
+Biggest bottleneck:
+${get("bottleneck")}
+
+Timeline:
+${get("timeline")}
+
+Budget:
+${get("budget")}
+`
+  );
+
+  window.location.href = `mailto:info@dreamprotocol.ai?subject=${subject}&body=${body}`;
+  closeAssessment();
 });
 </script>
 
