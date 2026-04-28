@@ -196,6 +196,59 @@ body::before {
   transition: .3s ease;
 }
 
+.services-rail {
+  position: relative;
+  overflow: hidden;
+}
+
+.service-line {
+  position: absolute;
+  top: 36px;
+  bottom: 36px;
+  left: 30px;
+  width: 1px;
+  background: linear-gradient(180deg, rgba(125,162,255,.08), rgba(125,162,255,.55), rgba(125,162,255,.08));
+}
+
+.flow-beam {
+  position: absolute;
+  left: 24px;
+  width: 13px;
+  height: 80px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(125,162,255,0), rgba(125,162,255,.9), rgba(125,162,255,0));
+  filter: blur(1px);
+  animation: flowBeam 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.service-node {
+  position: relative;
+  padding: 1.1rem 1.1rem 1.1rem 3.2rem;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 18px;
+  background: rgba(255,255,255,.03);
+}
+
+.service-dot {
+  position: absolute;
+  left: 24px;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #8fb0ff;
+  box-shadow: 0 0 18px #8fb0ff;
+}
+
+@keyframes flowBeam {
+  0% { top: 26px; opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { top: calc(100% - 90px); opacity: 0; }
+}
+
 .status-dot {
   width: 9px;
   height: 9px;
@@ -217,6 +270,25 @@ body::before {
   0% { top: -80px; opacity: 0; }
   20% { opacity: 1; }
   100% { top: 100%; opacity: 0; }
+}
+
+.protocol-flare {
+  position: absolute;
+  width: 520px;
+  height: 220px;
+  top: 35px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(130,164,255,.22), rgba(130,164,255,0) 70%);
+  filter: blur(16px);
+  pointer-events: none;
+  animation: protocolDrift 8s ease-in-out infinite;
+}
+
+@keyframes protocolDrift {
+  0%, 100% { transform: translateX(-50%) scale(1); opacity: .45; }
+  50% { transform: translateX(-50%) scale(1.08); opacity: .78; }
 }
 
 .metric-bar {
@@ -333,12 +405,12 @@ body::before {
   </div>
 </section>
 
-<section id="workflow" class="py-28 px-6 bg-white/[.025] overflow-hidden">
+<section id="workflow" class="py-28 px-6 bg-white/[.025]">
   <div class="max-w-7xl mx-auto">
 
     <div class="text-center mb-14">
       <p class="reveal text-blue-300 uppercase tracking-widest text-sm mb-4">Live Workflow</p>
-      <h2 class="reveal text-4xl md:text-5xl lg:text-6xl font-black leading-tight">
+      <h2 class="reveal text-4xl md:text-5xl lg:text-6xl font-black leading-tight max-w-4xl mx-auto">
         From request to execution.
       </h2>
       <p class="reveal text-gray-400 mt-5 text-lg max-w-2xl mx-auto">
@@ -346,7 +418,7 @@ body::before {
       </p>
     </div>
 
-    <div class="grid lg:grid-cols-5 gap-5">
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
       <div class="workflow-card glass rounded-3xl p-6">
         <div class="text-blue-300 text-sm mb-4">01</div>
         <h3 class="text-2xl font-bold">Lead</h3>
@@ -484,43 +556,165 @@ body::before {
 
 <section id="services" class="py-32 px-6 bg-white/[.025]">
   <div class="max-w-7xl mx-auto">
-    <p class="reveal text-blue-300 uppercase tracking-widest text-sm mb-4">Modules</p>
-    <h2 class="reveal text-5xl md:text-7xl font-black max-w-5xl mb-16">
+    <p class="text-blue-300 uppercase tracking-widest text-sm mb-4">Modules</p>
+    <h2 class="text-5xl md:text-7xl font-black max-w-5xl mb-16">
       Systems that quote, route, execute, and report.
     </h2>
 
-    <div class="grid md:grid-cols-2 gap-6">
-      <div class="step-card glass rounded-3xl p-8">
-        <div class="text-blue-300 text-sm mb-5">01</div>
-        <h3 class="text-3xl font-bold">AI Quoting Systems</h3>
-        <p class="text-gray-400 mt-4 text-lg">Turn requests into scopes, quotes, approvals, and follow-ups.</p>
-      </div>
+    <div class="services-rail glass rounded-[2rem] p-6 md:p-10">
+      <div class="service-line"></div>
+      <div class="flow-beam"></div>
 
-      <div class="step-card glass rounded-3xl p-8">
-        <div class="text-blue-300 text-sm mb-5">02</div>
-        <h3 class="text-3xl font-bold">Workflow Automation</h3>
-        <p class="text-gray-400 mt-4 text-lg">Connect Microsoft 365, CRM, QuickBooks, email, documents, and tickets.</p>
-      </div>
+      <div class="space-y-5 md:space-y-6">
+        <div class="service-node">
+          <span class="service-dot"></span>
+          <p class="text-blue-300 text-xs tracking-widest">01</p>
+          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Receptionist</h3>
+          <p class="text-gray-400 mt-3 text-base md:text-lg">Front desk coverage for inbound calls, routing, and first response.</p>
+        </div>
 
-      <div class="step-card glass rounded-3xl p-8">
-        <div class="text-blue-300 text-sm mb-5">03</div>
-        <h3 class="text-3xl font-bold">AI Operations Assistants</h3>
-        <p class="text-gray-400 mt-4 text-lg">Triage requests, draft responses, summarize work, and route action.</p>
-      </div>
+        <div class="service-node">
+          <span class="service-dot"></span>
+          <p class="text-blue-300 text-xs tracking-widest">02</p>
+          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Email Assistant</h3>
+          <p class="text-gray-400 mt-3 text-base md:text-lg">Inbox triage, reply drafting, and follow-up coordination.</p>
+        </div>
 
-      <div class="step-card glass rounded-3xl p-8">
-        <div class="text-blue-300 text-sm mb-5">04</div>
-        <h3 class="text-3xl font-bold">Managed AI Infrastructure</h3>
-        <p class="text-gray-400 mt-4 text-lg">Support the identity, security, data, and integration layer behind the automation.</p>
+        <div class="service-node">
+          <span class="service-dot"></span>
+          <p class="text-blue-300 text-xs tracking-widest">03</p>
+          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Bookkeeping Assistant</h3>
+          <p class="text-gray-400 mt-3 text-base md:text-lg">Transaction categorization, reconciliation prep, and bookkeeping support.</p>
+        </div>
+
+        <div class="service-node">
+          <span class="service-dot"></span>
+          <p class="text-blue-300 text-xs tracking-widest">04</p>
+          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Lead Intake Coordinator</h3>
+          <p class="text-gray-400 mt-3 text-base md:text-lg">Capture, qualify, and route inbound leads into your CRM.</p>
+        </div>
+
+        <div class="service-node">
+          <span class="service-dot"></span>
+          <p class="text-blue-300 text-xs tracking-widest">05</p>
+          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Scheduler</h3>
+          <p class="text-gray-400 mt-3 text-base md:text-lg">Meeting coordination, calendar holds, and schedule optimization.</p>
+        </div>
+
+        <div class="service-node">
+          <span class="service-dot"></span>
+          <p class="text-blue-300 text-xs tracking-widest">06</p>
+          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Customer Support Agent</h3>
+          <p class="text-gray-400 mt-3 text-base md:text-lg">Customer issue resolution with escalation routing and summaries.</p>
+        </div>
+
+        <div class="service-node">
+          <span class="service-dot"></span>
+          <p class="text-blue-300 text-xs tracking-widest">07</p>
+          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Helpdesk Assistant</h3>
+          <p class="text-gray-400 mt-3 text-base md:text-lg">Ticket intake, categorization, and response drafting for internal IT/helpdesk workflows.</p>
+        </div>
+
+        <div class="service-node">
+          <span class="service-dot"></span>
+          <p class="text-blue-300 text-xs tracking-widest">08</p>
+          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Order Processing Clerk</h3>
+          <p class="text-gray-400 mt-3 text-base md:text-lg">Order entry, validation checks, and fulfillment handoff.</p>
+        </div>
+
+        <div class="service-node">
+          <span class="service-dot"></span>
+          <p class="text-blue-300 text-xs tracking-widest">09</p>
+          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Invoice Processor</h3>
+          <p class="text-gray-400 mt-3 text-base md:text-lg">Invoice extraction, coding support, and approval routing.</p>
+        </div>
+
+        <div class="service-node">
+          <span class="service-dot"></span>
+          <p class="text-blue-300 text-xs tracking-widest">10</p>
+          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Reporting Analyst</h3>
+          <p class="text-gray-400 mt-3 text-base md:text-lg">Automated KPI rollups, summaries, and dashboard-ready outputs.</p>
+        </div>
+
+        <div class="service-node">
+          <span class="service-dot"></span>
+          <p class="text-blue-300 text-xs tracking-widest">11</p>
+          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Executive Assistant</h3>
+          <p class="text-gray-400 mt-3 text-base md:text-lg">Admin support for priorities, reminders, and communication prep.</p>
+        </div>
+
+        <div class="service-node">
+          <span class="service-dot"></span>
+          <p class="text-blue-300 text-xs tracking-widest">12</p>
+          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Marketing Assistant</h3>
+          <p class="text-gray-400 mt-3 text-base md:text-lg">Campaign support, content drafts, and workflow automation.</p>
+        </div>
+
+        <div class="service-node">
+          <span class="service-dot"></span>
+          <p class="text-blue-300 text-xs tracking-widest">13</p>
+          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Sales Follow-Up Rep</h3>
+          <p class="text-gray-400 mt-3 text-base md:text-lg">Post-call and post-demo follow-ups to move opportunities forward.</p>
+        </div>
+
+        <div class="service-node">
+          <span class="service-dot"></span>
+          <p class="text-blue-300 text-xs tracking-widest">14</p>
+          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI HR Assistant</h3>
+          <p class="text-gray-400 mt-3 text-base md:text-lg">Candidate communication, onboarding tasks, and HR request routing.</p>
+        </div>
+
+        <div class="service-node">
+          <span class="service-dot"></span>
+          <p class="text-blue-300 text-xs tracking-widest">15</p>
+          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Security Monitoring Assistant</h3>
+          <p class="text-gray-400 mt-3 text-base md:text-lg">Event triage support, alert summaries, and escalation workflows.</p>
+        </div>
+
+        <div class="service-node">
+          <span class="service-dot"></span>
+          <p class="text-blue-300 text-xs tracking-widest">16</p>
+          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI File Organizer</h3>
+          <p class="text-gray-400 mt-3 text-base md:text-lg">Document sorting, tagging, and storage hygiene automation.</p>
+        </div>
+
+        <div class="service-node">
+          <span class="service-dot"></span>
+          <p class="text-blue-300 text-xs tracking-widest">17</p>
+          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Call Summary Agent</h3>
+          <p class="text-gray-400 mt-3 text-base md:text-lg">Call recap generation with action items and next-step tracking.</p>
+        </div>
+
+        <div class="service-node">
+          <span class="service-dot"></span>
+          <p class="text-blue-300 text-xs tracking-widest">18</p>
+          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Contract Reviewer</h3>
+          <p class="text-gray-400 mt-3 text-base md:text-lg">Clause extraction, risk flagging support, and review prep.</p>
+        </div>
+
+        <div class="service-node">
+          <span class="service-dot"></span>
+          <p class="text-blue-300 text-xs tracking-widest">19</p>
+          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Vendor Quote Analyzer</h3>
+          <p class="text-gray-400 mt-3 text-base md:text-lg">Quote comparison, cost summaries, and recommendation support.</p>
+        </div>
+
+        <div class="service-node">
+          <span class="service-dot"></span>
+          <p class="text-blue-300 text-xs tracking-widest">20</p>
+          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Operations Coordinator</h3>
+          <p class="text-gray-400 mt-3 text-base md:text-lg">Cross-functional task orchestration and process follow-through.</p>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<section id="protocol" class="py-32 px-6">
+<section id="protocol" class="relative py-32 px-6 overflow-hidden">
+  <div class="protocol-flare"></div>
   <div class="max-w-7xl mx-auto">
-    <p class="reveal text-blue-300 uppercase tracking-widest text-sm mb-4">Dream Protocol</p>
-    <h2 class="reveal text-5xl md:text-7xl font-black max-w-5xl mb-16">
+    <p class="protocol-label text-blue-300 uppercase tracking-widest text-sm mb-4">Dream Protocol</p>
+    <h2 class="protocol-title text-5xl md:text-7xl font-black max-w-5xl mb-16">
       A practical path to AI automation.
     </h2>
 
@@ -602,22 +796,52 @@ gsap.utils.toArray(".reveal").forEach((el) => {
   });
 });
 
-gsap.from(".workflow-card", {
-  scrollTrigger: { trigger: ".workflow-card", start: "top 82%" },
+gsap.from("#protocol .protocol-label", {
+  scrollTrigger: { trigger: "#protocol", start: "top 80%" },
   opacity: 0,
-  y: 35,
-  stagger: .12,
+  y: 30,
   duration: .75,
   ease: "power3.out"
 });
 
-gsap.from(".step-card", {
-  scrollTrigger: { trigger: ".step-card", start: "top 80%" },
+gsap.from("#protocol .protocol-title", {
+  scrollTrigger: { trigger: "#protocol", start: "top 78%" },
   opacity: 0,
-  y: 45,
-  stagger: .1,
-  duration: .8
+  y: 50,
+  scale: .96,
+  duration: 1.05,
+  ease: "power4.out"
 });
+
+gsap.from(".service-node", {
+  scrollTrigger: { trigger: "#services", start: "top 78%", once: true },
+  opacity: 0,
+  x: 55,
+  stagger: .12,
+  duration: .72,
+  ease: "power3.out"
+});
+
+gsap.to(".service-dot", {
+  scale: 1.28,
+  repeat: -1,
+  yoyo: true,
+  duration: 1.3,
+  stagger: .18,
+  ease: "sine.inOut"
+});
+
+gsap.fromTo(".step-card",
+  { opacity: .9, y: 28 },
+  {
+    scrollTrigger: { trigger: "#protocol", start: "top 78%", once: true },
+    opacity: 1,
+    y: 0,
+    stagger: .08,
+    duration: .55,
+    ease: "power2.out"
+  }
+);
 
 gsap.from(".activity", {
   scrollTrigger: { trigger: ".activity", start: "top 82%" },
