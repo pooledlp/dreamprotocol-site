@@ -156,8 +156,15 @@ body::before {
   opacity: 1;
 }
 
+.workflow-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+}
+
 .workflow-card:hover,
-.step-card:hover {
+.step-card:hover,
+.service-card:hover {
   transform: translateY(-8px);
   box-shadow: 0 0 70px rgba(91,140,255,.18);
   border-color: rgba(147,178,255,.42);
@@ -409,16 +416,16 @@ body::before {
   <div class="max-w-7xl mx-auto">
 
     <div class="text-center mb-14">
-      <p class="reveal text-blue-300 uppercase tracking-widest text-sm mb-4">Live Service Flow</p>
-      <h2 class="reveal text-4xl md:text-5xl lg:text-6xl font-black leading-tight max-w-4xl mx-auto">
-        From inbound request to AI-assisted action.
+      <p class="reveal text-blue-300 uppercase tracking-widest text-sm mb-4">Live Workflow</p>
+      <h2 class="reveal text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-tight max-w-4xl mx-auto">
+        From request to execution.
       </h2>
       <p class="reveal text-gray-400 mt-5 text-lg max-w-2xl mx-auto">
         A connected assistant workflow that triages, routes, and completes operational tasks.
       </p>
     </div>
 
-    <div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
+    <div class="workflow-grid">
       <div class="workflow-card glass rounded-3xl p-6">
         <div class="text-blue-300 text-sm mb-4">01</div>
         <h3 class="text-2xl font-bold">Intake</h3>
@@ -556,9 +563,9 @@ body::before {
 
 <section id="services" class="py-32 px-6 bg-white/[.025]">
   <div class="max-w-7xl mx-auto">
-    <p class="text-blue-300 uppercase tracking-widest text-sm mb-4">AI Assistant Services</p>
+    <p class="text-blue-300 uppercase tracking-widest text-sm mb-4">Modules</p>
     <h2 class="text-5xl md:text-7xl font-black max-w-5xl mb-16">
-      Role-based AI assistants for daily business operations.
+      Systems that quote, route, execute, and report.
     </h2>
 
     <div class="services-rail glass rounded-[2rem] p-6 md:p-10">
@@ -568,142 +575,34 @@ body::before {
       <div class="space-y-5 md:space-y-6">
         <div class="service-node">
           <span class="service-dot"></span>
-          <p class="text-blue-300 text-xs tracking-widest">01</p>
-          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Receptionist</h3>
-          <p class="text-gray-400 mt-3 text-base md:text-lg">Front desk coverage for inbound calls, routing, and first response.</p>
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div>
+              <p class="text-blue-300 text-xs tracking-widest">01</p>
+              <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Quoting Systems</h3>
+              <p class="text-gray-400 mt-3 text-base md:text-lg">Turn requests into scopes, quotes, approvals, and follow-ups.</p>
+            </div>
+          </div>
         </div>
 
         <div class="service-node">
           <span class="service-dot"></span>
           <p class="text-blue-300 text-xs tracking-widest">02</p>
-          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Email Assistant</h3>
-          <p class="text-gray-400 mt-3 text-base md:text-lg">Inbox triage, reply drafting, and follow-up coordination.</p>
+          <h3 class="text-2xl md:text-3xl font-bold mt-2">Workflow Automation</h3>
+          <p class="text-gray-400 mt-3 text-base md:text-lg">Connect Microsoft 365, CRM, QuickBooks, email, documents, and tickets.</p>
         </div>
 
         <div class="service-node">
           <span class="service-dot"></span>
           <p class="text-blue-300 text-xs tracking-widest">03</p>
-          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Bookkeeping Assistant</h3>
-          <p class="text-gray-400 mt-3 text-base md:text-lg">Transaction categorization, reconciliation prep, and bookkeeping support.</p>
+          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Operations Assistants</h3>
+          <p class="text-gray-400 mt-3 text-base md:text-lg">Triage requests, draft responses, summarize work, and route action.</p>
         </div>
 
         <div class="service-node">
           <span class="service-dot"></span>
           <p class="text-blue-300 text-xs tracking-widest">04</p>
-          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Lead Intake Coordinator</h3>
-          <p class="text-gray-400 mt-3 text-base md:text-lg">Capture, qualify, and route inbound leads into your CRM.</p>
-        </div>
-
-        <div class="service-node">
-          <span class="service-dot"></span>
-          <p class="text-blue-300 text-xs tracking-widest">05</p>
-          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Scheduler</h3>
-          <p class="text-gray-400 mt-3 text-base md:text-lg">Meeting coordination, calendar holds, and schedule optimization.</p>
-        </div>
-
-        <div class="service-node">
-          <span class="service-dot"></span>
-          <p class="text-blue-300 text-xs tracking-widest">06</p>
-          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Customer Support Agent</h3>
-          <p class="text-gray-400 mt-3 text-base md:text-lg">Customer issue resolution with escalation routing and summaries.</p>
-        </div>
-
-        <div class="service-node">
-          <span class="service-dot"></span>
-          <p class="text-blue-300 text-xs tracking-widest">07</p>
-          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Helpdesk Assistant</h3>
-          <p class="text-gray-400 mt-3 text-base md:text-lg">Ticket intake, categorization, and response drafting for internal IT/helpdesk workflows.</p>
-        </div>
-
-        <div class="service-node">
-          <span class="service-dot"></span>
-          <p class="text-blue-300 text-xs tracking-widest">08</p>
-          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Order Processing Clerk</h3>
-          <p class="text-gray-400 mt-3 text-base md:text-lg">Order entry, validation checks, and fulfillment handoff.</p>
-        </div>
-
-        <div class="service-node">
-          <span class="service-dot"></span>
-          <p class="text-blue-300 text-xs tracking-widest">09</p>
-          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Invoice Processor</h3>
-          <p class="text-gray-400 mt-3 text-base md:text-lg">Invoice extraction, coding support, and approval routing.</p>
-        </div>
-
-        <div class="service-node">
-          <span class="service-dot"></span>
-          <p class="text-blue-300 text-xs tracking-widest">10</p>
-          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Reporting Analyst</h3>
-          <p class="text-gray-400 mt-3 text-base md:text-lg">Automated KPI rollups, summaries, and dashboard-ready outputs.</p>
-        </div>
-
-        <div class="service-node">
-          <span class="service-dot"></span>
-          <p class="text-blue-300 text-xs tracking-widest">11</p>
-          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Executive Assistant</h3>
-          <p class="text-gray-400 mt-3 text-base md:text-lg">Admin support for priorities, reminders, and communication prep.</p>
-        </div>
-
-        <div class="service-node">
-          <span class="service-dot"></span>
-          <p class="text-blue-300 text-xs tracking-widest">12</p>
-          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Marketing Assistant</h3>
-          <p class="text-gray-400 mt-3 text-base md:text-lg">Campaign support, content drafts, and workflow automation.</p>
-        </div>
-
-        <div class="service-node">
-          <span class="service-dot"></span>
-          <p class="text-blue-300 text-xs tracking-widest">13</p>
-          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Sales Follow-Up Rep</h3>
-          <p class="text-gray-400 mt-3 text-base md:text-lg">Post-call and post-demo follow-ups to move opportunities forward.</p>
-        </div>
-
-        <div class="service-node">
-          <span class="service-dot"></span>
-          <p class="text-blue-300 text-xs tracking-widest">14</p>
-          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI HR Assistant</h3>
-          <p class="text-gray-400 mt-3 text-base md:text-lg">Candidate communication, onboarding tasks, and HR request routing.</p>
-        </div>
-
-        <div class="service-node">
-          <span class="service-dot"></span>
-          <p class="text-blue-300 text-xs tracking-widest">15</p>
-          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Security Monitoring Assistant</h3>
-          <p class="text-gray-400 mt-3 text-base md:text-lg">Event triage support, alert summaries, and escalation workflows.</p>
-        </div>
-
-        <div class="service-node">
-          <span class="service-dot"></span>
-          <p class="text-blue-300 text-xs tracking-widest">16</p>
-          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI File Organizer</h3>
-          <p class="text-gray-400 mt-3 text-base md:text-lg">Document sorting, tagging, and storage hygiene automation.</p>
-        </div>
-
-        <div class="service-node">
-          <span class="service-dot"></span>
-          <p class="text-blue-300 text-xs tracking-widest">17</p>
-          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Call Summary Agent</h3>
-          <p class="text-gray-400 mt-3 text-base md:text-lg">Call recap generation with action items and next-step tracking.</p>
-        </div>
-
-        <div class="service-node">
-          <span class="service-dot"></span>
-          <p class="text-blue-300 text-xs tracking-widest">18</p>
-          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Contract Reviewer</h3>
-          <p class="text-gray-400 mt-3 text-base md:text-lg">Clause extraction, risk flagging support, and review prep.</p>
-        </div>
-
-        <div class="service-node">
-          <span class="service-dot"></span>
-          <p class="text-blue-300 text-xs tracking-widest">19</p>
-          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Vendor Quote Analyzer</h3>
-          <p class="text-gray-400 mt-3 text-base md:text-lg">Quote comparison, cost summaries, and recommendation support.</p>
-        </div>
-
-        <div class="service-node">
-          <span class="service-dot"></span>
-          <p class="text-blue-300 text-xs tracking-widest">20</p>
-          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Operations Coordinator</h3>
-          <p class="text-gray-400 mt-3 text-base md:text-lg">Cross-functional task orchestration and process follow-through.</p>
+          <h3 class="text-2xl md:text-3xl font-bold mt-2">Managed AI Infrastructure</h3>
+          <p class="text-gray-400 mt-3 text-base md:text-lg">Support the identity, security, data, and integration layer behind the automation.</p>
         </div>
       </div>
     </div>
@@ -713,9 +612,9 @@ body::before {
 <section id="protocol" class="relative py-32 px-6 overflow-hidden">
   <div class="protocol-flare"></div>
   <div class="max-w-7xl mx-auto">
-    <p class="protocol-label text-blue-300 uppercase tracking-widest text-sm mb-4">Deployment Model</p>
+    <p class="protocol-label text-blue-300 uppercase tracking-widest text-sm mb-4">Dream Protocol</p>
     <h2 class="protocol-title text-5xl md:text-7xl font-black max-w-5xl mb-16">
-      A practical path to rolling out AI assistants.
+      A practical path to AI automation.
     </h2>
 
     <div class="grid md:grid-cols-4 gap-5">
@@ -780,41 +679,6 @@ body::before {
         <input name="company" placeholder="Company name" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300">
 
         <textarea name="goals" rows="3" required placeholder="What are you looking for? (e.g., AI receptionist, intake, support, scheduling, invoicing...)" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300"></textarea>
-
-        <div class="glass rounded-2xl p-4 border border-white/10">
-          <p class="text-sm uppercase tracking-widest text-blue-200 mb-3">Assessment Quiz</p>
-
-          <div class="mb-4">
-            <p class="text-sm text-gray-300 mb-2">1) Which areas do you want AI help with first?</p>
-            <div class="grid md:grid-cols-2 gap-2 text-sm">
-              <label class="flex items-center gap-2"><input type="checkbox" name="focus[]" value="Reception & Calls"> Reception & Calls</label>
-              <label class="flex items-center gap-2"><input type="checkbox" name="focus[]" value="Email & Inbox"> Email & Inbox</label>
-              <label class="flex items-center gap-2"><input type="checkbox" name="focus[]" value="Scheduling"> Scheduling</label>
-              <label class="flex items-center gap-2"><input type="checkbox" name="focus[]" value="Customer Support"> Customer Support</label>
-              <label class="flex items-center gap-2"><input type="checkbox" name="focus[]" value="Bookkeeping & Invoicing"> Bookkeeping & Invoicing</label>
-              <label class="flex items-center gap-2"><input type="checkbox" name="focus[]" value="Sales Follow-Up"> Sales Follow-Up</label>
-            </div>
-          </div>
-
-          <div class="grid md:grid-cols-2 gap-4">
-            <div>
-              <p class="text-sm text-gray-300 mb-2">2) Weekly request volume</p>
-              <select name="volume" class="w-full bg-white/5 border border-white/15 rounded-xl px-3 py-2 outline-none focus:border-blue-300">
-                <option value="Low (1-50)">Low (1-50)</option>
-                <option value="Medium (51-200)">Medium (51-200)</option>
-                <option value="High (200+)">High (200+)</option>
-              </select>
-            </div>
-            <div>
-              <p class="text-sm text-gray-300 mb-2">3) Desired go-live timeline</p>
-              <select name="urgency" class="w-full bg-white/5 border border-white/15 rounded-xl px-3 py-2 outline-none focus:border-blue-300">
-                <option value="ASAP">ASAP</option>
-                <option value="30 Days">30 Days</option>
-                <option value="60-90 Days">60-90 Days</option>
-              </select>
-            </div>
-          </div>
-        </div>
 
         <textarea name="bottleneck" rows="3" placeholder="Biggest current bottleneck in your operations" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300"></textarea>
 
@@ -935,28 +799,6 @@ document.getElementById("assessmentForm").addEventListener("submit", (e) => {
 
   const data = new FormData(e.target);
   const get = (key) => (data.get(key) || "").toString().trim();
-  const getAll = (key) => data.getAll(key).map((v) => v.toString().trim()).filter(Boolean);
-
-  const focus = getAll("focus[]");
-  const volume = get("volume");
-  const urgency = get("urgency");
-
-  const score =
-    (volume.includes("High") ? 40 : volume.includes("Medium") ? 25 : 10) +
-    (urgency === "ASAP" ? 35 : urgency === "30 Days" ? 25 : 10) +
-    Math.min(focus.length * 6, 25);
-
-  const focusMap = {
-    "Reception & Calls": "AI Receptionist",
-    "Email & Inbox": "AI Email Assistant",
-    "Scheduling": "AI Scheduler",
-    "Customer Support": "AI Customer Support Agent",
-    "Bookkeeping & Invoicing": "AI Bookkeeping Assistant, AI Invoice Processor",
-    "Sales Follow-Up": "AI Sales Follow-Up Rep"
-  };
-  const recommendations = focus.length
-    ? focus.map((f) => `- ${focusMap[f] || f}`).join("\n")
-    : "- AI Lead Intake Coordinator\n- AI Operations Coordinator";
 
   const subject = encodeURIComponent(`AI Assessment Request - ${get("company") || get("name") || "New Lead"}`);
   const body = encodeURIComponent(
@@ -968,15 +810,6 @@ Company: ${get("company")}
 
 What they are looking for:
 ${get("goals")}
-
-Quiz Results:
-Focus Areas: ${focus.join(", ") || "Not selected"}
-Weekly Request Volume: ${volume}
-Go-live Timeline: ${urgency}
-Assessment Priority Score: ${score}/100
-
-Recommended Assistants:
-${recommendations}
 
 Biggest bottleneck:
 ${get("bottleneck")}
