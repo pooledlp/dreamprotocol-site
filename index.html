@@ -199,6 +199,25 @@ body::before {
 
 .service-card {
   transition: .3s ease;
+  overflow: hidden;
+  position: relative;
+}
+
+.service-card::before {
+  content: "";
+  position: absolute;
+  inset: -120% -30%;
+  background: linear-gradient(120deg, transparent 35%, rgba(169,192,255,.18) 50%, transparent 65%);
+  transform: translateX(-35%) rotate(8deg);
+  animation: serviceSweep 8s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes serviceSweep {
+  0% { transform: translateX(-55%) rotate(8deg); opacity: .1; }
+  15% { opacity: .35; }
+  60% { opacity: .1; }
+  100% { transform: translateX(55%) rotate(8deg); opacity: 0; }
 }
 
 .status-dot {
@@ -642,6 +661,25 @@ gsap.from("#protocol .protocol-title", {
   scale: .96,
   duration: 1.05,
   ease: "power4.out"
+});
+
+gsap.from(".service-card", {
+  scrollTrigger: { trigger: "#services", start: "top 78%", once: true },
+  opacity: 0,
+  y: 42,
+  scale: .96,
+  stagger: .12,
+  duration: .82,
+  ease: "back.out(1.4)"
+});
+
+gsap.to(".service-card", {
+  y: -6,
+  repeat: -1,
+  yoyo: true,
+  duration: 3,
+  stagger: .2,
+  ease: "sine.inOut"
 });
 
 gsap.fromTo(".step-card",
