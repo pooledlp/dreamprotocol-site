@@ -136,6 +136,27 @@ body::before {
   box-shadow: 0 0 24px #93b2ff;
 }
 
+
+.orbit-dot {
+  position: absolute;
+  inset: 0;
+  animation: orbitSpin 9s linear infinite;
+}
+
+.orbit-dot.reverse {
+  animation-direction: reverse;
+}
+
+.orbit-dot .dot {
+  top: 50%;
+  left: 50%;
+}
+
+@keyframes orbitSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 .system-line {
   position: absolute;
   height: 1px;
@@ -317,6 +338,47 @@ body::before {
   50% { filter: brightness(1.45); }
 }
 
+
+.console-chip {
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.06);
+  border-radius: 999px;
+  padding: .35rem .75rem;
+  font-size: .75rem;
+  color: #d7e3ff;
+}
+
+.call-wave {
+  height: 42px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, rgba(125,162,255,.18), rgba(188,140,255,.22));
+  position: relative;
+  overflow: hidden;
+}
+
+.call-wave::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(90deg, rgba(255,255,255,.35) 0 2px, transparent 2px 8px);
+  animation: waveMove 1.8s linear infinite;
+  opacity: .55;
+}
+
+@keyframes waveMove {
+  from { transform: translateX(0); }
+  to { transform: translateX(38px); }
+}
+
+.console-action {
+  border: 1px solid rgba(143,176,255,.45);
+  background: rgba(143,176,255,.12);
+  border-radius: 12px;
+  padding: .45rem .7rem;
+  font-size: .78rem;
+  color: #dbe7ff;
+}
+
 @media (max-width: 768px) {
   .core-wrap { width: 260px; height: 260px; }
   .core { width: 180px; height: 180px; }
@@ -361,12 +423,12 @@ body::before {
       </div>
 
       <h1 id="heroTitle" class="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black leading-[0.95] tracking-tight opacity-0">
-        Deploy AI assistants<br>
-        with <span class="gradient-text">operational foresight.</span>
+        Deploy AI voice assistants<br>
+        with <span class="gradient-text">real-world integrations.</span>
       </h1>
 
       <p id="heroSub" class="mt-8 text-lg md:text-xl text-gray-300 max-w-2xl leading-relaxed opacity-0">
-        We design, deploy, and manage role-based AI assistants across reception, support, intake, finance, operations, HR, and sales.
+        We provide AI consulting plus done-for-you voice and automation systems for SMB teams using Microsoft 365, Google Workspace, CRMs, phones, email, and billing tools.
       </p>
 
       <div id="heroBtns" class="mt-10 flex flex-col sm:flex-row gap-4 opacity-0">
@@ -389,9 +451,18 @@ body::before {
         <div class="ring two"></div>
         <div class="ring three"></div>
         <div class="core"></div>
-        <div class="dot" style="top: 17px; left: 172px;"></div>
-        <div class="dot" style="bottom: 36px; right: 58px;"></div>
-        <div class="dot" style="left: 28px; top: 205px;"></div>
+
+        <div class="orbit-dot" style="animation-duration: 10s;">
+          <div class="dot" style="transform: translate(-50%, -50%) rotate(15deg) translateX(98px);"></div>
+        </div>
+
+        <div class="orbit-dot reverse" style="animation-duration: 14s;">
+          <div class="dot" style="transform: translate(-50%, -50%) rotate(205deg) translateX(142px);"></div>
+        </div>
+
+        <div class="orbit-dot" style="animation-duration: 18s;">
+          <div class="dot" style="transform: translate(-50%, -50%) rotate(290deg) translateX(176px);"></div>
+        </div>
       </div>
 
       <div class="float-panel absolute top-8 right-4 lg:right-10 glass rounded-3xl p-5 w-56">
@@ -421,7 +492,7 @@ body::before {
         From request to execution.
       </h2>
       <p class="reveal text-gray-400 mt-5 text-lg max-w-2xl mx-auto">
-        A connected assistant workflow that triages, routes, and completes operational tasks.
+        A connected consulting + implementation workflow that answers calls, qualifies leads, updates systems, and completes operational tasks.
       </p>
     </div>
 
@@ -429,31 +500,31 @@ body::before {
       <div class="workflow-card glass rounded-3xl p-6">
         <div class="text-blue-300 text-sm mb-4">01</div>
         <h3 class="text-2xl font-bold">Intake</h3>
-        <p class="text-gray-400 mt-3 text-sm">Request enters by email, form, CRM, or ticket.</p>
+        <p class="text-gray-400 mt-3 text-sm">Request enters from phone call, web form, email, CRM, or ticket.</p>
       </div>
 
       <div class="workflow-card glass rounded-3xl p-6">
         <div class="text-blue-300 text-sm mb-4">02</div>
         <h3 class="text-2xl font-bold">Classify</h3>
-        <p class="text-gray-400 mt-3 text-sm">AI reads context and identifies the next action.</p>
+        <p class="text-gray-400 mt-3 text-sm">AI transcribes, extracts intent, and identifies the next action.</p>
       </div>
 
       <div class="workflow-card glass rounded-3xl p-6">
         <div class="text-blue-300 text-sm mb-4">03</div>
         <h3 class="text-2xl font-bold">Assign AI Role</h3>
-        <p class="text-gray-400 mt-3 text-sm">Scope, pricing, and notes are drafted.</p>
+        <p class="text-gray-400 mt-3 text-sm">Voice assistant or workflow bot drafts notes, tasks, and next steps.</p>
       </div>
 
       <div class="workflow-card glass rounded-3xl p-6">
         <div class="text-blue-300 text-sm mb-4">04</div>
         <h3 class="text-2xl font-bold">Review</h3>
-        <p class="text-gray-400 mt-3 text-sm">Decision makers are routed for approval.</p>
+        <p class="text-gray-400 mt-3 text-sm">Managers receive approvals in Teams, Slack, or email.</p>
       </div>
 
       <div class="workflow-card glass rounded-3xl p-6">
         <div class="text-blue-300 text-sm mb-4">05</div>
         <h3 class="text-2xl font-bold">Resolve</h3>
-        <p class="text-gray-400 mt-3 text-sm">Tasks, follow-ups, and reports are triggered.</p>
+        <p class="text-gray-400 mt-3 text-sm">Follow-ups, calendar updates, and CRM records are triggered automatically.</p>
       </div>
     </div>
 
@@ -486,10 +557,10 @@ body::before {
     <div>
       <p class="reveal text-blue-300 uppercase tracking-widest text-sm mb-4">System Activity</p>
       <h2 class="reveal text-5xl md:text-7xl font-black leading-tight">
-        Real work moving through intelligent workflows.
+        Voice calls, messages, and tasks running as one system.
       </h2>
       <p class="reveal text-gray-400 text-xl mt-8 max-w-2xl">
-        Visualize intake, routing, quoting, approvals, execution, and reporting as one connected operating system.
+        See call handling, lead routing, scheduling, quoting, approvals, and reporting inside one connected operating system.
       </p>
     </div>
 
@@ -525,36 +596,39 @@ body::before {
       </div>
 
       <div class="space-y-3">
-        <div class="activity glass rounded-2xl p-4 flex justify-between items-center">
-          <div>
-            <p class="font-bold">Quote generated</p>
-            <p class="text-gray-400 text-sm">Scope drafted and routed for approval</p>
+        <div class="activity glass rounded-2xl p-4">
+          <div class="flex items-center justify-between gap-3">
+            <p class="font-bold">Live Call • ACME Plumbing</p>
+            <span class="text-emerald-300 text-sm">Transcribing</span>
           </div>
-          <span class="text-blue-300 text-sm">Complete</span>
+          <p class="text-gray-400 text-sm mt-1">Caller needs same-day water heater repair and financing options.</p>
+          <div class="call-wave mt-3"></div>
+          <div class="flex flex-wrap gap-2 mt-3">
+            <span class="console-chip">Intent: Emergency Service</span>
+            <span class="console-chip">Sentiment: Urgent</span>
+            <span class="console-chip">Confidence: 96%</span>
+          </div>
+        </div>
+
+        <div class="activity glass rounded-2xl p-4">
+          <div class="flex items-center justify-between gap-3">
+            <p class="font-bold">AI Action Drafted</p>
+            <span class="text-blue-300 text-sm">Ready for one-click send</span>
+          </div>
+          <p class="text-gray-300 text-sm mt-2">"Hi Jamie — we can dispatch a technician at 2:30 PM. Reply YES to confirm and we’ll send financing options."</p>
+          <div class="flex flex-wrap gap-2 mt-3">
+            <span class="console-action">Send SMS</span>
+            <span class="console-action">Create Work Order</span>
+            <span class="console-action">Notify Dispatcher</span>
+          </div>
         </div>
 
         <div class="activity glass rounded-2xl p-4 flex justify-between items-center">
           <div>
-            <p class="font-bold">Approval requested</p>
-            <p class="text-gray-400 text-sm">Decision maker notified automatically</p>
+            <p class="font-bold">Routing Completed</p>
+            <p class="text-gray-400 text-sm">Job routed to field ops, billing, and customer success.</p>
           </div>
-          <span class="text-purple-300 text-sm">In progress</span>
-        </div>
-
-        <div class="activity glass rounded-2xl p-4 flex justify-between items-center">
-          <div>
-            <p class="font-bold">Task assigned</p>
-            <p class="text-gray-400 text-sm">Internal execution workflow created</p>
-          </div>
-          <span class="text-blue-300 text-sm">Done</span>
-        </div>
-
-        <div class="activity glass rounded-2xl p-4 flex justify-between items-center">
-          <div>
-            <p class="font-bold">Customer follow-up</p>
-            <p class="text-gray-400 text-sm">Email response prepared for review</p>
-          </div>
-          <span class="text-gray-300 text-sm">Queued</span>
+          <span class="text-blue-300 text-sm">Done in 14s</span>
         </div>
       </div>
     </div>
@@ -564,9 +638,10 @@ body::before {
 <section id="services" class="py-32 px-6 bg-white/[.025]">
   <div class="max-w-7xl mx-auto">
     <p class="text-blue-300 uppercase tracking-widest text-sm mb-4">Modules</p>
-    <h2 class="text-5xl md:text-7xl font-black max-w-5xl mb-16">
-      Systems that quote, route, execute, and report.
+    <h2 class="text-5xl md:text-7xl font-black max-w-5xl mb-6">
+      AI consulting, voice, and integration systems SMB teams can use today.
     </h2>
+    <p class="text-gray-400 text-lg max-w-4xl mb-16">There is too much in AI to show on one page. We help SMB teams prioritize high-ROI use cases, then design and implement the right stack.</p>
 
     <div class="services-rail glass rounded-[2rem] p-6 md:p-10">
       <div class="service-line"></div>
@@ -578,8 +653,8 @@ body::before {
           <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div>
               <p class="text-blue-300 text-xs tracking-widest">01</p>
-              <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Quoting Systems</h3>
-              <p class="text-gray-400 mt-3 text-base md:text-lg">Turn requests into scopes, quotes, approvals, and follow-ups.</p>
+              <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Voice Front Desk</h3>
+              <p class="text-gray-400 mt-3 text-base md:text-lg">Answer calls 24/7, qualify leads, capture details, and hand off with full call summaries.</p>
             </div>
           </div>
         </div>
@@ -587,22 +662,22 @@ body::before {
         <div class="service-node">
           <span class="service-dot"></span>
           <p class="text-blue-300 text-xs tracking-widest">02</p>
-          <h3 class="text-2xl md:text-3xl font-bold mt-2">Workflow Automation</h3>
-          <p class="text-gray-400 mt-3 text-base md:text-lg">Connect Microsoft 365, CRM, QuickBooks, email, documents, and tickets.</p>
+          <h3 class="text-2xl md:text-3xl font-bold mt-2">Microsoft 365 + Google Workspace</h3>
+          <p class="text-gray-400 mt-3 text-base md:text-lg">Automate Outlook/Gmail, Teams/Chat, Calendar, Drive/SharePoint, docs, and follow-up tasks.</p>
         </div>
 
         <div class="service-node">
           <span class="service-dot"></span>
           <p class="text-blue-300 text-xs tracking-widest">03</p>
-          <h3 class="text-2xl md:text-3xl font-bold mt-2">AI Operations Assistants</h3>
-          <p class="text-gray-400 mt-3 text-base md:text-lg">Triage requests, draft responses, summarize work, and route action.</p>
+          <h3 class="text-2xl md:text-3xl font-bold mt-2">CRM + Support Integrations</h3>
+          <p class="text-gray-400 mt-3 text-base md:text-lg">Sync HubSpot/Salesforce/Pipedrive, Zendesk/Freshdesk, and tickets with AI-generated notes and actions.</p>
         </div>
 
         <div class="service-node">
           <span class="service-dot"></span>
           <p class="text-blue-300 text-xs tracking-widest">04</p>
-          <h3 class="text-2xl md:text-3xl font-bold mt-2">Managed AI Infrastructure</h3>
-          <p class="text-gray-400 mt-3 text-base md:text-lg">Support the identity, security, data, and integration layer behind the automation.</p>
+          <h3 class="text-2xl md:text-3xl font-bold mt-2">Finance + Scheduling Integrations</h3>
+          <p class="text-gray-400 mt-3 text-base md:text-lg">Connect QuickBooks, Stripe, invoicing, and booking tools to automate reminders, payment follow-ups, and status updates.</p>
         </div>
       </div>
     </div>
@@ -614,32 +689,32 @@ body::before {
   <div class="max-w-7xl mx-auto">
     <p class="protocol-label text-blue-300 uppercase tracking-widest text-sm mb-4">Dream Protocol</p>
     <h2 class="protocol-title text-5xl md:text-7xl font-black max-w-5xl mb-16">
-      A practical path to AI automation.
+      A practical path to AI consulting, voice, and automation.
     </h2>
 
     <div class="grid md:grid-cols-4 gap-5">
       <div class="step-card glass rounded-3xl p-7">
         <div class="text-blue-300 text-sm mb-4">01</div>
         <h3 class="text-2xl font-bold">Select Roles</h3>
-        <p class="text-gray-400 mt-4">Prioritize assistants like receptionist, scheduler, support, and intake.</p>
+        <p class="text-gray-400 mt-4">Prioritize voice use cases like front desk, after-hours calls, lead qualification, and appointment booking.</p>
       </div>
 
       <div class="step-card glass rounded-3xl p-7">
         <div class="text-blue-300 text-sm mb-4">02</div>
         <h3 class="text-2xl font-bold">Connect Systems</h3>
-        <p class="text-gray-400 mt-4">Link inboxes, CRMs, helpdesks, finance tools, and calendars.</p>
+        <p class="text-gray-400 mt-4">Connect Microsoft 365, Google Workspace, CRMs, phones, support desks, and billing apps.</p>
       </div>
 
       <div class="step-card glass rounded-3xl p-7">
         <div class="text-blue-300 text-sm mb-4">03</div>
         <h3 class="text-2xl font-bold">Launch</h3>
-        <p class="text-gray-400 mt-4">Deploy assistants into real workflows with guardrails and approvals.</p>
+        <p class="text-gray-400 mt-4">Deploy voice agents + workflow assistants with guardrails, human handoff, and approval controls.</p>
       </div>
 
       <div class="step-card glass rounded-3xl p-7">
         <div class="text-blue-300 text-sm mb-4">04</div>
         <h3 class="text-2xl font-bold">Scale</h3>
-        <p class="text-gray-400 mt-4">Expand into more roles from reporting to contracts and vendor analysis.</p>
+        <p class="text-gray-400 mt-4">Scale into outbound calling, reactivation campaigns, customer support, and internal ops automation.</p>
       </div>
     </div>
   </div>
@@ -650,10 +725,10 @@ body::before {
   <div class="relative z-10 max-w-7xl mx-auto text-center">
     <p class="reveal text-blue-300 uppercase tracking-widest text-sm mb-4">Start</p>
     <h2 class="reveal text-5xl md:text-7xl font-black">
-      Build systems that run the business.
+      Launch AI systems that run key workflows.
     </h2>
     <p class="reveal text-gray-300 text-xl mt-8 max-w-3xl mx-auto">
-      Discover. Design. Deploy. Optimize. A practical implementation path for AI automation inside real companies.
+      Discover. Prioritize. Integrate. Launch. Optimize. We help you choose the right AI opportunities when there is too much to fit on one website.
     </p>
     <button onclick="openAssessment()" class="reveal inline-block mt-10 bg-white text-black px-10 py-4 rounded-full font-bold hover:scale-105 transition">
       Start AI Assessment
@@ -678,7 +753,51 @@ body::before {
 
         <input name="company" placeholder="Company name" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300">
 
-        <textarea name="goals" rows="3" required placeholder="What are you looking for? (e.g., AI receptionist, intake, support, scheduling, invoicing...)" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300"></textarea>
+        <div class="rounded-2xl border border-white/10 p-4 bg-white/[.02] space-y-4">
+          <p class="text-sm uppercase tracking-widest text-blue-300">Readiness Assessment</p>
+
+          <label class="block">
+            <span class="text-sm text-gray-300">1) How repetitive are your daily client operations?</span>
+            <select name="repetitive_ops" required class="mt-2 w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300">
+              <option value="">Select one</option>
+              <option value="1">Low (mostly custom/manual each time)</option>
+              <option value="2">Medium (some repeatable processes)</option>
+              <option value="3">High (many repeatable tasks)</option>
+            </select>
+          </label>
+
+          <label class="block">
+            <span class="text-sm text-gray-300">2) How well documented are your workflows/SOPs?</span>
+            <select name="workflow_docs" required class="mt-2 w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300">
+              <option value="">Select one</option>
+              <option value="1">Not documented</option>
+              <option value="2">Partially documented</option>
+              <option value="3">Well documented</option>
+            </select>
+          </label>
+
+          <label class="block">
+            <span class="text-sm text-gray-300">3) How integrated are your systems (email, CRM, calendar, billing)?</span>
+            <select name="system_integration" required class="mt-2 w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300">
+              <option value="">Select one</option>
+              <option value="1">Mostly disconnected tools</option>
+              <option value="2">Some integrations in place</option>
+              <option value="3">Strongly integrated stack</option>
+            </select>
+          </label>
+
+          <label class="block">
+            <span class="text-sm text-gray-300">4) Team openness to AI-assisted workflows?</span>
+            <select name="team_adoption" required class="mt-2 w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300">
+              <option value="">Select one</option>
+              <option value="1">Low</option>
+              <option value="2">Moderate</option>
+              <option value="3">High</option>
+            </select>
+          </label>
+        </div>
+
+        <textarea name="goals" rows="3" required placeholder="Top 1-3 outcomes you want from AI" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300"></textarea>
 
         <textarea name="bottleneck" rows="3" placeholder="Biggest current bottleneck in your operations" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300"></textarea>
 
@@ -800,7 +919,17 @@ document.getElementById("assessmentForm").addEventListener("submit", (e) => {
   const data = new FormData(e.target);
   const get = (key) => (data.get(key) || "").toString().trim();
 
-  const subject = encodeURIComponent(`AI Assessment Request - ${get("company") || get("name") || "New Lead"}`);
+  const scoreFields = ["repetitive_ops", "workflow_docs", "system_integration", "team_adoption"];
+  const maxScore = scoreFields.length * 3;
+  const score = scoreFields.reduce((sum, key) => sum + Number(get(key) || 0), 0);
+  const readiness = score >= 10 ? "High" : score >= 7 ? "Medium" : "Early Stage";
+  const recommendation = readiness === "High"
+    ? "Recommended next step: start with a 2-4 week pilot for one high-volume workflow."
+    : readiness === "Medium"
+      ? "Recommended next step: run a process-mapping sprint, then deploy a focused assistant pilot."
+      : "Recommended next step: document core SOPs and connect systems before full automation rollout.";
+
+  const subject = encodeURIComponent(`AI Assessment Result - ${get("company") || get("name") || "New Lead"}`);
   const body = encodeURIComponent(
 `AI Assessment Submission
 
@@ -808,7 +937,17 @@ Name: ${get("name")}
 Email: ${get("email")}
 Company: ${get("company")}
 
-What they are looking for:
+Assessment Score: ${score}/${maxScore}
+Readiness Level: ${readiness}
+${recommendation}
+
+Answers:
+- Repetitive Operations: ${get("repetitive_ops")}/3
+- Workflow Documentation: ${get("workflow_docs")}/3
+- System Integration: ${get("system_integration")}/3
+- Team Adoption: ${get("team_adoption")}/3
+
+Top outcomes:
 ${get("goals")}
 
 Biggest bottleneck:
