@@ -853,6 +853,7 @@ body::before {
         <button id="assessmentSubmitBtn" type="submit" class="w-full bg-white text-black py-3 rounded-xl font-bold hover:scale-[1.01] transition hidden">
           Send Assessment
         </button>
+        <p id="assessmentStatus" class="text-sm text-center text-gray-300 hidden"></p>
       </form>
     </div>
   </div>
@@ -1024,6 +1025,7 @@ updateAssessmentStep();
 
 document.getElementById("assessmentForm").addEventListener("submit", (e) => {
   e.preventDefault();
+  if (!validateCurrentStep()) return;
 
   const data = new FormData(e.target);
   const get = (key) => (data.get(key) || "").toString().trim();
@@ -1038,8 +1040,8 @@ document.getElementById("assessmentForm").addEventListener("submit", (e) => {
       ? "Recommended next step: run a process-mapping sprint, then deploy a focused assistant pilot."
       : "Recommended next step: document core SOPs and connect systems before full automation rollout.";
 
-  const subject = encodeURIComponent(`AI Assessment Result - ${get("company") || get("name") || "New Lead"}`);
-  const body = encodeURIComponent(
+  const subject = `AI Assessment Result - ${get("company") || get("name") || "New Lead"}`;
+  const body =
 `AI Assessment Submission
 
 Name: ${get("name")}
@@ -1068,10 +1070,49 @@ ${get("timeline")}
 Budget:
 ${get("budget")}
 `
-  );
+  ;
 
-  window.location.href = `mailto:info@dreamprotocol.ai?subject=${subject}&body=${body}`;
-  closeAssessment();
+  const statusEl = document.getElementById("assessmentStatus");
+  const submitBtn = document.getElementById("assessmentSubmitBtn");
+  statusEl.classList.remove("hidden");
+  statusEl.textContent = "Sending assessment...";
+  submitBtn.disabled = true;
+  submitBtn.classList.add("opacity-70", "cursor-not-allowed");
+
+  try {
+    const response = await fetch("https://formsubmit.co/ajax/pooledlp@gmail.com", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify({
+        _subject: subject,
+        _template: "table",
+        _captcha: "false",
+        message: body,
+        name: get("name"),
+        email: get("email"),
+        company: get("company"),
+        readiness_level: readiness,
+        assessment_score: `${score}/${maxScore}`
+      })
+    });
+
+    if (!response.ok) throw new Error("Failed to send");
+    statusEl.textContent = "Sent. Thank you — we will follow up soon.";
+    e.target.reset();
+    document.querySelectorAll(".option-tile.selected").forEach((tile) => tile.classList.remove("selected"));
+    setTimeout(() => {
+      closeAssessment();
+      statusEl.classList.add("hidden");
+      statusEl.textContent = "";
+      currentAssessmentStep = 1;
+      updateAssessmentStep();
+    }, 900);
+  } catch (error) {
+    statusEl.textContent = "Could not send right now. Please try again.";
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.classList.remove("opacity-70", "cursor-not-allowed");
+  }
 });
 </script>
 
