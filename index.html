@@ -408,6 +408,68 @@ body::before {
   background: rgba(143,176,255,.14);
 }
 
+.results-wrap {
+  position: relative;
+}
+
+.results-wrap::before {
+  content: "";
+  position: absolute;
+  inset: -20px -10px;
+  border-radius: 34px;
+  background: radial-gradient(circle at 20% 30%, rgba(125,162,255,.16), transparent 45%),
+              radial-gradient(circle at 75% 70%, rgba(188,140,255,.13), transparent 48%);
+  filter: blur(18px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.result-card {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.result-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, rgba(143,176,255,.12), rgba(188,140,255,.04), transparent 60%);
+  z-index: -1;
+}
+
+.result-card::after {
+  content: "";
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  border-radius: 999px;
+  top: -35px;
+  right: -25px;
+  background: radial-gradient(circle, rgba(143,176,255,.45), rgba(143,176,255,0) 70%);
+  opacity: .5;
+}
+
+.result-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  border: 1px solid rgba(143,176,255,.35);
+  background: rgba(143,176,255,.12);
+  border-radius: 999px;
+  color: #dbe7ff;
+  font-size: .72rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: .3rem .65rem;
+}
+
+.result-value {
+  font-size: clamp(2.1rem, 4vw, 3.25rem);
+  line-height: 1;
+  letter-spacing: -.03em;
+}
+
 @media (max-width: 768px) {
   .core-wrap { width: 260px; height: 260px; }
   .core { width: 180px; height: 180px; }
@@ -428,10 +490,11 @@ body::before {
     <a href="#" class="font-semibold tracking-wide text-lg flex items-center gap-2"><span class="inline-block w-2.5 h-2.5 rounded-full bg-blue-300 shadow-[0_0_18px_#93b2ff] animate-pulse"></span><span class="gradient-text">DreamProtocol.ai</span></a>
 
     <div class="hidden md:flex gap-8 text-sm text-gray-300">
-      <a href="#workflow" class="hover:text-white transition">Workflow</a>
-      <a href="#dashboard" class="hover:text-white transition">System</a>
-      <a href="#services" class="hover:text-white transition">Services</a>
-      <a href="#protocol" class="hover:text-white transition">Protocol</a>
+      <a href="#results" class="hover:text-white transition">Results</a>
+      <a href="#industries" class="hover:text-white transition">Industries</a>
+      <a href="#workflow" class="hover:text-white transition">How It Works</a>
+      <a href="#pricing" class="hover:text-white transition">Pricing</a>
+      <a href="#faq" class="hover:text-white transition">FAQ</a>
     </div>
 
     <button onclick="openAssessment()" class="bg-white text-black px-5 py-2 rounded-full text-sm font-bold hover:scale-105 transition">
@@ -448,21 +511,30 @@ body::before {
   <div class="relative z-10 max-w-7xl mx-auto grid lg:grid-cols-2 gap-14 items-center pt-28 pb-16">
     <div>
       <h1 id="heroTitle" class="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black leading-[0.95] tracking-tight opacity-0">
-        Deploy AI voice assistants<br>
-        with <span class="gradient-text">real-world integrations.</span>
+        Stop missing calls.<br>
+        <span class="gradient-text">Book more jobs automatically.</span>
       </h1>
 
       <p id="heroSub" class="mt-8 text-lg md:text-xl text-gray-300 max-w-2xl leading-relaxed opacity-0">
-        We build AI voice + automation systems for SMB teams using Microsoft 365, Google Workspace, CRMs, phones, email, and billing tools.
+        We build AI voice + automation systems for SMB teams that answer every call, follow up instantly, and sync your CRM, calendar, dispatch, and billing tools.
       </p>
 
+      <ul class="mt-6 space-y-2 text-gray-200 text-sm md:text-base">
+        <li>• 24/7 AI front desk for inbound calls and texts.</li>
+        <li>• Follow-up messages drafted and sent in under 60 seconds.</li>
+        <li>• Live handoff + approval controls for your team.</li>
+      </ul>
+
       <div id="heroBtns" class="mt-10 flex flex-col sm:flex-row gap-4 opacity-0">
+        <a href="mailto:hello@dreamprotocol.ai?subject=15-Min%20Strategy%20Call" class="bg-white text-black px-8 py-4 rounded-full font-bold hover:scale-105 transition text-center">
+          Book 15-min Strategy Call
+        </a>
+        <a href="#dashboard" class="glass px-8 py-4 rounded-full font-bold hover:scale-105 transition text-center">
+          Watch 2-min Demo Flow
+        </a>
         <button onclick="openAssessment()" class="bg-white text-black px-8 py-4 rounded-full font-bold hover:scale-105 transition">
           Start AI Assessment
         </button>
-        <a href="#dashboard" class="glass px-8 py-4 rounded-full font-bold hover:scale-105 transition">
-          See the System
-        </a>
       </div>
     </div>
 
@@ -503,6 +575,61 @@ body::before {
       <div class="float-panel hidden md:block absolute top-[44%] left-0 glass rounded-3xl p-5 w-52">
         <p class="text-sm text-gray-400">AI Actions</p>
         <p class="text-2xl font-bold mt-2">Ready to Send</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="results" class="py-20 px-6">
+  <div class="max-w-7xl mx-auto results-wrap">
+    <div class="relative z-10">
+      <p class="text-blue-300 uppercase tracking-widest text-sm mb-3">Results SMB Teams Care About</p>
+      <h2 class="text-3xl md:text-5xl font-black max-w-4xl mb-3">Proof your ops team can feel in week one.</h2>
+      <p class="text-gray-400 max-w-3xl mb-8">We focus on speed-to-value first: faster first response, fewer manual handoffs, and faster launches for one high-impact workflow.</p>
+    </div>
+    <div class="grid md:grid-cols-3 gap-5 relative z-10">
+      <div class="result-card glass rounded-3xl p-6">
+        <span class="result-pill">Booked Jobs</span>
+        <p class="result-value font-black mt-5"><span class="result-counter" data-target="22" data-prefix="+">0</span><span class="text-blue-200">%</span></p>
+        <p class="text-gray-300 mt-3">More booked appointments from faster response times and zero-missed overflow calls.</p>
+        <div class="metric-bar mt-5"><div class="metric-fill w-[74%]"></div></div>
+      </div>
+      <div class="result-card glass rounded-3xl p-6">
+        <span class="result-pill">Team Efficiency</span>
+        <p class="result-value font-black mt-5"><span class="result-counter" data-target="40" data-prefix="-">0</span><span class="text-violet-200">%</span></p>
+        <p class="text-gray-300 mt-3">Less admin time on repetitive follow-ups, reschedules, and internal routing work.</p>
+        <div class="metric-bar mt-5"><div class="metric-fill w-[62%]"></div></div>
+      </div>
+      <div class="result-card glass rounded-3xl p-6">
+        <span class="result-pill">Launch Speed</span>
+        <p class="result-value font-black mt-5"><span class="result-counter" data-target="2" data-suffix="–4">0</span><span class="text-indigo-200"> weeks</span></p>
+        <p class="text-gray-300 mt-3">Typical pilot timeline to launch one high-impact workflow with measurable ROI.</p>
+        <div class="metric-bar mt-5"><div class="metric-fill w-[88%]"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="industries" class="py-20 px-6 bg-white/[.025]">
+  <div class="max-w-7xl mx-auto">
+    <p class="text-blue-300 uppercase tracking-widest text-sm mb-4">Built for SMB Operations</p>
+    <h2 class="text-4xl md:text-6xl font-black max-w-5xl mb-10">Industry-ready workflows, not generic AI demos.</h2>
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="glass rounded-2xl p-5">
+        <h3 class="text-xl font-bold">Home Services</h3>
+        <p class="text-gray-400 mt-2 text-sm">Capture urgent calls, route dispatch, and send ETA updates automatically.</p>
+      </div>
+      <div class="glass rounded-2xl p-5">
+        <h3 class="text-xl font-bold">Med Spas & Clinics</h3>
+        <p class="text-gray-400 mt-2 text-sm">Handle scheduling, intake follow-up, and no-show reduction sequences.</p>
+      </div>
+      <div class="glass rounded-2xl p-5">
+        <h3 class="text-xl font-bold">Legal & Professional</h3>
+        <p class="text-gray-400 mt-2 text-sm">Qualify leads, summarize calls, and trigger consultation workflows.</p>
+      </div>
+      <div class="glass rounded-2xl p-5">
+        <h3 class="text-xl font-bold">Agencies & B2B Teams</h3>
+        <p class="text-gray-400 mt-2 text-sm">Route prospects, prep proposals, and keep CRM stages always updated.</p>
       </div>
     </div>
   </div>
@@ -572,6 +699,51 @@ body::before {
       </div>
     </div>
 
+  </div>
+</section>
+
+<section id="pricing" class="py-24 px-6">
+  <div class="max-w-7xl mx-auto">
+    <p class="text-blue-300 uppercase tracking-widest text-sm mb-4">Pricing</p>
+    <h2 class="text-4xl md:text-6xl font-black mb-10">Clear pilot options for SMB teams.</h2>
+    <div class="grid md:grid-cols-3 gap-5">
+      <div class="glass rounded-3xl p-7">
+        <p class="text-sm text-gray-300">Starter Pilot</p>
+        <p class="text-4xl font-black mt-2">$2.5k–$4k</p>
+        <p class="text-gray-400 mt-3 text-sm">One workflow, one integration lane, launch in 2–4 weeks.</p>
+      </div>
+      <div class="glass rounded-3xl p-7 border-blue-300/40">
+        <p class="text-sm text-gray-300">Growth System</p>
+        <p class="text-4xl font-black mt-2">$5k–$9k</p>
+        <p class="text-gray-400 mt-3 text-sm">Multi-step voice + CRM + calendar + billing orchestration.</p>
+      </div>
+      <div class="glass rounded-3xl p-7">
+        <p class="text-sm text-gray-300">Managed Expansion</p>
+        <p class="text-4xl font-black mt-2">Custom</p>
+        <p class="text-gray-400 mt-3 text-sm">Ongoing optimization, outbound campaigns, and advanced automations.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="faq" class="py-24 px-6 bg-white/[.025]">
+  <div class="max-w-5xl mx-auto">
+    <p class="text-blue-300 uppercase tracking-widest text-sm mb-4">FAQ</p>
+    <h2 class="text-4xl md:text-6xl font-black mb-10">Common SMB questions.</h2>
+    <div class="space-y-4">
+      <div class="glass rounded-2xl p-6">
+        <h3 class="font-bold text-xl">How fast can we launch?</h3>
+        <p class="text-gray-400 mt-2">Most teams launch a focused pilot in 2–4 weeks depending on system access and approvals.</p>
+      </div>
+      <div class="glass rounded-2xl p-6">
+        <h3 class="font-bold text-xl">Will this replace my team?</h3>
+        <p class="text-gray-400 mt-2">No. The system handles repetitive front-line tasks while your team keeps control of approvals and escalations.</p>
+      </div>
+      <div class="glass rounded-2xl p-6">
+        <h3 class="font-bold text-xl">What tools do you integrate with?</h3>
+        <p class="text-gray-400 mt-2">Microsoft 365, Google Workspace, CRMs, phone systems, support desks, and billing/scheduling platforms.</p>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -944,6 +1116,15 @@ if (window.gsap && window.ScrollTrigger) {
     stagger: .12,
     duration: .7
   });
+
+  gsap.from(".result-card", {
+    scrollTrigger: { trigger: "#results", start: "top 78%", once: true },
+    y: 32,
+    opacity: 0,
+    stagger: .12,
+    duration: .75,
+    ease: "power3.out"
+  });
 } else {
   ["heroTitle", "heroSub", "heroBtns"].forEach((id) => {
     const el = document.getElementById(id);
@@ -1033,6 +1214,42 @@ document.querySelectorAll("[data-tile-group]").forEach((group) => {
 });
 
 updateAssessmentStep();
+
+let resultsAnimated = false;
+function animateResultCounters() {
+  if (resultsAnimated) return;
+  resultsAnimated = true;
+  document.querySelectorAll(".result-counter").forEach((counter) => {
+    const target = Number(counter.getAttribute("data-target") || 0);
+    const prefix = counter.getAttribute("data-prefix") || "";
+    const suffix = counter.getAttribute("data-suffix") || "";
+    let frame = 0;
+    const durationFrames = 48;
+    const tick = () => {
+      frame += 1;
+      const progress = Math.min(frame / durationFrames, 1);
+      const value = Math.round(target * (1 - Math.pow(1 - progress, 3)));
+      counter.textContent = `${prefix}${value}${suffix}`;
+      if (progress < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
+}
+
+const resultsSection = document.getElementById("results");
+if (resultsSection && "IntersectionObserver" in window) {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        animateResultCounters();
+        observer.disconnect();
+      }
+    });
+  }, { threshold: 0.4 });
+  observer.observe(resultsSection);
+} else {
+  animateResultCounters();
+}
 
 document.getElementById("assessmentForm").addEventListener("submit", async (e) => {
   e.preventDefault();
