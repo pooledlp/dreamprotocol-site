@@ -136,6 +136,27 @@ body::before {
   box-shadow: 0 0 24px #93b2ff;
 }
 
+
+.orbit-dot {
+  position: absolute;
+  inset: 0;
+  animation: orbitSpin 9s linear infinite;
+}
+
+.orbit-dot.reverse {
+  animation-direction: reverse;
+}
+
+.orbit-dot .dot {
+  top: 50%;
+  left: 50%;
+}
+
+@keyframes orbitSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 .system-line {
   position: absolute;
   height: 1px;
@@ -389,9 +410,18 @@ body::before {
         <div class="ring two"></div>
         <div class="ring three"></div>
         <div class="core"></div>
-        <div class="dot" style="top: 17px; left: 172px;"></div>
-        <div class="dot" style="bottom: 36px; right: 58px;"></div>
-        <div class="dot" style="left: 28px; top: 205px;"></div>
+
+        <div class="orbit-dot" style="animation-duration: 10s;">
+          <div class="dot" style="transform: translate(-50%, -50%) rotate(15deg) translateX(98px);"></div>
+        </div>
+
+        <div class="orbit-dot reverse" style="animation-duration: 14s;">
+          <div class="dot" style="transform: translate(-50%, -50%) rotate(205deg) translateX(142px);"></div>
+        </div>
+
+        <div class="orbit-dot" style="animation-duration: 18s;">
+          <div class="dot" style="transform: translate(-50%, -50%) rotate(290deg) translateX(176px);"></div>
+        </div>
       </div>
 
       <div class="float-panel absolute top-8 right-4 lg:right-10 glass rounded-3xl p-5 w-56">
