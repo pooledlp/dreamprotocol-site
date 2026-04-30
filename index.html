@@ -428,10 +428,11 @@ body::before {
     <a href="#" class="font-semibold tracking-wide text-lg flex items-center gap-2"><span class="inline-block w-2.5 h-2.5 rounded-full bg-blue-300 shadow-[0_0_18px_#93b2ff] animate-pulse"></span><span class="gradient-text">DreamProtocol.ai</span></a>
 
     <div class="hidden md:flex gap-8 text-sm text-gray-300">
-      <a href="#workflow" class="hover:text-white transition">Workflow</a>
-      <a href="#dashboard" class="hover:text-white transition">System</a>
-      <a href="#services" class="hover:text-white transition">Services</a>
-      <a href="#protocol" class="hover:text-white transition">Protocol</a>
+      <a href="#results" class="hover:text-white transition">Results</a>
+      <a href="#industries" class="hover:text-white transition">Industries</a>
+      <a href="#workflow" class="hover:text-white transition">How It Works</a>
+      <a href="#pricing" class="hover:text-white transition">Pricing</a>
+      <a href="#faq" class="hover:text-white transition">FAQ</a>
     </div>
 
     <button onclick="openAssessment()" class="bg-white text-black px-5 py-2 rounded-full text-sm font-bold hover:scale-105 transition">
@@ -448,21 +449,30 @@ body::before {
   <div class="relative z-10 max-w-7xl mx-auto grid lg:grid-cols-2 gap-14 items-center pt-28 pb-16">
     <div>
       <h1 id="heroTitle" class="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black leading-[0.95] tracking-tight opacity-0">
-        Deploy AI voice assistants<br>
-        with <span class="gradient-text">real-world integrations.</span>
+        Stop missing calls.<br>
+        <span class="gradient-text">Book more jobs automatically.</span>
       </h1>
 
       <p id="heroSub" class="mt-8 text-lg md:text-xl text-gray-300 max-w-2xl leading-relaxed opacity-0">
-        We build AI voice + automation systems for SMB teams using Microsoft 365, Google Workspace, CRMs, phones, email, and billing tools.
+        We build AI voice + automation systems for SMB teams that answer every call, follow up instantly, and sync your CRM, calendar, dispatch, and billing tools.
       </p>
 
+      <ul class="mt-6 space-y-2 text-gray-200 text-sm md:text-base">
+        <li>• 24/7 AI front desk for inbound calls and texts.</li>
+        <li>• Follow-up messages drafted and sent in under 60 seconds.</li>
+        <li>• Live handoff + approval controls for your team.</li>
+      </ul>
+
       <div id="heroBtns" class="mt-10 flex flex-col sm:flex-row gap-4 opacity-0">
+        <a href="mailto:hello@dreamprotocol.ai?subject=15-Min%20Strategy%20Call" class="bg-white text-black px-8 py-4 rounded-full font-bold hover:scale-105 transition text-center">
+          Book 15-min Strategy Call
+        </a>
+        <a href="#dashboard" class="glass px-8 py-4 rounded-full font-bold hover:scale-105 transition text-center">
+          Watch 2-min Demo Flow
+        </a>
         <button onclick="openAssessment()" class="bg-white text-black px-8 py-4 rounded-full font-bold hover:scale-105 transition">
           Start AI Assessment
         </button>
-        <a href="#dashboard" class="glass px-8 py-4 rounded-full font-bold hover:scale-105 transition">
-          See the System
-        </a>
       </div>
     </div>
 
@@ -503,6 +513,51 @@ body::before {
       <div class="float-panel hidden md:block absolute top-[44%] left-0 glass rounded-3xl p-5 w-52">
         <p class="text-sm text-gray-400">AI Actions</p>
         <p class="text-2xl font-bold mt-2">Ready to Send</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="results" class="py-20 px-6">
+  <div class="max-w-7xl mx-auto">
+    <p class="text-blue-300 uppercase tracking-widest text-sm mb-4">Results SMB Teams Care About</p>
+    <div class="grid md:grid-cols-3 gap-5">
+      <div class="glass rounded-3xl p-6">
+        <p class="text-4xl font-black">+22%</p>
+        <p class="text-gray-300 mt-2">More booked appointments from faster response times.</p>
+      </div>
+      <div class="glass rounded-3xl p-6">
+        <p class="text-4xl font-black">-40%</p>
+        <p class="text-gray-300 mt-2">Less admin time spent on repetitive call and follow-up tasks.</p>
+      </div>
+      <div class="glass rounded-3xl p-6">
+        <p class="text-4xl font-black">2–4 weeks</p>
+        <p class="text-gray-300 mt-2">Typical pilot timeline to launch one high-impact workflow.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="industries" class="py-20 px-6 bg-white/[.025]">
+  <div class="max-w-7xl mx-auto">
+    <p class="text-blue-300 uppercase tracking-widest text-sm mb-4">Built for SMB Operations</p>
+    <h2 class="text-4xl md:text-6xl font-black max-w-5xl mb-10">Industry-ready workflows, not generic AI demos.</h2>
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="glass rounded-2xl p-5">
+        <h3 class="text-xl font-bold">Home Services</h3>
+        <p class="text-gray-400 mt-2 text-sm">Capture urgent calls, route dispatch, and send ETA updates automatically.</p>
+      </div>
+      <div class="glass rounded-2xl p-5">
+        <h3 class="text-xl font-bold">Med Spas & Clinics</h3>
+        <p class="text-gray-400 mt-2 text-sm">Handle scheduling, intake follow-up, and no-show reduction sequences.</p>
+      </div>
+      <div class="glass rounded-2xl p-5">
+        <h3 class="text-xl font-bold">Legal & Professional</h3>
+        <p class="text-gray-400 mt-2 text-sm">Qualify leads, summarize calls, and trigger consultation workflows.</p>
+      </div>
+      <div class="glass rounded-2xl p-5">
+        <h3 class="text-xl font-bold">Agencies & B2B Teams</h3>
+        <p class="text-gray-400 mt-2 text-sm">Route prospects, prep proposals, and keep CRM stages always updated.</p>
       </div>
     </div>
   </div>
@@ -572,6 +627,51 @@ body::before {
       </div>
     </div>
 
+  </div>
+</section>
+
+<section id="pricing" class="py-24 px-6">
+  <div class="max-w-7xl mx-auto">
+    <p class="text-blue-300 uppercase tracking-widest text-sm mb-4">Pricing</p>
+    <h2 class="text-4xl md:text-6xl font-black mb-10">Clear pilot options for SMB teams.</h2>
+    <div class="grid md:grid-cols-3 gap-5">
+      <div class="glass rounded-3xl p-7">
+        <p class="text-sm text-gray-300">Starter Pilot</p>
+        <p class="text-4xl font-black mt-2">$2.5k–$4k</p>
+        <p class="text-gray-400 mt-3 text-sm">One workflow, one integration lane, launch in 2–4 weeks.</p>
+      </div>
+      <div class="glass rounded-3xl p-7 border-blue-300/40">
+        <p class="text-sm text-gray-300">Growth System</p>
+        <p class="text-4xl font-black mt-2">$5k–$9k</p>
+        <p class="text-gray-400 mt-3 text-sm">Multi-step voice + CRM + calendar + billing orchestration.</p>
+      </div>
+      <div class="glass rounded-3xl p-7">
+        <p class="text-sm text-gray-300">Managed Expansion</p>
+        <p class="text-4xl font-black mt-2">Custom</p>
+        <p class="text-gray-400 mt-3 text-sm">Ongoing optimization, outbound campaigns, and advanced automations.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="faq" class="py-24 px-6 bg-white/[.025]">
+  <div class="max-w-5xl mx-auto">
+    <p class="text-blue-300 uppercase tracking-widest text-sm mb-4">FAQ</p>
+    <h2 class="text-4xl md:text-6xl font-black mb-10">Common SMB questions.</h2>
+    <div class="space-y-4">
+      <div class="glass rounded-2xl p-6">
+        <h3 class="font-bold text-xl">How fast can we launch?</h3>
+        <p class="text-gray-400 mt-2">Most teams launch a focused pilot in 2–4 weeks depending on system access and approvals.</p>
+      </div>
+      <div class="glass rounded-2xl p-6">
+        <h3 class="font-bold text-xl">Will this replace my team?</h3>
+        <p class="text-gray-400 mt-2">No. The system handles repetitive front-line tasks while your team keeps control of approvals and escalations.</p>
+      </div>
+      <div class="glass rounded-2xl p-6">
+        <h3 class="font-bold text-xl">What tools do you integrate with?</h3>
+        <p class="text-gray-400 mt-2">Microsoft 365, Google Workspace, CRMs, phone systems, support desks, and billing/scheduling platforms.</p>
+      </div>
+    </div>
   </div>
 </section>
 
