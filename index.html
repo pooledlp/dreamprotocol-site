@@ -782,8 +782,8 @@ body::before {
         </div>
 
         <section class="assessment-step active" data-step="1">
-          <h4 class="text-xl font-bold mb-3">Let's get started 👋</h4>
-          <p class="text-gray-300 text-sm mb-4">We'll walk through a quick questionnaire one step at a time and package everything into one email draft.</p>
+          <h4 class="text-xl font-bold mb-3">Let's get started</h4>
+          <p class="text-gray-300 text-sm mb-4">We'll walk through a quick questionnaire one step at a time and capture your responses for follow-up.</p>
           <div class="space-y-4">
             <input name="name" required placeholder="Your name" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300">
             <input name="email" type="email" required placeholder="Work email" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300">
@@ -834,14 +834,11 @@ body::before {
         </section>
 
         <section class="assessment-step" data-step="6">
-          <h4 class="text-xl font-bold mb-3">Final details 🎯</h4>
+          <h4 class="text-xl font-bold mb-3">Final details</h4>
           <div class="space-y-4">
             <textarea name="goals" rows="3" required placeholder="Top 1-3 outcomes you want from AI" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300"></textarea>
             <textarea name="bottleneck" rows="3" placeholder="Biggest current bottleneck in your operations" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300"></textarea>
-            <div class="grid md:grid-cols-2 gap-4">
-              <input name="timeline" placeholder="Preferred timeline (e.g., ASAP, 30 days)" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300">
-              <input name="budget" placeholder="Estimated monthly budget (optional)" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300">
-            </div>
+            <input name="timeline" placeholder="Preferred timeline (e.g., ASAP, 30 days)" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300">
           </div>
         </section>
 
@@ -1037,7 +1034,7 @@ document.querySelectorAll("[data-tile-group]").forEach((group) => {
 
 updateAssessmentStep();
 
-document.getElementById("assessmentForm").addEventListener("submit", (e) => {
+document.getElementById("assessmentForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   if (!validateCurrentStep()) return;
 
@@ -1081,8 +1078,6 @@ ${get("bottleneck")}
 Timeline:
 ${get("timeline")}
 
-Budget:
-${get("budget")}
 `
   ;
 
