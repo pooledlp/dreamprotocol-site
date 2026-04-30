@@ -379,6 +379,35 @@ body::before {
   color: #dbe7ff;
 }
 
+.assessment-step {
+  display: none;
+}
+
+.assessment-step.active {
+  display: block;
+}
+
+.option-tile {
+  border: 1px solid rgba(255,255,255,.15);
+  background: rgba(255,255,255,.03);
+  border-radius: 14px;
+  padding: .9rem;
+  width: 100%;
+  text-align: left;
+  transition: .2s ease;
+}
+
+.option-tile:hover,
+.option-tile:focus-visible {
+  border-color: rgba(143,176,255,.65);
+  box-shadow: 0 0 28px rgba(143,176,255,.15);
+}
+
+.option-tile.selected {
+  border-color: rgba(143,176,255,.95);
+  background: rgba(143,176,255,.14);
+}
+
 @media (max-width: 768px) {
   .core-wrap { width: 260px; height: 260px; }
   .core { width: 180px; height: 180px; }
@@ -742,69 +771,89 @@ body::before {
       </div>
 
       <form id="assessmentForm" class="space-y-4">
-        <div class="grid md:grid-cols-2 gap-4">
-          <input name="name" required placeholder="Your name" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300">
-          <input name="email" type="email" required placeholder="Work email" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300">
+        <div class="rounded-2xl border border-white/10 p-4 bg-white/[.02]">
+          <div class="flex justify-between items-center mb-2 text-xs uppercase tracking-widest text-gray-400">
+            <span id="assessmentStepLabel">Step 1 of 6</span>
+            <span id="assessmentStepHint">Quick intro</span>
+          </div>
+          <div class="h-2 bg-white/10 rounded-full overflow-hidden">
+            <div id="assessmentProgressBar" class="h-full bg-gradient-to-r from-blue-300 to-violet-300 transition-all duration-300" style="width:16.67%"></div>
+          </div>
         </div>
 
-        <input name="company" placeholder="Company name" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300">
+        <section class="assessment-step active" data-step="1">
+          <h4 class="text-xl font-bold mb-3">Let's get started 👋</h4>
+          <p class="text-gray-300 text-sm mb-4">We'll walk through a quick questionnaire one step at a time and package everything into one email draft.</p>
+          <div class="space-y-4">
+            <input name="name" required placeholder="Your name" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300">
+            <input name="email" type="email" required placeholder="Work email" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300">
+            <input name="company" placeholder="Company name" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300">
+          </div>
+        </section>
 
-        <div class="rounded-2xl border border-white/10 p-4 bg-white/[.02] space-y-4">
-          <p class="text-sm uppercase tracking-widest text-blue-300">Readiness Assessment</p>
+        <section class="assessment-step" data-step="2">
+          <h4 class="text-xl font-bold mb-3">How repetitive are your daily client operations?</h4>
+          <p class="text-gray-400 text-sm mb-4">This helps us estimate how fast automation can show impact.</p>
+          <div class="space-y-3" data-tile-group="repetitive_ops">
+            <button type="button" class="option-tile" data-value="1">Low <span class="block text-xs text-gray-400 mt-1">Mostly custom/manual each time.</span></button>
+            <button type="button" class="option-tile" data-value="2">Medium <span class="block text-xs text-gray-400 mt-1">Some repeatable processes.</span></button>
+            <button type="button" class="option-tile" data-value="3">High <span class="block text-xs text-gray-400 mt-1">Many repeatable tasks.</span></button>
+          </div>
+          <input type="hidden" name="repetitive_ops" required>
+        </section>
 
-          <label class="block">
-            <span class="text-sm text-gray-300">1) How repetitive are your daily client operations?</span>
-            <select name="repetitive_ops" required class="mt-2 w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300">
-              <option value="">Select one</option>
-              <option value="1">Low (mostly custom/manual each time)</option>
-              <option value="2">Medium (some repeatable processes)</option>
-              <option value="3">High (many repeatable tasks)</option>
-            </select>
-          </label>
+        <section class="assessment-step" data-step="3">
+          <h4 class="text-xl font-bold mb-3">How well documented are your workflows/SOPs?</h4>
+          <div class="space-y-3" data-tile-group="workflow_docs">
+            <button type="button" class="option-tile" data-value="1">Not documented</button>
+            <button type="button" class="option-tile" data-value="2">Partially documented</button>
+            <button type="button" class="option-tile" data-value="3">Well documented</button>
+          </div>
+          <input type="hidden" name="workflow_docs" required>
+        </section>
 
-          <label class="block">
-            <span class="text-sm text-gray-300">2) How well documented are your workflows/SOPs?</span>
-            <select name="workflow_docs" required class="mt-2 w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300">
-              <option value="">Select one</option>
-              <option value="1">Not documented</option>
-              <option value="2">Partially documented</option>
-              <option value="3">Well documented</option>
-            </select>
-          </label>
+        <section class="assessment-step" data-step="4">
+          <h4 class="text-xl font-bold mb-3">How integrated are your systems?</h4>
+          <p class="text-gray-400 text-sm mb-4">Email, CRM, calendar, billing, and phone tools.</p>
+          <div class="space-y-3" data-tile-group="system_integration">
+            <button type="button" class="option-tile" data-value="1">Mostly disconnected tools</button>
+            <button type="button" class="option-tile" data-value="2">Some integrations in place</button>
+            <button type="button" class="option-tile" data-value="3">Strongly integrated stack</button>
+          </div>
+          <input type="hidden" name="system_integration" required>
+        </section>
 
-          <label class="block">
-            <span class="text-sm text-gray-300">3) How integrated are your systems (email, CRM, calendar, billing)?</span>
-            <select name="system_integration" required class="mt-2 w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300">
-              <option value="">Select one</option>
-              <option value="1">Mostly disconnected tools</option>
-              <option value="2">Some integrations in place</option>
-              <option value="3">Strongly integrated stack</option>
-            </select>
-          </label>
+        <section class="assessment-step" data-step="5">
+          <h4 class="text-xl font-bold mb-3">How open is your team to AI-assisted workflows?</h4>
+          <div class="space-y-3" data-tile-group="team_adoption">
+            <button type="button" class="option-tile" data-value="1">Low</button>
+            <button type="button" class="option-tile" data-value="2">Moderate</button>
+            <button type="button" class="option-tile" data-value="3">High</button>
+          </div>
+          <input type="hidden" name="team_adoption" required>
+        </section>
 
-          <label class="block">
-            <span class="text-sm text-gray-300">4) Team openness to AI-assisted workflows?</span>
-            <select name="team_adoption" required class="mt-2 w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300">
-              <option value="">Select one</option>
-              <option value="1">Low</option>
-              <option value="2">Moderate</option>
-              <option value="3">High</option>
-            </select>
-          </label>
+        <section class="assessment-step" data-step="6">
+          <h4 class="text-xl font-bold mb-3">Final details 🎯</h4>
+          <div class="space-y-4">
+            <textarea name="goals" rows="3" required placeholder="Top 1-3 outcomes you want from AI" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300"></textarea>
+            <textarea name="bottleneck" rows="3" placeholder="Biggest current bottleneck in your operations" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300"></textarea>
+            <div class="grid md:grid-cols-2 gap-4">
+              <input name="timeline" placeholder="Preferred timeline (e.g., ASAP, 30 days)" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300">
+              <input name="budget" placeholder="Estimated monthly budget (optional)" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300">
+            </div>
+          </div>
+        </section>
+
+        <div class="grid grid-cols-2 gap-3">
+          <button id="assessmentBackBtn" type="button" class="glass py-3 rounded-xl font-semibold text-gray-200 hover:text-white transition">Back</button>
+          <button id="assessmentNextBtn" type="button" class="bg-white text-black py-3 rounded-xl font-bold hover:scale-[1.01] transition">Next</button>
         </div>
 
-        <textarea name="goals" rows="3" required placeholder="Top 1-3 outcomes you want from AI" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300"></textarea>
-
-        <textarea name="bottleneck" rows="3" placeholder="Biggest current bottleneck in your operations" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300"></textarea>
-
-        <div class="grid md:grid-cols-2 gap-4">
-          <input name="timeline" placeholder="Preferred timeline (e.g., ASAP, 30 days)" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300">
-          <input name="budget" placeholder="Estimated monthly budget (optional)" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300">
-        </div>
-
-        <button type="submit" class="w-full bg-white text-black py-3 rounded-xl font-bold hover:scale-[1.01] transition">
+        <button id="assessmentSubmitBtn" type="submit" class="w-full bg-white text-black py-3 rounded-xl font-bold hover:scale-[1.01] transition hidden">
           Send Assessment
         </button>
+        <p id="assessmentStatus" class="text-sm text-center text-gray-300 hidden"></p>
       </form>
     </div>
   </div>
@@ -901,6 +950,8 @@ gsap.from(".activity", {
 function openAssessment() {
   document.getElementById("assessmentModal").classList.remove("hidden");
   document.body.style.overflow = "hidden";
+  currentAssessmentStep = 1;
+  updateAssessmentStep();
 }
 
 function closeAssessment() {
@@ -908,8 +959,73 @@ function closeAssessment() {
   document.body.style.overflow = "";
 }
 
-document.getElementById("assessmentForm").addEventListener("submit", (e) => {
+const assessmentSteps = Array.from(document.querySelectorAll(".assessment-step"));
+const assessmentStepHints = [
+  "Quick intro",
+  "Operations fit",
+  "Process maturity",
+  "System connectivity",
+  "Team readiness",
+  "Goals + timeline"
+];
+let currentAssessmentStep = 1;
+
+function updateAssessmentStep() {
+  const total = assessmentSteps.length;
+  assessmentSteps.forEach((step, idx) => step.classList.toggle("active", idx === currentAssessmentStep - 1));
+  document.getElementById("assessmentStepLabel").textContent = `Step ${currentAssessmentStep} of ${total}`;
+  document.getElementById("assessmentStepHint").textContent = assessmentStepHints[currentAssessmentStep - 1] || "";
+  document.getElementById("assessmentProgressBar").style.width = `${(currentAssessmentStep / total) * 100}%`;
+  document.getElementById("assessmentBackBtn").style.visibility = currentAssessmentStep === 1 ? "hidden" : "visible";
+  document.getElementById("assessmentNextBtn").classList.toggle("hidden", currentAssessmentStep === total);
+  document.getElementById("assessmentSubmitBtn").classList.toggle("hidden", currentAssessmentStep !== total);
+}
+
+function validateCurrentStep() {
+  const step = assessmentSteps[currentAssessmentStep - 1];
+  const requiredFields = step.querySelectorAll("[required]");
+  for (const field of requiredFields) {
+    if (!field.value) {
+      field.reportValidity();
+      return false;
+    }
+  }
+  return true;
+}
+
+document.getElementById("assessmentNextBtn").addEventListener("click", () => {
+  if (!validateCurrentStep()) return;
+  if (currentAssessmentStep < assessmentSteps.length) {
+    currentAssessmentStep += 1;
+    updateAssessmentStep();
+  }
+});
+
+document.getElementById("assessmentBackBtn").addEventListener("click", () => {
+  if (currentAssessmentStep > 1) {
+    currentAssessmentStep -= 1;
+    updateAssessmentStep();
+  }
+});
+
+document.querySelectorAll("[data-tile-group]").forEach((group) => {
+  const fieldName = group.getAttribute("data-tile-group");
+  const hiddenInput = document.querySelector(`input[name="${fieldName}"]`);
+  const options = Array.from(group.querySelectorAll(".option-tile"));
+  options.forEach((option) => {
+    option.addEventListener("click", () => {
+      options.forEach((opt) => opt.classList.remove("selected"));
+      option.classList.add("selected");
+      hiddenInput.value = option.getAttribute("data-value") || "";
+    });
+  });
+});
+
+updateAssessmentStep();
+
+document.getElementById("assessmentForm").addEventListener("submit", async (e) => {
   e.preventDefault();
+  if (!validateCurrentStep()) return;
 
   const data = new FormData(e.target);
   const get = (key) => (data.get(key) || "").toString().trim();
@@ -924,8 +1040,8 @@ document.getElementById("assessmentForm").addEventListener("submit", (e) => {
       ? "Recommended next step: run a process-mapping sprint, then deploy a focused assistant pilot."
       : "Recommended next step: document core SOPs and connect systems before full automation rollout.";
 
-  const subject = encodeURIComponent(`AI Assessment Result - ${get("company") || get("name") || "New Lead"}`);
-  const body = encodeURIComponent(
+  const subject = `AI Assessment Result - ${get("company") || get("name") || "New Lead"}`;
+  const body =
 `AI Assessment Submission
 
 Name: ${get("name")}
@@ -954,10 +1070,49 @@ ${get("timeline")}
 Budget:
 ${get("budget")}
 `
-  );
+  ;
 
-  window.location.href = `mailto:info@dreamprotocol.ai?subject=${subject}&body=${body}`;
-  closeAssessment();
+  const statusEl = document.getElementById("assessmentStatus");
+  const submitBtn = document.getElementById("assessmentSubmitBtn");
+  statusEl.classList.remove("hidden");
+  statusEl.textContent = "Sending assessment...";
+  submitBtn.disabled = true;
+  submitBtn.classList.add("opacity-70", "cursor-not-allowed");
+
+  try {
+    const response = await fetch("https://formsubmit.co/ajax/pooledlp@gmail.com", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify({
+        _subject: subject,
+        _template: "table",
+        _captcha: "false",
+        message: body,
+        name: get("name"),
+        email: get("email"),
+        company: get("company"),
+        readiness_level: readiness,
+        assessment_score: `${score}/${maxScore}`
+      })
+    });
+
+    if (!response.ok) throw new Error("Failed to send");
+    statusEl.textContent = "Sent. Thank you — we will follow up soon.";
+    e.target.reset();
+    document.querySelectorAll(".option-tile.selected").forEach((tile) => tile.classList.remove("selected"));
+    setTimeout(() => {
+      closeAssessment();
+      statusEl.classList.add("hidden");
+      statusEl.textContent = "";
+      currentAssessmentStep = 1;
+      updateAssessmentStep();
+    }, 900);
+  } catch (error) {
+    statusEl.textContent = "Could not send right now. Please try again.";
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.classList.remove("opacity-70", "cursor-not-allowed");
+  }
 });
 </script>
 
