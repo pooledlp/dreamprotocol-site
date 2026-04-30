@@ -408,6 +408,68 @@ body::before {
   background: rgba(143,176,255,.14);
 }
 
+.results-wrap {
+  position: relative;
+}
+
+.results-wrap::before {
+  content: "";
+  position: absolute;
+  inset: -20px -10px;
+  border-radius: 34px;
+  background: radial-gradient(circle at 20% 30%, rgba(125,162,255,.16), transparent 45%),
+              radial-gradient(circle at 75% 70%, rgba(188,140,255,.13), transparent 48%);
+  filter: blur(18px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.result-card {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.result-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, rgba(143,176,255,.12), rgba(188,140,255,.04), transparent 60%);
+  z-index: -1;
+}
+
+.result-card::after {
+  content: "";
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  border-radius: 999px;
+  top: -35px;
+  right: -25px;
+  background: radial-gradient(circle, rgba(143,176,255,.45), rgba(143,176,255,0) 70%);
+  opacity: .5;
+}
+
+.result-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  border: 1px solid rgba(143,176,255,.35);
+  background: rgba(143,176,255,.12);
+  border-radius: 999px;
+  color: #dbe7ff;
+  font-size: .72rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: .3rem .65rem;
+}
+
+.result-value {
+  font-size: clamp(2.1rem, 4vw, 3.25rem);
+  line-height: 1;
+  letter-spacing: -.03em;
+}
+
 @media (max-width: 768px) {
   .core-wrap { width: 260px; height: 260px; }
   .core { width: 180px; height: 180px; }
@@ -1044,6 +1106,15 @@ if (window.gsap && window.ScrollTrigger) {
     stagger: .12,
     duration: .7
   });
+
+  gsap.from(".result-card", {
+    scrollTrigger: { trigger: "#results", start: "top 78%", once: true },
+    y: 32,
+    opacity: 0,
+    stagger: .12,
+    duration: .75,
+    ease: "power3.out"
+  });
 } else {
   ["heroTitle", "heroSub", "heroBtns"].forEach((id) => {
     const el = document.getElementById(id);
@@ -1133,6 +1204,42 @@ document.querySelectorAll("[data-tile-group]").forEach((group) => {
 });
 
 updateAssessmentStep();
+
+let resultsAnimated = false;
+function animateResultCounters() {
+  if (resultsAnimated) return;
+  resultsAnimated = true;
+  document.querySelectorAll(".result-counter").forEach((counter) => {
+    const target = Number(counter.getAttribute("data-target") || 0);
+    const prefix = counter.getAttribute("data-prefix") || "";
+    const suffix = counter.getAttribute("data-suffix") || "";
+    let frame = 0;
+    const durationFrames = 48;
+    const tick = () => {
+      frame += 1;
+      const progress = Math.min(frame / durationFrames, 1);
+      const value = Math.round(target * (1 - Math.pow(1 - progress, 3)));
+      counter.textContent = `${prefix}${value}${suffix}`;
+      if (progress < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
+}
+
+const resultsSection = document.getElementById("results");
+if (resultsSection && "IntersectionObserver" in window) {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        animateResultCounters();
+        observer.disconnect();
+      }
+    });
+  }, { threshold: 0.4 });
+  observer.observe(resultsSection);
+} else {
+  animateResultCounters();
+}
 
 document.getElementById("assessmentForm").addEventListener("submit", async (e) => {
   e.preventDefault();
