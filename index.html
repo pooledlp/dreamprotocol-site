@@ -136,6 +136,27 @@ body::before {
   box-shadow: 0 0 24px #93b2ff;
 }
 
+
+.orbit-dot {
+  position: absolute;
+  inset: 0;
+  animation: orbitSpin 9s linear infinite;
+}
+
+.orbit-dot.reverse {
+  animation-direction: reverse;
+}
+
+.orbit-dot .dot {
+  top: 50%;
+  left: 50%;
+}
+
+@keyframes orbitSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 .system-line {
   position: absolute;
   height: 1px;
@@ -389,9 +410,18 @@ body::before {
         <div class="ring two"></div>
         <div class="ring three"></div>
         <div class="core"></div>
-        <div class="dot" style="top: 17px; left: 172px;"></div>
-        <div class="dot" style="bottom: 36px; right: 58px;"></div>
-        <div class="dot" style="left: 28px; top: 205px;"></div>
+
+        <div class="orbit-dot" style="animation-duration: 10s;">
+          <div class="dot" style="transform: translate(-50%, -50%) rotate(15deg) translateX(98px);"></div>
+        </div>
+
+        <div class="orbit-dot reverse" style="animation-duration: 14s;">
+          <div class="dot" style="transform: translate(-50%, -50%) rotate(205deg) translateX(142px);"></div>
+        </div>
+
+        <div class="orbit-dot" style="animation-duration: 18s;">
+          <div class="dot" style="transform: translate(-50%, -50%) rotate(290deg) translateX(176px);"></div>
+        </div>
       </div>
 
       <div class="float-panel absolute top-8 right-4 lg:right-10 glass rounded-3xl p-5 w-56">
@@ -678,7 +708,51 @@ body::before {
 
         <input name="company" placeholder="Company name" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300">
 
-        <textarea name="goals" rows="3" required placeholder="What are you looking for? (e.g., AI receptionist, intake, support, scheduling, invoicing...)" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300"></textarea>
+        <div class="rounded-2xl border border-white/10 p-4 bg-white/[.02] space-y-4">
+          <p class="text-sm uppercase tracking-widest text-blue-300">Readiness Assessment</p>
+
+          <label class="block">
+            <span class="text-sm text-gray-300">1) How repetitive are your daily client operations?</span>
+            <select name="repetitive_ops" required class="mt-2 w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300">
+              <option value="">Select one</option>
+              <option value="1">Low (mostly custom/manual each time)</option>
+              <option value="2">Medium (some repeatable processes)</option>
+              <option value="3">High (many repeatable tasks)</option>
+            </select>
+          </label>
+
+          <label class="block">
+            <span class="text-sm text-gray-300">2) How well documented are your workflows/SOPs?</span>
+            <select name="workflow_docs" required class="mt-2 w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300">
+              <option value="">Select one</option>
+              <option value="1">Not documented</option>
+              <option value="2">Partially documented</option>
+              <option value="3">Well documented</option>
+            </select>
+          </label>
+
+          <label class="block">
+            <span class="text-sm text-gray-300">3) How integrated are your systems (email, CRM, calendar, billing)?</span>
+            <select name="system_integration" required class="mt-2 w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300">
+              <option value="">Select one</option>
+              <option value="1">Mostly disconnected tools</option>
+              <option value="2">Some integrations in place</option>
+              <option value="3">Strongly integrated stack</option>
+            </select>
+          </label>
+
+          <label class="block">
+            <span class="text-sm text-gray-300">4) Team openness to AI-assisted workflows?</span>
+            <select name="team_adoption" required class="mt-2 w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300">
+              <option value="">Select one</option>
+              <option value="1">Low</option>
+              <option value="2">Moderate</option>
+              <option value="3">High</option>
+            </select>
+          </label>
+        </div>
+
+        <textarea name="goals" rows="3" required placeholder="Top 1-3 outcomes you want from AI" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300"></textarea>
 
         <textarea name="bottleneck" rows="3" placeholder="Biggest current bottleneck in your operations" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300"></textarea>
 
@@ -800,7 +874,17 @@ document.getElementById("assessmentForm").addEventListener("submit", (e) => {
   const data = new FormData(e.target);
   const get = (key) => (data.get(key) || "").toString().trim();
 
-  const subject = encodeURIComponent(`AI Assessment Request - ${get("company") || get("name") || "New Lead"}`);
+  const scoreFields = ["repetitive_ops", "workflow_docs", "system_integration", "team_adoption"];
+  const maxScore = scoreFields.length * 3;
+  const score = scoreFields.reduce((sum, key) => sum + Number(get(key) || 0), 0);
+  const readiness = score >= 10 ? "High" : score >= 7 ? "Medium" : "Early Stage";
+  const recommendation = readiness === "High"
+    ? "Recommended next step: start with a 2-4 week pilot for one high-volume workflow."
+    : readiness === "Medium"
+      ? "Recommended next step: run a process-mapping sprint, then deploy a focused assistant pilot."
+      : "Recommended next step: document core SOPs and connect systems before full automation rollout.";
+
+  const subject = encodeURIComponent(`AI Assessment Result - ${get("company") || get("name") || "New Lead"}`);
   const body = encodeURIComponent(
 `AI Assessment Submission
 
@@ -808,7 +892,17 @@ Name: ${get("name")}
 Email: ${get("email")}
 Company: ${get("company")}
 
-What they are looking for:
+Assessment Score: ${score}/${maxScore}
+Readiness Level: ${readiness}
+${recommendation}
+
+Answers:
+- Repetitive Operations: ${get("repetitive_ops")}/3
+- Workflow Documentation: ${get("workflow_docs")}/3
+- System Integration: ${get("system_integration")}/3
+- Team Adoption: ${get("team_adoption")}/3
+
+Top outcomes:
 ${get("goals")}
 
 Biggest bottleneck:
