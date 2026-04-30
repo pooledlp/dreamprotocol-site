@@ -1023,7 +1023,7 @@ document.querySelectorAll("[data-tile-group]").forEach((group) => {
 
 updateAssessmentStep();
 
-document.getElementById("assessmentForm").addEventListener("submit", async (e) => {
+document.getElementById("assessmentForm").addEventListener("submit", (e) => {
   e.preventDefault();
   if (!validateCurrentStep()) return;
 
