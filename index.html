@@ -391,6 +391,62 @@ body::before {
   color: #dbe7ff;
 }
 
+.demo-output-card {
+  border: 1px solid rgba(255,255,255,.1);
+  background: rgba(255,255,255,.04);
+  border-radius: 18px;
+  padding: 1rem;
+}
+
+.demo-output-card p {
+  color: #93b2ff;
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .14em;
+  margin-bottom: .5rem;
+}
+
+.demo-output-card span {
+  color: rgba(229,236,255,.88);
+  font-size: .92rem;
+  line-height: 1.55;
+}
+
+.transcript-line {
+  border: 1px solid rgba(255,255,255,.1);
+  background: rgba(255,255,255,.035);
+  border-radius: 18px;
+  padding: 1rem;
+  transition: border-color .25s ease, background .25s ease, transform .25s ease;
+}
+
+.transcript-line.active {
+  border-color: rgba(147,178,255,.72);
+  background: rgba(147,178,255,.12);
+  transform: translateY(-2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .transcript-line,
+  .workflow-card,
+  .step-card,
+  .option-tile,
+  .float-panel,
+  .orb,
+  .core,
+  .orbit-dot,
+  .grid-bg,
+  .workflow-progress,
+  .flow-beam,
+  .scan,
+  .protocol-flare,
+  .metric-fill,
+  .call-wave::before {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
 .demo-step.active {
   border-color: rgba(143,176,255,.75);
   background: rgba(143,176,255,.14);
@@ -621,64 +677,91 @@ body::before {
 </section>
 
 <section id="demo" class="py-16 px-6">
-  <div class="max-w-7xl mx-auto glass rounded-3xl p-8 md:p-12">
-    <div class="grid lg:grid-cols-[.9fr_1.2fr] gap-10 items-start">
-      <div>
-        <p class="text-blue-300 uppercase tracking-widest text-sm mb-4">Interactive visual demo</p>
-        <h2 class="text-3xl md:text-5xl font-black mb-5">See the AI Front Desk in Action</h2>
-        <p class="text-gray-300 text-lg leading-relaxed">
-          A customer calls after hours. The AI answers, captures the issue, qualifies urgency, drafts the follow-up, updates the CRM, and alerts the team — without pretending this is fake audio.
-        </p>
-        <div class="mt-8 flex flex-col sm:flex-row gap-3">
-          <a href="mailto:pooledlp@gmail.com?subject=15-Minute%20DreamProtocol%20Build%20Call" class="inline-flex justify-center bg-white text-black px-7 py-4 rounded-full font-bold hover:scale-105 transition">Book a 15-Minute Build Call</a>
-          <button type="button" onclick="openAssessment()" class="inline-flex justify-center glass px-7 py-4 rounded-full font-bold hover:scale-105 transition">See What We’d Automate</button>
+  <div class="max-w-7xl mx-auto glass rounded-3xl p-8 md:p-12 overflow-hidden relative">
+    <div class="protocol-flare opacity-70"></div>
+    <div class="relative z-10 text-center max-w-4xl mx-auto mb-10">
+      <p class="text-blue-300 uppercase tracking-widest text-sm mb-4">Interactive call demo</p>
+      <h2 class="text-3xl md:text-5xl font-black mb-5">Hear the AI Front Desk Answer a Call</h2>
+      <p class="text-gray-300 text-lg leading-relaxed">
+        Pick a scenario and hear how DreamProtocol captures the request, qualifies urgency, prepares the follow-up, updates the CRM, and alerts the team.
+      </p>
+      <div class="mt-5 flex flex-wrap justify-center gap-3">
+        <span class="console-chip">Sample demo conversation — not a live customer recording.</span>
+        <span class="console-chip" id="voiceModeLabel">Browser voice simulation — sample script, not a live call recording.</span>
+      </div>
+    </div>
+
+    <div class="relative z-10 grid xl:grid-cols-[.75fr_1.25fr_.9fr] gap-5 lg:gap-6 items-start">
+      <div class="rounded-3xl border border-white/12 bg-black/20 p-4 md:p-5">
+        <p class="text-xs uppercase tracking-widest text-blue-300 mb-4">Choose scenario</p>
+        <div class="space-y-3" role="tablist" aria-label="AI front desk call demo scenarios">
+          <button type="button" class="demo-step option-tile active" role="tab" aria-selected="true" aria-controls="demoScenarioPanel" id="scenario-tab-home-services" data-scenario="home-services">
+            <span class="flex items-start gap-3"><span class="status-dot mt-1.5 shrink-0"></span><span><span class="block font-bold">Home Services</span><span class="block text-sm text-gray-400 mt-1">After-hours leak</span></span></span>
+          </button>
+          <button type="button" class="demo-step option-tile" role="tab" aria-selected="false" aria-controls="demoScenarioPanel" id="scenario-tab-med-spa" data-scenario="med-spa">
+            <span class="flex items-start gap-3"><span class="status-dot mt-1.5 shrink-0"></span><span><span class="block font-bold">Med Spa / Clinic</span><span class="block text-sm text-gray-400 mt-1">Appointment request</span></span></span>
+          </button>
+          <button type="button" class="demo-step option-tile" role="tab" aria-selected="false" aria-controls="demoScenarioPanel" id="scenario-tab-legal-intake" data-scenario="legal-intake">
+            <span class="flex items-start gap-3"><span class="status-dot mt-1.5 shrink-0"></span><span><span class="block font-bold">Legal Intake</span><span class="block text-sm text-gray-400 mt-1">New consultation request</span></span></span>
+          </button>
+          <button type="button" class="demo-step option-tile" role="tab" aria-selected="false" aria-controls="demoScenarioPanel" id="scenario-tab-hospitality" data-scenario="hospitality">
+            <span class="flex items-start gap-3"><span class="status-dot mt-1.5 shrink-0"></span><span><span class="block font-bold">Hospitality</span><span class="block text-sm text-gray-400 mt-1">Guest request</span></span></span>
+          </button>
         </div>
       </div>
 
-      <div class="rounded-3xl border border-white/15 bg-black/25 p-5 md:p-6 overflow-hidden">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+      <div id="demoScenarioPanel" role="tabpanel" aria-live="polite" aria-labelledby="scenario-tab-home-services" class="rounded-[2rem] border border-white/15 bg-black/35 p-5 md:p-6 shadow-[0_0_80px_rgba(91,140,255,.10)]">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
           <div>
-            <p class="text-sm text-gray-400">After-hours workflow simulation</p>
-            <p class="text-xl font-bold" id="demoTitle">Call answered</p>
+            <p class="text-xs uppercase tracking-widest text-gray-400">Incoming call · <span id="demoIndustry">Home Services</span></p>
+            <h3 id="demoTitle" class="text-2xl md:text-3xl font-black mt-1">After-hours leak</h3>
+            <p id="demoSituation" class="text-gray-400 mt-2">A homeowner calls after hours about a leaking water heater.</p>
           </div>
-          <span class="console-chip">No fake audio — visual simulation</span>
+          <div class="rounded-full border border-blue-200/30 bg-blue-300/10 px-4 py-2 text-sm text-blue-100 whitespace-nowrap">Answered by DreamProtocol</div>
         </div>
 
-        <div class="grid lg:grid-cols-[.85fr_1.15fr] gap-5">
-          <div class="space-y-3" role="tablist" aria-label="AI front desk demo steps">
-            <button type="button" class="demo-step option-tile active" data-demo-step="0"><span class="status-dot inline-block mr-2"></span>Call answered</button>
-            <button type="button" class="demo-step option-tile" data-demo-step="1"><span class="status-dot inline-block mr-2"></span>Lead qualified</button>
-            <button type="button" class="demo-step option-tile" data-demo-step="2"><span class="status-dot inline-block mr-2"></span>Follow-up drafted</button>
-            <button type="button" class="demo-step option-tile" data-demo-step="3"><span class="status-dot inline-block mr-2"></span>CRM updated</button>
-            <button type="button" class="demo-step option-tile" data-demo-step="4"><span class="status-dot inline-block mr-2"></span>Team notified</button>
+        <div class="rounded-3xl border border-white/10 bg-white/[.035] p-4 mb-5">
+          <div class="flex flex-col md:flex-row md:items-center gap-4 justify-between">
+            <div class="flex items-center gap-3">
+              <button type="button" id="demoPlayButton" class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-white text-black font-black hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-200 transition" aria-label="Play browser voice simulation">▶</button>
+              <div>
+                <p id="demoPlayerStatus" class="font-bold">Ready to play voice simulation</p>
+                <p class="text-sm text-gray-400">No autoplay. Transcript remains available below.</p>
+              </div>
+            </div>
+            <button type="button" id="demoStopButton" class="inline-flex justify-center rounded-full border border-white/15 px-5 py-3 text-sm font-bold text-gray-100 hover:border-blue-200/60 transition" disabled>Stop</button>
           </div>
+          <div class="mt-4 h-2 rounded-full bg-white/10 overflow-hidden" aria-hidden="true">
+            <div id="demoProgress" class="h-full w-0 rounded-full bg-gradient-to-r from-blue-300 to-violet-300 transition-[width] duration-300"></div>
+          </div>
+          <div class="mt-3 flex flex-wrap gap-2 text-xs text-gray-400">
+            <span class="console-chip">AI answered</span>
+            <span class="console-chip">Intent captured</span>
+            <span class="console-chip">Follow-up drafted</span>
+            <span class="console-chip">CRM updated</span>
+            <span class="console-chip">Team alerted</span>
+            <span class="console-chip">Human review</span>
+          </div>
+        </div>
 
-          <div class="space-y-4">
-            <div class="rounded-2xl bg-white/[.04] border border-white/10 p-4">
-              <p class="text-xs uppercase tracking-widest text-blue-300 mb-2">Customer request</p>
-              <p id="demoRequest" class="text-gray-200 leading-relaxed">“Hi, our water heater is leaking and we just noticed water under the closet door. Can someone call us tonight?”</p>
-            </div>
-            <div class="rounded-2xl bg-white/[.04] border border-white/10 p-4">
-              <p class="text-xs uppercase tracking-widest text-blue-300 mb-2">AI summary</p>
-              <p id="demoSummary" class="text-gray-300 leading-relaxed">After-hours plumbing lead captured. Urgency: high. Customer has active leak, needs callback, address and phone confirmed.</p>
-            </div>
-            <div class="grid sm:grid-cols-2 gap-4">
-              <div class="rounded-2xl bg-white/[.04] border border-white/10 p-4">
-                <p class="text-xs uppercase tracking-widest text-blue-300 mb-2">CRM note</p>
-                <p id="demoCrm" class="text-gray-300 text-sm leading-relaxed">New lead record created with call summary, urgency, preferred callback, and source marked “after-hours AI front desk.”</p>
-              </div>
-              <div class="rounded-2xl bg-white/[.04] border border-white/10 p-4">
-                <p class="text-xs uppercase tracking-widest text-blue-300 mb-2">Internal alert</p>
-                <p id="demoAlert" class="text-gray-300 text-sm leading-relaxed">Notify on-call manager: “High-priority leak. AI drafted customer reply. Approval needed before dispatch promise.”</p>
-              </div>
-            </div>
-            <div class="console-action flex items-center justify-between gap-3">
-              <span id="demoApproval">Human approval required before confirming arrival time or pricing.</span>
-              <span class="text-blue-200 whitespace-nowrap">Humans in control</span>
-            </div>
-          </div>
+        <div class="space-y-3" id="demoTranscript" aria-label="Sample call transcript"></div>
+      </div>
+
+      <div class="rounded-3xl border border-white/12 bg-black/20 p-4 md:p-5">
+        <p class="text-xs uppercase tracking-widest text-blue-300 mb-4">Operational output</p>
+        <div class="space-y-3">
+          <div class="demo-output-card"><p>AI call summary</p><span id="demoSummary">After-hours plumbing lead captured. Urgency: high. Customer reports active water heater leak, water shut off, water on floor, callback requested tonight.</span></div>
+          <div class="demo-output-card"><p>CRM note</p><span id="demoCrm">New lead created from after-hours AI front desk. Source: phone. Type: emergency plumbing/water heater. Status: needs human review.</span></div>
+          <div class="demo-output-card"><p>Follow-up draft</p><span id="demoFollowUp">Thanks for calling. We captured your water heater leak request and flagged it as urgent. Our team will review the details and follow up shortly.</span></div>
+          <div class="demo-output-card"><p>Internal team alert</p><span id="demoAlert">High-priority leak request. Customer reports active leak and water on floor. Approval needed before dispatch promise or pricing.</span></div>
+          <div class="console-action flex items-start gap-3"><span class="status-dot mt-1.5 shrink-0"></span><span id="demoApproval">Human approval required before confirming arrival time, availability, or pricing.</span></div>
         </div>
       </div>
+    </div>
+
+    <div class="relative z-10 mt-8 flex flex-col sm:flex-row justify-center gap-3">
+      <a href="mailto:pooledlp@gmail.com?subject=15-Minute%20DreamProtocol%20Build%20Call" class="inline-flex justify-center bg-white text-black px-7 py-4 rounded-full font-bold hover:scale-105 transition">Book a 15-Minute Build Call</a>
+      <button type="button" onclick="openAssessment()" class="inline-flex justify-center glass px-7 py-4 rounded-full font-bold hover:scale-105 transition">See What We’d Automate</button>
     </div>
   </div>
 </section>
@@ -1022,29 +1105,212 @@ if (window.gsap && window.ScrollTrigger) {
   });
 }
 
-const demoSteps = [
-  { title: "Call answered", request: "“Hi, our water heater is leaking and we just noticed water under the closet door. Can someone call us tonight?”", summary: "After-hours plumbing lead captured. Urgency: high. Customer has active leak, needs callback, address and phone confirmed.", crm: "New lead record created with call summary, urgency, preferred callback, and source marked ‘after-hours AI front desk.’", alert: "Notify on-call manager: ‘High-priority leak. AI drafted customer reply. Approval needed before dispatch promise.’", approval: "Human approval required before confirming arrival time or pricing." },
-  { title: "Lead qualified", request: "AI asks for location, service type, urgency, access notes, and preferred callback number before ending the call.", summary: "Qualified as serviceable location with urgent need. Missing: technician availability and exact arrival window.", crm: "Lead fields updated: service category, urgency, neighborhood, preferred callback, and next best action.", alert: "Route to urgent queue with clear qualification notes so a human can decide dispatch priority.", approval: "Human reviews urgent dispatch decisions before any firm promise is made." },
-  { title: "Follow-up drafted", request: "Customer wants reassurance that the request was received and asks what to do while waiting.", summary: "AI drafts a calm SMS confirming receipt, callback expectation, and safe non-technical next steps.", crm: "Follow-up draft attached to the lead record and linked to the after-hours call transcript summary.", alert: "Team sees the proposed message and can approve, edit, or send a custom response.", approval: "Sensitive advice and time commitments stay in review until your team approves." },
-  { title: "CRM updated", request: "The customer’s details should not be trapped in voicemail or a phone note.", summary: "Contact, call reason, urgency, transcript summary, follow-up draft, and owner task are organized in the CRM.", crm: "CRM note: ‘After-hours call: leaking water heater. High urgency. Needs callback tonight. Follow-up draft pending approval.’", alert: "Create task for manager and optionally sync calendar callback window once approved.", approval: "Your CRM becomes the source of truth; humans can override every next step." },
-  { title: "Team notified", request: "The team needs a concise alert, not another raw voicemail to interpret in the morning.", summary: "AI sends an internal summary with urgency, recommended action, and what requires approval.", crm: "Record status set to ‘Needs human review’ with owner assigned and next action visible.", alert: "Internal alert: ‘High-priority after-hours lead captured. Review dispatch and approve customer follow-up.’", approval: "Human-in-the-loop state is explicit before dispatch, pricing, or sensitive replies." }
+const demoScenarios = [
+  {
+    id: "home-services",
+    label: "Home Services",
+    industry: "Home Services",
+    title: "After-hours leak",
+    situation: "A homeowner calls after hours about a leaking water heater.",
+    audioSrc: null,
+    transcript: [
+      { speaker: "Caller", text: "Hi, our water heater is leaking and we just noticed water under the closet door. Can someone call us tonight?" },
+      { speaker: "AI", text: "I’m sorry you’re dealing with that. I can capture this for the on-call team now. Are you seeing active leaking, and are you able to safely turn off water near the heater?" },
+      { speaker: "Caller", text: "Yes, it’s active. We turned the water off, but there’s still water on the floor." },
+      { speaker: "AI", text: "Got it. I’m marking this as urgent. I’ll confirm your name, phone number, and address, then send this to the on-call manager for review before anyone promises timing or pricing." },
+      { speaker: "Caller", text: "Okay, that works." },
+      { speaker: "AI", text: "Thanks. I’ve captured the request and flagged it as high priority. You’ll receive a confirmation text, and the team can review the details before calling you back." }
+    ],
+    summary: "After-hours plumbing lead captured. Urgency: high. Customer reports active water heater leak, water shut off, water on floor, callback requested tonight.",
+    crmNote: "New lead created from after-hours AI front desk. Source: phone. Type: emergency plumbing/water heater. Status: needs human review.",
+    followUpDraft: "Thanks for calling. We captured your water heater leak request and flagged it as urgent. Our team will review the details and follow up shortly.",
+    internalAlert: "High-priority leak request. Customer reports active leak and water on floor. Approval needed before dispatch promise or pricing.",
+    humanApprovalNote: "Human approval required before confirming arrival time, availability, or pricing."
+  },
+  {
+    id: "med-spa",
+    label: "Med Spa / Clinic",
+    industry: "Med Spa / Clinic",
+    title: "Appointment request",
+    situation: "A caller wants to schedule a consultation and asks about availability.",
+    audioSrc: null,
+    transcript: [
+      { speaker: "Caller", text: "Hi, I’m interested in booking a consultation. Do you have anything open this week?" },
+      { speaker: "AI", text: "I can help capture the request and check what the team should follow up on. Are you looking for a new consultation, a follow-up appointment, or a specific service?" },
+      { speaker: "Caller", text: "A new consultation." },
+      { speaker: "AI", text: "Great. I’ll collect your contact details, preferred days, and whether morning or afternoon works better. For treatment-specific or medical questions, the team will review and follow up directly." },
+      { speaker: "Caller", text: "Afternoons are better." },
+      { speaker: "AI", text: "Perfect. I’ll note that you prefer afternoons this week and send the request to the scheduling team for review." }
+    ],
+    summary: "New consultation request. Caller prefers afternoons this week. Needs scheduling follow-up. Treatment-specific questions should be handled by staff.",
+    crmNote: "New appointment request created. Type: consultation. Preference: afternoon availability this week. Status: staff review.",
+    followUpDraft: "Thanks for reaching out. We captured your consultation request and afternoon preference. Our team will follow up with available times.",
+    internalAlert: "New consultation request. Please review availability and follow up. Do not automate treatment-specific guidance.",
+    humanApprovalNote: "Human review required for clinical, pricing, eligibility, or treatment-specific questions."
+  },
+  {
+    id: "legal-intake",
+    label: "Legal Intake",
+    industry: "Legal / Professional Services",
+    title: "New consultation request",
+    situation: "A caller wants help with a new legal matter and needs intake routing.",
+    audioSrc: null,
+    transcript: [
+      { speaker: "Caller", text: "Hi, I’m looking for a consultation. I need to talk to someone about a contract issue." },
+      { speaker: "AI", text: "I can help collect the basic intake details and route your request to the right person. I’m not able to provide legal advice, but I can make sure the team receives your information." },
+      { speaker: "Caller", text: "That’s fine." },
+      { speaker: "AI", text: "Great. I’ll capture your name, contact information, the general matter type, and whether there are any urgent dates or deadlines." },
+      { speaker: "Caller", text: "There’s a deadline next Friday." },
+      { speaker: "AI", text: "Thank you. I’ll mark the request as time-sensitive and send a summary to the team for review before anyone confirms representation or advice." }
+    ],
+    summary: "New consultation request for contract issue. Caller reports deadline next Friday. Time-sensitive. Needs attorney/staff review.",
+    crmNote: "New legal intake created. Matter type: contract issue. Deadline: next Friday. Status: review required.",
+    followUpDraft: "Thanks for contacting us. We captured your consultation request and noted the upcoming deadline. Our team will review and follow up.",
+    internalAlert: "Time-sensitive consultation request. Contract issue with deadline next Friday. Human review required before advice, representation, or next steps.",
+    humanApprovalNote: "Human approval required before giving legal guidance, confirming representation, or discussing strategy."
+  },
+  {
+    id: "hospitality",
+    label: "Hospitality",
+    industry: "Hotels / Hospitality",
+    title: "Guest request",
+    situation: "A hotel guest calls during a busy front-desk period with a room request.",
+    audioSrc: null,
+    transcript: [
+      { speaker: "Caller", text: "Hi, I’m in room 214. Could we get extra towels and ask about a late checkout?" },
+      { speaker: "AI", text: "Absolutely. I can capture that request for the front desk. You need extra towels for room 214 and want to ask whether late checkout is available, correct?" },
+      { speaker: "Caller", text: "Yes, that’s right." },
+      { speaker: "AI", text: "Got it. I’ll send the towel request to the team and flag the late checkout question for staff review, since availability may depend on the schedule." }
+    ],
+    summary: "Guest in room 214 requests extra towels and asks about late checkout availability.",
+    crmNote: "Guest request logged. Room: 214. Request: extra towels. Question: late checkout availability. Status: staff review.",
+    followUpDraft: "Thanks — we’ve sent your towel request to the team and flagged your late checkout question for front desk review.",
+    internalAlert: "Room 214 requests extra towels. Late checkout availability needs staff confirmation.",
+    humanApprovalNote: "Human review required before confirming late checkout availability."
+  }
 ];
 
-function setDemoStep(index) {
-  const step = demoSteps[index];
-  if (!step) return;
-  document.querySelectorAll(".demo-step").forEach((button, idx) => button.classList.toggle("active", idx === index));
-  document.getElementById("demoTitle").textContent = step.title;
-  document.getElementById("demoRequest").textContent = step.request;
-  document.getElementById("demoSummary").textContent = step.summary;
-  document.getElementById("demoCrm").textContent = step.crm;
-  document.getElementById("demoAlert").textContent = step.alert;
-  document.getElementById("demoApproval").textContent = step.approval;
+let currentScenarioIndex = 0;
+let currentUtteranceIndex = -1;
+let demoIsSpeaking = false;
+let demoIsPaused = false;
+let demoProgressTimer = null;
+
+function getSpeechSynthesis() {
+  if (typeof window === "undefined" || !("speechSynthesis" in window)) return null;
+  return window.speechSynthesis;
+}
+
+function stopVoiceSimulation() {
+  const synth = getSpeechSynthesis();
+  if (synth) synth.cancel();
+  demoIsSpeaking = false;
+  demoIsPaused = false;
+  currentUtteranceIndex = -1;
+  clearInterval(demoProgressTimer);
+  demoProgressTimer = null;
+  document.getElementById("demoPlayButton").textContent = "▶";
+  document.getElementById("demoPlayButton").setAttribute("aria-label", "Play browser voice simulation");
+  document.getElementById("demoStopButton").disabled = true;
+  document.getElementById("demoPlayerStatus").textContent = "Ready to play voice simulation";
+  document.getElementById("demoProgress").style.width = "0%";
+  document.querySelectorAll(".transcript-line").forEach((line) => line.classList.remove("active"));
+}
+
+function renderTranscript(scenario) {
+  const transcript = document.getElementById("demoTranscript");
+  transcript.innerHTML = scenario.transcript.map((line, index) => `
+    <div class="transcript-line" data-transcript-line="${index}">
+      <p class="text-xs uppercase tracking-widest ${line.speaker === "AI" ? "text-blue-300" : "text-violet-200"}">${line.speaker}</p>
+      <p class="mt-2 text-gray-100 leading-relaxed">“${line.text}”</p>
+    </div>
+  `).join("");
+}
+
+function setScenario(id) {
+  const index = demoScenarios.findIndex((scenario) => scenario.id === id);
+  const scenario = demoScenarios[index];
+  if (!scenario) return;
+  stopVoiceSimulation();
+  currentScenarioIndex = index;
+  document.querySelectorAll(".demo-step").forEach((button) => {
+    const isActive = button.dataset.scenario === scenario.id;
+    button.classList.toggle("active", isActive);
+    button.setAttribute("aria-selected", isActive ? "true" : "false");
+  });
+  const activeTab = document.querySelector(`[data-scenario="${scenario.id}"]`);
+  if (activeTab) document.getElementById("demoScenarioPanel").setAttribute("aria-labelledby", activeTab.id);
+  document.getElementById("demoIndustry").textContent = scenario.industry;
+  document.getElementById("demoTitle").textContent = scenario.title;
+  document.getElementById("demoSituation").textContent = scenario.situation;
+  document.getElementById("demoSummary").textContent = scenario.summary;
+  document.getElementById("demoCrm").textContent = scenario.crmNote;
+  document.getElementById("demoFollowUp").textContent = scenario.followUpDraft;
+  document.getElementById("demoAlert").textContent = scenario.internalAlert;
+  document.getElementById("demoApproval").textContent = scenario.humanApprovalNote;
+  renderTranscript(scenario);
+}
+
+function speakLine(scenario, index) {
+  const synth = getSpeechSynthesis();
+  if (!synth || !demoIsSpeaking) return;
+  if (index >= scenario.transcript.length) {
+    stopVoiceSimulation();
+    document.getElementById("demoPlayerStatus").textContent = "Voice simulation complete";
+    document.getElementById("demoProgress").style.width = "100%";
+    return;
+  }
+  currentUtteranceIndex = index;
+  document.querySelectorAll(".transcript-line").forEach((line, lineIndex) => line.classList.toggle("active", lineIndex === index));
+  document.getElementById("demoProgress").style.width = `${Math.round((index / scenario.transcript.length) * 100)}%`;
+  const line = scenario.transcript[index];
+  document.getElementById("demoPlayerStatus").textContent = `Playing ${line.speaker} line ${index + 1} of ${scenario.transcript.length}`;
+  const utterance = new SpeechSynthesisUtterance(`${line.speaker}: ${line.text}`);
+  utterance.rate = line.speaker === "AI" ? 0.95 : 1;
+  utterance.pitch = line.speaker === "AI" ? 0.95 : 1.05;
+  utterance.onend = () => speakLine(scenario, index + 1);
+  utterance.onerror = () => stopVoiceSimulation();
+  synth.speak(utterance);
+}
+
+function playVoiceSimulation() {
+  const synth = getSpeechSynthesis();
+  if (!synth) {
+    document.getElementById("demoPlayerStatus").textContent = "Audio sample coming soon — transcript and workflow shown below.";
+    return;
+  }
+  if (demoIsSpeaking && !demoIsPaused) {
+    synth.pause();
+    demoIsPaused = true;
+    document.getElementById("demoPlayButton").textContent = "▶";
+    document.getElementById("demoPlayButton").setAttribute("aria-label", "Resume browser voice simulation");
+    document.getElementById("demoPlayerStatus").textContent = "Voice simulation paused";
+    return;
+  }
+  if (demoIsSpeaking && demoIsPaused) {
+    synth.resume();
+    demoIsPaused = false;
+    document.getElementById("demoPlayButton").textContent = "Ⅱ";
+    document.getElementById("demoPlayButton").setAttribute("aria-label", "Pause browser voice simulation");
+    document.getElementById("demoPlayerStatus").textContent = `Resuming line ${currentUtteranceIndex + 1}`;
+    return;
+  }
+  const scenario = demoScenarios[currentScenarioIndex];
+  demoIsSpeaking = true;
+  demoIsPaused = false;
+  document.getElementById("demoPlayButton").textContent = "Ⅱ";
+  document.getElementById("demoPlayButton").setAttribute("aria-label", "Pause browser voice simulation");
+  document.getElementById("demoStopButton").disabled = false;
+  speakLine(scenario, 0);
 }
 
 document.querySelectorAll(".demo-step").forEach((button) => {
-  button.addEventListener("click", () => setDemoStep(Number(button.dataset.demoStep || 0)));
+  button.addEventListener("click", () => setScenario(button.dataset.scenario));
 });
+
+document.getElementById("demoPlayButton").addEventListener("click", playVoiceSimulation);
+document.getElementById("demoStopButton").addEventListener("click", stopVoiceSimulation);
+setScenario("home-services");
 
 function formatCurrency(value) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(value);
