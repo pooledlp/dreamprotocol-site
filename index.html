@@ -4,16 +4,16 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>AI Front Desk &amp; Workflow Automation for Bay Area SMBs | DreamProtocol</title>
-<meta name="description" content="DreamProtocol installs AI front-desk and workflow automation systems for Bay Area small businesses. Answer calls, qualify leads, send follow-ups, update CRM, and reduce admin work in 2–4 weeks." />
+<meta name="description" content="DreamProtocol installs AI front-desk systems for Bay Area businesses. Answer calls, qualify leads, send follow-ups, book appointments, and update CRM workflows automatically." />
 <link rel="canonical" href="https://dreamprotocol.ai/" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://dreamprotocol.ai/" />
-<meta property="og:title" content="AI Front Desk for Bay Area Small Businesses" />
-<meta property="og:description" content="Answer calls, qualify leads, send follow-ups, update CRM, and reduce admin work with DreamProtocol AI automation." />
+<meta property="og:title" content="AI Front Desk &amp; Workflow Automation for Bay Area SMBs | DreamProtocol" />
+<meta property="og:description" content="DreamProtocol installs AI front-desk systems for Bay Area businesses. Answer calls, qualify leads, send follow-ups, book appointments, and update CRM workflows automatically." />
 <meta property="og:site_name" content="DreamProtocol" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="AI Front Desk for Bay Area Small Businesses" />
-<meta name="twitter:description" content="Answer calls, qualify leads, send follow-ups, update CRM, and reduce admin work with DreamProtocol AI automation." />
+<meta name="twitter:title" content="AI Front Desk &amp; Workflow Automation for Bay Area SMBs | DreamProtocol" />
+<meta name="twitter:description" content="DreamProtocol installs AI front-desk systems for Bay Area businesses. Answer calls, qualify leads, send follow-ups, book appointments, and update CRM workflows automatically." />
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 <link rel="alternate icon" href="/favicon.svg" />
 
@@ -391,6 +391,32 @@ body::before {
   color: #dbe7ff;
 }
 
+.demo-step.active {
+  border-color: rgba(143,176,255,.75);
+  background: rgba(143,176,255,.14);
+  box-shadow: 0 0 34px rgba(143,176,255,.16);
+}
+
+.demo-step.active .status-dot {
+  background: #b9caff;
+  box-shadow: 0 0 28px #93b2ff;
+}
+
+.roi-input {
+  width: 100%;
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 16px;
+  background: rgba(255,255,255,.055);
+  padding: .85rem 1rem;
+  color: white;
+  outline: none;
+}
+
+.roi-input:focus {
+  border-color: rgba(143,176,255,.8);
+  box-shadow: 0 0 0 3px rgba(143,176,255,.14);
+}
+
 .assessment-step {
   display: none;
 }
@@ -528,7 +554,7 @@ body::before {
       </h1>
 
       <p id="heroSub" class="mt-8 text-lg md:text-xl text-gray-300 max-w-2xl leading-relaxed opacity-0">
-        DreamProtocol installs AI front-desk systems for Bay Area businesses. Answer calls, qualify leads, send follow-ups, book appointments, and update your CRM automatically.
+        DreamProtocol gives Bay Area local businesses a 24/7 AI front desk that answers calls, qualifies leads, sends follow-ups, books appointments, and updates your systems before opportunities go cold.
       </p>
 
       <ul class="mt-6 space-y-2 text-gray-200 text-sm md:text-base">
@@ -539,13 +565,17 @@ body::before {
       </ul>
 
       <div id="heroBtns" class="mt-10 flex flex-col sm:flex-row gap-3 opacity-0">
-        <a href="#demo" aria-label="Hear the DreamProtocol AI front desk demo" class="inline-flex justify-center bg-white text-black px-8 py-4 rounded-full font-bold hover:scale-105 transition">
-          Hear the AI Demo
-        </a>
-        <button type="button" onclick="openAssessment()" aria-label="Book a 15-minute build call with DreamProtocol" class="inline-flex justify-center glass px-8 py-4 rounded-full font-bold hover:scale-105 transition">
+        <a href="mailto:pooledlp@gmail.com?subject=15-Minute%20DreamProtocol%20Build%20Call" aria-label="Book a 15-minute build call with DreamProtocol" class="inline-flex justify-center bg-white text-black px-8 py-4 rounded-full font-bold hover:scale-105 transition">
           Book a 15-Minute Build Call
+        </a>
+        <button type="button" onclick="openAssessment()" aria-label="See what DreamProtocol would automate for your business" class="inline-flex justify-center glass px-8 py-4 rounded-full font-bold hover:scale-105 transition">
+          See What We’d Automate
         </button>
+        <a href="#demo" aria-label="View the DreamProtocol visual AI front desk demo" class="inline-flex justify-center glass px-8 py-4 rounded-full font-bold hover:scale-105 transition">
+          View AI Demo
+        </a>
       </div>
+      <p class="mt-4 text-sm text-gray-400">Built for home services, clinics, med spas, hotels, legal offices, and professional services.</p>
     </div>
 
     <div class="relative flex items-center justify-center min-h-[430px] lg:min-h-[560px] scale-95 lg:scale-100">
@@ -592,34 +622,61 @@ body::before {
 
 <section id="demo" class="py-16 px-6">
   <div class="max-w-7xl mx-auto glass rounded-3xl p-8 md:p-12">
-    <div class="grid lg:grid-cols-[1fr_1.15fr] gap-10 items-center">
+    <div class="grid lg:grid-cols-[.9fr_1.2fr] gap-10 items-start">
       <div>
-        <p class="text-blue-300 uppercase tracking-widest text-sm mb-4">Demo</p>
+        <p class="text-blue-300 uppercase tracking-widest text-sm mb-4">Interactive visual demo</p>
         <h2 class="text-3xl md:text-5xl font-black mb-5">See the AI Front Desk in Action</h2>
         <p class="text-gray-300 text-lg leading-relaxed">
-          A customer calls after hours. The AI answers, qualifies the request, drafts the follow-up, updates the CRM, and alerts your team.
+          A customer calls after hours. The AI answers, captures the issue, qualifies urgency, drafts the follow-up, updates the CRM, and alerts the team — without pretending this is fake audio.
         </p>
-        <button type="button" onclick="openAssessment()" aria-label="Request a DreamProtocol demo call" class="mt-8 inline-flex bg-white text-black px-8 py-4 rounded-full font-bold hover:scale-105 transition">
-          Request Demo Call
-        </button>
+        <div class="mt-8 flex flex-col sm:flex-row gap-3">
+          <a href="mailto:pooledlp@gmail.com?subject=15-Minute%20DreamProtocol%20Build%20Call" class="inline-flex justify-center bg-white text-black px-7 py-4 rounded-full font-bold hover:scale-105 transition">Book a 15-Minute Build Call</a>
+          <button type="button" onclick="openAssessment()" class="inline-flex justify-center glass px-7 py-4 rounded-full font-bold hover:scale-105 transition">See What We’d Automate</button>
+        </div>
       </div>
 
-      <!-- TODO: Replace this placeholder with real call audio, waveform, or live demo number. -->
       <div class="rounded-3xl border border-white/15 bg-black/25 p-5 md:p-6 overflow-hidden">
-        <div class="flex items-center justify-between mb-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
           <div>
-            <p class="text-sm text-gray-400">Placeholder demo UI</p>
-            <p class="text-xl font-bold">After-hours lead captured</p>
+            <p class="text-sm text-gray-400">After-hours workflow simulation</p>
+            <p class="text-xl font-bold" id="demoTitle">Call answered</p>
           </div>
-          <span class="console-chip">No fake audio</span>
+          <span class="console-chip">No fake audio — visual simulation</span>
         </div>
-        <div class="call-wave mb-5" aria-hidden="true"></div>
-        <div class="grid sm:grid-cols-5 gap-3">
-          <div class="console-action">1. Call answered</div>
-          <div class="console-action">2. Lead qualified</div>
-          <div class="console-action">3. Follow-up sent</div>
-          <div class="console-action">4. CRM updated</div>
-          <div class="console-action">5. Team notified</div>
+
+        <div class="grid lg:grid-cols-[.85fr_1.15fr] gap-5">
+          <div class="space-y-3" role="tablist" aria-label="AI front desk demo steps">
+            <button type="button" class="demo-step option-tile active" data-demo-step="0"><span class="status-dot inline-block mr-2"></span>Call answered</button>
+            <button type="button" class="demo-step option-tile" data-demo-step="1"><span class="status-dot inline-block mr-2"></span>Lead qualified</button>
+            <button type="button" class="demo-step option-tile" data-demo-step="2"><span class="status-dot inline-block mr-2"></span>Follow-up drafted</button>
+            <button type="button" class="demo-step option-tile" data-demo-step="3"><span class="status-dot inline-block mr-2"></span>CRM updated</button>
+            <button type="button" class="demo-step option-tile" data-demo-step="4"><span class="status-dot inline-block mr-2"></span>Team notified</button>
+          </div>
+
+          <div class="space-y-4">
+            <div class="rounded-2xl bg-white/[.04] border border-white/10 p-4">
+              <p class="text-xs uppercase tracking-widest text-blue-300 mb-2">Customer request</p>
+              <p id="demoRequest" class="text-gray-200 leading-relaxed">“Hi, our water heater is leaking and we just noticed water under the closet door. Can someone call us tonight?”</p>
+            </div>
+            <div class="rounded-2xl bg-white/[.04] border border-white/10 p-4">
+              <p class="text-xs uppercase tracking-widest text-blue-300 mb-2">AI summary</p>
+              <p id="demoSummary" class="text-gray-300 leading-relaxed">After-hours plumbing lead captured. Urgency: high. Customer has active leak, needs callback, address and phone confirmed.</p>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div class="rounded-2xl bg-white/[.04] border border-white/10 p-4">
+                <p class="text-xs uppercase tracking-widest text-blue-300 mb-2">CRM note</p>
+                <p id="demoCrm" class="text-gray-300 text-sm leading-relaxed">New lead record created with call summary, urgency, preferred callback, and source marked “after-hours AI front desk.”</p>
+              </div>
+              <div class="rounded-2xl bg-white/[.04] border border-white/10 p-4">
+                <p class="text-xs uppercase tracking-widest text-blue-300 mb-2">Internal alert</p>
+                <p id="demoAlert" class="text-gray-300 text-sm leading-relaxed">Notify on-call manager: “High-priority leak. AI drafted customer reply. Approval needed before dispatch promise.”</p>
+              </div>
+            </div>
+            <div class="console-action flex items-center justify-between gap-3">
+              <span id="demoApproval">Human approval required before confirming arrival time or pricing.</span>
+              <span class="text-blue-200 whitespace-nowrap">Humans in control</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -641,6 +698,41 @@ body::before {
   </div>
 </section>
 
+<section id="missed-call-recovery" class="py-20 px-6">
+  <div class="max-w-7xl mx-auto">
+    <div class="grid lg:grid-cols-[.9fr_1.1fr] gap-8 items-start">
+      <div class="glass rounded-3xl p-8 md:p-10">
+        <p class="text-blue-300 uppercase tracking-widest text-sm mb-4">Missed call recovery</p>
+        <h2 class="text-3xl md:text-5xl font-black mb-5">Calculate What Missed Calls May Be Costing You</h2>
+        <p class="text-gray-300 text-lg leading-relaxed">Most businesses do not have a lead problem. They have a response-time problem. Use this simple calculator to estimate monthly and annual revenue at risk.</p>
+        <p class="text-gray-500 text-sm mt-5">Formula: monthly calls × missed/delayed percent × close rate × average job value.</p>
+      </div>
+      <div class="glass rounded-3xl p-6 md:p-8">
+        <div class="grid sm:grid-cols-2 gap-4">
+          <label class="block text-sm text-gray-300">Monthly inbound calls
+            <input id="roiCalls" class="roi-input mt-2" type="number" min="0" value="200" inputmode="numeric">
+          </label>
+          <label class="block text-sm text-gray-300">Missed or delayed calls (%)
+            <input id="roiMissed" class="roi-input mt-2" type="number" min="0" max="100" value="20" inputmode="decimal">
+          </label>
+          <label class="block text-sm text-gray-300">Average job / appointment value ($)
+            <input id="roiValue" class="roi-input mt-2" type="number" min="0" value="500" inputmode="decimal">
+          </label>
+          <label class="block text-sm text-gray-300">Lead-to-customer close rate (%)
+            <input id="roiClose" class="roi-input mt-2" type="number" min="0" max="100" value="30" inputmode="decimal">
+          </label>
+        </div>
+        <div class="grid md:grid-cols-3 gap-4 mt-6">
+          <div class="rounded-2xl bg-white/[.04] border border-white/10 p-4"><p class="text-xs uppercase tracking-widest text-gray-400">Opportunities missed / month</p><p id="roiMissedLeads" class="text-3xl font-black mt-2">40</p></div>
+          <div class="rounded-2xl bg-white/[.04] border border-white/10 p-4"><p class="text-xs uppercase tracking-widest text-gray-400">Monthly revenue at risk</p><p id="roiMonthly" class="text-3xl font-black mt-2">$6,000</p></div>
+          <div class="rounded-2xl bg-white/[.04] border border-white/10 p-4"><p class="text-xs uppercase tracking-widest text-gray-400">Annual revenue at risk</p><p id="roiAnnual" class="text-3xl font-black mt-2">$72,000</p></div>
+        </div>
+        <p class="text-gray-500 text-sm mt-5">Estimate only. Actual results depend on call quality, close rate, workflow design, and implementation.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section id="local" class="py-16 px-6">
   <div class="max-w-7xl mx-auto glass rounded-3xl p-8 md:p-12">
     <h2 class="text-3xl md:text-5xl font-black mb-6">Built for Bay Area businesses that rely on fast response times.</h2>
@@ -652,13 +744,13 @@ body::before {
 
 <section id="industries" class="py-20 px-6 bg-white/[.025]">
   <div class="max-w-7xl mx-auto">
-    <p class="text-blue-300 uppercase tracking-widest text-sm mb-4">Industries</p>
-    <h2 class="text-4xl md:text-6xl font-black max-w-5xl mb-10">Practical front-desk workflows for local operators.</h2>
+    <p class="text-blue-300 uppercase tracking-widest text-sm mb-4">Bay Area SMBs</p>
+    <h2 class="text-4xl md:text-6xl font-black max-w-5xl mb-10">Vertical-specific AI front desk workflows for local operators.</h2>
     <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="glass rounded-2xl p-5"><h3 class="text-xl font-bold">Home Services</h3><p class="text-gray-400 mt-2 text-sm">Capture urgent calls, route dispatch, and send ETA updates automatically.</p></div>
-      <div class="glass rounded-2xl p-5"><h3 class="text-xl font-bold">Med Spas &amp; Clinics</h3><p class="text-gray-400 mt-2 text-sm">Handle scheduling, intake follow-up, and no-show reduction workflows.</p></div>
-      <div class="glass rounded-2xl p-5"><h3 class="text-xl font-bold">Legal &amp; Professional Services</h3><p class="text-gray-400 mt-2 text-sm">Qualify leads, summarize calls, and trigger consultation workflows.</p></div>
-      <div class="glass rounded-2xl p-5"><h3 class="text-xl font-bold">Hotels &amp; Hospitality</h3><p class="text-gray-400 mt-2 text-sm">Answer guest questions, route requests, and reduce front-desk overload.</p></div>
+      <div class="glass rounded-2xl p-5"><h3 class="text-xl font-bold">Home Services</h3><p class="text-gray-400 mt-2 text-sm">Capture urgent calls, qualify service requests, route dispatch details, and send ETA updates.</p><p class="text-blue-200 text-sm mt-4">Best first workflow: after-hours emergency intake.</p><p class="text-gray-500 text-xs mt-2">Automates call summary, dispatch notes, SMS draft, and escalation to the on-call human.</p></div>
+      <div class="glass rounded-2xl p-5"><h3 class="text-xl font-bold">Med Spas &amp; Clinics</h3><p class="text-gray-400 mt-2 text-sm">Handle scheduling, intake follow-up, reminders, and no-show reduction workflows with human review where needed.</p><p class="text-blue-200 text-sm mt-4">Best first workflow: appointment request and reminder flow.</p><p class="text-gray-500 text-xs mt-2">Automates reminders and intake follow-up while escalating sensitive or clinical questions.</p></div>
+      <div class="glass rounded-2xl p-5"><h3 class="text-xl font-bold">Legal &amp; Professional Services</h3><p class="text-gray-400 mt-2 text-sm">Qualify new inquiries, summarize calls, route consultation requests, and keep intake moving.</p><p class="text-blue-200 text-sm mt-4">Best first workflow: new consultation intake.</p><p class="text-gray-500 text-xs mt-2">Automates summaries, conflict-safe routing notes, and follow-up drafts for staff approval.</p></div>
+      <div class="glass rounded-2xl p-5"><h3 class="text-xl font-bold">Hotels &amp; Hospitality</h3><p class="text-gray-400 mt-2 text-sm">Answer guest questions, route requests, and reduce front-desk overload during busy periods.</p><p class="text-blue-200 text-sm mt-4">Best first workflow: guest request triage.</p><p class="text-gray-500 text-xs mt-2">Automates request capture, team notifications, and escalation when a guest needs human help.</p></div>
     </div>
   </div>
 </section>
@@ -692,6 +784,30 @@ body::before {
       <div class="grid grid-cols-5 text-xs text-gray-500 mt-3">
         <span>Intake</span><span>Understand</span><span>Act</span><span>Approve</span><span class="text-right">Resolve</span>
       </div>
+    </div>
+  </div>
+</section>
+
+<section id="integrations" class="py-20 px-6">
+  <div class="max-w-7xl mx-auto glass rounded-3xl p-8 md:p-12">
+    <p class="text-blue-300 uppercase tracking-widest text-sm mb-4">Workflow systems</p>
+    <h2 class="text-4xl md:text-6xl font-black mb-6">Connects to the systems you already use</h2>
+    <p class="text-gray-300 text-lg leading-relaxed max-w-5xl">DreamProtocol is not just a chatbot. It connects calls, texts, email, CRM records, calendars, approvals, and team notifications into one working flow.</p>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-3 mt-8 text-sm text-gray-200">
+      <div class="console-action">CRM</div><div class="console-action">Calendar</div><div class="console-action">Email</div><div class="console-action">Phone system</div><div class="console-action">Forms</div>
+      <div class="console-action">Help desk</div><div class="console-action">QuickBooks / billing</div><div class="console-action">Google Workspace</div><div class="console-action">Microsoft 365</div><div class="console-action">Custom workflows</div>
+    </div>
+  </div>
+</section>
+
+<section id="proof" class="py-20 px-6 bg-white/[.025]">
+  <div class="max-w-7xl mx-auto">
+    <p class="text-blue-300 uppercase tracking-widest text-sm mb-4">Operational proof points</p>
+    <h2 class="text-4xl md:text-6xl font-black mb-10">Built for real SMB operations</h2>
+    <div class="grid md:grid-cols-3 gap-5">
+      <div class="glass rounded-3xl p-7"><h3 class="text-2xl font-bold">After-hours lead capture</h3><p class="text-gray-400 mt-3">Use this workflow when calls come in after hours and need to be captured, summarized, and routed before the next business day.</p></div>
+      <div class="glass rounded-3xl p-7"><h3 class="text-2xl font-bold">Instant follow-up workflow</h3><p class="text-gray-400 mt-3">Use this workflow to draft or send fast responses after calls, forms, or texts so qualified opportunities do not sit untouched.</p></div>
+      <div class="glass rounded-3xl p-7"><h3 class="text-2xl font-bold">Human-in-the-loop approvals</h3><p class="text-gray-400 mt-3">Use this workflow when messages, appointment promises, pricing notes, or sensitive requests need a human review before action.</p></div>
     </div>
   </div>
 </section>
@@ -780,11 +896,11 @@ body::before {
 
         <section class="assessment-step active" data-step="1">
           <h4 class="text-xl font-bold mb-3">Let’s map your first workflow</h4>
-          <p class="text-gray-300 text-sm mb-4">Answer a few quick questions and we’ll map the first workflow DreamProtocol could automate for your business.</p>
+          <p class="text-gray-300 text-sm mb-4">Answer a few quick questions and we’ll turn your notes into practical next steps for an AI front desk or CRM follow-up automation pilot.</p>
           <div class="space-y-4">
-            <input name="name" required placeholder="Your name" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300">
-            <input name="email" type="email" required placeholder="Work email" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300">
-            <input name="company" placeholder="Company name" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300">
+            <label class="block text-sm text-gray-300">Your name<input name="name" required placeholder="Your name" class="mt-2 w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300"></label>
+            <label class="block text-sm text-gray-300">Work email<input name="email" type="email" required placeholder="you@company.com" class="mt-2 w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300"></label>
+            <label class="block text-sm text-gray-300">Company name<input name="company" placeholder="Company name" class="mt-2 w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300"></label>
           </div>
         </section>
 
@@ -831,21 +947,21 @@ body::before {
         </section>
 
         <section class="assessment-step" data-step="6">
-          <h4 class="text-xl font-bold mb-3">Final details</h4>
+          <h4 class="text-xl font-bold mb-3">Final details — we’ll use this to map your first automation</h4>
           <div class="space-y-4">
-            <textarea name="goals" rows="3" required placeholder="What should the AI front desk improve first?" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300"></textarea>
-            <textarea name="bottleneck" rows="3" placeholder="Current call, follow-up, or admin bottleneck" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300"></textarea>
-            <input name="timeline" placeholder="Preferred timeline (e.g., ASAP, 30 days)" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300">
+            <label class="block text-sm text-gray-300">What should the AI front desk improve first?<textarea name="goals" rows="3" required placeholder="Example: capture after-hours calls and create CRM follow-up tasks" class="mt-2 w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300"></textarea></label>
+            <label class="block text-sm text-gray-300">Current call, follow-up, or admin bottleneck<textarea name="bottleneck" rows="3" placeholder="Where does the process slow down today?" class="mt-2 w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300"></textarea></label>
+            <label class="block text-sm text-gray-300">Preferred timeline<input name="timeline" placeholder="Preferred timeline (e.g., ASAP, 30 days)" class="mt-2 w-full bg-white/5 border border-white/15 rounded-xl px-4 py-3 outline-none focus:border-blue-300"></label>
           </div>
         </section>
 
         <div class="grid grid-cols-2 gap-3">
           <button id="assessmentBackBtn" type="button" class="glass py-3 rounded-xl font-semibold text-gray-200 hover:text-white transition">Back</button>
-          <button id="assessmentNextBtn" type="button" class="bg-white text-black py-3 rounded-xl font-bold hover:scale-[1.01] transition">Next</button>
+          <button id="assessmentNextBtn" type="button" class="bg-white text-black py-3 rounded-xl font-bold hover:scale-[1.01] transition">Continue</button>
         </div>
 
         <button id="assessmentSubmitBtn" type="submit" class="w-full bg-white text-black py-3 rounded-xl font-bold hover:scale-[1.01] transition hidden">
-          Send Workflow Notes
+          Send My Workflow Notes
         </button>
         <p id="assessmentStatus" class="text-sm text-center text-gray-300 hidden"></p>
       </form>
@@ -863,7 +979,7 @@ body::before {
   </div>
 </footer>
 
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","name":"DreamProtocol","url":"https://dreamprotocol.ai"},{"@type":"ProfessionalService","name":"DreamProtocol","url":"https://dreamprotocol.ai","areaServed":["Bay Area","Marin County","Sonoma County","San Francisco","Oakland","San Jose","Northern California"],"description":"AI front-desk and workflow automation implementation for Bay Area small businesses."},{"@type":"WebSite","name":"DreamProtocol","url":"https://dreamprotocol.ai/"},{"@type":"Service","name":"AI Front Desk","provider":{"@type":"Organization","name":"DreamProtocol"},"areaServed":["Bay Area","Northern California"],"serviceType":["AI Front Desk","AI Receptionist","AI Workflow Automation","SMB AI Automation","CRM Follow-Up Automation"],"description":"Answer calls, qualify leads, send follow-ups, book appointments, update CRM records, and reduce admin work."},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What does DreamProtocol do?","acceptedAnswer":{"@type":"Answer","text":"DreamProtocol builds AI front-desk and workflow automation systems for small businesses. We help answer calls, qualify leads, send follow-ups, update CRMs, book appointments, and reduce repetitive admin work."}},{"@type":"Question","name":"Is this just a chatbot?","acceptedAnswer":{"@type":"Answer","text":"No. DreamProtocol connects AI to real business workflows: calls, texts, email, CRM records, calendars, approvals, and team notifications."}},{"@type":"Question","name":"Who is this for?","acceptedAnswer":{"@type":"Answer","text":"Local businesses that depend on fast response times: home services, med spas, clinics, hotels, legal offices, professional services, and SMB teams."}},{"@type":"Question","name":"Can humans stay in control?","acceptedAnswer":{"@type":"Answer","text":"Yes. We can build approval steps so your team reviews important messages, updates, or actions before they are sent."}},{"@type":"Question","name":"How long does a pilot take?","acceptedAnswer":{"@type":"Answer","text":"Most starter pilots are designed to launch in 2–4 weeks depending on integrations, call flows, and approval requirements."}},{"@type":"Question","name":"What tools can you connect with?","acceptedAnswer":{"@type":"Answer","text":"Common systems include CRM platforms, calendars, email, Microsoft 365, Google Workspace, QuickBooks, help desk tools, phone systems, and custom workflows."}},{"@type":"Question","name":"Do you only work in the Bay Area?","acceptedAnswer":{"@type":"Answer","text":"DreamProtocol is Bay Area-based and focuses on Bay Area and Northern California SMBs, but remote implementation is possible for the right business."}}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","name":"DreamProtocol","url":"https://dreamprotocol.ai"},{"@type":"ProfessionalService","name":"DreamProtocol","url":"https://dreamprotocol.ai","areaServed":["Bay Area","Marin County","Sonoma County","San Francisco","Oakland","San Jose","Northern California"],"description":"AI front desk, missed call recovery, CRM follow-up automation, and workflow automation implementation for Bay Area SMBs."},{"@type":"WebSite","name":"DreamProtocol","url":"https://dreamprotocol.ai/"},{"@type":"Service","name":"AI Front Desk","provider":{"@type":"Organization","name":"DreamProtocol"},"areaServed":["Bay Area","Northern California"],"serviceType":["AI Front Desk","AI Receptionist","AI Workflow Automation","SMB AI Automation","CRM Follow-Up Automation"],"description":"Answer calls, qualify leads, send follow-ups, book appointments, update CRM records, and reduce admin work."},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What does DreamProtocol do?","acceptedAnswer":{"@type":"Answer","text":"DreamProtocol builds AI front-desk and workflow automation systems for small businesses. We help answer calls, qualify leads, send follow-ups, update CRMs, book appointments, and reduce repetitive admin work."}},{"@type":"Question","name":"Is this just a chatbot?","acceptedAnswer":{"@type":"Answer","text":"No. DreamProtocol connects AI to real business workflows: calls, texts, email, CRM records, calendars, approvals, and team notifications."}},{"@type":"Question","name":"Who is this for?","acceptedAnswer":{"@type":"Answer","text":"Local businesses that depend on fast response times: home services, med spas, clinics, hotels, legal offices, professional services, and SMB teams."}},{"@type":"Question","name":"Can humans stay in control?","acceptedAnswer":{"@type":"Answer","text":"Yes. We can build approval steps so your team reviews important messages, updates, or actions before they are sent."}},{"@type":"Question","name":"How long does a pilot take?","acceptedAnswer":{"@type":"Answer","text":"Most starter pilots are designed to launch in 2–4 weeks depending on integrations, call flows, and approval requirements."}},{"@type":"Question","name":"What tools can you connect with?","acceptedAnswer":{"@type":"Answer","text":"Common systems include CRM platforms, calendars, email, Microsoft 365, Google Workspace, QuickBooks, help desk tools, phone systems, and custom workflows."}},{"@type":"Question","name":"Do you only work in the Bay Area?","acceptedAnswer":{"@type":"Answer","text":"DreamProtocol is Bay Area-based and focuses on Bay Area and Northern California SMBs, but remote implementation is possible for the right business."}}]}]}</script>
 
 <script>
 if (window.gsap && window.ScrollTrigger) {
@@ -906,6 +1022,52 @@ if (window.gsap && window.ScrollTrigger) {
   });
 }
 
+const demoSteps = [
+  { title: "Call answered", request: "“Hi, our water heater is leaking and we just noticed water under the closet door. Can someone call us tonight?”", summary: "After-hours plumbing lead captured. Urgency: high. Customer has active leak, needs callback, address and phone confirmed.", crm: "New lead record created with call summary, urgency, preferred callback, and source marked ‘after-hours AI front desk.’", alert: "Notify on-call manager: ‘High-priority leak. AI drafted customer reply. Approval needed before dispatch promise.’", approval: "Human approval required before confirming arrival time or pricing." },
+  { title: "Lead qualified", request: "AI asks for location, service type, urgency, access notes, and preferred callback number before ending the call.", summary: "Qualified as serviceable location with urgent need. Missing: technician availability and exact arrival window.", crm: "Lead fields updated: service category, urgency, neighborhood, preferred callback, and next best action.", alert: "Route to urgent queue with clear qualification notes so a human can decide dispatch priority.", approval: "Human reviews urgent dispatch decisions before any firm promise is made." },
+  { title: "Follow-up drafted", request: "Customer wants reassurance that the request was received and asks what to do while waiting.", summary: "AI drafts a calm SMS confirming receipt, callback expectation, and safe non-technical next steps.", crm: "Follow-up draft attached to the lead record and linked to the after-hours call transcript summary.", alert: "Team sees the proposed message and can approve, edit, or send a custom response.", approval: "Sensitive advice and time commitments stay in review until your team approves." },
+  { title: "CRM updated", request: "The customer’s details should not be trapped in voicemail or a phone note.", summary: "Contact, call reason, urgency, transcript summary, follow-up draft, and owner task are organized in the CRM.", crm: "CRM note: ‘After-hours call: leaking water heater. High urgency. Needs callback tonight. Follow-up draft pending approval.’", alert: "Create task for manager and optionally sync calendar callback window once approved.", approval: "Your CRM becomes the source of truth; humans can override every next step." },
+  { title: "Team notified", request: "The team needs a concise alert, not another raw voicemail to interpret in the morning.", summary: "AI sends an internal summary with urgency, recommended action, and what requires approval.", crm: "Record status set to ‘Needs human review’ with owner assigned and next action visible.", alert: "Internal alert: ‘High-priority after-hours lead captured. Review dispatch and approve customer follow-up.’", approval: "Human-in-the-loop state is explicit before dispatch, pricing, or sensitive replies." }
+];
+
+function setDemoStep(index) {
+  const step = demoSteps[index];
+  if (!step) return;
+  document.querySelectorAll(".demo-step").forEach((button, idx) => button.classList.toggle("active", idx === index));
+  document.getElementById("demoTitle").textContent = step.title;
+  document.getElementById("demoRequest").textContent = step.request;
+  document.getElementById("demoSummary").textContent = step.summary;
+  document.getElementById("demoCrm").textContent = step.crm;
+  document.getElementById("demoAlert").textContent = step.alert;
+  document.getElementById("demoApproval").textContent = step.approval;
+}
+
+document.querySelectorAll(".demo-step").forEach((button) => {
+  button.addEventListener("click", () => setDemoStep(Number(button.dataset.demoStep || 0)));
+});
+
+function formatCurrency(value) {
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(value);
+}
+
+function updateRoiCalculator() {
+  const calls = Number(document.getElementById("roiCalls")?.value || 0);
+  const missedPercent = Number(document.getElementById("roiMissed")?.value || 0) / 100;
+  const averageValue = Number(document.getElementById("roiValue")?.value || 0);
+  const closeRate = Number(document.getElementById("roiClose")?.value || 0) / 100;
+  const missedLeads = calls * missedPercent;
+  const monthly = missedLeads * closeRate * averageValue;
+  document.getElementById("roiMissedLeads").textContent = new Intl.NumberFormat("en-US", { maximumFractionDigits: 1 }).format(missedLeads);
+  document.getElementById("roiMonthly").textContent = formatCurrency(monthly);
+  document.getElementById("roiAnnual").textContent = formatCurrency(monthly * 12);
+}
+
+["roiCalls", "roiMissed", "roiValue", "roiClose"].forEach((id) => {
+  const input = document.getElementById(id);
+  if (input) input.addEventListener("input", updateRoiCalculator);
+});
+updateRoiCalculator();
+
 function openAssessment() {
   document.getElementById("assessmentModal").classList.remove("hidden");
   document.body.style.overflow = "hidden";
@@ -916,6 +1078,12 @@ function openAssessment() {
 function closeAssessment() {
   document.getElementById("assessmentModal").classList.add("hidden");
   document.body.style.overflow = "";
+  const statusEl = document.getElementById("assessmentStatus");
+  if (statusEl) {
+    statusEl.classList.add("hidden");
+    statusEl.classList.remove("text-blue-100");
+    statusEl.textContent = "";
+  }
 }
 
 const assessmentSteps = Array.from(document.querySelectorAll(".assessment-step"));
@@ -945,10 +1113,18 @@ function validateCurrentStep() {
   const requiredFields = step.querySelectorAll("[required]");
   for (const field of requiredFields) {
     if (!field.value) {
-      field.reportValidity();
+      const tileGroup = field.type === "hidden" ? step.querySelector(`[data-tile-group="${field.name}"]`) : null;
+      if (tileGroup) {
+        tileGroup.querySelector(".option-tile")?.focus();
+        document.getElementById("assessmentStatus").classList.remove("hidden");
+        document.getElementById("assessmentStatus").textContent = "Choose an option to continue.";
+      } else {
+        field.reportValidity();
+      }
       return false;
     }
   }
+  document.getElementById("assessmentStatus").classList.add("hidden");
   return true;
 }
 
@@ -1068,7 +1244,7 @@ ${get("timeline")}
   const statusEl = document.getElementById("assessmentStatus");
   const submitBtn = document.getElementById("assessmentSubmitBtn");
   statusEl.classList.remove("hidden");
-  statusEl.textContent = "Sending assessment...";
+  statusEl.textContent = "Sending your workflow notes...";
   submitBtn.disabled = true;
   submitBtn.classList.add("opacity-70", "cursor-not-allowed");
 
@@ -1090,16 +1266,12 @@ ${get("timeline")}
     });
 
     if (!response.ok) throw new Error("Failed to send");
-    statusEl.textContent = "Sent. Thank you — we will follow up soon.";
+    statusEl.textContent = "Got it — we’ll map the first workflow DreamProtocol could automate and follow up with practical next steps.";
+    statusEl.classList.add("text-blue-100");
     e.target.reset();
     document.querySelectorAll(".option-tile.selected").forEach((tile) => tile.classList.remove("selected"));
-    setTimeout(() => {
-      closeAssessment();
-      statusEl.classList.add("hidden");
-      statusEl.textContent = "";
-      currentAssessmentStep = 1;
-      updateAssessmentStep();
-    }, 900);
+    currentAssessmentStep = 1;
+    updateAssessmentStep();
   } catch (error) {
     statusEl.textContent = "Could not send right now. Please try again.";
   } finally {
