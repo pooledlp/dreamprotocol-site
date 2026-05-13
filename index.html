@@ -412,22 +412,7 @@ body::before {
   line-height: 1.55;
 }
 
-.transcript-line {
-  border: 1px solid rgba(255,255,255,.1);
-  background: rgba(255,255,255,.035);
-  border-radius: 18px;
-  padding: 1rem;
-  transition: border-color .25s ease, background .25s ease, transform .25s ease;
-}
-
-.transcript-line.active {
-  border-color: rgba(147,178,255,.72);
-  background: rgba(147,178,255,.12);
-  transform: translateY(-2px);
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .transcript-line,
   .workflow-card,
   .step-card,
   .option-tile,
@@ -770,8 +755,8 @@ body::before {
       </div>
     </div>
 
-    <div class="relative z-10 grid lg:grid-cols-[1.25fr_.85fr] gap-5 lg:gap-6 items-start">
-      <div class="rounded-[2rem] border border-white/15 bg-black/35 p-5 md:p-6 shadow-[0_0_80px_rgba(91,140,255,.10)]">
+    <div class="relative z-10 grid lg:grid-cols-2 gap-5 lg:gap-6 items-stretch">
+      <div class="rounded-[2rem] border border-white/15 bg-black/35 p-5 md:p-6 shadow-[0_0_80px_rgba(91,140,255,.10)] h-full flex flex-col">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
           <div>
             <p class="text-xs uppercase tracking-widest text-gray-400">Incoming call · Medical clinic</p>
@@ -802,38 +787,17 @@ body::before {
           </div>
         </div>
 
-        <div aria-label="Sample call transcript">
-          <div class="flex items-center justify-between gap-4 mb-3">
-            <p class="text-xs uppercase tracking-widest text-blue-300">Visible transcript</p>
-            <p class="text-xs text-gray-500">Available even if audio cannot load</p>
-          </div>
-          <div class="space-y-3">
-            <div class="transcript-line"><p class="text-xs uppercase tracking-widest text-blue-300">AI:</p><p class="mt-2 text-gray-100 leading-relaxed">Thanks for calling Bayview Medical Group. This is Ava, the virtual receptionist. How can I help you today?</p></div>
-            <div class="transcript-line"><p class="text-xs uppercase tracking-widest text-violet-200">Caller:</p><p class="mt-2 text-gray-100 leading-relaxed">Hi, I need to schedule an appointment.</p></div>
-            <div class="transcript-line"><p class="text-xs uppercase tracking-widest text-blue-300">AI:</p><p class="mt-2 text-gray-100 leading-relaxed">Of course. Are you a new patient or an existing patient?</p></div>
-            <div class="transcript-line"><p class="text-xs uppercase tracking-widest text-violet-200">Caller:</p><p class="mt-2 text-gray-100 leading-relaxed">Existing patient.</p></div>
-            <div class="transcript-line"><p class="text-xs uppercase tracking-widest text-blue-300">AI:</p><p class="mt-2 text-gray-100 leading-relaxed">Got it. What’s the reason for the visit?</p></div>
-            <div class="transcript-line"><p class="text-xs uppercase tracking-widest text-violet-200">Caller:</p><p class="mt-2 text-gray-100 leading-relaxed">I’ve had a sore throat and congestion for a few days.</p></div>
-            <div class="transcript-line"><p class="text-xs uppercase tracking-widest text-blue-300">AI:</p><p class="mt-2 text-gray-100 leading-relaxed">I’m sorry you’re not feeling well. Before I collect the appointment details, are you having chest pain, trouble breathing, severe allergic reaction, or any emergency symptoms?</p></div>
-            <div class="transcript-line"><p class="text-xs uppercase tracking-widest text-violet-200">Caller:</p><p class="mt-2 text-gray-100 leading-relaxed">No, nothing like that.</p></div>
-            <div class="transcript-line"><p class="text-xs uppercase tracking-widest text-blue-300">AI:</p><p class="mt-2 text-gray-100 leading-relaxed">Okay, thank you. What day and time would work best for you?</p></div>
-            <div class="transcript-line"><p class="text-xs uppercase tracking-widest text-violet-200">Caller:</p><p class="mt-2 text-gray-100 leading-relaxed">Tomorrow morning, if possible.</p></div>
-            <div class="transcript-line"><p class="text-xs uppercase tracking-widest text-blue-300">AI:</p><p class="mt-2 text-gray-100 leading-relaxed">Perfect. I’ll send that request to the office team. Can I get your full name?</p></div>
-            <div class="transcript-line"><p class="text-xs uppercase tracking-widest text-violet-200">Caller:</p><p class="mt-2 text-gray-100 leading-relaxed">Sarah Miller.</p></div>
-            <div class="transcript-line"><p class="text-xs uppercase tracking-widest text-blue-300">AI:</p><p class="mt-2 text-gray-100 leading-relaxed">Thank you. And your date of birth?</p></div>
-            <div class="transcript-line"><p class="text-xs uppercase tracking-widest text-violet-200">Caller:</p><p class="mt-2 text-gray-100 leading-relaxed">March 12th, 1988.</p></div>
-            <div class="transcript-line"><p class="text-xs uppercase tracking-widest text-blue-300">AI:</p><p class="mt-2 text-gray-100 leading-relaxed">Great. What’s the best phone number for confirmation?</p></div>
-            <div class="transcript-line"><p class="text-xs uppercase tracking-widest text-violet-200">Caller:</p><p class="mt-2 text-gray-100 leading-relaxed">415-555-0198.</p></div>
-            <div class="transcript-line"><p class="text-xs uppercase tracking-widest text-blue-300">AI:</p><p class="mt-2 text-gray-100 leading-relaxed">Thank you. I have Sarah Miller, date of birth March 12th, 1988, requesting an appointment tomorrow morning for sore throat and congestion, with a callback number of 415-555-0198. Is that correct?</p></div>
-            <div class="transcript-line"><p class="text-xs uppercase tracking-widest text-violet-200">Caller:</p><p class="mt-2 text-gray-100 leading-relaxed">Yes.</p></div>
-            <div class="transcript-line"><p class="text-xs uppercase tracking-widest text-blue-300">AI:</p><p class="mt-2 text-gray-100 leading-relaxed">Perfect. I’ll send this request to the office team for confirmation. They’ll follow up with you as soon as possible. Thanks for calling Bayview Medical Group, and I hope you feel better soon.</p></div>
-          </div>
+        <div class="grid sm:grid-cols-2 gap-3 mt-auto" aria-label="Demo call checkpoints">
+          <div class="demo-output-card"><p>Call intent</p><span>Appointment request identified and routed as a front-desk intake workflow.</span></div>
+          <div class="demo-output-card"><p>Safety screen</p><span>Emergency symptoms checked before collecting appointment details.</span></div>
+          <div class="demo-output-card"><p>Patient details</p><span>Name, date of birth, preferred timing, visit reason, and callback number captured.</span></div>
+          <div class="demo-output-card"><p>Staff handoff</p><span>Request prepared for the clinic team to review and confirm availability.</span></div>
         </div>
       </div>
 
-      <div class="rounded-3xl border border-white/12 bg-black/20 p-4 md:p-5">
+      <div class="rounded-3xl border border-white/12 bg-black/20 p-4 md:p-5 h-full flex flex-col">
         <p class="text-xs uppercase tracking-widest text-blue-300 mb-4">Operational output</p>
-        <div class="space-y-3">
+        <div class="space-y-3 flex-1">
           <div class="demo-output-card"><p>AI call summary</p><span>Existing patient requested an appointment for sore throat and congestion. No emergency symptoms reported. Prefers tomorrow morning.</span></div>
           <div class="demo-output-card"><p>CRM note</p><span>Appointment request captured by AI front desk. Patient details, reason for visit, preferred timing, and callback number ready for staff review.</span></div>
           <div class="demo-output-card"><p>Follow-up draft</p><span>Thanks for calling. We captured your appointment request and sent it to the office team for confirmation.</span></div>
