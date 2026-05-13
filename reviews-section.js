@@ -42,7 +42,7 @@ function renderStars(company) {
 
 function ReviewsSection(reviews) {
   const logoRow = reviews.map((item) => `
-    <li class="customer-logo-tile group flex min-h-[82px] items-center justify-center rounded-2xl border border-white/10 bg-white/[.045] px-8 py-5 shadow-[0_0_34px_rgba(91,140,255,.08)]">
+    <li class="customer-logo-tile group flex min-h-[104px] items-center justify-center rounded-2xl border border-white/10 bg-white/[.045] px-7 py-6 shadow-[0_0_34px_rgba(91,140,255,.08)]">
       ${renderLogoMark(item, "customer-logo")}
     </li>
   `).join("");
@@ -63,7 +63,7 @@ function ReviewsSection(reviews) {
             <h3 class="text-xl font-bold text-white">${item.company}</h3>
             <p class="mt-1 text-sm text-blue-100/75">${item.label}</p>
           </div>
-          <div class="group flex min-h-[46px] min-w-[116px] items-center justify-end rounded-xl border border-white/10 bg-white/[.035] px-3">
+          <div class="group flex min-h-[58px] min-w-[156px] items-center justify-center rounded-xl border border-white/10 bg-white/[.035] px-4">
             ${renderLogoMark(item, "review-logo")}
           </div>
         </div>
