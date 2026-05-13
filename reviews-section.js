@@ -2,25 +2,25 @@ const customerReviews = [
   {
     company: "Podium",
     label: "Customer Messaging",
-    logo: "/public/logos/customers/podium.svg",
+    logo: "/logos/customers/podium.svg",
     quote: "DreamProtocol made customer response workflows feel faster, cleaner, and more consistent."
   },
   {
     company: "Dialpad",
     label: "Voice AI Workflows",
-    logo: "/public/logos/customers/dialpad.svg",
+    logo: "/logos/customers/dialpad.svg",
     quote: "The AI receptionist experience was smooth, professional, and easy to deploy."
   },
   {
     company: "PandaDoc",
     label: "Document Workflows",
-    logo: "/public/logos/customers/pandadoc.svg",
+    logo: "/logos/customers/pandadoc.svg",
     quote: "DreamProtocol helped simplify workflows that previously required multiple tools."
   },
   {
     company: "Atera",
     label: "IT Operations",
-    logo: "/public/logos/customers/atera.svg",
+    logo: "/logos/customers/atera.svg",
     quote: "We immediately saw operational improvements through workflow automation."
   }
 ];
@@ -33,7 +33,7 @@ function renderLogoMark(item, className) {
 }
 
 function renderStars(company) {
-  return Array.from({ length: 5 }, () => `
+  return Array.from({ length: 5 }, (_, index) => `
     <svg class="h-4 w-4 text-blue-200 drop-shadow-[0_0_10px_rgba(147,178,255,.55)]" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" focusable="false">
       <path d="M10 1.8l2.35 4.76 5.25.76-3.8 3.7.9 5.23L10 13.78l-4.7 2.47.9-5.23-3.8-3.7 5.25-.76L10 1.8z"></path>
     </svg>
@@ -58,9 +58,14 @@ function ReviewsSection(reviews) {
           </div>
         </div>
         <p class="mt-8 text-lg leading-relaxed text-gray-100">“${item.quote}”</p>
-        <div class="mt-auto pt-8 border-t border-white/10">
-          <h3 class="text-xl font-bold text-white">${item.company}</h3>
-          <p class="mt-1 text-sm text-blue-100/75">${item.label}</p>
+        <div class="mt-auto pt-8 flex items-center justify-between gap-4 border-t border-white/10">
+          <div>
+            <h3 class="text-xl font-bold text-white">${item.company}</h3>
+            <p class="mt-1 text-sm text-blue-100/75">${item.label}</p>
+          </div>
+          <div class="group flex min-h-[46px] min-w-[116px] items-center justify-end rounded-xl border border-white/10 bg-white/[.035] px-3">
+            ${renderLogoMark(item, "review-logo")}
+          </div>
         </div>
       </div>
     </article>
