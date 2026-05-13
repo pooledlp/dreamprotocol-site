@@ -24,6 +24,8 @@
 <style>
 html { scroll-behavior: smooth; }
 
+[id] { scroll-margin-top: 112px; }
+
 body {
   margin: 0;
   background: #040409;
@@ -627,6 +629,33 @@ body::before {
   }
 }
 
+.nav-link.active {
+  color: white;
+}
+
+.nav-link.active::after {
+  transform: scaleX(1);
+  opacity: 1;
+}
+
+.nav-link::after {
+  content: "";
+  display: block;
+  height: 2px;
+  margin-top: 4px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #93b2ff, #bc8cff);
+  transform: scaleX(0);
+  transform-origin: left;
+  opacity: 0;
+  transition: transform .2s ease, opacity .2s ease;
+}
+
+.mobile-nav-panel {
+  max-height: calc(100vh - 112px);
+  overflow-y: auto;
+}
+
 @media (max-width: 768px) {
   .core-wrap { width: 260px; height: 260px; }
   .core { width: 180px; height: 180px; }
@@ -642,26 +671,43 @@ body::before {
 <body>
 <div class="noise"></div>
 
-<nav class="fixed top-0 left-0 right-0 z-50 px-5 py-5">
-  <div class="max-w-7xl mx-auto flex justify-between items-center glass rounded-full px-6 py-3">
-    <a href="#" class="font-semibold tracking-wide text-lg flex items-center gap-2" aria-label="DreamProtocol.ai home"><span class="inline-block w-2.5 h-2.5 rounded-full bg-blue-300 shadow-[0_0_18px_#93b2ff] animate-pulse"></span><span class="gradient-text">DreamProtocol.ai</span></a>
+<nav class="fixed top-0 left-0 right-0 z-50 px-5 py-5" aria-label="Primary navigation">
+  <div class="max-w-7xl mx-auto flex justify-between items-center glass rounded-full px-5 sm:px-6 py-3 gap-3">
+    <a href="#top" class="font-semibold tracking-wide text-lg flex items-center gap-2 shrink-0 nav-link" data-section="top" aria-label="DreamProtocol.ai home"><span class="inline-block w-2.5 h-2.5 rounded-full bg-blue-300 shadow-[0_0_18px_#93b2ff] animate-pulse"></span><span class="gradient-text">DreamProtocol.ai</span></a>
 
-    <div class="hidden md:flex gap-8 text-sm text-gray-300">
-      <a href="#demo" class="hover:text-white transition">Demo</a>
-      <a href="#automates" class="hover:text-white transition">Automates</a>
-      <a href="#workflow" class="hover:text-white transition">Workflow</a>
-      <a href="#about" class="hover:text-white transition">About</a>
-      <a href="#pricing" class="hover:text-white transition">Pricing</a>
-      <a href="#faq" class="hover:text-white transition">FAQ</a>
+    <div class="hidden lg:flex gap-5 xl:gap-7 text-sm text-gray-300" aria-label="Section navigation">
+      <a href="#demo" class="nav-link hover:text-white transition" data-section="demo">Demo</a>
+      <a href="#automates" class="nav-link hover:text-white transition" data-section="automates">Automates</a>
+      <a href="#workflow" class="nav-link hover:text-white transition" data-section="workflow">Workflow</a>
+      <a href="#integrations" class="nav-link hover:text-white transition" data-section="integrations">Systems</a>
+      <a href="#pricing" class="nav-link hover:text-white transition" data-section="pricing">Pricing</a>
+      <a href="#about" class="nav-link hover:text-white transition" data-section="about">About</a>
+      <a href="#faq" class="nav-link hover:text-white transition" data-section="faq">FAQ</a>
     </div>
 
-    <button type="button" onclick="openAssessment()" aria-label="See what DreamProtocol would automate for your business" class="bg-white text-black px-4 sm:px-5 py-2 rounded-full text-sm font-bold hover:scale-105 transition">
-      <span class="hidden sm:inline">See What We’d Automate</span><span class="sm:hidden">Automate</span>
-    </button>
+    <div class="flex items-center gap-2 shrink-0">
+      <button type="button" onclick="openAssessment()" aria-label="See what DreamProtocol would automate for your business" class="bg-white text-black px-4 sm:px-5 py-2 rounded-full text-sm font-bold hover:scale-105 transition">
+        <span class="hidden sm:inline">See What We’d Automate</span><span class="sm:hidden">Automate</span>
+      </button>
+      <button id="mobileMenuToggle" type="button" class="lg:hidden glass px-3 py-2 rounded-full text-sm font-bold text-white hover:scale-105 transition" aria-controls="mobileMenu" aria-expanded="false" aria-label="Open site menu">Menu</button>
+    </div>
+  </div>
+
+  <div id="mobileMenu" class="mobile-nav-panel hidden lg:hidden max-w-7xl mx-auto mt-3 glass rounded-3xl p-4 text-sm text-gray-200">
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" aria-label="Mobile section navigation">
+      <a href="#top" class="nav-link rounded-2xl border border-white/10 bg-white/[.04] px-4 py-3 hover:text-white transition" data-section="top">Home</a>
+      <a href="#demo" class="nav-link rounded-2xl border border-white/10 bg-white/[.04] px-4 py-3 hover:text-white transition" data-section="demo">Demo</a>
+      <a href="#automates" class="nav-link rounded-2xl border border-white/10 bg-white/[.04] px-4 py-3 hover:text-white transition" data-section="automates">Automates</a>
+      <a href="#workflow" class="nav-link rounded-2xl border border-white/10 bg-white/[.04] px-4 py-3 hover:text-white transition" data-section="workflow">Workflow</a>
+      <a href="#integrations" class="nav-link rounded-2xl border border-white/10 bg-white/[.04] px-4 py-3 hover:text-white transition" data-section="integrations">Systems</a>
+      <a href="#pricing" class="nav-link rounded-2xl border border-white/10 bg-white/[.04] px-4 py-3 hover:text-white transition" data-section="pricing">Pricing</a>
+      <a href="#about" class="nav-link rounded-2xl border border-white/10 bg-white/[.04] px-4 py-3 hover:text-white transition" data-section="about">About</a>
+      <a href="#faq" class="nav-link rounded-2xl border border-white/10 bg-white/[.04] px-4 py-3 hover:text-white transition" data-section="faq">FAQ</a>
+    </div>
   </div>
 </nav>
 
-<section class="relative min-h-screen flex items-center overflow-hidden px-6">
+<section id="top" class="relative min-h-screen flex items-center overflow-hidden px-6">
   <div class="grid-bg"></div>
   <div class="orb top-20 right-10"></div>
   <div class="orb bottom-0 left-0 opacity-25"></div>
@@ -685,10 +731,7 @@ body::before {
       </ul>
 
       <div id="heroBtns" class="mt-10 flex flex-col sm:flex-row gap-3 opacity-0">
-        <a href="mailto:pooledlp@gmail.com?subject=15-Minute%20DreamProtocol%20Build%20Call" aria-label="Book a 15-minute build call with DreamProtocol" class="inline-flex justify-center bg-white text-black px-8 py-4 rounded-full font-bold hover:scale-105 transition">
-          Book a 15-Minute Build Call
-        </a>
-        <button type="button" onclick="openAssessment()" aria-label="See what DreamProtocol would automate for your business" class="inline-flex justify-center glass px-8 py-4 rounded-full font-bold hover:scale-105 transition">
+        <button type="button" onclick="openAssessment()" aria-label="See what DreamProtocol would automate for your business" class="inline-flex justify-center bg-white text-black px-8 py-4 rounded-full font-bold hover:scale-105 transition">
           See What We’d Automate
         </button>
         <a href="#demo" aria-label="View the DreamProtocol visual AI front desk demo" class="inline-flex justify-center glass px-8 py-4 rounded-full font-bold hover:scale-105 transition">
@@ -808,8 +851,8 @@ body::before {
     </div>
 
     <div class="relative z-10 mt-8 flex flex-col sm:flex-row justify-center gap-3">
-      <a href="mailto:pooledlp@gmail.com?subject=15-Minute%20DreamProtocol%20Build%20Call" class="inline-flex justify-center bg-white text-black px-7 py-4 rounded-full font-bold hover:scale-105 transition">Book a 15-Minute Build Call</a>
-      <button type="button" onclick="openAssessment()" class="inline-flex justify-center glass px-7 py-4 rounded-full font-bold hover:scale-105 transition">See What We’d Automate</button>
+      <button type="button" onclick="openAssessment()" class="inline-flex justify-center bg-white text-black px-7 py-4 rounded-full font-bold hover:scale-105 transition">See What We’d Automate</button>
+      <a href="#automates" class="inline-flex justify-center glass px-7 py-4 rounded-full font-bold hover:scale-105 transition">Explore Workflows</a>
     </div>
   </div>
 </section>
@@ -1201,6 +1244,59 @@ function updateRoiCalculator() {
   if (input) input.addEventListener("input", updateRoiCalculator);
 });
 updateRoiCalculator();
+
+function setupNavigation() {
+  const mobileToggle = document.getElementById("mobileMenuToggle");
+  const mobileMenu = document.getElementById("mobileMenu");
+  const navLinks = Array.from(document.querySelectorAll(".nav-link[data-section]"));
+  const sectionIds = [...new Set(navLinks.map((link) => link.dataset.section))];
+  const sections = sectionIds.map((id) => document.getElementById(id)).filter(Boolean);
+
+  function closeMobileMenu() {
+    if (!mobileMenu || !mobileToggle) return;
+    mobileMenu.classList.add("hidden");
+    mobileToggle.setAttribute("aria-expanded", "false");
+    mobileToggle.textContent = "Menu";
+  }
+
+  function setActive(sectionId) {
+    navLinks.forEach((link) => {
+      link.classList.toggle("active", link.dataset.section === sectionId);
+      if (link.dataset.section === sectionId) link.setAttribute("aria-current", "page");
+      else link.removeAttribute("aria-current");
+    });
+  }
+
+  if (mobileToggle && mobileMenu) {
+    mobileToggle.addEventListener("click", () => {
+      const isOpen = !mobileMenu.classList.contains("hidden");
+      mobileMenu.classList.toggle("hidden", isOpen);
+      mobileToggle.setAttribute("aria-expanded", String(!isOpen));
+      mobileToggle.textContent = isOpen ? "Menu" : "Close";
+    });
+  }
+
+  navLinks.forEach((link) => {
+    link.addEventListener("click", () => {
+      closeMobileMenu();
+    });
+  });
+
+  if ("IntersectionObserver" in window && sections.length) {
+    const observer = new IntersectionObserver((entries) => {
+      const visible = entries
+        .filter((entry) => entry.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if (visible?.target?.id) setActive(visible.target.id);
+    }, { rootMargin: "-30% 0px -55% 0px", threshold: [0.12, 0.25, 0.5] });
+    sections.forEach((section) => observer.observe(section));
+  }
+
+  const initialSection = window.location.hash.replace("#", "") || "top";
+  if (sectionIds.includes(initialSection)) setActive(initialSection);
+}
+
+setupNavigation();
 
 function openAssessment() {
   document.getElementById("assessmentModal").classList.remove("hidden");
