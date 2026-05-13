@@ -632,17 +632,17 @@ body::before {
 }
 
 .customer-logo {
-  max-height: 34px;
-  max-width: 140px;
+  display: block;
+  width: clamp(156px, 15vw, 210px);
+  height: 52px;
   object-fit: contain;
-  filter: brightness(0) invert(1);
 }
 
 .review-logo {
-  max-height: 28px;
-  max-width: 116px;
+  display: block;
+  width: 136px;
+  height: 38px;
   object-fit: contain;
-  filter: brightness(0) invert(1);
 }
 
 @media (prefers-reduced-motion: reduce) {
