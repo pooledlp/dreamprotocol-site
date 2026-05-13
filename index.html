@@ -564,6 +564,88 @@ body::before {
   letter-spacing: -.03em;
 }
 
+.reviews-shell {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(91,140,255,.18), transparent 34%),
+    radial-gradient(circle at 82% 28%, rgba(188,140,255,.14), transparent 36%),
+    linear-gradient(180deg, rgba(4,4,9,.98), rgba(8,11,24,.96));
+}
+
+.reviews-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+  background-size: 88px 88px;
+  mask-image: radial-gradient(circle at center, black 0%, transparent 72%);
+  pointer-events: none;
+}
+
+.review-card {
+  position: relative;
+  overflow: hidden;
+  min-height: 310px;
+  transition: transform .28s ease, border-color .28s ease, box-shadow .28s ease;
+}
+
+.review-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(143,176,255,.12), rgba(188,140,255,.045), transparent 64%);
+  opacity: .9;
+  pointer-events: none;
+}
+
+.review-card::after {
+  content: "";
+  position: absolute;
+  width: 145px;
+  height: 145px;
+  right: -48px;
+  bottom: -52px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(92,120,255,.45), rgba(188,140,255,.18), transparent 70%);
+  filter: blur(6px);
+  opacity: .55;
+  pointer-events: none;
+}
+
+.review-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(147,178,255,.48);
+  box-shadow: 0 0 72px rgba(91,140,255,.20);
+}
+
+.customer-logo-tile {
+  min-width: 180px;
+  transition: opacity .25s ease, border-color .25s ease, transform .25s ease;
+}
+
+.customer-logo-tile:hover {
+  transform: translateY(-3px);
+  border-color: rgba(147,178,255,.36);
+}
+
+.customer-logo {
+  max-height: 34px;
+  max-width: 140px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  .review-card,
+  .customer-logo-tile {
+    transition: none !important;
+  }
+}
+
 @media (max-width: 768px) {
   .core-wrap { width: 260px; height: 260px; }
   .core { width: 180px; height: 180px; }
@@ -925,6 +1007,9 @@ body::before {
   </div>
 </section>
 
+<div id="reviews-section"></div>
+
+
 <section id="faq" class="py-24 px-6 bg-white/[.025]">
   <div class="max-w-5xl mx-auto">
     <p class="text-blue-300 uppercase tracking-widest text-sm mb-4">FAQ</p>
@@ -1061,6 +1146,10 @@ body::before {
     DreamProtocol gives local businesses an AI front desk that captures leads, follows up instantly, and keeps operations moving across the Bay Area and Northern California.
   </div>
 </footer>
+
+
+<script src="/reviews-section.js"></script>
+
 
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","name":"DreamProtocol","url":"https://dreamprotocol.ai"},{"@type":"ProfessionalService","name":"DreamProtocol","url":"https://dreamprotocol.ai","areaServed":["Bay Area","Marin County","Sonoma County","San Francisco","Oakland","San Jose","Northern California"],"description":"AI front desk, missed call recovery, CRM follow-up automation, and workflow automation implementation for Bay Area SMBs."},{"@type":"WebSite","name":"DreamProtocol","url":"https://dreamprotocol.ai/"},{"@type":"Service","name":"AI Front Desk","provider":{"@type":"Organization","name":"DreamProtocol"},"areaServed":["Bay Area","Northern California"],"serviceType":["AI Front Desk","AI Receptionist","AI Workflow Automation","SMB AI Automation","CRM Follow-Up Automation"],"description":"Answer calls, qualify leads, send follow-ups, book appointments, update CRM records, and reduce admin work."},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What does DreamProtocol do?","acceptedAnswer":{"@type":"Answer","text":"DreamProtocol builds AI front-desk and workflow automation systems for small businesses. We help answer calls, qualify leads, send follow-ups, update CRMs, book appointments, and reduce repetitive admin work."}},{"@type":"Question","name":"Is this just a chatbot?","acceptedAnswer":{"@type":"Answer","text":"No. DreamProtocol connects AI to real business workflows: calls, texts, email, CRM records, calendars, approvals, and team notifications."}},{"@type":"Question","name":"Who is this for?","acceptedAnswer":{"@type":"Answer","text":"Local businesses that depend on fast response times: home services, med spas, clinics, hotels, legal offices, professional services, and SMB teams."}},{"@type":"Question","name":"Can humans stay in control?","acceptedAnswer":{"@type":"Answer","text":"Yes. We can build approval steps so your team reviews important messages, updates, or actions before they are sent."}},{"@type":"Question","name":"How long does a pilot take?","acceptedAnswer":{"@type":"Answer","text":"Most starter pilots are designed to launch in 2–4 weeks depending on integrations, call flows, and approval requirements."}},{"@type":"Question","name":"What tools can you connect with?","acceptedAnswer":{"@type":"Answer","text":"Common systems include CRM platforms, calendars, email, Microsoft 365, Google Workspace, QuickBooks, help desk tools, phone systems, and custom workflows."}},{"@type":"Question","name":"Do you only work in the Bay Area?","acceptedAnswer":{"@type":"Answer","text":"DreamProtocol is Bay Area-based and focuses on Bay Area and Northern California SMBs, but remote implementation is possible for the right business."}}]}]}</script>
 
