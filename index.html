@@ -447,16 +447,6 @@ body::before {
   }
 }
 
-.demo-step.active {
-  border-color: rgba(143,176,255,.75);
-  background: rgba(143,176,255,.14);
-  box-shadow: 0 0 34px rgba(143,176,255,.16);
-}
-
-.demo-step.active .status-dot {
-  background: #b9caff;
-  box-shadow: 0 0 28px #93b2ff;
-}
 
 .roi-input {
   width: 100%;
@@ -769,81 +759,86 @@ body::before {
   <div class="max-w-7xl mx-auto glass rounded-3xl p-8 md:p-12 overflow-hidden relative">
     <div class="protocol-flare opacity-70"></div>
     <div class="relative z-10 text-center max-w-4xl mx-auto mb-10">
-      <p class="text-blue-300 uppercase tracking-widest text-sm mb-4">Interactive call demo</p>
-      <h2 class="text-3xl md:text-5xl font-black mb-5">Hear the AI Front Desk Answer a Call</h2>
+      <p class="text-blue-300 uppercase tracking-widest text-sm mb-4">AI receptionist demo</p>
+      <h2 class="text-3xl md:text-5xl font-black mb-5">Hear DreamProtocol Handle a Medical Appointment Call</h2>
       <p class="text-gray-300 text-lg leading-relaxed">
-        Pick a scenario and hear how DreamProtocol captures the request, qualifies urgency, prepares the follow-up, updates the CRM, and alerts the team.
+        A sample clinic front-desk call showing how the AI captures the appointment request, checks for emergency symptoms, collects patient details, and sends the request for human confirmation.
       </p>
       <div class="mt-5 flex flex-wrap justify-center gap-3">
-        <span class="console-chip">Sample demo conversation — not a live customer recording.</span>
-        <span class="console-chip" id="voiceModeLabel">Browser voice simulation — sample script, not a live call recording.</span>
+        <span class="console-chip">Sample demo conversation — not a live patient recording.</span>
+        <span class="console-chip">For demonstration only. Not medical advice.</span>
       </div>
     </div>
 
-    <div class="relative z-10 grid xl:grid-cols-[.75fr_1.25fr_.9fr] gap-5 lg:gap-6 items-start">
-      <div class="rounded-3xl border border-white/12 bg-black/20 p-4 md:p-5">
-        <p class="text-xs uppercase tracking-widest text-blue-300 mb-4">Choose scenario</p>
-        <div class="space-y-3" role="tablist" aria-label="AI front desk call demo scenarios">
-          <button type="button" class="demo-step option-tile active" role="tab" aria-selected="true" aria-controls="demoScenarioPanel" id="scenario-tab-home-services" data-scenario="home-services">
-            <span class="flex items-start gap-3"><span class="status-dot mt-1.5 shrink-0"></span><span><span class="block font-bold">Home Services</span><span class="block text-sm text-gray-400 mt-1">After-hours leak</span></span></span>
-          </button>
-          <button type="button" class="demo-step option-tile" role="tab" aria-selected="false" aria-controls="demoScenarioPanel" id="scenario-tab-med-spa" data-scenario="med-spa">
-            <span class="flex items-start gap-3"><span class="status-dot mt-1.5 shrink-0"></span><span><span class="block font-bold">Med Spa / Clinic</span><span class="block text-sm text-gray-400 mt-1">Appointment request</span></span></span>
-          </button>
-          <button type="button" class="demo-step option-tile" role="tab" aria-selected="false" aria-controls="demoScenarioPanel" id="scenario-tab-legal-intake" data-scenario="legal-intake">
-            <span class="flex items-start gap-3"><span class="status-dot mt-1.5 shrink-0"></span><span><span class="block font-bold">Legal Intake</span><span class="block text-sm text-gray-400 mt-1">New consultation request</span></span></span>
-          </button>
-          <button type="button" class="demo-step option-tile" role="tab" aria-selected="false" aria-controls="demoScenarioPanel" id="scenario-tab-hospitality" data-scenario="hospitality">
-            <span class="flex items-start gap-3"><span class="status-dot mt-1.5 shrink-0"></span><span><span class="block font-bold">Hospitality</span><span class="block text-sm text-gray-400 mt-1">Guest request</span></span></span>
-          </button>
-        </div>
-      </div>
-
-      <div id="demoScenarioPanel" role="tabpanel" aria-live="polite" aria-labelledby="scenario-tab-home-services" class="rounded-[2rem] border border-white/15 bg-black/35 p-5 md:p-6 shadow-[0_0_80px_rgba(91,140,255,.10)]">
+    <div class="relative z-10 grid lg:grid-cols-[1.25fr_.85fr] gap-5 lg:gap-6 items-start">
+      <div class="rounded-[2rem] border border-white/15 bg-black/35 p-5 md:p-6 shadow-[0_0_80px_rgba(91,140,255,.10)]">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
           <div>
-            <p class="text-xs uppercase tracking-widest text-gray-400">Incoming call · <span id="demoIndustry">Home Services</span></p>
-            <h3 id="demoTitle" class="text-2xl md:text-3xl font-black mt-1">After-hours leak</h3>
-            <p id="demoSituation" class="text-gray-400 mt-2">A homeowner calls after hours about a leaking water heater.</p>
+            <p class="text-xs uppercase tracking-widest text-gray-400">Incoming call · Medical clinic</p>
+            <h3 class="text-2xl md:text-3xl font-black mt-1">Appointment request intake</h3>
+            <p class="text-gray-400 mt-2">A sample patient calls Bayview Medical Group to request an appointment for cold-like symptoms.</p>
           </div>
           <div class="rounded-full border border-blue-200/30 bg-blue-300/10 px-4 py-2 text-sm text-blue-100 whitespace-nowrap">Answered by DreamProtocol</div>
         </div>
 
         <div class="rounded-3xl border border-white/10 bg-white/[.035] p-4 mb-5">
-          <div class="flex flex-col md:flex-row md:items-center gap-4 justify-between">
-            <div class="flex items-center gap-3">
-              <button type="button" id="demoPlayButton" class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-white text-black font-black hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-200 transition" aria-label="Play browser voice simulation">▶</button>
-              <div>
-                <p id="demoPlayerStatus" class="font-bold">Ready to play voice simulation</p>
-                <p class="text-sm text-gray-400">No autoplay. Transcript remains available below.</p>
-              </div>
+          <div class="mb-3 flex items-center gap-3">
+            <span class="status-dot shrink-0"></span>
+            <div>
+              <p class="font-bold">Real MP3 demo sample</p>
+              <p class="text-sm text-gray-400">No autoplay. Use the native audio controls to play the sample.</p>
             </div>
-            <button type="button" id="demoStopButton" class="inline-flex justify-center rounded-full border border-white/15 px-5 py-3 text-sm font-bold text-gray-100 hover:border-blue-200/60 transition" disabled>Stop</button>
           </div>
-          <div class="mt-4 h-2 rounded-full bg-white/10 overflow-hidden" aria-hidden="true">
-            <div id="demoProgress" class="h-full w-0 rounded-full bg-gradient-to-r from-blue-300 to-violet-300 transition-[width] duration-300"></div>
-          </div>
+          <audio controls preload="metadata" class="w-full" aria-label="Play DreamProtocol medical AI receptionist demo">
+            <source src="/demo-audio/dreamprotocol-medical-demo.mp3" type="audio/mpeg" />
+            Your browser does not support the audio element.
+          </audio>
           <div class="mt-3 flex flex-wrap gap-2 text-xs text-gray-400">
             <span class="console-chip">AI answered</span>
-            <span class="console-chip">Intent captured</span>
-            <span class="console-chip">Follow-up drafted</span>
-            <span class="console-chip">CRM updated</span>
-            <span class="console-chip">Team alerted</span>
-            <span class="console-chip">Human review</span>
+            <span class="console-chip">Appointment intent captured</span>
+            <span class="console-chip">Emergency symptoms checked</span>
+            <span class="console-chip">Patient details collected</span>
+            <span class="console-chip">Human confirmation required</span>
           </div>
         </div>
 
-        <div class="space-y-3" id="demoTranscript" aria-label="Sample call transcript"></div>
+        <div aria-label="Sample call transcript">
+          <div class="flex items-center justify-between gap-4 mb-3">
+            <p class="text-xs uppercase tracking-widest text-blue-300">Visible transcript</p>
+            <p class="text-xs text-gray-500">Available even if audio cannot load</p>
+          </div>
+          <div class="space-y-3">
+            <div class="transcript-line"><p class="text-xs uppercase tracking-widest text-blue-300">AI:</p><p class="mt-2 text-gray-100 leading-relaxed">Thanks for calling Bayview Medical Group. This is Ava, the virtual receptionist. How can I help you today?</p></div>
+            <div class="transcript-line"><p class="text-xs uppercase tracking-widest text-violet-200">Caller:</p><p class="mt-2 text-gray-100 leading-relaxed">Hi, I need to schedule an appointment.</p></div>
+            <div class="transcript-line"><p class="text-xs uppercase tracking-widest text-blue-300">AI:</p><p class="mt-2 text-gray-100 leading-relaxed">Of course. Are you a new patient or an existing patient?</p></div>
+            <div class="transcript-line"><p class="text-xs uppercase tracking-widest text-violet-200">Caller:</p><p class="mt-2 text-gray-100 leading-relaxed">Existing patient.</p></div>
+            <div class="transcript-line"><p class="text-xs uppercase tracking-widest text-blue-300">AI:</p><p class="mt-2 text-gray-100 leading-relaxed">Got it. What’s the reason for the visit?</p></div>
+            <div class="transcript-line"><p class="text-xs uppercase tracking-widest text-violet-200">Caller:</p><p class="mt-2 text-gray-100 leading-relaxed">I’ve had a sore throat and congestion for a few days.</p></div>
+            <div class="transcript-line"><p class="text-xs uppercase tracking-widest text-blue-300">AI:</p><p class="mt-2 text-gray-100 leading-relaxed">I’m sorry you’re not feeling well. Before I collect the appointment details, are you having chest pain, trouble breathing, severe allergic reaction, or any emergency symptoms?</p></div>
+            <div class="transcript-line"><p class="text-xs uppercase tracking-widest text-violet-200">Caller:</p><p class="mt-2 text-gray-100 leading-relaxed">No, nothing like that.</p></div>
+            <div class="transcript-line"><p class="text-xs uppercase tracking-widest text-blue-300">AI:</p><p class="mt-2 text-gray-100 leading-relaxed">Okay, thank you. What day and time would work best for you?</p></div>
+            <div class="transcript-line"><p class="text-xs uppercase tracking-widest text-violet-200">Caller:</p><p class="mt-2 text-gray-100 leading-relaxed">Tomorrow morning, if possible.</p></div>
+            <div class="transcript-line"><p class="text-xs uppercase tracking-widest text-blue-300">AI:</p><p class="mt-2 text-gray-100 leading-relaxed">Perfect. I’ll send that request to the office team. Can I get your full name?</p></div>
+            <div class="transcript-line"><p class="text-xs uppercase tracking-widest text-violet-200">Caller:</p><p class="mt-2 text-gray-100 leading-relaxed">Sarah Miller.</p></div>
+            <div class="transcript-line"><p class="text-xs uppercase tracking-widest text-blue-300">AI:</p><p class="mt-2 text-gray-100 leading-relaxed">Thank you. And your date of birth?</p></div>
+            <div class="transcript-line"><p class="text-xs uppercase tracking-widest text-violet-200">Caller:</p><p class="mt-2 text-gray-100 leading-relaxed">March 12th, 1988.</p></div>
+            <div class="transcript-line"><p class="text-xs uppercase tracking-widest text-blue-300">AI:</p><p class="mt-2 text-gray-100 leading-relaxed">Great. What’s the best phone number for confirmation?</p></div>
+            <div class="transcript-line"><p class="text-xs uppercase tracking-widest text-violet-200">Caller:</p><p class="mt-2 text-gray-100 leading-relaxed">415-555-0198.</p></div>
+            <div class="transcript-line"><p class="text-xs uppercase tracking-widest text-blue-300">AI:</p><p class="mt-2 text-gray-100 leading-relaxed">Thank you. I have Sarah Miller, date of birth March 12th, 1988, requesting an appointment tomorrow morning for sore throat and congestion, with a callback number of 415-555-0198. Is that correct?</p></div>
+            <div class="transcript-line"><p class="text-xs uppercase tracking-widest text-violet-200">Caller:</p><p class="mt-2 text-gray-100 leading-relaxed">Yes.</p></div>
+            <div class="transcript-line"><p class="text-xs uppercase tracking-widest text-blue-300">AI:</p><p class="mt-2 text-gray-100 leading-relaxed">Perfect. I’ll send this request to the office team for confirmation. They’ll follow up with you as soon as possible. Thanks for calling Bayview Medical Group, and I hope you feel better soon.</p></div>
+          </div>
+        </div>
       </div>
 
       <div class="rounded-3xl border border-white/12 bg-black/20 p-4 md:p-5">
         <p class="text-xs uppercase tracking-widest text-blue-300 mb-4">Operational output</p>
         <div class="space-y-3">
-          <div class="demo-output-card"><p>AI call summary</p><span id="demoSummary">After-hours plumbing lead captured. Urgency: high. Customer reports active water heater leak, water shut off, water on floor, callback requested tonight.</span></div>
-          <div class="demo-output-card"><p>CRM note</p><span id="demoCrm">New lead created from after-hours AI front desk. Source: phone. Type: emergency plumbing/water heater. Status: needs human review.</span></div>
-          <div class="demo-output-card"><p>Follow-up draft</p><span id="demoFollowUp">Thanks for calling. We captured your water heater leak request and flagged it as urgent. Our team will review the details and follow up shortly.</span></div>
-          <div class="demo-output-card"><p>Internal team alert</p><span id="demoAlert">High-priority leak request. Customer reports active leak and water on floor. Approval needed before dispatch promise or pricing.</span></div>
-          <div class="console-action flex items-start gap-3"><span class="status-dot mt-1.5 shrink-0"></span><span id="demoApproval">Human approval required before confirming arrival time, availability, or pricing.</span></div>
+          <div class="demo-output-card"><p>AI call summary</p><span>Existing patient requested an appointment for sore throat and congestion. No emergency symptoms reported. Prefers tomorrow morning.</span></div>
+          <div class="demo-output-card"><p>CRM note</p><span>Appointment request captured by AI front desk. Patient details, reason for visit, preferred timing, and callback number ready for staff review.</span></div>
+          <div class="demo-output-card"><p>Follow-up draft</p><span>Thanks for calling. We captured your appointment request and sent it to the office team for confirmation.</span></div>
+          <div class="demo-output-card"><p>Internal team alert</p><span>Clinic appointment request needs staff confirmation. AI did not provide medical advice, diagnosis, or treatment instructions.</span></div>
+          <div class="console-action flex items-start gap-3"><span class="status-dot mt-1.5 shrink-0"></span><span>Human approval required before confirming appointment availability or sending patient instructions.</span></div>
         </div>
       </div>
     </div>
@@ -1220,213 +1215,6 @@ if (window.gsap && window.ScrollTrigger) {
     el.style.transform = "none";
   });
 }
-
-const demoScenarios = [
-  {
-    id: "home-services",
-    label: "Home Services",
-    industry: "Home Services",
-    title: "After-hours leak",
-    situation: "A homeowner calls after hours about a leaking water heater.",
-    audioSrc: null,
-    transcript: [
-      { speaker: "Caller", text: "Hi, our water heater is leaking and we just noticed water under the closet door. Can someone call us tonight?" },
-      { speaker: "AI", text: "I’m sorry you’re dealing with that. I can capture this for the on-call team now. Are you seeing active leaking, and are you able to safely turn off water near the heater?" },
-      { speaker: "Caller", text: "Yes, it’s active. We turned the water off, but there’s still water on the floor." },
-      { speaker: "AI", text: "Got it. I’m marking this as urgent. I’ll confirm your name, phone number, and address, then send this to the on-call manager for review before anyone promises timing or pricing." },
-      { speaker: "Caller", text: "Okay, that works." },
-      { speaker: "AI", text: "Thanks. I’ve captured the request and flagged it as high priority. You’ll receive a confirmation text, and the team can review the details before calling you back." }
-    ],
-    summary: "After-hours plumbing lead captured. Urgency: high. Customer reports active water heater leak, water shut off, water on floor, callback requested tonight.",
-    crmNote: "New lead created from after-hours AI front desk. Source: phone. Type: emergency plumbing/water heater. Status: needs human review.",
-    followUpDraft: "Thanks for calling. We captured your water heater leak request and flagged it as urgent. Our team will review the details and follow up shortly.",
-    internalAlert: "High-priority leak request. Customer reports active leak and water on floor. Approval needed before dispatch promise or pricing.",
-    humanApprovalNote: "Human approval required before confirming arrival time, availability, or pricing."
-  },
-  {
-    id: "med-spa",
-    label: "Med Spa / Clinic",
-    industry: "Med Spa / Clinic",
-    title: "Appointment request",
-    situation: "A caller wants to schedule a consultation and asks about availability.",
-    audioSrc: null,
-    transcript: [
-      { speaker: "Caller", text: "Hi, I’m interested in booking a consultation. Do you have anything open this week?" },
-      { speaker: "AI", text: "I can help capture the request and check what the team should follow up on. Are you looking for a new consultation, a follow-up appointment, or a specific service?" },
-      { speaker: "Caller", text: "A new consultation." },
-      { speaker: "AI", text: "Great. I’ll collect your contact details, preferred days, and whether morning or afternoon works better. For treatment-specific or medical questions, the team will review and follow up directly." },
-      { speaker: "Caller", text: "Afternoons are better." },
-      { speaker: "AI", text: "Perfect. I’ll note that you prefer afternoons this week and send the request to the scheduling team for review." }
-    ],
-    summary: "New consultation request. Caller prefers afternoons this week. Needs scheduling follow-up. Treatment-specific questions should be handled by staff.",
-    crmNote: "New appointment request created. Type: consultation. Preference: afternoon availability this week. Status: staff review.",
-    followUpDraft: "Thanks for reaching out. We captured your consultation request and afternoon preference. Our team will follow up with available times.",
-    internalAlert: "New consultation request. Please review availability and follow up. Do not automate treatment-specific guidance.",
-    humanApprovalNote: "Human review required for clinical, pricing, eligibility, or treatment-specific questions."
-  },
-  {
-    id: "legal-intake",
-    label: "Legal Intake",
-    industry: "Legal / Professional Services",
-    title: "New consultation request",
-    situation: "A caller wants help with a new legal matter and needs intake routing.",
-    audioSrc: null,
-    transcript: [
-      { speaker: "Caller", text: "Hi, I’m looking for a consultation. I need to talk to someone about a contract issue." },
-      { speaker: "AI", text: "I can help collect the basic intake details and route your request to the right person. I’m not able to provide legal advice, but I can make sure the team receives your information." },
-      { speaker: "Caller", text: "That’s fine." },
-      { speaker: "AI", text: "Great. I’ll capture your name, contact information, the general matter type, and whether there are any urgent dates or deadlines." },
-      { speaker: "Caller", text: "There’s a deadline next Friday." },
-      { speaker: "AI", text: "Thank you. I’ll mark the request as time-sensitive and send a summary to the team for review before anyone confirms representation or advice." }
-    ],
-    summary: "New consultation request for contract issue. Caller reports deadline next Friday. Time-sensitive. Needs attorney/staff review.",
-    crmNote: "New legal intake created. Matter type: contract issue. Deadline: next Friday. Status: review required.",
-    followUpDraft: "Thanks for contacting us. We captured your consultation request and noted the upcoming deadline. Our team will review and follow up.",
-    internalAlert: "Time-sensitive consultation request. Contract issue with deadline next Friday. Human review required before advice, representation, or next steps.",
-    humanApprovalNote: "Human approval required before giving legal guidance, confirming representation, or discussing strategy."
-  },
-  {
-    id: "hospitality",
-    label: "Hospitality",
-    industry: "Hotels / Hospitality",
-    title: "Guest request",
-    situation: "A hotel guest calls during a busy front-desk period with a room request.",
-    audioSrc: null,
-    transcript: [
-      { speaker: "Caller", text: "Hi, I’m in room 214. Could we get extra towels and ask about a late checkout?" },
-      { speaker: "AI", text: "Absolutely. I can capture that request for the front desk. You need extra towels for room 214 and want to ask whether late checkout is available, correct?" },
-      { speaker: "Caller", text: "Yes, that’s right." },
-      { speaker: "AI", text: "Got it. I’ll send the towel request to the team and flag the late checkout question for staff review, since availability may depend on the schedule." }
-    ],
-    summary: "Guest in room 214 requests extra towels and asks about late checkout availability.",
-    crmNote: "Guest request logged. Room: 214. Request: extra towels. Question: late checkout availability. Status: staff review.",
-    followUpDraft: "Thanks — we’ve sent your towel request to the team and flagged your late checkout question for front desk review.",
-    internalAlert: "Room 214 requests extra towels. Late checkout availability needs staff confirmation.",
-    humanApprovalNote: "Human review required before confirming late checkout availability."
-  }
-];
-
-let currentScenarioIndex = 0;
-let currentUtteranceIndex = -1;
-let demoIsSpeaking = false;
-let demoIsPaused = false;
-let demoProgressTimer = null;
-
-function getSpeechSynthesis() {
-  if (typeof window === "undefined" || !("speechSynthesis" in window)) return null;
-  return window.speechSynthesis;
-}
-
-function stopVoiceSimulation() {
-  const synth = getSpeechSynthesis();
-  if (synth) synth.cancel();
-  demoIsSpeaking = false;
-  demoIsPaused = false;
-  currentUtteranceIndex = -1;
-  clearInterval(demoProgressTimer);
-  demoProgressTimer = null;
-  document.getElementById("demoPlayButton").textContent = "▶";
-  document.getElementById("demoPlayButton").setAttribute("aria-label", "Play browser voice simulation");
-  document.getElementById("demoStopButton").disabled = true;
-  document.getElementById("demoPlayerStatus").textContent = "Ready to play voice simulation";
-  document.getElementById("demoProgress").style.width = "0%";
-  document.querySelectorAll(".transcript-line").forEach((line) => line.classList.remove("active"));
-}
-
-function renderTranscript(scenario) {
-  const transcript = document.getElementById("demoTranscript");
-  transcript.innerHTML = scenario.transcript.map((line, index) => `
-    <div class="transcript-line" data-transcript-line="${index}">
-      <p class="text-xs uppercase tracking-widest ${line.speaker === "AI" ? "text-blue-300" : "text-violet-200"}">${line.speaker}</p>
-      <p class="mt-2 text-gray-100 leading-relaxed">“${line.text}”</p>
-    </div>
-  `).join("");
-}
-
-function setScenario(id) {
-  const index = demoScenarios.findIndex((scenario) => scenario.id === id);
-  const scenario = demoScenarios[index];
-  if (!scenario) return;
-  stopVoiceSimulation();
-  currentScenarioIndex = index;
-  document.querySelectorAll(".demo-step").forEach((button) => {
-    const isActive = button.dataset.scenario === scenario.id;
-    button.classList.toggle("active", isActive);
-    button.setAttribute("aria-selected", isActive ? "true" : "false");
-  });
-  const activeTab = document.querySelector(`[data-scenario="${scenario.id}"]`);
-  if (activeTab) document.getElementById("demoScenarioPanel").setAttribute("aria-labelledby", activeTab.id);
-  document.getElementById("demoIndustry").textContent = scenario.industry;
-  document.getElementById("demoTitle").textContent = scenario.title;
-  document.getElementById("demoSituation").textContent = scenario.situation;
-  document.getElementById("demoSummary").textContent = scenario.summary;
-  document.getElementById("demoCrm").textContent = scenario.crmNote;
-  document.getElementById("demoFollowUp").textContent = scenario.followUpDraft;
-  document.getElementById("demoAlert").textContent = scenario.internalAlert;
-  document.getElementById("demoApproval").textContent = scenario.humanApprovalNote;
-  renderTranscript(scenario);
-}
-
-function speakLine(scenario, index) {
-  const synth = getSpeechSynthesis();
-  if (!synth || !demoIsSpeaking) return;
-  if (index >= scenario.transcript.length) {
-    stopVoiceSimulation();
-    document.getElementById("demoPlayerStatus").textContent = "Voice simulation complete";
-    document.getElementById("demoProgress").style.width = "100%";
-    return;
-  }
-  currentUtteranceIndex = index;
-  document.querySelectorAll(".transcript-line").forEach((line, lineIndex) => line.classList.toggle("active", lineIndex === index));
-  document.getElementById("demoProgress").style.width = `${Math.round((index / scenario.transcript.length) * 100)}%`;
-  const line = scenario.transcript[index];
-  document.getElementById("demoPlayerStatus").textContent = `Playing ${line.speaker} line ${index + 1} of ${scenario.transcript.length}`;
-  const utterance = new SpeechSynthesisUtterance(`${line.speaker}: ${line.text}`);
-  utterance.rate = line.speaker === "AI" ? 0.95 : 1;
-  utterance.pitch = line.speaker === "AI" ? 0.95 : 1.05;
-  utterance.onend = () => speakLine(scenario, index + 1);
-  utterance.onerror = () => stopVoiceSimulation();
-  synth.speak(utterance);
-}
-
-function playVoiceSimulation() {
-  const synth = getSpeechSynthesis();
-  if (!synth) {
-    document.getElementById("demoPlayerStatus").textContent = "Audio sample coming soon — transcript and workflow shown below.";
-    return;
-  }
-  if (demoIsSpeaking && !demoIsPaused) {
-    synth.pause();
-    demoIsPaused = true;
-    document.getElementById("demoPlayButton").textContent = "▶";
-    document.getElementById("demoPlayButton").setAttribute("aria-label", "Resume browser voice simulation");
-    document.getElementById("demoPlayerStatus").textContent = "Voice simulation paused";
-    return;
-  }
-  if (demoIsSpeaking && demoIsPaused) {
-    synth.resume();
-    demoIsPaused = false;
-    document.getElementById("demoPlayButton").textContent = "Ⅱ";
-    document.getElementById("demoPlayButton").setAttribute("aria-label", "Pause browser voice simulation");
-    document.getElementById("demoPlayerStatus").textContent = `Resuming line ${currentUtteranceIndex + 1}`;
-    return;
-  }
-  const scenario = demoScenarios[currentScenarioIndex];
-  demoIsSpeaking = true;
-  demoIsPaused = false;
-  document.getElementById("demoPlayButton").textContent = "Ⅱ";
-  document.getElementById("demoPlayButton").setAttribute("aria-label", "Pause browser voice simulation");
-  document.getElementById("demoStopButton").disabled = false;
-  speakLine(scenario, 0);
-}
-
-document.querySelectorAll(".demo-step").forEach((button) => {
-  button.addEventListener("click", () => setScenario(button.dataset.scenario));
-});
-
-document.getElementById("demoPlayButton").addEventListener("click", playVoiceSimulation);
-document.getElementById("demoStopButton").addEventListener("click", stopVoiceSimulation);
-setScenario("home-services");
 
 function formatCurrency(value) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(value);
