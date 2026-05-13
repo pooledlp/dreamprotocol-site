@@ -90,7 +90,7 @@ function ReviewsSection(reviews) {
 
         <div class="mt-12 text-center">
           <p class="text-2xl md:text-3xl font-black">Ready to automate your front desk?</p>
-          <a href="mailto:pooledlp@gmail.com?subject=15-Minute%20DreamProtocol%20Build%20Call" aria-label="Book a DreamProtocol demo" class="mt-6 inline-flex justify-center bg-white text-black px-8 py-4 rounded-full font-bold hover:scale-105 transition">Book a Demo</a>
+          <button type="button" onclick="openAssessment()" aria-label="See what DreamProtocol would automate for your business" class="mt-6 inline-flex justify-center bg-white text-black px-8 py-4 rounded-full font-bold hover:scale-105 transition">See What We’d Automate</button>
         </div>
       </div>
     </section>
