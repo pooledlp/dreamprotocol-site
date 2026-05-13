@@ -2,25 +2,25 @@ const customerReviews = [
   {
     company: "Podium",
     label: "Customer Messaging",
-    logo: "/logos/customers/podium.svg",
+    logo: "public/logos/customers/podium.svg",
     quote: "DreamProtocol made customer response workflows feel faster, cleaner, and more consistent."
   },
   {
     company: "Dialpad",
     label: "Voice AI Workflows",
-    logo: "/logos/customers/dialpad.svg",
+    logo: "public/logos/customers/dialpad.svg",
     quote: "The AI receptionist experience was smooth, professional, and easy to deploy."
   },
   {
     company: "PandaDoc",
     label: "Document Workflows",
-    logo: "/logos/customers/pandadoc.svg",
+    logo: "public/logos/customers/pandadoc.svg",
     quote: "DreamProtocol helped simplify workflows that previously required multiple tools."
   },
   {
     company: "Atera",
     label: "IT Operations",
-    logo: "/logos/customers/atera.svg",
+    logo: "public/logos/customers/atera.svg",
     quote: "We immediately saw operational improvements through workflow automation."
   }
 ];
