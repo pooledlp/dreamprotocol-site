@@ -428,7 +428,9 @@ body::before {
   .scan,
   .protocol-flare,
   .metric-fill,
-  .call-wave::before {
+  .call-wave::before,
+  .hero-shell::before,
+  .hero-shell::after {
     animation: none !important;
     transition: none !important;
   }
@@ -651,12 +653,123 @@ body::before {
   transition: transform .2s ease, opacity .2s ease;
 }
 
+
+.hero-shell {
+  isolation: isolate;
+}
+
+.hero-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(147,178,255,.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(147,178,255,.028) 1px, transparent 1px);
+  background-size: 54px 54px;
+  opacity: .55;
+  transform: translate3d(0, 0, 0);
+  animation: heroGridFloat 28s linear infinite;
+  mask-image: radial-gradient(circle at 42% 34%, black 0%, transparent 72%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero-shell::after {
+  content: "";
+  position: absolute;
+  width: min(760px, 90vw);
+  height: min(760px, 90vw);
+  left: -18%;
+  top: 10%;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(93,128,255,.16), rgba(188,140,255,.07), transparent 68%);
+  filter: blur(28px);
+  opacity: .55;
+  animation: heroGlowPulse 10s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes heroGridFloat {
+  from { background-position: 0 0, 0 0; }
+  to { background-position: 54px 54px, 54px 54px; }
+}
+
+@keyframes heroGlowPulse {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: .4; }
+  50% { transform: translate3d(4%, -3%, 0) scale(1.08); opacity: .7; }
+}
+
+.mobile-menu-toggle {
+  background: rgba(255,255,255,.035);
+  border: 1px solid rgba(255,255,255,.08);
+  box-shadow: none;
+  backdrop-filter: blur(12px);
+}
+
+.mobile-menu-toggle:hover,
+.mobile-menu-toggle:focus-visible {
+  border-color: rgba(147,178,255,.24);
+  background: rgba(255,255,255,.06);
+}
+
 .mobile-nav-panel {
   max-height: calc(100vh - 112px);
   overflow-y: auto;
 }
 
 @media (max-width: 768px) {
+  .hero-shell {
+    align-items: flex-start;
+  }
+
+  .hero-shell::before {
+    background-size: 42px 42px;
+    opacity: .44;
+  }
+
+  .hero-kicker {
+    margin-bottom: .7rem;
+    font-size: .72rem;
+    letter-spacing: .17em;
+  }
+
+  .hero-title {
+    font-size: clamp(2.65rem, 13.5vw, 3.55rem);
+    line-height: .93;
+  }
+
+  .hero-subcopy {
+    margin-top: 1.05rem;
+    font-size: 1rem;
+    line-height: 1.58;
+  }
+
+  .hero-proof-list {
+    margin-top: 1rem;
+    row-gap: .35rem;
+    font-size: .92rem;
+    line-height: 1.45;
+  }
+
+  .hero-cta-row {
+    margin-top: 1.35rem;
+    gap: .65rem;
+  }
+
+  .hero-cta-row > * {
+    min-height: 3.25rem;
+    align-items: center;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+
+  .hero-trust {
+    margin-top: .9rem;
+    font-size: .82rem;
+    line-height: 1.45;
+  }
+
   .core-wrap { width: 260px; height: 260px; }
   .core { width: 180px; height: 180px; }
 
@@ -689,7 +802,7 @@ body::before {
       <button type="button" onclick="openAssessment()" aria-label="See what DreamProtocol would automate for your business" class="bg-white text-black px-4 sm:px-5 py-2 rounded-full text-sm font-bold hover:scale-105 transition">
         <span class="hidden sm:inline">See What We’d Automate</span><span class="sm:hidden">Automate</span>
       </button>
-      <button id="mobileMenuToggle" type="button" class="lg:hidden glass px-3 py-2 rounded-full text-sm font-bold text-white hover:scale-105 transition" aria-controls="mobileMenu" aria-expanded="false" aria-label="Open site menu">Menu</button>
+      <button id="mobileMenuToggle" type="button" class="mobile-menu-toggle lg:hidden px-3 py-2 rounded-full text-xs font-semibold text-gray-300 hover:scale-105 transition" aria-controls="mobileMenu" aria-expanded="false" aria-label="Open site menu">Menu</button>
     </div>
   </div>
 
@@ -707,38 +820,38 @@ body::before {
   </div>
 </nav>
 
-<section id="top" class="relative min-h-screen flex items-center overflow-hidden px-6">
+<section id="top" class="hero-shell relative min-h-screen flex items-center overflow-hidden px-5 sm:px-6">
   <div class="grid-bg"></div>
   <div class="orb top-20 right-10"></div>
   <div class="orb bottom-0 left-0 opacity-25"></div>
 
-  <div class="relative z-10 max-w-7xl mx-auto grid lg:grid-cols-2 gap-14 items-center pt-28 pb-16">
+  <div class="relative z-10 max-w-7xl mx-auto grid lg:grid-cols-2 gap-10 lg:gap-14 items-center pt-24 pb-12 sm:pt-28 sm:pb-16">
     <div>
-      <p class="text-blue-300 uppercase tracking-widest text-sm mb-4">AI front desk + follow-up automation</p>
-      <h1 id="heroTitle" class="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black leading-[0.95] tracking-tight opacity-0">
+      <p class="hero-kicker text-blue-300 uppercase tracking-widest text-sm mb-4">AI front desk + follow-up automation</p>
+      <h1 id="heroTitle" class="hero-title text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black leading-[0.95] tracking-tight opacity-0">
         Never Miss Another Customer Call
       </h1>
 
-      <p id="heroSub" class="mt-8 text-lg md:text-xl text-gray-300 max-w-2xl leading-relaxed opacity-0">
-        DreamProtocol gives Bay Area local businesses a 24/7 AI front desk that answers calls, qualifies leads, sends follow-ups, books appointments, and updates your systems before opportunities go cold.
+      <p id="heroSub" class="hero-subcopy mt-8 text-lg md:text-xl text-gray-300 max-w-2xl leading-relaxed opacity-0">
+        DreamProtocol gives businesses a 24/7 AI front desk that answers calls, qualifies leads, books appointments, and follows up instantly.
       </p>
 
-      <ul class="mt-6 space-y-2 text-gray-200 text-sm md:text-base">
-        <li>• 24/7 call and text handling</li>
+      <ul class="hero-proof-list mt-6 grid gap-2 text-gray-200 text-sm md:text-base">
         <li>• Follow-ups in under 60 seconds</li>
+        <li>• 24/7 call and text handling</li>
         <li>• CRM, calendar, email, and approval workflows</li>
         <li>• Built, monitored, and improved for you</li>
       </ul>
 
-      <div id="heroBtns" class="mt-10 flex flex-col sm:flex-row gap-3 opacity-0">
+      <div id="heroBtns" class="hero-cta-row mt-10 flex flex-col sm:flex-row gap-3 opacity-0">
         <button type="button" onclick="openAssessment()" aria-label="See what DreamProtocol would automate for your business" class="inline-flex justify-center bg-white text-black px-8 py-4 rounded-full font-bold hover:scale-105 transition">
           See What We’d Automate
         </button>
-        <a href="#demo" aria-label="View the DreamProtocol visual AI front desk demo" class="inline-flex justify-center glass px-8 py-4 rounded-full font-bold hover:scale-105 transition">
-          View AI Demo
+        <a href="#demo" aria-label="Hear a live AI call demo from DreamProtocol" class="inline-flex justify-center glass px-8 py-4 rounded-full font-bold hover:scale-105 transition">
+          Hear a Live AI Call
         </a>
       </div>
-      <p class="mt-4 text-sm text-gray-400">Built for home services, clinics, med spas, hotels, legal offices, and professional services.</p>
+      <p class="hero-trust mt-4 text-sm text-gray-400 max-w-2xl">Built for Bay Area businesses that can’t afford missed calls, slow follow-ups, or dropped leads.</p>
     </div>
 
     <div class="relative flex items-center justify-center min-h-[430px] lg:min-h-[560px] scale-95 lg:scale-100">
