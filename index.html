@@ -700,25 +700,6 @@ body::before {
   50% { transform: translate3d(4%, -3%, 0) scale(1.08); opacity: .7; }
 }
 
-.mobile-menu-toggle {
-  background: rgba(255,255,255,.035);
-  border: 1px solid rgba(255,255,255,.08);
-  box-shadow: none;
-  backdrop-filter: blur(12px);
-}
-
-.mobile-menu-toggle:hover,
-.mobile-menu-toggle:focus-visible {
-  border-color: rgba(147,178,255,.24);
-  background: rgba(255,255,255,.06);
-}
-
-.mobile-nav-panel {
-  box-sizing: border-box;
-  width: min(100%, calc(100vw - 2.5rem));
-  max-height: calc(100vh - 112px);
-  overflow-y: auto;
-}
 
 @media (max-width: 640px) {
   .site-nav {
@@ -743,23 +724,9 @@ body::before {
     white-space: nowrap;
   }
 
-  .nav-assessment-button,
-  .mobile-menu-toggle {
-    padding: .5rem .7rem;
-    font-size: .75rem;
-  }
-
-  .mobile-nav-panel {
-    width: calc(100vw - 1.5rem);
-    margin-top: .6rem;
-    padding: .75rem;
-    border-radius: 1.25rem;
-  }
-}
-
-@media (max-width: 380px) {
   .nav-assessment-button {
-    display: none;
+    padding: .5rem .75rem;
+    font-size: .75rem;
   }
 }
 
@@ -851,20 +818,6 @@ body::before {
       <button type="button" onclick="openAssessment()" aria-label="See what DreamProtocol would automate for your business" class="nav-assessment-button bg-white text-black px-4 sm:px-5 py-2 rounded-full text-sm font-bold hover:scale-105 transition">
         <span class="hidden sm:inline">See What We’d Automate</span><span class="sm:hidden">Automate</span>
       </button>
-      <button id="mobileMenuToggle" type="button" class="mobile-menu-toggle lg:hidden px-3 py-2 rounded-full text-xs font-semibold text-gray-300 hover:scale-105 transition" aria-controls="mobileMenu" aria-expanded="false" aria-label="Open site menu">Menu</button>
-    </div>
-  </div>
-
-  <div id="mobileMenu" class="mobile-nav-panel hidden lg:hidden max-w-7xl mx-auto mt-3 glass rounded-3xl p-4 text-sm text-gray-200">
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" aria-label="Mobile section navigation">
-      <a href="#top" class="nav-link rounded-2xl border border-white/10 bg-white/[.04] px-4 py-3 hover:text-white transition" data-section="top">Home</a>
-      <a href="#demo" class="nav-link rounded-2xl border border-white/10 bg-white/[.04] px-4 py-3 hover:text-white transition" data-section="demo">Demo</a>
-      <a href="#automates" class="nav-link rounded-2xl border border-white/10 bg-white/[.04] px-4 py-3 hover:text-white transition" data-section="automates">Automates</a>
-      <a href="#workflow" class="nav-link rounded-2xl border border-white/10 bg-white/[.04] px-4 py-3 hover:text-white transition" data-section="workflow">Workflow</a>
-      <a href="#integrations" class="nav-link rounded-2xl border border-white/10 bg-white/[.04] px-4 py-3 hover:text-white transition" data-section="integrations">Systems</a>
-      <a href="#pricing" class="nav-link rounded-2xl border border-white/10 bg-white/[.04] px-4 py-3 hover:text-white transition" data-section="pricing">Pricing</a>
-      <a href="#about" class="nav-link rounded-2xl border border-white/10 bg-white/[.04] px-4 py-3 hover:text-white transition" data-section="about">About</a>
-      <a href="#faq" class="nav-link rounded-2xl border border-white/10 bg-white/[.04] px-4 py-3 hover:text-white transition" data-section="faq">FAQ</a>
     </div>
   </div>
 </nav>
@@ -1425,18 +1378,9 @@ function updateRoiCalculator() {
 updateRoiCalculator();
 
 function setupNavigation() {
-  const mobileToggle = document.getElementById("mobileMenuToggle");
-  const mobileMenu = document.getElementById("mobileMenu");
   const navLinks = Array.from(document.querySelectorAll(".nav-link[data-section]"));
   const sectionIds = [...new Set(navLinks.map((link) => link.dataset.section))];
   const sections = sectionIds.map((id) => document.getElementById(id)).filter(Boolean);
-
-  function closeMobileMenu() {
-    if (!mobileMenu || !mobileToggle) return;
-    mobileMenu.classList.add("hidden");
-    mobileToggle.setAttribute("aria-expanded", "false");
-    mobileToggle.textContent = "Menu";
-  }
 
   function setActive(sectionId) {
     navLinks.forEach((link) => {
@@ -1445,21 +1389,6 @@ function setupNavigation() {
       else link.removeAttribute("aria-current");
     });
   }
-
-  if (mobileToggle && mobileMenu) {
-    mobileToggle.addEventListener("click", () => {
-      const isOpen = !mobileMenu.classList.contains("hidden");
-      mobileMenu.classList.toggle("hidden", isOpen);
-      mobileToggle.setAttribute("aria-expanded", String(!isOpen));
-      mobileToggle.textContent = isOpen ? "Menu" : "Close";
-    });
-  }
-
-  navLinks.forEach((link) => {
-    link.addEventListener("click", () => {
-      closeMobileMenu();
-    });
-  });
 
   if ("IntersectionObserver" in window && sections.length) {
     const observer = new IntersectionObserver((entries) => {
