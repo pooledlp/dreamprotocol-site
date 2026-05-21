@@ -18,7 +18,7 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 <link rel="alternate icon" href="/favicon.svg" />
 
-<script src="https://cdn.tailwindcss.com"></script>
+<script defer src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
@@ -943,7 +943,7 @@ body::before {
               <p class="text-sm text-gray-400">No autoplay. Use the native audio controls to play the sample.</p>
             </div>
           </div>
-          <audio controls preload="metadata" class="w-full" aria-label="Play DreamProtocol medical AI receptionist demo">
+          <audio controls preload="none" class="w-full" aria-label="Play DreamProtocol medical AI receptionist demo">
             <source src="/demo-audio/dreamprotocol-medical-demo.mp3" type="audio/mpeg" />
             Your browser does not support the audio element.
           </audio>
@@ -1373,10 +1373,10 @@ if (window.gsap && window.ScrollTrigger) {
 }
 }
 
-if (document.readyState === "complete") {
+if (document.readyState !== "loading") {
   initGsapAnimations();
 } else {
-  window.addEventListener("load", initGsapAnimations, { once: true });
+  document.addEventListener("DOMContentLoaded", initGsapAnimations, { once: true });
 }
 
 function formatCurrency(value) {
@@ -1395,11 +1395,13 @@ function updateRoiCalculator() {
   document.getElementById("roiAnnual").textContent = formatCurrency(monthly * 12);
 }
 
-["roiCalls", "roiMissed", "roiValue", "roiClose"].forEach((id) => {
-  const input = document.getElementById(id);
-  if (input) input.addEventListener("input", updateRoiCalculator);
-});
-updateRoiCalculator();
+function initRoiCalculator() {
+  ["roiCalls", "roiMissed", "roiValue", "roiClose"].forEach((id) => {
+    const input = document.getElementById(id);
+    if (input) input.addEventListener("input", updateRoiCalculator);
+  });
+  updateRoiCalculator();
+}
 
 function setupNavigation() {
   const navLinks = Array.from(document.querySelectorAll(".nav-link[data-section]"));
@@ -1428,9 +1430,8 @@ function setupNavigation() {
   if (sectionIds.includes(initialSection)) setActive(initialSection);
 }
 
-setupNavigation();
-
 function openAssessment() {
+  ensureAssessmentInitialized();
   document.getElementById("assessmentModal").classList.remove("hidden");
   document.body.style.overflow = "hidden";
   currentAssessmentStep = 1;
@@ -1448,7 +1449,8 @@ function closeAssessment() {
   }
 }
 
-const assessmentSteps = Array.from(document.querySelectorAll(".assessment-step"));
+let assessmentInitialized = false;
+let assessmentSteps = [];
 const assessmentStepHints = [
   "Quick intro",
   "Operations fit",
@@ -1490,91 +1492,95 @@ function validateCurrentStep() {
   return true;
 }
 
-document.getElementById("assessmentNextBtn").addEventListener("click", () => {
-  if (!validateCurrentStep()) return;
-  if (currentAssessmentStep < assessmentSteps.length) {
-    currentAssessmentStep += 1;
-    updateAssessmentStep();
-  }
-});
+function initAssessment() {
+  if (assessmentInitialized) return;
+  assessmentInitialized = true;
+  assessmentSteps = Array.from(document.querySelectorAll(".assessment-step"));
 
-document.getElementById("assessmentBackBtn").addEventListener("click", () => {
-  if (currentAssessmentStep > 1) {
-    currentAssessmentStep -= 1;
-    updateAssessmentStep();
-  }
-});
+  document.getElementById("assessmentNextBtn").addEventListener("click", () => {
+    if (!validateCurrentStep()) return;
+    if (currentAssessmentStep < assessmentSteps.length) {
+      currentAssessmentStep += 1;
+      updateAssessmentStep();
+    }
+  });
 
-document.querySelectorAll("[data-tile-group]").forEach((group) => {
-  const fieldName = group.getAttribute("data-tile-group");
-  const hiddenInput = document.querySelector(`input[name="${fieldName}"]`);
-  const options = Array.from(group.querySelectorAll(".option-tile"));
-  options.forEach((option) => {
-    option.addEventListener("click", () => {
-      options.forEach((opt) => opt.classList.remove("selected"));
-      option.classList.add("selected");
-      hiddenInput.value = option.getAttribute("data-value") || "";
+  document.getElementById("assessmentBackBtn").addEventListener("click", () => {
+    if (currentAssessmentStep > 1) {
+      currentAssessmentStep -= 1;
+      updateAssessmentStep();
+    }
+  });
+
+  document.querySelectorAll("[data-tile-group]").forEach((group) => {
+    const fieldName = group.getAttribute("data-tile-group");
+    const hiddenInput = document.querySelector(`input[name="${fieldName}"]`);
+    const options = Array.from(group.querySelectorAll(".option-tile"));
+    options.forEach((option) => {
+      option.addEventListener("click", () => {
+        options.forEach((opt) => opt.classList.remove("selected"));
+        option.classList.add("selected");
+        hiddenInput.value = option.getAttribute("data-value") || "";
+      });
     });
   });
-});
+  updateAssessmentStep();
 
-updateAssessmentStep();
-
-let resultsAnimated = false;
-function animateResultCounters() {
-  if (resultsAnimated) return;
-  resultsAnimated = true;
-  document.querySelectorAll(".result-counter").forEach((counter) => {
-    const target = Number(counter.getAttribute("data-target") || 0);
-    const prefix = counter.getAttribute("data-prefix") || "";
-    const suffix = counter.getAttribute("data-suffix") || "";
-    let frame = 0;
-    const durationFrames = 48;
-    const tick = () => {
-      frame += 1;
-      const progress = Math.min(frame / durationFrames, 1);
-      const value = Math.round(target * (1 - Math.pow(1 - progress, 3)));
-      counter.textContent = `${prefix}${value}${suffix}`;
-      if (progress < 1) requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
-  });
-}
-
-const resultsSection = document.getElementById("results");
-if (resultsSection && "IntersectionObserver" in window) {
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        animateResultCounters();
-        observer.disconnect();
-      }
+  let resultsAnimated = false;
+  function animateResultCounters() {
+    if (resultsAnimated) return;
+    resultsAnimated = true;
+    document.querySelectorAll(".result-counter").forEach((counter) => {
+      const target = Number(counter.getAttribute("data-target") || 0);
+      const prefix = counter.getAttribute("data-prefix") || "";
+      const suffix = counter.getAttribute("data-suffix") || "";
+      let frame = 0;
+      const durationFrames = 48;
+      const tick = () => {
+        frame += 1;
+        const progress = Math.min(frame / durationFrames, 1);
+        const value = Math.round(target * (1 - Math.pow(1 - progress, 3)));
+        counter.textContent = `${prefix}${value}${suffix}`;
+        if (progress < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
     });
-  }, { threshold: 0.4 });
-  observer.observe(resultsSection);
-} else {
-  animateResultCounters();
-}
+  }
 
-document.getElementById("assessmentForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  if (!validateCurrentStep()) return;
+  const resultsSection = document.getElementById("results");
+  if (resultsSection && "IntersectionObserver" in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          animateResultCounters();
+          observer.disconnect();
+        }
+      });
+    }, { threshold: 0.4 });
+    observer.observe(resultsSection);
+  } else {
+    animateResultCounters();
+  }
 
-  const data = new FormData(e.target);
-  const get = (key) => (data.get(key) || "").toString().trim();
+  document.getElementById("assessmentForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!validateCurrentStep()) return;
 
-  const scoreFields = ["repetitive_ops", "workflow_docs", "system_integration", "team_adoption"];
-  const maxScore = scoreFields.length * 3;
-  const score = scoreFields.reduce((sum, key) => sum + Number(get(key) || 0), 0);
-  const readiness = score >= 10 ? "High" : score >= 7 ? "Medium" : "Early Stage";
-  const recommendation = readiness === "High"
-    ? "Recommended next step: start with a 2–4 week pilot for one high-impact front-desk workflow."
-    : readiness === "Medium"
-      ? "Recommended next step: map the first call, follow-up, or scheduling workflow, then deploy a focused pilot."
-      : "Recommended next step: document the front-desk flow and pick one connected system before launch.";
+    const data = new FormData(e.target);
+    const get = (key) => (data.get(key) || "").toString().trim();
 
-  const subject = `See What We’d Automate Result - ${get("company") || get("name") || "New Lead"}`;
-  const body =
+    const scoreFields = ["repetitive_ops", "workflow_docs", "system_integration", "team_adoption"];
+    const maxScore = scoreFields.length * 3;
+    const score = scoreFields.reduce((sum, key) => sum + Number(get(key) || 0), 0);
+    const readiness = score >= 10 ? "High" : score >= 7 ? "Medium" : "Early Stage";
+    const recommendation = readiness === "High"
+      ? "Recommended next step: start with a 2–4 week pilot for one high-impact front-desk workflow."
+      : readiness === "Medium"
+        ? "Recommended next step: map the first call, follow-up, or scheduling workflow, then deploy a focused pilot."
+        : "Recommended next step: document the front-desk flow and pick one connected system before launch.";
+
+    const subject = `See What We’d Automate Result - ${get("company") || get("name") || "New Lead"}`;
+    const body =
 `See What We’d Automate Submission
 
 Name: ${get("name")}
@@ -1601,46 +1607,67 @@ Timeline:
 ${get("timeline")}
 
 `
-  ;
+    ;
 
-  const statusEl = document.getElementById("assessmentStatus");
-  const submitBtn = document.getElementById("assessmentSubmitBtn");
-  statusEl.classList.remove("hidden");
-  statusEl.textContent = "Sending your workflow notes...";
-  submitBtn.disabled = true;
-  submitBtn.classList.add("opacity-70", "cursor-not-allowed");
+    const statusEl = document.getElementById("assessmentStatus");
+    const submitBtn = document.getElementById("assessmentSubmitBtn");
+    statusEl.classList.remove("hidden");
+    statusEl.textContent = "Sending your workflow notes...";
+    submitBtn.disabled = true;
+    submitBtn.classList.add("opacity-70", "cursor-not-allowed");
 
-  try {
-    const response = await fetch("https://formsubmit.co/ajax/pooledlp@gmail.com", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Accept": "application/json" },
-      body: JSON.stringify({
-        _subject: subject,
-        _template: "table",
-        _captcha: "false",
-        message: body,
-        name: get("name"),
-        email: get("email"),
-        company: get("company"),
-        readiness_level: readiness,
-        assessment_score: `${score}/${maxScore}`
-      })
-    });
+    try {
+      const response = await fetch("https://formsubmit.co/ajax/pooledlp@gmail.com", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({
+          _subject: subject,
+          _template: "table",
+          _captcha: "false",
+          message: body,
+          name: get("name"),
+          email: get("email"),
+          company: get("company"),
+          readiness_level: readiness,
+          assessment_score: `${score}/${maxScore}`
+        })
+      });
 
-    if (!response.ok) throw new Error("Failed to send");
-    statusEl.textContent = "Got it — we’ll map the first workflow DreamProtocol could automate and follow up with practical next steps.";
-    statusEl.classList.add("text-blue-100");
-    e.target.reset();
-    document.querySelectorAll(".option-tile.selected").forEach((tile) => tile.classList.remove("selected"));
-    currentAssessmentStep = 1;
-    updateAssessmentStep();
-  } catch (error) {
-    statusEl.textContent = "Could not send right now. Please try again.";
-  } finally {
-    submitBtn.disabled = false;
-    submitBtn.classList.remove("opacity-70", "cursor-not-allowed");
+      if (!response.ok) throw new Error("Failed to send");
+      statusEl.textContent = "Got it — we’ll map the first workflow DreamProtocol could automate and follow up with practical next steps.";
+      statusEl.classList.add("text-blue-100");
+      e.target.reset();
+      document.querySelectorAll(".option-tile.selected").forEach((tile) => tile.classList.remove("selected"));
+      currentAssessmentStep = 1;
+      updateAssessmentStep();
+    } catch (error) {
+      statusEl.textContent = "Could not send right now. Please try again.";
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.classList.remove("opacity-70", "cursor-not-allowed");
+    }
+  });
+}
+
+function ensureAssessmentInitialized() {
+  if (!assessmentInitialized) initAssessment();
+}
+
+function scheduleNonCriticalWork() {
+  setupNavigation();
+  initRoiCalculator();
+  if ("requestIdleCallback" in window) {
+    requestIdleCallback(() => initAssessment(), { timeout: 2500 });
+  } else {
+    setTimeout(initAssessment, 800);
   }
-});
+}
+
+if (document.readyState !== "loading") {
+  scheduleNonCriticalWork();
+} else {
+  document.addEventListener("DOMContentLoaded", scheduleNonCriticalWork, { once: true });
+}
 </script>
 
 </body>
