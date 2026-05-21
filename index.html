@@ -19,8 +19,9 @@
 <link rel="alternate icon" href="/favicon.svg" />
 
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 
 <style>
 html { scroll-behavior: smooth; }
@@ -62,6 +63,15 @@ body::before {
   from { transform: translateY(0); }
   to { transform: translateY(72px); }
 }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 
 .noise {
   position: fixed;
@@ -1137,7 +1147,7 @@ body::before {
       <div class="reveal lg:justify-self-end">
         <figure class="relative max-w-sm mx-auto lg:mx-0">
           <div class="absolute -inset-3 rounded-[2rem] bg-gradient-to-br from-blue-300/20 to-violet-300/10 blur-xl"></div>
-          <img src="public/logos/customers/dustin-poole-about.png" alt="Dustin Poole, founder of DreamProtocol.ai" class="relative h-[360px] w-full rounded-[1.65rem] object-cover object-center border border-white/10 bg-white/[.04] shadow-[0_0_60px_rgba(91,140,255,.16)]" loading="lazy">
+          <img src="public/logos/customers/dustin-poole-about.png" alt="Dustin Poole, founder of DreamProtocol.ai" class="relative h-[360px] w-full rounded-[1.65rem] object-cover object-center border border-white/10 bg-white/[.04] shadow-[0_0_60px_rgba(91,140,255,.16)]" loading="lazy" decoding="async" width="1200" height="1200">
           <figcaption class="relative mt-4 rounded-2xl border border-white/10 bg-white/[.06] p-4 text-sm leading-relaxed text-gray-300">
             <span class="block font-bold text-white">Dustin Poole</span>
             Founder of DreamProtocol.ai
@@ -1298,12 +1308,13 @@ body::before {
 </footer>
 
 
-<script src="/reviews-section.js"></script>
+<script defer src="/reviews-section.js"></script>
 
 
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","name":"DreamProtocol","url":"https://dreamprotocol.ai"},{"@type":"ProfessionalService","name":"DreamProtocol","url":"https://dreamprotocol.ai","areaServed":["Bay Area","Marin County","Sonoma County","San Francisco","Oakland","San Jose","Northern California"],"description":"AI front desk, missed call recovery, CRM follow-up automation, and workflow automation implementation for Bay Area SMBs."},{"@type":"WebSite","name":"DreamProtocol","url":"https://dreamprotocol.ai/"},{"@type":"Service","name":"AI Front Desk","provider":{"@type":"Organization","name":"DreamProtocol"},"areaServed":["Bay Area","Northern California"],"serviceType":["AI Front Desk","AI Receptionist","AI Workflow Automation","SMB AI Automation","CRM Follow-Up Automation"],"description":"Answer calls, qualify leads, send follow-ups, book appointments, update CRM records, and reduce admin work."},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What does DreamProtocol do?","acceptedAnswer":{"@type":"Answer","text":"DreamProtocol builds AI front-desk and workflow automation systems for small businesses. We help answer calls, qualify leads, send follow-ups, update CRMs, book appointments, and reduce repetitive admin work."}},{"@type":"Question","name":"Is this just a chatbot?","acceptedAnswer":{"@type":"Answer","text":"No. DreamProtocol connects AI to real business workflows: calls, texts, email, CRM records, calendars, approvals, and team notifications."}},{"@type":"Question","name":"Who is this for?","acceptedAnswer":{"@type":"Answer","text":"Local businesses that depend on fast response times: home services, med spas, clinics, hotels, legal offices, professional services, and SMB teams."}},{"@type":"Question","name":"Can humans stay in control?","acceptedAnswer":{"@type":"Answer","text":"Yes. We can build approval steps so your team reviews important messages, updates, or actions before they are sent."}},{"@type":"Question","name":"How long does a pilot take?","acceptedAnswer":{"@type":"Answer","text":"Most starter pilots are designed to launch in 2–4 weeks depending on integrations, call flows, and approval requirements."}},{"@type":"Question","name":"What tools can you connect with?","acceptedAnswer":{"@type":"Answer","text":"Common systems include CRM platforms, calendars, email, Microsoft 365, Google Workspace, QuickBooks, help desk tools, phone systems, and custom workflows."}},{"@type":"Question","name":"Can you help with our phone system or business tools too?","acceptedAnswer":{"@type":"Answer","text":"Yes. Many AI front-desk projects depend on clean phone routing, calendars, inboxes, CRM records, user access, and cloud tools. DreamProtocol can help configure, coordinate, and support those systems as part of a workflow build or managed operations plan."}},{"@type":"Question","name":"Do you only work in the Bay Area?","acceptedAnswer":{"@type":"Answer","text":"DreamProtocol is Bay Area-based and focuses on Bay Area and Northern California SMBs, but remote implementation is possible for the right business."}}]}]}</script>
 
 <script>
+function initGsapAnimations() {
 if (window.gsap && window.ScrollTrigger) {
   gsap.registerPlugin(ScrollTrigger);
 
@@ -1359,6 +1370,13 @@ if (window.gsap && window.ScrollTrigger) {
     el.style.opacity = "1";
     el.style.transform = "none";
   });
+}
+}
+
+if (document.readyState === "complete") {
+  initGsapAnimations();
+} else {
+  window.addEventListener("load", initGsapAnimations, { once: true });
 }
 
 function formatCurrency(value) {
