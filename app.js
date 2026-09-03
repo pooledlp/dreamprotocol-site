@@ -25,6 +25,11 @@
   const demoNotice = $('#demo-notice');
   let profile = null;
 
+  const cleanString = (value, limit = 200) => typeof value === 'string' ? value.trim().slice(0, limit) : '';
+  const cleanList = (value, limit = 5) => Array.isArray(value)
+    ? value.map((item) => cleanString(item)).filter(Boolean).slice(0, limit)
+    : [];
+
   function normalizeUrl(value) {
     const trimmed = value.trim();
     const withProtocol = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
@@ -41,28 +46,101 @@
       company,
       employeeName: 'Alex',
       role: 'AI Front Desk',
-      greeting: `Thanks for calling ${company}. This is Alex. How can I help you today?`
+      greeting: `Thanks for calling ${company}. This is Alex. How can I help you today?`,
+      business: { name: company, services: [], locations: [], faq: [] },
+      found: {},
+      isFallback: true,
+      analysisId: null
     };
   }
 
   function parseProfile(data, url) {
+    if (!data || data.success !== true || !data.business) throw new Error('unavailable');
     const fallback = fallbackProfile(url);
-    const business = data?.business || data?.profile || data || {};
+    const source = data.business;
+    const agent = data.agent || {};
+    const name = cleanString(source.name || source.company || source.businessName, 100);
+    const business = {
+      name,
+      description: cleanString(source.description, 400),
+      website: cleanString(source.website, 500),
+      industry: cleanString(source.industry, 80),
+      services: cleanList(source.services),
+      hours: cleanString(source.hours, 240),
+      locations: cleanList(source.locations),
+      phone: cleanString(source.phone, 60),
+      email: cleanString(source.email, 160),
+      faq: Array.isArray(source.faq) ? source.faq.filter((item) => item && cleanString(item.question)).slice(0, 5).map((item) => ({ question: cleanString(item.question), answer: cleanString(item.answer, 500) })) : []
+    };
+    const found = {
+      identity: Boolean(data.found?.identity && name),
+      services: Boolean(data.found?.services && business.services.length),
+      hours: Boolean(data.found?.hours && business.hours),
+      locations: Boolean(data.found?.locations && business.locations.length),
+      faq: Boolean(data.found?.faq && business.faq.length)
+    };
+    const company = found.identity ? name : fallback.company;
     return {
-      company: String(business.company || business.businessName || business.name || fallback.company).slice(0, 100),
-      employeeName: String(business.employeeName || business.agentName || 'Alex').slice(0, 40),
-      role: String(business.role || 'AI Front Desk').slice(0, 80),
-      greeting: String(business.greeting || business.exampleGreeting || fallback.greeting).slice(0, 500),
-      analysisId: business.analysisId || data?.analysisId || null
+      company,
+      employeeName: cleanString(agent.name, 40) || 'Alex',
+      role: cleanString(agent.role, 80) || 'AI Front Desk',
+      greeting: cleanString(agent.greeting, 500) || `Thanks for calling ${company}. This is Alex. How can I help you today?`,
+      suggestedGoals: cleanList(agent.suggestedGoals, 6),
+      analysisId: cleanString(data.analysisId, 100) || null,
+      business,
+      found,
+      isFallback: false
     };
   }
 
-  async function animateAnalysis() {
-    analysisSteps.forEach((step) => step.classList.remove('done'));
+  async function animateAnalysis(stopSignal) {
+    analysisSteps.forEach((step) => step.classList.remove('done', 'active', 'missing'));
     for (const step of analysisSteps) {
+      if (stopSignal.stopped) break;
+      analysisSteps.forEach((item) => item.classList.remove('active'));
+      step.classList.add('active');
       await wait(reducedMotion ? 1 : 270);
-      step.classList.add('done');
     }
+  }
+
+  function finishAnalysis(found, succeeded) {
+    analysisSteps.forEach((step) => {
+      step.classList.remove('active');
+      const key = step.dataset.field;
+      const discovered = key === 'website' ? succeeded : Boolean(found[key]);
+      step.classList.toggle('done', discovered);
+      step.classList.toggle('missing', !discovered);
+    });
+  }
+
+  function addKnowledge(label, values) {
+    if (!values || (Array.isArray(values) && !values.length)) return;
+    const section = document.createElement('section');
+    const heading = document.createElement('h4');
+    heading.textContent = label;
+    const content = document.createElement('p');
+    content.textContent = Array.isArray(values) ? values.join(' · ') : values;
+    section.append(heading, content);
+    $('#knowledge-preview').append(section);
+  }
+
+  function renderProfile(current) {
+    $('#employee-name').textContent = current.employeeName;
+    $('#employee-company').textContent = `${current.role} for ${current.company}`;
+    $('#employee-greeting').textContent = `“${current.greeting.replace(/^[“"]|[”"]$/g, '')}”`;
+    $('#talk-button').firstChild.textContent = `Talk to ${current.employeeName} `;
+    const knowledge = $('#knowledge-preview');
+    knowledge.replaceChildren();
+    if (!current.isFallback) {
+      if (current.found.services) addKnowledge('Knows about', current.business.services);
+      if (current.found.locations) addKnowledge('Service area', current.business.locations);
+      if (current.found.hours) addKnowledge('Hours', current.business.hours);
+      if (current.business.phone) addKnowledge('Contact', current.business.phone);
+    }
+    $('#preview-label').textContent = current.isFallback ? 'Starting preview' : 'Your preview is ready';
+    demoNotice.textContent = current.isFallback
+      ? "We couldn't fully read that website, so here's a basic starting point. A production Dream Protocol employee would be configured with your verified services, hours, locations, and workflows."
+      : 'Built only from business information found on your website.';
   }
 
   async function requestAnalysis(url) {
@@ -95,7 +173,8 @@
     websiteForm.hidden = true;
     employeeView.hidden = true;
     analysisView.hidden = false;
-    const animation = animateAnalysis();
+    const stopSignal = { stopped: false };
+    const animation = animateAnalysis(stopSignal);
     let usedFallback = false;
     try {
       const data = await requestAnalysis(url);
@@ -104,16 +183,24 @@
       profile = fallbackProfile(url);
       usedFallback = true;
     }
+    stopSignal.stopped = true;
     await animation;
+    finishAnalysis(profile.found, !usedFallback);
     await wait(reducedMotion ? 1 : 250);
     analysisView.hidden = true;
     employeeView.hidden = false;
-    $('#employee-name').textContent = profile.employeeName;
-    $('#employee-company').textContent = `${profile.role} for ${profile.company}`;
-    $('#employee-greeting').textContent = `“${profile.greeting.replace(/^[“"]|[”"]$/g, '')}”`;
-    $('#talk-button').firstChild.textContent = `Talk to ${profile.employeeName} `;
-    demoNotice.textContent = usedFallback ? 'Here’s a starting point. We’ll tailor the live employee after learning your workflow.' : 'Built from the business information provided by your website.';
+    renderProfile(profile);
     button.disabled = false;
+  });
+
+  $('#reset-analysis').addEventListener('click', () => {
+    profile = null;
+    employeeView.hidden = true;
+    analysisView.hidden = true;
+    websiteForm.hidden = false;
+    const input = $('#business-url');
+    input.value = '';
+    input.focus();
   });
 
   const talkButton = $('#talk-button');

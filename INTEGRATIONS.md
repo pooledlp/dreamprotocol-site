@@ -1,11 +1,11 @@
 # Dream Protocol interactive integrations
 
-The homepage is a static site. Production services are isolated behind `window.DREAMPROTOCOL_CONFIG`, which can be assigned before `app.js` loads. The page supplies same-origin defaults:
+The homepage is a static site. Production services are isolated behind `window.DREAMPROTOCOL_CONFIG`, which can be assigned before `app.js` loads. The page supplies the intended analyzer hostname as its default; DNS, TLS, and the reverse proxy must be deployed before enabling the production scanner:
 
 ```html
 <script>
 window.DREAMPROTOCOL_CONFIG = {
-  businessAnalysisEndpoint: "/api/analyze-business",
+  businessAnalysisEndpoint: "https://api.dreamprotocol.ai/analyze-business",
   voiceSessionEndpoint: "/api/voice/session"
 };
 </script>
@@ -18,25 +18,30 @@ A deployment may override either URL with a same-origin or CORS-enabled HTTPS en
 The browser sends:
 
 ```http
-POST /api/analyze-business
+POST https://api.dreamprotocol.ai/analyze-business
 Content-Type: application/json
 
 {"url":"https://example.com/"}
 ```
 
-The response may use top-level properties or nest them under `business` or `profile`:
+The response uses a normalized, evidence-based contract:
 
 ```json
 {
+  "success": true,
   "analysisId": "short-lived-reference",
   "business": {
-    "company": "North Bay Plumbing",
-    "employeeName": "Alex",
-    "role": "AI Front Desk",
-    "greeting": "Thanks for calling North Bay Plumbing. This is Alex. How can I help?"
-  }
+    "name": "North Bay Plumbing",
+    "services": ["Emergency plumbing", "Drain cleaning"],
+    "hours": "Mo-Fr 08:00-17:00",
+    "locations": ["San Rafael, CA"]
+  },
+  "agent": {"name": "Alex", "role": "AI Front Desk", "greeting": "Thanks for calling North Bay Plumbing. This is Alex. How can I help you today?"},
+  "found": {"identity": true, "services": true, "hours": true, "locations": true, "faq": false}
 }
 ```
+
+Fields not backed by extracted website evidence must be absent, empty, or have a matching `found` value of `false`. The UI displays checkmarks and knowledge categories only when these flags agree with non-empty normalized data.
 
 The backend—not the browser—must normalize and validate URLs, allow only public HTTP/HTTPS destinations, resolve and block private/loopback/link-local/internal addresses (including redirects and DNS rebinding), enforce crawl/page/size limits and timeouts, and sanitize fetched content before model use or storage. The frontend never fetches the submitted site directly. If analysis is unavailable, it presents an explicitly generic starting profile without exposing technical errors.
 
