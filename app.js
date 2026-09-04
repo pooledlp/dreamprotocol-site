@@ -24,6 +24,35 @@
   const analysisSteps = [...document.querySelectorAll('#analysis-steps li')];
   const demoNotice = $('#demo-notice');
   let profile = null;
+  let widgetRenderId = 0;
+
+  const vapiWidgetReady = new Promise((resolve) => {
+    const widgetScript = $('#vapi-widget-script');
+    let settled = false;
+    const timeout = window.setTimeout(() => finish(false), 10000);
+
+    function finish(loaded) {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(timeout);
+      if (loaded && customElements.get('vapi-widget')) resolve(true);
+      else {
+        console.error('[Dream Protocol Vapi Widget] Widget script failed to load.');
+        resolve(false);
+      }
+    }
+
+    if (customElements.get('vapi-widget')) {
+      finish(true);
+      return;
+    }
+
+    customElements.whenDefined('vapi-widget').then(() => finish(true));
+    widgetScript.addEventListener('load', () => {
+      if (customElements.get('vapi-widget')) finish(true);
+    }, { once: true });
+    widgetScript.addEventListener('error', () => finish(false), { once: true });
+  });
 
   const cleanString = (value, limit = 200) => typeof value === 'string' ? value.trim().slice(0, limit) : '';
   const cleanList = (value, limit = 5) => Array.isArray(value)
@@ -159,7 +188,7 @@
     };
   }
 
-  function renderVoiceWidget(current) {
+  async function renderVoiceWidget(current) {
     const panel = $('#alex-widget-panel');
     const host = $('#vapi-widget-host');
     const errorMessage = $('#widget-error');
@@ -167,6 +196,16 @@
     errorMessage.hidden = true;
     panel.hidden = current.isFallback;
     if (current.isFallback) return;
+    const renderId = ++widgetRenderId;
+    errorMessage.textContent = 'Loading live voice…';
+    errorMessage.hidden = false;
+
+    if (!await vapiWidgetReady) {
+      if (renderId !== widgetRenderId) return;
+      errorMessage.textContent = 'Live voice is temporarily unavailable.';
+      return;
+    }
+    if (renderId !== widgetRenderId) return;
 
     const widget = document.createElement('vapi-widget');
     const attributes = {
@@ -175,22 +214,27 @@
       mode: 'voice',
       theme: 'dark',
       size: 'full',
-      'show-transcript': 'true',
-      'require-consent': 'true',
-      'terms-content': 'Use your microphone to speak with the Dream Protocol AI demo. Conversation data is processed by our voice technology provider to provide the live experience.',
-      'base-color': '#0f1215',
+      title: 'Talk with Alex',
+      'start-button-text': 'Start conversation',
+      'end-button-text': 'End conversation',
+      'voice-show-transcript': 'true',
+      'consent-required': 'true',
+      'consent-content': 'Use your microphone to speak with the Dream Protocol AI demo. Conversation data is processed by our voice technology provider to provide the live experience.',
+      'base-bg-color': '#0f1215',
       'accent-color': '#a8c5ff',
-      'button-base-color': '#d7ff68',
-      'button-accent-color': '#0a0c0e',
-      radius: 'medium',
+      'cta-button-color': '#d7ff68',
+      'cta-button-text-color': '#0a0c0e',
+      'border-radius': 'medium',
       'assistant-overrides': JSON.stringify(widgetOverrides(current))
     };
     Object.entries(attributes).forEach(([name, value]) => widget.setAttribute(name, value || ''));
     widget.addEventListener('error', (event) => {
       console.error('[Dream Protocol Vapi Widget]', event.detail);
+      errorMessage.textContent = 'Live voice is temporarily unavailable.';
       errorMessage.hidden = false;
     });
     host.append(widget);
+    errorMessage.hidden = true;
   }
 
   async function requestAnalysis(url) {
@@ -245,6 +289,7 @@
 
   $('#reset-analysis').addEventListener('click', () => {
     profile = null;
+    widgetRenderId += 1;
     $('#vapi-widget-host').replaceChildren();
     $('#alex-widget-panel').hidden = true;
     employeeView.hidden = true;

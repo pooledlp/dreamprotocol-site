@@ -18,7 +18,7 @@ The scanner sends `{"url":"https://example.com/"}` to `https://api.dreamprotocol
 
 ## Vapi browser voice
 
-The result panel embeds Vapi's official Web Widget in voice mode. The widget script is pinned to `@vapi-ai/client-sdk-react@0.3.1` and loaded from unpkg; there is no local Vapi SDK bundle or custom audio/WebRTC adapter. It receives the verified scanner profile directly and does not request a voice-session backend. Before mounting the widget, the browser serializes these `assistantOverrides.variableValues`:
+The result panel embeds Vapi's official Web Widget in voice mode. The widget script is pinned to `@vapi-ai/client-sdk-react@0.1.1` and loaded from unpkg; there is no local Vapi SDK bundle or custom audio/WebRTC adapter. It receives the verified scanner profile directly and does not request a voice-session backend. Before mounting the widget, the browser serializes these `assistantOverrides.variableValues`:
 
 - `companyName`
 - `businessWebsite`
