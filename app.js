@@ -25,8 +25,17 @@
   const demoNotice = $('#demo-notice');
   let profile = null;
   let alexVapi = null;
+  let nativeVapiButton = null;
+  let alexCallActive = false;
   let vapiSDKPromise = null;
   let alexEventHandlers = [];
+  const alexStartButton = $('#alex-start-button');
+
+  alexStartButton.addEventListener('click', () => {
+    if (!nativeVapiButton) return;
+    console.log('[Dream Protocol Vapi] proxying user click to native Vapi control');
+    nativeVapiButton.click();
+  });
 
   function loadVapiSDK() {
     if (typeof window.vapiSDK?.run === 'function') {
@@ -194,7 +203,7 @@
   function removeAlexVoice() {
     alexEventHandlers.forEach(([event, handler]) => alexVapi?.off?.(event, handler));
     alexEventHandlers = [];
-    if (alexVapi) {
+    if (alexVapi && alexCallActive) {
       try {
         alexVapi.stop?.();
       } catch (error) {
@@ -202,8 +211,12 @@
       }
     }
     alexVapi = null;
+    alexCallActive = false;
+    nativeVapiButton = null;
     document.querySelectorAll('.vapi-btn').forEach((button) => button.remove());
     $('#alex-voice-control').replaceChildren();
+    alexStartButton.disabled = true;
+    alexStartButton.textContent = 'Loading voice…';
   }
 
   function listenForAlexEvent(event, handler) {
@@ -240,11 +253,9 @@
     const panel = $('#alex-widget-panel');
     const errorMessage = $('#widget-error');
     removeAlexVoice();
-    errorMessage.hidden = true;
     panel.hidden = current.isFallback;
     if (current.isFallback) return;
-    errorMessage.textContent = 'Loading voice control…';
-    errorMessage.hidden = false;
+    errorMessage.textContent = 'Preparing live voice…';
 
     try {
       await loadVapiSDK();
@@ -270,22 +281,30 @@
       if (!alexVapi) throw new Error('Vapi SDK did not return an instance');
       console.log('[Dream Protocol Vapi] run returned instance');
 
-      listenForAlexEvent('call-start', () => { errorMessage.hidden = true; });
-      listenForAlexEvent('call-end', () => { errorMessage.hidden = true; });
+      listenForAlexEvent('call-start', () => {
+        alexCallActive = true;
+        alexStartButton.textContent = 'End conversation';
+        errorMessage.textContent = 'Speak with Alex using your microphone.';
+      });
+      listenForAlexEvent('call-end', () => {
+        alexCallActive = false;
+        alexStartButton.textContent = 'Talk to Alex';
+        errorMessage.textContent = 'Speak with Alex using your microphone.';
+      });
       listenForAlexEvent('error', (error) => {
         console.error('[Dream Protocol Vapi] Call error', error);
+        alexCallActive = false;
+        alexStartButton.textContent = 'Try again';
         errorMessage.textContent = 'Live voice is temporarily unavailable.';
-        errorMessage.hidden = false;
       });
-      listenForAlexEvent('message', () => { errorMessage.hidden = true; });
 
       console.log('[Dream Protocol Vapi] waiting for button');
       const button = await waitForVapiButton(5000);
       if (current !== profile) return;
       if (!button) {
         console.error('[Dream Protocol Vapi] SDK initialized but .vapi-btn was not detected within 5 seconds');
+        alexStartButton.textContent = 'Try again';
         errorMessage.textContent = 'Live voice is temporarily unavailable.';
-        errorMessage.hidden = false;
         return;
       }
 
@@ -295,17 +314,21 @@
       const bounds = button.getBoundingClientRect();
       if (buttonStyle.display === 'none' || buttonStyle.visibility === 'hidden' || bounds.width === 0 || bounds.height === 0) {
         console.error('[Dream Protocol Vapi] .vapi-btn was detected but is not visibly rendered');
+        alexStartButton.textContent = 'Try again';
         errorMessage.textContent = 'Live voice is temporarily unavailable.';
-        errorMessage.hidden = false;
         return;
       }
-      errorMessage.textContent = 'Use the Talk with Alex button in the lower-right corner.';
-      errorMessage.hidden = false;
+      nativeVapiButton = button;
+      nativeVapiButton.classList.add('vapi-native-hidden');
+      alexStartButton.disabled = false;
+      alexStartButton.textContent = 'Talk to Alex';
+      errorMessage.textContent = 'Speak with Alex using your microphone.';
+      console.log('[Dream Protocol Vapi] Dream Protocol voice control ready');
     } catch (error) {
       console.error('[Dream Protocol Vapi] Alex initialization failed', error);
       removeAlexVoice();
+      alexStartButton.textContent = 'Try again';
       errorMessage.textContent = 'Live voice is temporarily unavailable.';
-      errorMessage.hidden = false;
     }
   }
 
