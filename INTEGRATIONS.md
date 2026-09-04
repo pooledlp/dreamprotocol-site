@@ -1,73 +1,60 @@
 # Dream Protocol interactive integrations
 
-The homepage is a static site. Production services are isolated behind `window.DREAMPROTOCOL_CONFIG`, which can be assigned before `app.js` loads. The page supplies the intended analyzer hostname as its default; DNS, TLS, and the reverse proxy must be deployed before enabling the production scanner:
+The homepage remains a static GitHub Pages site. Browser-safe production settings live in `window.DREAMPROTOCOL_CONFIG` before `app.js` loads:
 
-```html
-<script>
+```js
 window.DREAMPROTOCOL_CONFIG = {
   businessAnalysisEndpoint: "https://api.dreamprotocol.ai/analyze-business",
-  voiceSessionEndpoint: "/api/voice/session"
+  vapiPublicKey: "ec40770e-0ff1-482c-929e-5288315e24b1",
+  vapiAssistantId: "30ccf544-cd70-4ba6-8b23-fcd9ff5a4fec"
 };
-</script>
 ```
 
-A deployment may override either URL with a same-origin or CORS-enabled HTTPS endpoint. Do not place provider secrets, private API keys, or durable credentials in this object or any other browser-delivered file.
+`vapiPublicKey` is intentionally a **public browser key**, not a server credential. Never put a Vapi private key, an OpenAI key, or any other provider secret in browser-delivered files.
 
 ## Business analysis
 
-The browser sends:
+The scanner sends `{"url":"https://example.com/"}` to `https://api.dreamprotocol.ai/analyze-business`. The analysis service must return evidence-based business fields. Missing fields remain empty; the browser does not invent them. The backend remains responsible for URL validation, SSRF protection, crawl limits, content sanitization, and CORS.
 
-```http
-POST https://api.dreamprotocol.ai/analyze-business
-Content-Type: application/json
+## Vapi browser voice
 
-{"url":"https://example.com/"}
+The replaceable `window.DreamProtocolVoiceAdapter` uses the official `@vapi-ai/web` SDK. It receives the verified scanner profile directly; it does not request a voice-session backend. The browser calls the configured assistant with these `assistantOverrides.variableValues`:
+
+- `companyName`
+- `businessWebsite`
+- `businessDescription`
+- `services`
+- `businessHours`
+- `locations`
+- `businessPhone`
+
+Except for the intentionally empty website fallback, unavailable scanner values are sent as `Not provided on the website`. This makes absence explicit to the assistant rather than fabricating context.
+
+The adapter maps Vapi `call-start`, `speech-start`, `speech-end`, and `call-end` events into provider-neutral UI states. It accepts only final Vapi transcript messages for the visible `YOU` / `ALEX` history. Provider errors are logged to the developer console while the visitor sees a safe fallback message.
+
+The visitor must confirm the in-page microphone notice before the adapter is initialized or Vapi is started. Ending a conversation stops Vapi and removes all SDK listeners, allowing another call in the same browser session without duplicate handlers.
+
+### Required Vapi restrictions
+
+The public key **MUST remain restricted in the Vapi dashboard** to:
+
+- allowed origin `https://dreamprotocol.ai`
+- allowed origin `https://www.dreamprotocol.ai`
+- allowed assistant ID `30ccf544-cd70-4ba6-8b23-fcd9ff5a4fec` (Dream Protocol Demo - Alex only)
+
+Review Vapi recording, storage, retention, and jurisdictional consent settings before launch. The page deliberately makes no recording or storage promise.
+
+## Static bundle
+
+The pinned SDK and esbuild versions are declared in `package.json`. Run:
+
+```sh
+npm install
+npm run build
 ```
 
-The response uses a normalized, evidence-based contract:
-
-```json
-{
-  "success": true,
-  "analysisId": "short-lived-reference",
-  "business": {
-    "name": "North Bay Plumbing",
-    "services": ["Emergency plumbing", "Drain cleaning"],
-    "hours": "Mo-Fr 08:00-17:00",
-    "locations": ["San Rafael, CA"]
-  },
-  "agent": {"name": "Alex", "role": "AI Front Desk", "greeting": "Thanks for calling North Bay Plumbing. This is Alex. How can I help you today?"},
-  "found": {"identity": true, "services": true, "hours": true, "locations": true, "faq": false}
-}
-```
-
-Fields not backed by extracted website evidence must be absent, empty, or have a matching `found` value of `false`. The UI displays checkmarks and knowledge categories only when these flags agree with non-empty normalized data.
-
-The backend—not the browser—must normalize and validate URLs, allow only public HTTP/HTTPS destinations, resolve and block private/loopback/link-local/internal addresses (including redirects and DNS rebinding), enforce crawl/page/size limits and timeouts, and sanitize fetched content before model use or storage. The frontend never fetches the submitted site directly. If analysis is unavailable, it presents an explicitly generic starting profile without exposing technical errors.
-
-## Secure voice session
-
-The browser sends the approved preview context to `voiceSessionEndpoint`. The backend must authenticate/rate-limit as appropriate and return only short-lived, client-safe session material. Permanent Vapi, SignalWire, telephony, or model-provider secrets must remain server-side.
-
-Provider-specific browser code belongs in a replaceable adapter, not in the page controller:
-
-```js
-window.DreamProtocolVoiceAdapter = {
-  async connect({ session, onState, onComplete }) {
-    // Consume the ephemeral `session` response and connect provider media.
-    // Call onState("connected" | "listening" | "speaking" | "ended").
-    // Call onComplete({ completedActions: [...] }) with verified outcomes only.
-  },
-  async disconnect() {
-    // Close media and return { completedActions: [...] } if verified.
-  }
-};
-```
-
-The UI passes the endpoint response through to this adapter, so changing providers does not require rewriting the business-analysis or demo state flow. End-of-call actions are rendered only when returned by the adapter/session; the site does not infer CRM, appointment, or messaging outcomes.
-
-Before production voice launch, review microphone consent, recording disclosure and jurisdictional consent requirements, retention, transcript access, deletion controls, abuse/rate limits, and session expiration.
+esbuild bundles `src/voice-adapter.js` and `@vapi-ai/web` into the browser ESM file at `dist/voice-adapter.js`; Node.js is not needed in production. The committed deployment artifact currently imports the exact pinned SDK version from esm.sh so GitHub Pages remains runnable even when this repository's restricted development proxy prevents downloading npm packages. A successful release build replaces that artifact with the self-contained bundle.
 
 ## Lead delivery
 
-The final contact form retains the existing FormSubmit delivery destination. It sends name, company, phone, email, workflow, source page, and FormSubmit delivery settings. If lead ownership or compliance requirements grow, replace this browser-side destination with a first-party server endpoint, add server-side validation/rate limiting, and document retention.
+The contact form retains its existing FormSubmit delivery. If compliance requirements grow, replace it with a first-party endpoint and document validation, rate limiting, and retention.
