@@ -18,7 +18,7 @@ The scanner sends `{"url":"https://example.com/"}` to `https://api.dreamprotocol
 
 ## Vapi browser voice
 
-The result panel embeds Vapi's official Web Widget in voice mode. The widget script is pinned to `@vapi-ai/client-sdk-react@0.1.1` and loaded from unpkg; there is no local Vapi SDK bundle or custom audio/WebRTC adapter. It receives the verified scanner profile directly and does not request a voice-session backend. Before mounting the widget, the browser serializes these `assistantOverrides.variableValues`:
+After a verified scan, the result panel loads Vapi's official HTML Script Tag SDK from jsDelivr and initializes its voice button with `window.vapiSDK.run(...)`; there is no React custom element, local Vapi SDK bundle, or custom audio/WebRTC adapter. It receives the verified scanner profile directly and does not request a voice-session backend. Before initializing the button, the browser supplies these `assistantOverrides.variableValues`:
 
 - `companyName`
 - `businessWebsite`
@@ -28,9 +28,9 @@ The result panel embeds Vapi's official Web Widget in voice mode. The widget scr
 - `locations`
 - `businessPhone`
 
-Except for the intentionally empty website value, unavailable scanner values are sent as `Not provided on the website`. This makes absence explicit to the assistant rather than fabricating context. If analysis falls back rather than returning a verified profile, the voice widget is not mounted.
+Except for the intentionally empty website value, unavailable scanner values are sent as `Not provided on the website`. This makes absence explicit to the assistant rather than fabricating context. If analysis falls back rather than returning a verified profile, the voice SDK is not loaded and no button is initialized.
 
-The widget owns microphone permission, audio playback, call controls, and its visible transcript. It uses dark mode, Dream Protocol's blue and lime accent colors, full size, and the widget's supported consent prompt. Provider `error` events are logged to the developer console while the visitor sees a short retry message.
+The HTML voice widget owns microphone permission, audio playback, and call controls. Its pill button uses Dream Protocol's blue, lime, and red call-state colors. Provider `error` events are logged to the developer console while the visitor sees a short retry message.
 
 Dream Protocol does not preflight `getUserMedia`, create or unlock an `AudioContext`, observe or mirror Vapi audio elements, select output sinks, or implement browser-specific recovery. Browser media behavior is delegated to Vapi's supported widget.
 
@@ -57,8 +57,8 @@ npm run check
 Test on a secure origin in Edge desktop, Chrome desktop, Firefox desktop, Safari desktop, Chrome Android, Chrome iOS, and Safari iPhone:
 
 1. Scan `https://pannuholistic.com` and confirm its verified company, services, description, and available contact/location data appear in the preview.
-2. Select the widget's start control, accept its consent step, allow the normal browser microphone prompt, and confirm the call begins.
-3. Confirm Alex is audible, user microphone audio reaches Alex, and the widget displays the transcript.
+2. Select the `Talk with Alex` button, allow the normal browser microphone prompt, and confirm the call begins.
+3. Confirm Alex is audible and user microphone audio reaches Alex.
 4. Ask “What services do you offer?” and confirm the response uses the scanned services rather than invented information.
 5. End and start a second call without reloading. Also test permission already allowed and explicitly blocked using the widget's standard recovery experience.
 
