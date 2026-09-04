@@ -31,6 +31,15 @@
   let alexEventHandlers = [];
   const alexStartButton = $('#alex-start-button');
 
+  let heroSeconds = 24;
+  const heroTimer = $('.call-time');
+  if (heroTimer && !reducedMotion) {
+    window.setInterval(() => {
+      heroSeconds += 1;
+      heroTimer.textContent = `${String(Math.floor(heroSeconds / 60)).padStart(2, '0')}:${String(heroSeconds % 60).padStart(2, '0')}`;
+    }, 1000);
+  }
+
   alexStartButton.addEventListener('click', () => {
     if (!nativeVapiButton) return;
     console.log('[Dream Protocol Vapi] proxying user click to native Vapi control');
@@ -154,13 +163,19 @@
     });
   }
 
-  function addKnowledge(label, values) {
+  function addKnowledge(label, values, type = '') {
     if (!values || (Array.isArray(values) && !values.length)) return;
     const section = document.createElement('section');
     const heading = document.createElement('h4');
     heading.textContent = label;
-    const content = document.createElement('p');
-    content.textContent = Array.isArray(values) ? values.join(' · ') : values;
+    section.className = type;
+    const content = document.createElement(Array.isArray(values) ? 'ul' : 'p');
+    if (Array.isArray(values)) values.forEach((value) => {
+      const item = document.createElement('li');
+      item.textContent = value;
+      content.append(item);
+    });
+    else content.textContent = values;
     section.append(heading, content);
     $('#knowledge-preview').append(section);
   }
@@ -168,20 +183,26 @@
   function renderProfile(current) {
     $('#employee-name').textContent = current.employeeName;
     $('#employee-company').textContent = `${current.role} for ${current.company}`;
+    $('#preview-speaker').textContent = current.employeeName;
     $('#employee-greeting').textContent = `“${current.greeting.replace(/^[“"]|[”"]$/g, '')}”`;
     const knowledge = $('#knowledge-preview');
     knowledge.replaceChildren();
     if (!current.isFallback) {
-      if (current.found.services) addKnowledge('Knows about', current.business.services);
-      if (current.found.locations) addKnowledge('Service area', current.business.locations);
-      if (current.found.hours) addKnowledge('Hours', current.business.hours);
-      if (current.business.phone) addKnowledge('Contact', current.business.phone);
+      if (current.found.services) addKnowledge('Services learned', current.business.services, 'services-knowledge');
+      if (current.found.locations) addKnowledge('Locations', current.business.locations, 'locations-knowledge');
+      if (current.found.hours) addKnowledge('Hours', current.business.hours, 'hours-knowledge');
+      if (current.business.phone || current.business.email) addKnowledge('Contact ready', [current.business.phone, current.business.email].filter(Boolean), 'contact-knowledge');
     }
+    $('#service-count').textContent = current.business.services?.length ? `${current.business.services.length} discovered` : 'Not found';
+    $('#hours-status').textContent = current.found.hours ? 'Verified ✓' : 'Not found';
+    $('#location-count').textContent = current.business.locations?.length ? `${current.business.locations.length} found` : 'Not found';
+    $('#contact-status').textContent = current.business.phone || current.business.email ? 'Ready ✓' : 'Not found';
     $('#preview-label').textContent = current.isFallback ? 'Starting preview' : 'Your preview is ready';
     demoNotice.textContent = current.isFallback
       ? 'Live voice becomes available after we successfully read the business website.'
       : 'Built only from business information found on your website.';
     initializeAlexVoice(current);
+    window.requestAnimationFrame(() => employeeView.classList.add('is-revealed'));
   }
 
   function widgetOverrides(current) {
@@ -361,6 +382,7 @@
     button.disabled = true;
     websiteForm.hidden = true;
     employeeView.hidden = true;
+    employeeView.classList.remove('is-revealed');
     analysisView.hidden = false;
     const stopSignal = { stopped: false };
     const animation = animateAnalysis(stopSignal);
@@ -395,6 +417,12 @@
   });
 
   window.addEventListener('pagehide', removeAlexVoice);
+
+  const audio = $('.audio-card audio');
+  if (audio) {
+    audio.addEventListener('play', () => audio.closest('.audio-card').classList.add('is-playing'));
+    ['pause', 'ended'].forEach((event) => audio.addEventListener(event, () => audio.closest('.audio-card').classList.remove('is-playing')));
+  }
 
   const leadForm = $('#lead-form');
   leadForm.addEventListener('submit', async (event) => {
