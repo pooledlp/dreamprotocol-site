@@ -209,6 +209,8 @@
   const sessionSummary = $('#session-summary');
   const endCall = $('#end-call');
   const startConversation = $('#start-conversation');
+  const enableSound = $('#enable-sound');
+  const retryMicrophone = $('#retry-microphone');
   let activeAdapter = null;
   let transcripts = [];
   let completing = false;
@@ -257,6 +259,8 @@
     $('#transcript-recap').hidden = !transcripts.length;
     renderTranscript($('#recap-list'), transcripts);
     talkButton.disabled = false;
+    enableSound.hidden = true;
+    retryMicrophone.hidden = true;
   }
 
   function showVoiceFailure(error) {
@@ -270,9 +274,69 @@
     endCall.hidden = true;
     activeAdapter = null;
     talkButton.disabled = false;
+    enableSound.hidden = true;
+    retryMicrophone.hidden = true;
+  }
+
+  function showMicrophoneFailure(error) {
+    console.error('[Dream Protocol audio] getUserMedia failed.', { name: error?.name, message: error?.message });
+    const messages = {
+      NotAllowedError: 'Microphone access is blocked. Use the microphone permission control in your browser address bar, allow Dream Protocol, then try again.',
+      NotFoundError: 'No microphone was detected.',
+      NotReadableError: 'Your microphone is currently unavailable or being used by another application.',
+      SecurityError: 'Your browser prevented microphone access.'
+    };
+    if (!messages[error?.name]) return showVoiceFailure(error);
+    voiceConsent.hidden = true;
+    sessionSummary.hidden = true;
+    voiceView.hidden = false;
+    $('#voice-state').textContent = 'Microphone unavailable';
+    $('#voice-title').textContent = error.name === 'NotAllowedError' ? 'Microphone access is blocked for Dream Protocol.' : 'We could not access your microphone.';
+    $('#voice-message').textContent = messages[error.name];
+    endCall.hidden = true;
+    enableSound.hidden = true;
+    retryMicrophone.hidden = false;
+    activeAdapter = null;
+    talkButton.disabled = false;
+  }
+
+  async function microphonePermissionState() {
+    if (!navigator.permissions?.query) return 'unsupported';
+    try {
+      const status = await navigator.permissions.query({ name: 'microphone' });
+      console.debug('[Dream Protocol audio] Microphone permission result.', status.state);
+      return status.state;
+    } catch (error) {
+      console.debug('[Dream Protocol audio] Microphone permission query unsupported.', error?.name);
+      return 'unsupported';
+    }
+  }
+
+  async function preflightMicrophone() {
+    const permission = await microphonePermissionState();
+    if (permission === 'denied') {
+      const error = new Error('Microphone permission is denied.');
+      error.name = 'NotAllowedError';
+      throw error;
+    }
+    if (permission === 'prompt') $('#voice-message').textContent = 'Allow microphone access to talk with Alex.';
+    else $('#voice-message').textContent = 'Waiting for microphone permission…';
+    let stream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      console.debug('[Dream Protocol audio] getUserMedia succeeded.');
+    } catch (error) {
+      console.debug('[Dream Protocol audio] getUserMedia failed.', { name: error?.name, message: error?.message });
+      throw error;
+    } finally {
+      stream?.getTracks().forEach((track) => track.stop());
+    }
   }
 
   async function startVoice() {
+    const adapter = window.DreamProtocolVoiceAdapter;
+    // Invoke playback APIs before the first await so mobile/WebKit sees the direct tap.
+    const audioUnlock = adapter?.unlockAudioPlayback?.();
     voiceConsent.hidden = true;
     sessionSummary.hidden = true;
     voiceView.hidden = false;
@@ -285,13 +349,17 @@
     completing = false;
     talkButton.disabled = true;
     startConversation.disabled = true;
+    retryMicrophone.hidden = true;
+    enableSound.hidden = true;
     try {
       if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) throw new Error('Microphone access is unsupported in this browser or context.');
       if (!config.vapiPublicKey || !config.vapiAssistantId) throw new Error('Vapi browser configuration is missing.');
-      const adapter = window.DreamProtocolVoiceAdapter;
       if (!adapter || typeof adapter.connect !== 'function') throw new Error('The voice adapter did not load.');
+      await audioUnlock;
+      await preflightMicrophone();
       activeAdapter = adapter;
       $('#voice-state').textContent = 'Connecting to Alex';
+      $('#voice-message').textContent = 'Microphone ready. Starting the conversation…';
       endCall.hidden = false;
       await adapter.connect({
         profile,
@@ -305,10 +373,20 @@
         },
         onTranscript: addTranscript,
         onComplete: finishConversation,
-        onError: showVoiceFailure
+        onError: showVoiceFailure,
+        onAudioBlocked() {
+          $('#voice-title').textContent = `${profile.employeeName} is connected. Tap to enable sound.`;
+          $('#voice-message').textContent = 'Your browser needs one more tap before it can play Alex’s voice.';
+          enableSound.hidden = false;
+        },
+        onAudioReady() {
+          enableSound.hidden = true;
+        }
       });
     } catch (error) {
-      showVoiceFailure(error);
+      await adapter?.disconnect?.();
+      if (['NotAllowedError', 'NotFoundError', 'NotReadableError', 'SecurityError'].includes(error?.name)) showMicrophoneFailure(error);
+      else showVoiceFailure(error);
     } finally {
       startConversation.disabled = false;
     }
@@ -317,6 +395,17 @@
   talkButton.addEventListener('click', showConsent);
   $('#start-another-call').addEventListener('click', showConsent);
   startConversation.addEventListener('click', startVoice);
+  retryMicrophone.addEventListener('click', startVoice);
+  enableSound.addEventListener('click', async () => {
+    enableSound.disabled = true;
+    const succeeded = await activeAdapter?.enableSound?.();
+    enableSound.disabled = false;
+    enableSound.hidden = Boolean(succeeded);
+    if (succeeded) {
+      $('#voice-title').textContent = `${profile.employeeName} is listening.`;
+      $('#voice-message').textContent = 'Speak naturally. End the conversation whenever you’re ready.';
+    }
+  });
   $('#cancel-conversation').addEventListener('click', () => {
     voiceConsent.hidden = true;
     employeeView.hidden = false;
