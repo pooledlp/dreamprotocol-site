@@ -212,15 +212,38 @@
     alexEventHandlers.push([event, handler]);
   }
 
+  function waitForVapiButton(timeoutMs = 5000) {
+    return new Promise((resolve) => {
+      const existing = document.querySelector('.vapi-btn');
+      if (existing) {
+        resolve(existing);
+        return;
+      }
+
+      const observer = new MutationObserver(() => {
+        const button = document.querySelector('.vapi-btn');
+        if (!button) return;
+        observer.disconnect();
+        clearTimeout(timer);
+        resolve(button);
+      });
+
+      observer.observe(document.body, { childList: true, subtree: true });
+      const timer = setTimeout(() => {
+        observer.disconnect();
+        resolve(null);
+      }, timeoutMs);
+    });
+  }
+
   async function initializeAlexVoice(current) {
     const panel = $('#alex-widget-panel');
-    const host = $('#alex-voice-control');
     const errorMessage = $('#widget-error');
     removeAlexVoice();
     errorMessage.hidden = true;
     panel.hidden = current.isFallback;
     if (current.isFallback) return;
-    errorMessage.textContent = 'Loading live voice…';
+    errorMessage.textContent = 'Loading voice control…';
     errorMessage.hidden = false;
 
     try {
@@ -228,7 +251,7 @@
       if (current !== profile) return;
 
       const buttonConfig = {
-        position: 'bottom-center',
+        position: 'bottom-right',
         offset: '24px',
         width: '260px',
         height: '64px',
@@ -237,6 +260,7 @@
         active: { color: '#ef4444', type: 'pill', title: 'Conversation live', subtitle: 'Tap to end' }
       };
 
+      console.log('[Dream Protocol Vapi] calling vapiSDK.run');
       alexVapi = window.vapiSDK.run({
         apiKey: config.vapiPublicKey,
         assistant: config.vapiAssistantId,
@@ -244,7 +268,7 @@
         config: buttonConfig
       });
       if (!alexVapi) throw new Error('Vapi SDK did not return an instance');
-      console.log('[Dream Protocol Vapi] Alex initialized');
+      console.log('[Dream Protocol Vapi] run returned instance');
 
       listenForAlexEvent('call-start', () => { errorMessage.hidden = true; });
       listenForAlexEvent('call-end', () => { errorMessage.hidden = true; });
@@ -255,18 +279,28 @@
       });
       listenForAlexEvent('message', () => { errorMessage.hidden = true; });
 
-      await new Promise((resolve) => window.requestAnimationFrame(() => window.requestAnimationFrame(resolve)));
+      console.log('[Dream Protocol Vapi] waiting for button');
+      const button = await waitForVapiButton(5000);
       if (current !== profile) return;
-      const button = document.querySelector('.vapi-btn');
-      if (!button) throw new Error('Vapi voice button was not rendered');
-      host.append(button);
+      if (!button) {
+        console.error('[Dream Protocol Vapi] SDK initialized but .vapi-btn was not detected within 5 seconds');
+        errorMessage.textContent = 'Live voice is temporarily unavailable.';
+        errorMessage.hidden = false;
+        return;
+      }
+
+      console.log('[Dream Protocol Vapi] button detected');
+      await new Promise((resolve) => window.requestAnimationFrame(resolve));
       const buttonStyle = window.getComputedStyle(button);
       const bounds = button.getBoundingClientRect();
       if (buttonStyle.display === 'none' || buttonStyle.visibility === 'hidden' || bounds.width === 0 || bounds.height === 0) {
-        throw new Error('Vapi voice button is not visibly rendered');
+        console.error('[Dream Protocol Vapi] .vapi-btn was detected but is not visibly rendered');
+        errorMessage.textContent = 'Live voice is temporarily unavailable.';
+        errorMessage.hidden = false;
+        return;
       }
-      console.log('[Dream Protocol Vapi] Voice button rendered');
-      errorMessage.hidden = true;
+      errorMessage.textContent = 'Use the Talk with Alex button in the lower-right corner.';
+      errorMessage.hidden = false;
     } catch (error) {
       console.error('[Dream Protocol Vapi] Alex initialization failed', error);
       removeAlexVoice();
@@ -336,6 +370,8 @@
     input.value = '';
     input.focus();
   });
+
+  window.addEventListener('pagehide', removeAlexVoice);
 
   const leadForm = $('#lead-form');
   leadForm.addEventListener('submit', async (event) => {
