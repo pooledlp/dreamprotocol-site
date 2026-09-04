@@ -204,87 +204,134 @@
   });
 
   const talkButton = $('#talk-button');
+  const voiceConsent = $('#voice-consent');
   const voiceView = $('#voice-view');
+  const sessionSummary = $('#session-summary');
   const endCall = $('#end-call');
-  let activeSession = null;
+  const startConversation = $('#start-conversation');
   let activeAdapter = null;
+  let transcripts = [];
+  let completing = false;
 
-  function safeActions(value) {
-    if (!Array.isArray(value)) return [];
-    return value
-      .filter((action) => typeof action === 'string' || (action && typeof action.label === 'string' && action.completed === true))
-      .map((action) => typeof action === 'string' ? action : action.label)
-      .map((action) => action.replace(/[<>]/g, '').slice(0, 120))
-      .filter(Boolean)
-      .slice(0, 6);
+  function showConsent() {
+    if (!profile) return;
+    employeeView.hidden = true;
+    voiceView.hidden = true;
+    sessionSummary.hidden = true;
+    voiceConsent.hidden = false;
+    $('#consent-message').textContent = `Use your microphone to speak with the AI Front Desk for ${profile.company}. This live browser demo uses Vapi to process the conversation.`;
+    startConversation.focus();
   }
 
-  function showSummary(actions) {
-    const completed = safeActions(actions);
-    if (!completed.length) return;
-    const list = $('#summary-actions');
-    list.replaceChildren(...completed.map((label) => {
+  function renderTranscript(target, entries) {
+    target.replaceChildren(...entries.map(({ speaker, text }) => {
       const item = document.createElement('li');
-      item.textContent = label;
+      const label = document.createElement('strong');
+      label.textContent = speaker;
+      item.append(label, document.createTextNode(text));
       return item;
     }));
+  }
+
+  function addTranscript(entry) {
+    if (!entry || !['YOU', 'ALEX'].includes(entry.speaker) || typeof entry.text !== 'string') return;
+    const text = entry.text.trim().slice(0, 2000);
+    if (!text) return;
+    const previous = transcripts[transcripts.length - 1];
+    if (previous?.speaker === entry.speaker && previous.text === text) return;
+    transcripts.push({ speaker: entry.speaker, text });
+    transcripts = transcripts.slice(-30);
+    $('#live-transcript').hidden = false;
+    renderTranscript($('#transcript-list'), transcripts);
+    $('#transcript-list').lastElementChild?.scrollIntoView({ block: 'nearest' });
+  }
+
+  function finishConversation() {
+    if (completing) return;
+    completing = true;
+    activeAdapter = null;
+    endCall.hidden = true;
+    voiceConsent.hidden = true;
     voiceView.hidden = true;
-    $('#session-summary').hidden = false;
+    sessionSummary.hidden = false;
+    $('#transcript-recap').hidden = !transcripts.length;
+    renderTranscript($('#recap-list'), transcripts);
+    talkButton.disabled = false;
+  }
+
+  function showVoiceFailure(error) {
+    console.error('[Dream Protocol voice] Unable to start or continue the Vapi conversation.', error);
+    voiceConsent.hidden = true;
+    sessionSummary.hidden = true;
+    voiceView.hidden = false;
+    $('#voice-state').textContent = 'Conversation unavailable';
+    $('#voice-title').textContent = "We couldn't start the live conversation.";
+    $('#voice-message').innerHTML = 'You can still <a class="text-link" href="#hear">hear the example below</a>.';
+    endCall.hidden = true;
+    activeAdapter = null;
+    talkButton.disabled = false;
   }
 
   async function startVoice() {
-    employeeView.hidden = true;
+    voiceConsent.hidden = true;
+    sessionSummary.hidden = true;
     voiceView.hidden = false;
-    $('#voice-state').textContent = 'Preparing your conversation';
+    $('#voice-state').textContent = 'Preparing conversation';
     $('#voice-title').textContent = `${profile.employeeName} is getting ready.`;
-    $('#voice-message').textContent = 'This usually takes a moment.';
+    $('#voice-message').textContent = 'Your browser will ask for microphone access.';
+    $('#live-transcript').hidden = true;
+    $('#transcript-list').replaceChildren();
+    transcripts = [];
+    completing = false;
     talkButton.disabled = true;
+    startConversation.disabled = true;
     try {
-      if (!config.voiceSessionEndpoint) throw new Error('unavailable');
-      const response = await fetch(config.voiceSessionEndpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({ analysisId: profile.analysisId, company: profile.company, employeeName: profile.employeeName, greeting: profile.greeting })
-      });
-      if (!response.ok) throw new Error('unavailable');
-      activeSession = await response.json();
+      if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) throw new Error('Microphone access is unsupported in this browser or context.');
+      if (!config.vapiPublicKey || !config.vapiAssistantId) throw new Error('Vapi browser configuration is missing.');
       const adapter = window.DreamProtocolVoiceAdapter;
-      if (!adapter || typeof adapter.connect !== 'function') throw new Error('unavailable');
+      if (!adapter || typeof adapter.connect !== 'function') throw new Error('The voice adapter did not load.');
       activeAdapter = adapter;
-      await adapter.connect({
-        session: activeSession,
-        onState(state) {
-          const labels = { connected: 'Conversation live', listening: 'Listening', speaking: `${profile.employeeName} is speaking`, ended: 'Conversation complete' };
-          $('#voice-state').textContent = labels[state] || 'Conversation live';
-        },
-        onComplete(result = {}) {
-          showSummary(result.completedActions || result.actions || activeSession.completedActions);
-        }
-      });
-      $('#voice-state').textContent = 'Conversation live';
-      $('#voice-title').textContent = `${profile.employeeName} is listening.`;
-      $('#voice-message').textContent = 'Speak naturally. End the conversation whenever you’re ready.';
+      $('#voice-state').textContent = 'Connecting to Alex';
       endCall.hidden = false;
-    } catch {
-      $('#voice-state').textContent = 'Let’s try that another way';
-      $('#voice-title').textContent = 'A live conversation isn’t available right now.';
-      $('#voice-message').innerHTML = 'You can still <a class="text-link" href="#hear">hear an example conversation</a> or tell us about your workflow below.';
-      endCall.hidden = true;
+      await adapter.connect({
+        profile,
+        onState(state) {
+          const labels = { connected: 'Conversation live', listening: 'Listening…', speaking: `${profile.employeeName} is speaking`, ended: 'Conversation ended' };
+          $('#voice-state').textContent = labels[state] || 'Conversation live';
+          if (state === 'connected' || state === 'listening') {
+            $('#voice-title').textContent = `${profile.employeeName} is listening.`;
+            $('#voice-message').textContent = 'Speak naturally. End the conversation whenever you’re ready.';
+          }
+        },
+        onTranscript: addTranscript,
+        onComplete: finishConversation,
+        onError: showVoiceFailure
+      });
+    } catch (error) {
+      showVoiceFailure(error);
     } finally {
-      talkButton.disabled = false;
+      startConversation.disabled = false;
     }
   }
 
-  talkButton.addEventListener('click', startVoice);
+  talkButton.addEventListener('click', showConsent);
+  $('#start-another-call').addEventListener('click', showConsent);
+  startConversation.addEventListener('click', startVoice);
+  $('#cancel-conversation').addEventListener('click', () => {
+    voiceConsent.hidden = true;
+    employeeView.hidden = false;
+    talkButton.focus();
+  });
   endCall.addEventListener('click', async () => {
-    let result = {};
-    if (activeAdapter && typeof activeAdapter.disconnect === 'function') result = await activeAdapter.disconnect() || {};
-    endCall.hidden = true;
-    showSummary(result.completedActions || result.actions || activeSession?.completedActions);
-    if (!safeActions(result.completedActions || result.actions || activeSession?.completedActions).length) {
-      $('#voice-state').textContent = 'Conversation complete';
-      $('#voice-title').textContent = 'Thanks for talking with us.';
-      $('#voice-message').textContent = 'Your live session has ended.';
+    endCall.disabled = true;
+    try {
+      if (activeAdapter && typeof activeAdapter.disconnect === 'function') await activeAdapter.disconnect();
+      finishConversation();
+    } catch (error) {
+      console.error('[Dream Protocol voice] Unable to end the Vapi conversation cleanly.', error);
+      finishConversation();
+    } finally {
+      endCall.disabled = false;
     }
   });
 
