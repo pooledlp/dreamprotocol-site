@@ -300,43 +300,20 @@
     talkButton.disabled = false;
   }
 
-  async function microphonePermissionState() {
-    if (!navigator.permissions?.query) return 'unsupported';
-    try {
-      const status = await navigator.permissions.query({ name: 'microphone' });
-      console.debug('[Dream Protocol audio] Microphone permission result.', status.state);
-      return status.state;
-    } catch (error) {
-      console.debug('[Dream Protocol audio] Microphone permission query unsupported.', error?.name);
-      return 'unsupported';
+  function requestMicrophoneFromGesture() {
+    if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
+      return Promise.reject(new Error('Microphone access is unsupported in this browser or context.'));
     }
-  }
-
-  async function preflightMicrophone() {
-    const permission = await microphonePermissionState();
-    if (permission === 'denied') {
-      const error = new Error('Microphone permission is denied.');
-      error.name = 'NotAllowedError';
-      throw error;
-    }
-    if (permission === 'prompt') $('#voice-message').textContent = 'Allow microphone access to talk with Alex.';
-    else $('#voice-message').textContent = 'Waiting for microphone permission…';
-    let stream;
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      console.debug('[Dream Protocol audio] getUserMedia succeeded.');
-    } catch (error) {
-      console.debug('[Dream Protocol audio] getUserMedia failed.', { name: error?.name, message: error?.message });
-      throw error;
-    } finally {
-      stream?.getTracks().forEach((track) => track.stop());
-    }
+    const request = navigator.mediaDevices.getUserMedia({ audio: true });
+    console.debug('[Dream Protocol audio] mic request initiated from user gesture');
+    return request;
   }
 
   async function startVoice() {
     const adapter = window.DreamProtocolVoiceAdapter;
-    // Invoke playback APIs before the first await so mobile/WebKit sees the direct tap.
-    const audioUnlock = adapter?.unlockAudioPlayback?.();
+    // Both browser-gated APIs must be invoked synchronously within this click.
+    const microphonePromise = requestMicrophoneFromGesture();
+    const audioUnlockPromise = adapter?.unlockAudioPlayback?.();
     voiceConsent.hidden = true;
     sessionSummary.hidden = true;
     voiceView.hidden = false;
@@ -351,12 +328,15 @@
     startConversation.disabled = true;
     retryMicrophone.hidden = true;
     enableSound.hidden = true;
+    let temporaryMicrophoneStream;
     try {
-      if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) throw new Error('Microphone access is unsupported in this browser or context.');
       if (!config.vapiPublicKey || !config.vapiAssistantId) throw new Error('Vapi browser configuration is missing.');
       if (!adapter || typeof adapter.connect !== 'function') throw new Error('The voice adapter did not load.');
-      await audioUnlock;
-      await preflightMicrophone();
+      temporaryMicrophoneStream = await microphonePromise;
+      console.debug('[Dream Protocol audio] mic permission granted');
+      await audioUnlockPromise;
+      temporaryMicrophoneStream.getTracks().forEach((track) => track.stop());
+      temporaryMicrophoneStream = null;
       activeAdapter = adapter;
       $('#voice-state').textContent = 'Connecting to Alex';
       $('#voice-message').textContent = 'Microphone ready. Starting the conversation…';
@@ -384,6 +364,7 @@
         }
       });
     } catch (error) {
+      temporaryMicrophoneStream?.getTracks().forEach((track) => track.stop());
       await adapter?.disconnect?.();
       if (['NotAllowedError', 'NotFoundError', 'NotReadableError', 'SecurityError'].includes(error?.name)) showMicrophoneFailure(error);
       else showVoiceFailure(error);
