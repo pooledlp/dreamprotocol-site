@@ -1067,7 +1067,7 @@ var require_daily = __commonJS({
           }, DAILY_EVENT_THEME_UPDATED: function() {
             return hi;
           }, DAILY_EVENT_TRACK_STARTED: function() {
-            return Ni;
+            return Di;
           }, DAILY_EVENT_TRACK_STOPPED: function() {
             return ji;
           }, DAILY_EVENT_TRANSCRIPTION_ERROR: function() {
@@ -1081,7 +1081,7 @@ var require_daily = __commonJS({
           }, DAILY_EVENT_WAITING_PARTICIPANT_ADDED: function() {
             return Ii;
           }, DAILY_EVENT_WAITING_PARTICIPANT_REMOVED: function() {
-            return Di;
+            return Ni;
           }, DAILY_EVENT_WAITING_PARTICIPANT_UPDATED: function() {
             return Li;
           }, DAILY_FATAL_ERROR_CONNECTION: function() {
@@ -1111,11 +1111,11 @@ var require_daily = __commonJS({
           }, DAILY_STATE_ERROR: function() {
             return jr;
           }, DAILY_STATE_JOINED: function() {
-            return Dr;
+            return Nr;
           }, DAILY_STATE_JOINING: function() {
             return Lr;
           }, DAILY_STATE_LEFT: function() {
-            return Nr;
+            return Dr;
           }, DAILY_STATE_NEW: function() {
             return Or;
           }, DAILY_TRACK_STATE_BLOCKED: function() {
@@ -1193,7 +1193,7 @@ var require_daily = __commonJS({
             return null != t3 && t3.proxyUrl ? t3.proxyUrl + ("/" === t3.proxyUrl.slice(-1) ? "" : "/") + e3.substring(8) : e3;
           }
           function C(e3) {
-            return null != e3 && e3.callObjectBundleUrlOverride ? e3.callObjectBundleUrlOverride : A("https://c.daily.co/call-machine/versioned/".concat("0.85.0", "/static/call-machine-object-bundle.js"), e3);
+            return null != e3 && e3.callObjectBundleUrlOverride ? e3.callObjectBundleUrlOverride : A("https://c.daily.co/call-machine/versioned/".concat("0.87.0", "/static/call-machine-object-bundle.js"), e3);
           }
           function O(e3) {
             try {
@@ -1203,15 +1203,15 @@ var require_daily = __commonJS({
             }
             return true;
           }
-          const P = "undefined" == typeof __SENTRY_DEBUG__ || __SENTRY_DEBUG__, I = "undefined" == typeof __SENTRY_DEBUG__ || __SENTRY_DEBUG__, L = "8.55.0", D = globalThis;
-          function N(e3, t3, n3) {
-            const r2 = n3 || D, i2 = r2.__SENTRY__ = r2.__SENTRY__ || {}, o2 = i2[L] = i2[L] || {};
+          const P = "undefined" == typeof __SENTRY_DEBUG__ || __SENTRY_DEBUG__, I = "undefined" == typeof __SENTRY_DEBUG__ || __SENTRY_DEBUG__, L = "8.55.0", N = globalThis;
+          function D(e3, t3, n3) {
+            const r2 = n3 || N, i2 = r2.__SENTRY__ = r2.__SENTRY__ || {}, o2 = i2[L] = i2[L] || {};
             return o2[e3] || (o2[e3] = t3());
           }
           const j = ["debug", "info", "warn", "error", "log", "assert", "trace"], R = {};
           function x(e3) {
-            if (!("console" in D)) return e3();
-            const t3 = D.console, n3 = {}, r2 = Object.keys(R);
+            if (!("console" in N)) return e3();
+            const t3 = N.console, n3 = {}, r2 = Object.keys(R);
             r2.forEach(((e4) => {
               const r3 = R[e4];
               n3[e4] = t3[e4], t3[e4] = r3;
@@ -1224,7 +1224,7 @@ var require_daily = __commonJS({
               }));
             }
           }
-          const F = N("logger", (function() {
+          const F = D("logger", (function() {
             let e3 = false;
             const t3 = { enable: () => {
               e3 = true;
@@ -1234,7 +1234,7 @@ var require_daily = __commonJS({
             return I ? j.forEach(((n3) => {
               t3[n3] = (...t4) => {
                 e3 && x((() => {
-                  D.console[n3](`Sentry Logger [${n3}]:`, ...t4);
+                  N.console[n3](`Sentry Logger [${n3}]:`, ...t4);
                 }));
               };
             })) : j.forEach(((e4) => {
@@ -1308,7 +1308,7 @@ var require_daily = __commonJS({
           function ee(e3) {
             return !("object" != typeof e3 || null === e3 || !e3.__isVue && !e3._isVue);
           }
-          const te = D;
+          const te = N;
           function ne(e3, t3 = {}) {
             if (!e3) return "<unknown>";
             try {
@@ -1453,7 +1453,7 @@ var require_daily = __commonJS({
             return e3;
           }
           function ge() {
-            const e3 = D, t3 = e3.crypto || e3.msCrypto;
+            const e3 = N, t3 = e3.crypto || e3.msCrypto;
             let n3 = () => 16 * Math.random();
             try {
               if (t3 && t3.randomUUID) return t3.randomUUID().replace(/-/g, "");
@@ -1566,7 +1566,7 @@ Url: ${Ee(e4)}`), true);
             }
           }
           function Te() {
-            return Me(D), D;
+            return Me(N), N;
           }
           function Me(e3) {
             const t3 = e3.__SENTRY__ = e3.__SENTRY__ || {};
@@ -1576,7 +1576,7 @@ Url: ${Ee(e4)}`), true);
             return Date.now() / 1e3;
           }
           const Ce = (function() {
-            const { performance: e3 } = D;
+            const { performance: e3 } = N;
             if (!e3 || !e3.now) return Ae;
             const t3 = Date.now() - e3.now(), n3 = null == e3.timeOrigin ? t3 : e3.timeOrigin;
             return () => (n3 + e3.now()) / 1e3;
@@ -1597,25 +1597,25 @@ Url: ${Ee(e4)}`), true);
           function Le() {
             return ge().substring(16);
           }
-          function De(e3, t3, n3 = 2) {
+          function Ne(e3, t3, n3 = 2) {
             if (!t3 || "object" != typeof t3 || n3 <= 0) return t3;
             if (e3 && t3 && 0 === Object.keys(t3).length) return e3;
             const r2 = { ...e3 };
-            for (const e4 in t3) Object.prototype.hasOwnProperty.call(t3, e4) && (r2[e4] = De(r2[e4], t3[e4], n3 - 1));
+            for (const e4 in t3) Object.prototype.hasOwnProperty.call(t3, e4) && (r2[e4] = Ne(r2[e4], t3[e4], n3 - 1));
             return r2;
           }
           (() => {
-            const { performance: e3 } = D;
+            const { performance: e3 } = N;
             if (!e3 || !e3.now) return void (Oe = "none");
             const t3 = 36e5, n3 = e3.now(), r2 = Date.now(), i2 = e3.timeOrigin ? Math.abs(e3.timeOrigin + n3 - r2) : t3, o2 = i2 < t3, a2 = e3.timing && e3.timing.navigationStart, s2 = "number" == typeof a2 ? Math.abs(a2 + n3 - r2) : t3;
             o2 || s2 < t3 ? i2 <= s2 ? (Oe = "timeOrigin", e3.timeOrigin) : Oe = "navigationStart" : Oe = "dateNow";
           })();
-          const Ne = "_sentrySpan";
+          const De = "_sentrySpan";
           function je(e3, t3) {
-            t3 ? ce(e3, Ne, t3) : delete e3[Ne];
+            t3 ? ce(e3, De, t3) : delete e3[De];
           }
           function Re(e3) {
-            return e3[Ne];
+            return e3[De];
           }
           class xe {
             constructor() {
@@ -1715,7 +1715,7 @@ Url: ${Ee(e4)}`), true);
               return { breadcrumbs: this._breadcrumbs, attachments: this._attachments, contexts: this._contexts, tags: this._tags, extra: this._extra, user: this._user, level: this._level, fingerprint: this._fingerprint || [], eventProcessors: this._eventProcessors, propagationContext: this._propagationContext, sdkProcessingMetadata: this._sdkProcessingMetadata, transactionName: this._transactionName, span: Re(this) };
             }
             setSDKProcessingMetadata(e3) {
-              return this._sdkProcessingMetadata = De(this._sdkProcessingMetadata, e3, 2), this;
+              return this._sdkProcessingMetadata = Ne(this._sdkProcessingMetadata, e3, 2), this;
             }
             setPropagationContext(e3) {
               return this._propagationContext = { spanId: Le(), ...e3 }, this;
@@ -1785,7 +1785,7 @@ Url: ${Ee(e4)}`), true);
           }
           function Ue() {
             const e3 = Me(Te());
-            return e3.stack = e3.stack || new Ve(N("defaultCurrentScope", (() => new Fe())), N("defaultIsolationScope", (() => new Fe())));
+            return e3.stack = e3.stack || new Ve(D("defaultCurrentScope", (() => new Fe())), D("defaultIsolationScope", (() => new Fe())));
           }
           function Be(e3) {
             return Ue().withScope(e3);
@@ -1919,7 +1919,7 @@ Name: ${rt(r2)}
 Error:`, t4);
             }
           }
-          const ht = D;
+          const ht = N;
           let vt, gt, mt;
           function yt() {
             if (!ht.document) return;
@@ -2013,7 +2013,7 @@ Error:`, t4);
               return r2 ? (void 0 !== n3[0] && (r2.body = n3[0]), pt("xhr", { startTimestamp: 1e3 * Ce(), xhr: t3 }), e4.apply(t3, n3)) : e4.apply(t3, n3);
             } });
           }
-          const wt = D;
+          const wt = N;
           let kt;
           function Et(e3) {
             const t3 = "history";
@@ -2044,17 +2044,17 @@ Error:`, t4);
             }, se(ht.history, "pushState", t3), se(ht.history, "replaceState", t3);
           }
           function Mt() {
-            "console" in D && j.forEach((function(e3) {
-              e3 in D.console && se(D.console, e3, (function(t3) {
+            "console" in N && j.forEach((function(e3) {
+              e3 in N.console && se(N.console, e3, (function(t3) {
                 return R[e3] = t3, function(...t4) {
                   pt("console", { args: t4, level: e3 });
                   const n3 = R[e3];
-                  n3 && n3.apply(D.console, t4);
+                  n3 && n3.apply(N.console, t4);
                 };
               }));
             }));
           }
-          const At = D;
+          const At = N;
           function Ct(e3) {
             return e3 && /^function\s+\w+\(\)\s+\{\s+\[native code\]\s+\}$/.test(e3.toString());
           }
@@ -2079,7 +2079,7 @@ Error:`, t4);
                 I && F.warn("Could not create sandbox iframe for pure fetch check, bailing to window.fetch: ", e5);
               }
               return e4;
-            })() || se(D, "fetch", (function(t4) {
+            })() || se(N, "fetch", (function(t4) {
               return function(...n3) {
                 const r2 = new Error(), { method: i2, url: o2 } = (function(e4) {
                   if (0 === e4.length) return { method: "GET", url: "" };
@@ -2090,7 +2090,7 @@ Error:`, t4);
                   const t5 = e4[0];
                   return { url: It(t5), method: Pt(t5, "method") ? String(t5.method).toUpperCase() : "GET" };
                 })(n3), a2 = { args: n3, fetchData: { method: i2, url: o2 }, startTimestamp: 1e3 * Ce(), virtualError: r2 };
-                return e3 || pt("fetch", { ...a2 }), t4.apply(D, n3).then((async (t5) => (e3 ? e3(t5) : pt("fetch", { ...a2, endTimestamp: 1e3 * Ce(), response: t5 }), t5)), ((e4) => {
+                return e3 || pt("fetch", { ...a2 }), t4.apply(N, n3).then((async (t5) => (e3 ? e3(t5) : pt("fetch", { ...a2, endTimestamp: 1e3 * Ce(), response: t5 }), t5)), ((e4) => {
                   throw pt("fetch", { ...a2, endTimestamp: 1e3 * Ce(), error: e4 }), Y(e4) && void 0 === e4.stack && (e4.stack = r2.stack, ce(e4, "framesToPop", 1)), e4;
                 }));
               };
@@ -2103,7 +2103,7 @@ Error:`, t4);
             return "string" == typeof e3 ? e3 : e3 ? Pt(e3, "url") ? e3.url : e3.toString ? e3.toString() : "" : "";
           }
           const Lt = 100;
-          function Dt(e3, t3) {
+          function Nt(e3, t3) {
             const n3 = Ge(), r2 = We();
             if (!n3) return;
             const { beforeBreadcrumb: i2 = null, maxBreadcrumbs: o2 = Lt } = n3.getOptions();
@@ -2111,7 +2111,7 @@ Error:`, t4);
             const a2 = { timestamp: Ae(), ...e3 }, s2 = i2 ? x((() => i2(a2, t3))) : a2;
             null !== s2 && (n3.emit && n3.emit("beforeAddBreadcrumb", s2, t3), r2.addBreadcrumb(s2, o2));
           }
-          function Nt(e3) {
+          function Dt(e3) {
             return void 0 === e3 ? void 0 : e3 >= 400 && e3 < 500 ? "warning" : e3 >= 500 ? "error" : void 0;
           }
           function jt(e3) {
@@ -2375,10 +2375,10 @@ Error:`, t4);
           }
           function cn(e3, t3) {
             const { extra: n3, tags: r2, user: i2, contexts: o2, level: a2, sdkProcessingMetadata: s2, breadcrumbs: c2, fingerprint: u2, eventProcessors: l2, attachments: d2, propagationContext: f2, transactionName: p2, span: h2 } = t3;
-            un(e3, "extra", n3), un(e3, "tags", r2), un(e3, "user", i2), un(e3, "contexts", o2), e3.sdkProcessingMetadata = De(e3.sdkProcessingMetadata, s2, 2), a2 && (e3.level = a2), p2 && (e3.transactionName = p2), h2 && (e3.span = h2), c2.length && (e3.breadcrumbs = [...e3.breadcrumbs, ...c2]), u2.length && (e3.fingerprint = [...e3.fingerprint, ...u2]), l2.length && (e3.eventProcessors = [...e3.eventProcessors, ...l2]), d2.length && (e3.attachments = [...e3.attachments, ...d2]), e3.propagationContext = { ...e3.propagationContext, ...f2 };
+            un(e3, "extra", n3), un(e3, "tags", r2), un(e3, "user", i2), un(e3, "contexts", o2), e3.sdkProcessingMetadata = Ne(e3.sdkProcessingMetadata, s2, 2), a2 && (e3.level = a2), p2 && (e3.transactionName = p2), h2 && (e3.span = h2), c2.length && (e3.breadcrumbs = [...e3.breadcrumbs, ...c2]), u2.length && (e3.fingerprint = [...e3.fingerprint, ...u2]), l2.length && (e3.eventProcessors = [...e3.eventProcessors, ...l2]), d2.length && (e3.attachments = [...e3.attachments, ...d2]), e3.propagationContext = { ...e3.propagationContext, ...f2 };
           }
           function un(e3, t3, n3) {
-            e3[t3] = De(e3[t3], n3, 1);
+            e3[t3] = Ne(e3[t3], n3, 1);
           }
           function ln(e3, t3, n3, r2, i2, o2) {
             const { normalizeDepth: a2 = 3, normalizeMaxBreadth: s2 = 1e3 } = e3, c2 = { ...t3, event_id: t3.event_id || n3.event_id || ge(), timestamp: t3.timestamp || Ae() }, u2 = n3.integrations || e3.integrations.map(((e4) => e4.name));
@@ -2393,7 +2393,7 @@ Error:`, t4);
               t4.length > 0 && (e4.sdk = e4.sdk || {}, e4.sdk.integrations = [...e4.sdk.integrations || [], ...t4]);
             })(c2, u2), i2 && i2.emit("applyFrameMetadata", t3), void 0 === t3.type && (function(e4, t4) {
               const n4 = (function(e5) {
-                const t5 = D._sentryDebugIds;
+                const t5 = N._sentryDebugIds;
                 if (!t5) return {};
                 const n5 = Object.keys(t5);
                 return qt && n5.length === $t || ($t = n5.length, qt = n5.reduce(((n6, r3) => {
@@ -2428,7 +2428,7 @@ Error:`, t4);
               return n4.update(t4), n4;
             })(r2, n3.captureContext);
             n3.mechanism && be(c2, n3.mechanism);
-            const d2 = i2 ? i2.getEventProcessors() : [], f2 = N("globalScope", (() => new Fe())).getScopeData();
+            const d2 = i2 ? i2.getEventProcessors() : [], f2 = D("globalScope", (() => new Fe())).getScopeData();
             o2 && cn(f2, o2.getScopeData()), l2 && cn(f2, l2.getScopeData());
             const p2 = [...n3.attachments || [], ...f2.attachments];
             return p2.length && (n3.attachments = p2), (function(e4, t4) {
@@ -2481,7 +2481,7 @@ Error:`, t4);
             return qe().captureEvent(e3, t3);
           }
           function pn(e3) {
-            const t3 = Ge(), n3 = We(), r2 = qe(), { release: i2, environment: o2 = xt } = t3 && t3.getOptions() || {}, { userAgent: a2 } = D.navigator || {}, s2 = (function(e4) {
+            const t3 = Ge(), n3 = We(), r2 = qe(), { release: i2, environment: o2 = xt } = t3 && t3.getOptions() || {}, { userAgent: a2 } = N.navigator || {}, s2 = (function(e4) {
               const t4 = Ce(), n4 = { sid: ge(), init: true, timestamp: t4, started: t4, duration: 0, status: "ok", errors: 0, ignoreDuration: false, toJSON: () => (function(e5) {
                 return he({ sid: `${e5.sid}`, init: e5.init, started: new Date(1e3 * e5.started).toISOString(), timestamp: new Date(1e3 * e5.timestamp).toISOString(), status: e5.status, errors: e5.errors, did: "number" == typeof e5.did || "string" == typeof e5.did ? `${e5.did}` : void 0, duration: e5.duration, abnormal_mechanism: e5.abnormal_mechanism, attrs: { release: e5.release, environment: e5.environment, ip_address: e5.ipAddress, user_agent: e5.userAgent } });
               })(n4) };
@@ -2503,7 +2503,7 @@ Error:`, t4);
           function gn(e3 = false) {
             e3 ? hn() : vn();
           }
-          const mn = D;
+          const mn = N;
           let yn = 0;
           function _n() {
             return yn > 0;
@@ -2574,7 +2574,7 @@ Error:`, t4);
                     if (false !== t4.args[0]) return;
                     n4.message = `Assertion failed: ${oe(t4.args.slice(1), " ") || "console.assert"}`, n4.data.arguments = t4.args.slice(1);
                   }
-                  Dt(n4, { input: t4.args, level: t4.level });
+                  Nt(n4, { input: t4.args, level: t4.level });
                 };
               })(e4)), t3.dom && (n3 = /* @__PURE__ */ (function(e5, t4) {
                 return function(n4) {
@@ -2603,7 +2603,7 @@ Error:`, t4);
                   }
                   if (0 === r2.length) return;
                   const s2 = { category: `ui.${n4.name}`, message: r2 };
-                  i2 && (s2.data = { "ui.component_name": i2 }), Dt(s2, { event: n4.event, name: n4.name, global: n4.global });
+                  i2 && (s2.data = { "ui.component_name": i2 }), Nt(s2, { event: n4.event, name: n4.name, global: n4.global });
                 };
               })(e4, t3.dom), dt("dom", n3), ft("dom", yt)), t3.xhr && (function(e5) {
                 dt("xhr", e5), ft("xhr", St);
@@ -2613,7 +2613,7 @@ Error:`, t4);
                   const { startTimestamp: n4, endTimestamp: r2 } = t4, i2 = t4.xhr[bt];
                   if (!n4 || !r2 || !i2) return;
                   const { method: o2, url: a2, status_code: s2, body: c2 } = i2, u2 = { method: o2, url: a2, status_code: s2 }, l2 = { xhr: t4.xhr, input: c2, startTimestamp: n4, endTimestamp: r2 };
-                  Dt({ category: "xhr", data: u2, type: "http", level: Nt(s2) }, l2);
+                  Nt({ category: "xhr", data: u2, type: "http", level: Dt(s2) }, l2);
                 };
               })(e4)), t3.fetch && (function(e5) {
                 const t4 = "fetch";
@@ -2622,10 +2622,10 @@ Error:`, t4);
                 return function(t4) {
                   if (Ge() !== e5) return;
                   const { startTimestamp: n4, endTimestamp: r2 } = t4;
-                  if (r2 && (!t4.fetchData.url.match(/sentry_key/) || "POST" !== t4.fetchData.method)) if (t4.error) Dt({ category: "fetch", data: t4.fetchData, level: "error", type: "http" }, { data: t4.error, input: t4.args, startTimestamp: n4, endTimestamp: r2 });
+                  if (r2 && (!t4.fetchData.url.match(/sentry_key/) || "POST" !== t4.fetchData.method)) if (t4.error) Nt({ category: "fetch", data: t4.fetchData, level: "error", type: "http" }, { data: t4.error, input: t4.args, startTimestamp: n4, endTimestamp: r2 });
                   else {
                     const e6 = t4.response, i2 = { ...t4.fetchData, status_code: e6 && e6.status }, o2 = { input: t4.args, response: e6, startTimestamp: n4, endTimestamp: r2 };
-                    Dt({ category: "fetch", data: i2, type: "http", level: Nt(i2.status_code) }, o2);
+                    Nt({ category: "fetch", data: i2, type: "http", level: Dt(i2.status_code) }, o2);
                   }
                 };
               })(e4)), t3.history && Et(/* @__PURE__ */ (function(e5) {
@@ -2635,11 +2635,11 @@ Error:`, t4);
                   const i2 = jt(mn.location.href);
                   let o2 = n4 ? jt(n4) : void 0;
                   const a2 = jt(r2);
-                  o2 && o2.path || (o2 = i2), i2.protocol === a2.protocol && i2.host === a2.host && (r2 = a2.relative), i2.protocol === o2.protocol && i2.host === o2.host && (n4 = o2.relative), Dt({ category: "navigation", data: { from: n4, to: r2 } });
+                  o2 && o2.path || (o2 = i2), i2.protocol === a2.protocol && i2.host === a2.host && (r2 = a2.relative), i2.protocol === o2.protocol && i2.host === o2.host && (n4 = o2.relative), Nt({ category: "navigation", data: { from: n4, to: r2 } });
                 };
               })(e4)), t3.sentry && e4.on("beforeSendEvent", /* @__PURE__ */ (function(e5) {
                 return function(t4) {
-                  Ge() === e5 && Dt({ category: "sentry." + ("transaction" === t4.type ? "transaction" : "event"), event_id: t4.event_id, level: t4.level, message: ye(t4) }, { event: t4 });
+                  Ge() === e5 && Nt({ category: "sentry." + ("transaction" === t4.type ? "transaction" : "event"), event_id: t4.event_id, level: t4.level, message: ye(t4) }, { event: t4 });
                 };
               })(e4));
             } };
@@ -2696,24 +2696,24 @@ Error:`, t4);
           }
           let Cn = null;
           function On() {
-            Cn = D.onerror, D.onerror = function(e3, t3, n3, r2, i2) {
+            Cn = N.onerror, N.onerror = function(e3, t3, n3, r2, i2) {
               return pt("error", { column: r2, error: i2, line: n3, msg: e3, url: t3 }), !!Cn && Cn.apply(this, arguments);
-            }, D.onerror.__SENTRY_INSTRUMENTED__ = true;
+            }, N.onerror.__SENTRY_INSTRUMENTED__ = true;
           }
           let Pn = null;
           function In() {
-            Pn = D.onunhandledrejection, D.onunhandledrejection = function(e3) {
+            Pn = N.onunhandledrejection, N.onunhandledrejection = function(e3) {
               return pt("unhandledrejection", e3), !Pn || Pn.apply(this, arguments);
-            }, D.onunhandledrejection.__SENTRY_INSTRUMENTED__ = true;
+            }, N.onunhandledrejection.__SENTRY_INSTRUMENTED__ = true;
           }
           function Ln(e3, t3) {
-            const n3 = Nn(e3, t3), r2 = { type: xn(t3), value: Fn(t3) };
+            const n3 = Dn(e3, t3), r2 = { type: xn(t3), value: Fn(t3) };
             return n3.length && (r2.stacktrace = { frames: n3 }), void 0 === r2.type && "" === r2.value && (r2.value = "Unrecoverable error caught"), r2;
           }
-          function Dn(e3, t3) {
+          function Nn(e3, t3) {
             return { exception: { values: [Ln(e3, t3)] } };
           }
-          function Nn(e3, t3) {
+          function Dn(e3, t3) {
             const n3 = t3.stacktrace || t3.stack || "", r2 = (function(e4) {
               return e4 && jn.test(e4.message) ? 1 : 0;
             })(t3), i2 = (function(e4) {
@@ -2739,17 +2739,17 @@ Error:`, t4);
           }
           function Vn(e3, t3, n3, r2, i2) {
             let o2;
-            if (q(t3) && t3.error) return Dn(e3, t3.error);
+            if (q(t3) && t3.error) return Nn(e3, t3.error);
             if (W(t3) || $(t3, "DOMException")) {
               const i3 = t3;
-              if ("stack" in t3) o2 = Dn(e3, t3);
+              if ("stack" in t3) o2 = Nn(e3, t3);
               else {
                 const t4 = i3.name || (W(i3) ? "DOMError" : "DOMException"), a2 = i3.message ? `${t4}: ${i3.message}` : t4;
                 o2 = Un(e3, a2, n3, r2), _e(o2, a2);
               }
               return "code" in i3 && (o2.tags = { ...o2.tags, "DOMException.code": `${i3.code}` }), o2;
             }
-            return Y(t3) ? Dn(e3, t3) : K(t3) || Q(t3) ? (o2 = (function(e4, t4, n4, r3) {
+            return Y(t3) ? Nn(e3, t3) : K(t3) || Q(t3) ? (o2 = (function(e4, t4, n4, r3) {
               const i3 = Ge(), o3 = i3 && i3.getOptions().normalizeDepth, a2 = (function(e5) {
                 for (const t5 in e5) if (Object.prototype.hasOwnProperty.call(e5, t5)) {
                   const n5 = e5[t5];
@@ -2759,7 +2759,7 @@ Error:`, t4);
               if (a2) return { exception: { values: [Ln(e4, a2)] }, extra: s2 };
               const c2 = { exception: { values: [{ type: Q(t4) ? t4.constructor.name : r3 ? "UnhandledRejection" : "Error", value: Bn(t4, { isUnhandledRejection: r3 }) }] }, extra: s2 };
               if (n4) {
-                const t5 = Nn(e4, n4);
+                const t5 = Dn(e4, n4);
                 t5.length && (c2.exception.values[0].stacktrace = { frames: t5 });
               }
               return c2;
@@ -2768,7 +2768,7 @@ Error:`, t4);
           function Un(e3, t3, n3, r2) {
             const i2 = {};
             if (r2 && n3) {
-              const r3 = Nn(e3, n3);
+              const r3 = Dn(e3, n3);
               r3.length && (i2.exception = { values: [{ value: t3, stacktrace: { frames: r3 } }] }), be(i2, { synthetic: true });
             }
             if (z(t3)) {
@@ -2918,7 +2918,7 @@ Error:`, t4);
             return false;
           }
           function rr(e3) {
-            return D.__SENTRY__ && D.__SENTRY__.encodePolyfill ? D.__SENTRY__.encodePolyfill(e3) : new TextEncoder().encode(e3);
+            return N.__SENTRY__ && N.__SENTRY__.encodePolyfill ? N.__SENTRY__.encodePolyfill(e3) : new TextEncoder().encode(e3);
           }
           function ir(e3) {
             const [t3, n3] = e3;
@@ -3456,7 +3456,7 @@ Reason: ${e4}`);
             const n3 = -1 !== e3.indexOf("safari-extension"), r2 = -1 !== e3.indexOf("safari-web-extension");
             return n3 || r2 ? [-1 !== e3.indexOf("@") ? e3.split("@")[0] : Xe, n3 ? `safari-extension:${t3}` : `safari-web-extension:${t3}`] : [e3, t3];
           };
-          var Or = "new", Pr = "loading", Ir = "loaded", Lr = "joining-meeting", Dr = "joined-meeting", Nr = "left-meeting", jr = "error", Rr = "blocked", xr = "off", Fr = "sendable", Vr = "loading", Ur = "interrupted", Br = "playable", Jr = "unknown", Yr = "full", $r = "lobby", qr = "none", Wr = "base", Gr = "*", zr = "ejected", Hr = "nbf-room", Kr = "nbf-token", Qr = "exp-room", Xr = "exp-token", Zr = "no-room", ei = "meeting-full", ti = "end-of-life", ni = "not-allowed", ri = "connection-error", ii = "cam-in-use", oi = "mic-in-use", ai = "cam-mic-in-use", si = "permissions", ci = "undefined-mediadevices", ui = "not-found", li = "constraints", di = "unknown", fi = "iframe-ready-for-launch-config", pi = "iframe-launch-config", hi = "theme-updated", vi = "loading", gi = "load-attempt-failed", mi = "loaded", yi = "started-camera", _i = "camera-error", bi = "joining-meeting", Si = "joined-meeting", wi = "left-meeting", ki = "participant-joined", Ei = "participant-updated", Ti = "participant-left", Mi = "participant-counts-updated", Ai = "access-state-updated", Ci = "meeting-session-summary-updated", Oi = "meeting-session-state-updated", Pi = "meeting-session-data-error", Ii = "waiting-participant-added", Li = "waiting-participant-updated", Di = "waiting-participant-removed", Ni = "track-started", ji = "track-stopped", Ri = "transcription-started", xi = "transcription-stopped", Fi = "transcription-error", Vi = "recording-started", Ui = "recording-stopped", Bi = "recording-stats", Ji = "recording-error", Yi = "recording-upload-completed", $i = "recording-data", qi = "app-message", Wi = "transcription-message", Gi = "remote-media-player-started", zi = "remote-media-player-updated", Hi = "remote-media-player-stopped", Ki = "local-screen-share-started", Qi = "local-screen-share-stopped", Xi = "local-screen-share-canceled", Zi = "active-speaker-change", eo = "active-speaker-mode-change", to = "network-quality-change", no = "network-connection", ro = "cpu-load-change", io = "face-counts-updated", oo = "fullscreen", ao = "exited-fullscreen", so = "live-streaming-started", co = "live-streaming-updated", uo = "live-streaming-stopped", lo = "live-streaming-error", fo = "lang-updated", po = "receive-settings-updated", ho = "input-settings-updated", vo = "nonfatal-error", go = "error", mo = 4096, yo = 102400, _o = "iframe-call-message", bo = "local-screen-start", So = "daily-method-update-live-streaming-endpoints", wo = "transmit-log", ko = "daily-custom-track", Eo = { NONE: "none", BGBLUR: "background-blur", BGIMAGE: "background-image", FACE_DETECTION: "face-detection" }, To = { NONE: "none", NOISE_CANCELLATION: "noise-cancellation" }, Mo = { PLAY: "play", PAUSE: "pause" }, Ao = ["jpg", "png", "jpeg"], Co = "sip-call-transfer";
+          var Or = "new", Pr = "loading", Ir = "loaded", Lr = "joining-meeting", Nr = "joined-meeting", Dr = "left-meeting", jr = "error", Rr = "blocked", xr = "off", Fr = "sendable", Vr = "loading", Ur = "interrupted", Br = "playable", Jr = "unknown", Yr = "full", $r = "lobby", qr = "none", Wr = "base", Gr = "*", zr = "ejected", Hr = "nbf-room", Kr = "nbf-token", Qr = "exp-room", Xr = "exp-token", Zr = "no-room", ei = "meeting-full", ti = "end-of-life", ni = "not-allowed", ri = "connection-error", ii = "cam-in-use", oi = "mic-in-use", ai = "cam-mic-in-use", si = "permissions", ci = "undefined-mediadevices", ui = "not-found", li = "constraints", di = "unknown", fi = "iframe-ready-for-launch-config", pi = "iframe-launch-config", hi = "theme-updated", vi = "loading", gi = "load-attempt-failed", mi = "loaded", yi = "started-camera", _i = "camera-error", bi = "joining-meeting", Si = "joined-meeting", wi = "left-meeting", ki = "participant-joined", Ei = "participant-updated", Ti = "participant-left", Mi = "participant-counts-updated", Ai = "access-state-updated", Ci = "meeting-session-summary-updated", Oi = "meeting-session-state-updated", Pi = "meeting-session-data-error", Ii = "waiting-participant-added", Li = "waiting-participant-updated", Ni = "waiting-participant-removed", Di = "track-started", ji = "track-stopped", Ri = "transcription-started", xi = "transcription-stopped", Fi = "transcription-error", Vi = "recording-started", Ui = "recording-stopped", Bi = "recording-stats", Ji = "recording-error", Yi = "recording-upload-completed", $i = "recording-data", qi = "app-message", Wi = "transcription-message", Gi = "remote-media-player-started", zi = "remote-media-player-updated", Hi = "remote-media-player-stopped", Ki = "local-screen-share-started", Qi = "local-screen-share-stopped", Xi = "local-screen-share-canceled", Zi = "active-speaker-change", eo = "active-speaker-mode-change", to = "network-quality-change", no = "network-connection", ro = "cpu-load-change", io = "face-counts-updated", oo = "fullscreen", ao = "exited-fullscreen", so = "live-streaming-started", co = "live-streaming-updated", uo = "live-streaming-stopped", lo = "live-streaming-error", fo = "lang-updated", po = "receive-settings-updated", ho = "input-settings-updated", vo = "nonfatal-error", go = "error", mo = 4096, yo = 102400, _o = "iframe-call-message", bo = "local-screen-start", So = "daily-method-update-live-streaming-endpoints", wo = "transmit-log", ko = "daily-custom-track", Eo = { NONE: "none", BGBLUR: "background-blur", BGIMAGE: "background-image", FACE_DETECTION: "face-detection" }, To = { NONE: "none", NOISE_CANCELLATION: "noise-cancellation" }, Mo = { PLAY: "play", PAUSE: "pause" }, Ao = ["jpg", "png", "jpeg"], Co = "sip-call-transfer";
           function Oo() {
             return !Po() && "undefined" != typeof window && window.navigator && window.navigator.userAgent ? window.navigator.userAgent : "";
           }
@@ -3472,19 +3472,19 @@ Reason: ${e4}`);
             var e3 = document.createElement("iframe");
             return !!e3.requestFullscreen || !!e3.webkitRequestFullscreen;
           }
-          var Do = "none", No = (function() {
+          var No = "none", Do = (function() {
             try {
               var e3, t3 = document.createElement("canvas"), n3 = false;
               (e3 = t3.getContext("webgl2", { failIfMajorPerformanceCaveat: true })) || (n3 = true, e3 = t3.getContext("webgl2"));
               var r2 = null != e3;
-              return t3.remove(), r2 ? n3 ? "software" : "hardware" : Do;
+              return t3.remove(), r2 ? n3 ? "software" : "hardware" : No;
             } catch (e4) {
-              return Do;
+              return No;
             }
           })();
           function jo() {
             var e3 = arguments.length > 0 && void 0 !== arguments[0] && arguments[0];
-            return !Po() && !(No === Do) && (e3 ? !Vo() && ["Chrome", "Firefox"].includes(Uo()) : (function() {
+            return !Po() && !(Do === No) && (e3 ? !Vo() && ["Chrome", "Firefox"].includes(Uo()) : (function() {
               if (Vo()) return false;
               var e4 = Uo();
               if ("Safari" === e4) {
@@ -4111,7 +4111,7 @@ Reason: ${e4}`);
           }
           var Pa = /* @__PURE__ */ new Map(), Ia = null;
           function La(e3) {
-            Da() ? (function(e4) {
+            Na() ? (function(e4) {
               Aa.has(e4) || (Aa.set(e4, {}), navigator.mediaDevices.enumerateDevices().then((function(t3) {
                 Aa.has(e4) && (Aa.get(e4).lastDevicesString = JSON.stringify(t3), Ca || (Ca = (function() {
                   var e5 = v((function* () {
@@ -4223,11 +4223,11 @@ Reason: ${e4}`);
               })));
             })(e3);
           }
-          function Da() {
+          function Na() {
             var e3;
             return Po() || void 0 !== (null === (e3 = navigator.mediaDevices) || void 0 === e3 ? void 0 : e3.ondevicechange);
           }
-          var Na = /* @__PURE__ */ new Set();
+          var Da = /* @__PURE__ */ new Set();
           function ja(e3, t3) {
             var n3 = Object.keys(e3);
             if (Object.getOwnPropertySymbols) {
@@ -4458,7 +4458,7 @@ Reason: ${e4}`);
             for (var n3 = 0, r2 = Array(t3); n3 < t3; n3++) r2[n3] = e3[n3];
             return r2;
           }
-          var Za = {}, es = "video", ts = "voice", ns = Po() ? { data: {} } : { data: {}, topology: "none" }, rs = { present: 0, hidden: 0 }, is = { maxBitrate: { min: 1e5, max: 25e5 }, maxFramerate: { min: 1, max: 30 }, scaleResolutionDownBy: { min: 1, max: 8 } }, os = Object.keys(is), as = ["state", "volume", "simulcastEncodings"], ss = { androidInCallNotification: { title: "string", subtitle: "string", iconName: "string", disableForCustomOverride: "boolean" }, disableAutoDeviceManagement: { audio: "boolean", video: "boolean" } }, cs = { id: { iconPath: "string", iconPathDarkMode: "string", label: "string", tooltip: "string", visualState: "'default' | 'sidebar-open' | 'active'" } }, us = { id: { allow: "string", controlledBy: "'*' | 'owners' | string[]", csp: "string", iconURL: "string", label: "string", loading: "'eager' | 'lazy'", location: "'main' | 'sidebar'", name: "string", referrerPolicy: "string", sandbox: "string", src: "string", srcdoc: "string", shared: "string[] | 'owners' | boolean" } }, ls = { customIntegrations: { validate: js, help: Ds() }, customTrayButtons: { validate: Ns, help: "customTrayButtons should be a dictionary of the type ".concat(JSON.stringify(cs)) }, url: { validate: function(e3) {
+          var Za = {}, es = "video", ts = "voice", ns = Po() ? { data: {} } : { data: {}, topology: "none" }, rs = { present: 0, hidden: 0 }, is = { maxBitrate: { min: 1e5, max: 25e5 }, maxFramerate: { min: 1, max: 30 }, scaleResolutionDownBy: { min: 1, max: 8 } }, os = Object.keys(is), as = ["state", "volume", "simulcastEncodings"], ss = { androidInCallNotification: { title: "string", subtitle: "string", iconName: "string", disableForCustomOverride: "boolean" }, disableAutoDeviceManagement: { audio: "boolean", video: "boolean" } }, cs = { id: { iconPath: "string", iconPathDarkMode: "string", label: "string", tooltip: "string", visualState: "'default' | 'sidebar-open' | 'active'" } }, us = { id: { allow: "string", controlledBy: "'*' | 'owners' | string[]", csp: "string", iconURL: "string", label: "string", loading: "'eager' | 'lazy'", location: "'main' | 'sidebar'", name: "string", referrerPolicy: "string", sandbox: "string", src: "string", srcdoc: "string", shared: "string[] | 'owners' | boolean" } }, ls = { customIntegrations: { validate: js, help: Ns() }, customTrayButtons: { validate: Ds, help: "customTrayButtons should be a dictionary of the type ".concat(JSON.stringify(cs)) }, url: { validate: function(e3) {
             return "string" == typeof e3;
           }, help: "url should be a string" }, baseUrl: { validate: function(e3) {
             return "string" == typeof e3;
@@ -4639,7 +4639,7 @@ Reason: ${e4}`);
                 La(r2.handleDeviceChange);
               })), p(r2, "stopListeningForDeviceChanges", (function() {
                 var e5;
-                e5 = r2.handleDeviceChange, Da() ? (function(e6) {
+                e5 = r2.handleDeviceChange, Na() ? (function(e6) {
                   Aa.has(e6) && (Aa.delete(e6), 0 === Aa.size && Ca && (navigator.mediaDevices.removeEventListener("devicechange", Ca), Ca = null));
                 })(e5) : (function(e6) {
                   Pa.has(e6) && (Pa.delete(e6), 0 === Pa.size && Ia && (clearInterval(Ia), Ia = null));
@@ -4869,7 +4869,7 @@ Reason: ${e4}`);
             } }, { key: "setIceConfig", value: function(e4) {
               return this.sendMessageToCallMachine({ action: "set-ice-config", iceConfig: e4 }), this;
             } }, { key: "meetingSessionSummary", value: function() {
-              return [Nr, jr].includes(this._callState) ? this._finalSummaryOfPrevSession : this._meetingSessionSummary;
+              return [Dr, jr].includes(this._callState) ? this._finalSummaryOfPrevSession : this._meetingSessionSummary;
             } }, { key: "getMeetingSession", value: (z2 = v((function* () {
               var e4 = this;
               return console.warn("getMeetingSession() is deprecated: use meetingSessionSummary(), which will return immediately"), vs(this._callState, "getMeetingSession()"), new Promise((function(t4) {
@@ -4962,9 +4962,9 @@ Reason: ${e4}`);
                 }
                 this.validateProperties(t4), this.properties = Ha(Ha({}, this.properties), t4);
               }
-              return new Promise((function(t5) {
+              return new Promise((function(t5, n4) {
                 e4._preloadCache.inputSettings = e4._prepInputSettingsForSharing(e4._inputSettings, false), e4.sendMessageToCallMachine({ action: "start-camera", properties: hs(e4.properties, e4.callClientId), preloadCache: hs(e4._preloadCache, e4.callClientId) }, (function(e5) {
-                  t5({ camera: e5.camera, mic: e5.mic, speaker: e5.speaker });
+                  e5.error ? n4(e5.error) : t5({ camera: e5.camera, mic: e5.mic, speaker: e5.speaker });
                 }));
               }));
             })), function() {
@@ -5098,8 +5098,11 @@ Reason: ${e4}`);
               return U2.apply(this, arguments);
             }) }, { key: "join", value: (V2 = v((function* () {
               var e4 = this, t4 = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {};
-              this._testCallInProgress && this.stopTestCallQuality();
-              var n4 = false;
+              if (this._testCallInProgress && this.stopTestCallQuality(), !t4.url && !this.properties.url) {
+                var n4 = "No room URL has been provided";
+                return console.error(n4), Promise.reject(new Error(n4));
+              }
+              var r2 = false;
               if (this.needsLoad()) {
                 this.updateIsPreparingToJoin(true);
                 try {
@@ -5108,25 +5111,28 @@ Reason: ${e4}`);
                   return this.updateIsPreparingToJoin(false), Promise.reject(e5);
                 }
               } else {
-                if (n4 = !(!this.properties.cssFile && !this.properties.cssText), this._didPreAuth) {
+                if (r2 = !(!this.properties.cssFile && !this.properties.cssText), this._didPreAuth) {
                   if (t4.url && t4.url !== this.properties.url) return console.error("url in join() is different than the one used in preAuth()"), this.updateIsPreparingToJoin(false), Promise.reject();
                   if (t4.token && t4.token !== this.properties.token) return console.error("token in join() is different than the one used in preAuth()"), this.updateIsPreparingToJoin(false), Promise.reject();
                 }
                 if (t4.url && !this._callObjectMode && t4.url && t4.url !== this.properties.url) return console.error("url in join() is different than the one used in load() (".concat(this.properties.url, " -> ").concat(t4.url, ")")), this.updateIsPreparingToJoin(false), Promise.reject();
                 this.validateProperties(t4), this.properties = Ha(Ha({}, this.properties), t4);
               }
-              return void 0 !== t4.showLocalVideo && (this._callObjectMode ? console.error("showLocalVideo is not available in callObject mode") : this._showLocalVideo = !!t4.showLocalVideo), void 0 !== t4.showParticipantsBar && (this._callObjectMode ? console.error("showParticipantsBar is not available in callObject mode") : this._showParticipantsBar = !!t4.showParticipantsBar), this._callState === Dr || this._callState === Lr ? (console.warn("already joined meeting, call leave() before joining again"), void this.updateIsPreparingToJoin(false)) : (this._updateCallState(Lr, false), this.emitDailyJSEvent({ action: bi }), this._preloadCache.inputSettings = this._prepInputSettingsForSharing(this._inputSettings || {}, false), this.sendMessageToCallMachine({ action: "join-meeting", properties: hs(this.properties, this.callClientId), preloadCache: hs(this._preloadCache, this.callClientId) }), new Promise((function(t5, r2) {
+              return void 0 !== t4.showLocalVideo && (this._callObjectMode ? console.error("showLocalVideo is not available in callObject mode") : this._showLocalVideo = !!t4.showLocalVideo), void 0 !== t4.showParticipantsBar && (this._callObjectMode ? console.error("showParticipantsBar is not available in callObject mode") : this._showParticipantsBar = !!t4.showParticipantsBar), this._callState === Nr || this._callState === Lr ? (console.warn("already joined meeting, call leave() before joining again"), void this.updateIsPreparingToJoin(false)) : (this._updateCallState(Lr, false), this.emitDailyJSEvent({ action: bi }), this._preloadCache.inputSettings = this._prepInputSettingsForSharing(this._inputSettings || {}, false), this.sendMessageToCallMachine({ action: "join-meeting", properties: hs(this.properties, this.callClientId), preloadCache: hs(this._preloadCache, this.callClientId) }, (function(t5) {
+                t5.error && e4._joinedCallback && (e4._joinedCallback(null, t5.error), e4._joinedCallback = null);
+              })), new Promise((function(t5, n5) {
                 e4._joinedCallback = function(i2, o2) {
                   if (e4._callState !== jr) {
-                    if (e4._updateCallState(Dr), i2) for (var a3 in i2) {
+                    if (o2) return e4._updateCallState(Dr), void n5(o2);
+                    if (e4._updateCallState(Nr), i2) for (var a3 in i2) {
                       if (e4._callObjectMode) {
                         var s3 = e4._callMachine().store;
                         wa(i2[a3], s3), ka(i2[a3], s3), Ta(i2[a3], e4._participants[a3], s3);
                       }
                       e4._participants[a3] = Ha({}, i2[a3]), e4.toggleParticipantAudioBasedOnNativeAudioFocus();
                     }
-                    n4 && e4.loadCss(e4.properties), t5(i2);
-                  } else r2(o2);
+                    r2 && e4.loadCss(e4.properties), t5(i2);
+                  } else n5(o2);
                 };
               })));
             })), function() {
@@ -5134,7 +5140,7 @@ Reason: ${e4}`);
             }) }, { key: "leave", value: (F2 = v((function* () {
               var e4 = this;
               return this._testCallInProgress && this.stopTestCallQuality(), new Promise((function(t4) {
-                e4._callState === Nr || e4._callState === jr ? t4() : e4._callObjectLoader && !e4._callObjectLoader.loaded ? (e4._callObjectLoader.cancel(), e4._updateCallState(Nr), e4.resetMeetingDependentVars(), e4.emitDailyJSEvent({ action: Nr }), t4()) : (e4._resolveLeave = t4, e4.sendMessageToCallMachine({ action: "leave-meeting" }));
+                e4._callState === Dr || e4._callState === jr ? t4() : e4._callObjectLoader && !e4._callObjectLoader.loaded ? (e4._callObjectLoader.cancel(), e4._updateCallState(Dr), e4.resetMeetingDependentVars(), e4.emitDailyJSEvent({ action: Dr }), t4()) : (e4._resolveLeave = t4, e4.sendMessageToCallMachine({ action: "leave-meeting" }));
               }));
             })), function() {
               return F2.apply(this, arguments);
@@ -5153,7 +5159,7 @@ Reason: ${e4}`);
               ys(this._callMachineInitialized, "stopScreenShare()"), this.sendMessageToCallMachine({ action: "local-screen-stop" });
             } }, { key: "startRecording", value: function() {
               var e4 = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, t4 = e4.type;
-              if (t4 && "cloud" !== t4 && "raw-tracks" !== t4 && "local" !== t4) throw new Error("invalid type: ".concat(t4, ", allowed values 'cloud', 'raw-tracks', or 'local'"));
+              if (t4 && "cloud" !== t4 && "cloud-audio-only" !== t4 && "raw-tracks" !== t4 && "local" !== t4) throw new Error("invalid type: ".concat(t4, ", allowed values 'cloud', 'cloud-audio-only', 'raw-tracks', or 'local'"));
               this.sendMessageToCallMachine(Ha({ action: "local-recording-start" }, e4));
             } }, { key: "updateRecording", value: function(e4) {
               var t4 = e4.layout, n4 = void 0 === t4 ? { preset: "default" } : t4, r2 = e4.instanceId;
@@ -5224,7 +5230,7 @@ Reason: ${e4}`);
               }));
             })), function(e4) {
               return j2.apply(this, arguments);
-            }) }, { key: "updateRemoteMediaPlayer", value: (N2 = v((function* (e4) {
+            }) }, { key: "updateRemoteMediaPlayer", value: (D2 = v((function* (e4) {
               var t4 = this, n4 = e4.session_id, r2 = e4.settings;
               try {
                 Fs(r2);
@@ -5237,7 +5243,7 @@ Reason: ${e4}`);
                 }));
               }));
             })), function(e4) {
-              return N2.apply(this, arguments);
+              return D2.apply(this, arguments);
             }) }, { key: "startTranscription", value: function(e4) {
               vs(this._callState, "startTranscription()"), this.sendMessageToCallMachine(Ha({ action: "daily-method-start-transcription" }, e4));
             } }, { key: "updateTranscription", value: function(e4) {
@@ -5249,7 +5255,7 @@ Reason: ${e4}`);
               if (vs(this._callState, "stopTranscription()"), e4 && "object" !== o(e4)) throw new Error("stopTranscription Error: options must be object type");
               if (e4 && !e4.instanceId) throw new Error('"instanceId" not provided');
               this.sendMessageToCallMachine(Ha({ action: "daily-method-stop-transcription" }, e4));
-            } }, { key: "startDialOut", value: (D2 = v((function* (e4) {
+            } }, { key: "startDialOut", value: (N2 = v((function* (e4) {
               var t4 = this;
               vs(this._callState, "startDialOut()");
               var n4 = function(e5) {
@@ -5311,7 +5317,7 @@ Reason: ${e4}`);
                 }));
               }));
             })), function(e4) {
-              return D2.apply(this, arguments);
+              return N2.apply(this, arguments);
             }) }, { key: "stopDialOut", value: function(e4) {
               var t4 = this;
               return vs(this._callState, "stopDialOut()"), new Promise((function(n4, r2) {
@@ -5357,7 +5363,7 @@ Reason: ${e4}`);
               return P2.apply(this, arguments);
             }) }, { key: "getNetworkStats", value: function() {
               var e4 = this;
-              return this._callState !== Dr ? Promise.resolve(Ha({ stats: { latest: {} } }, this._network)) : new Promise((function(t4) {
+              return this._callState !== Nr ? Promise.resolve(Ha({ stats: { latest: {} } }, this._network)) : new Promise((function(t4) {
                 e4.sendMessageToCallMachine({ action: "get-calc-stats" }, (function(n4) {
                   t4(Ha(Ha({}, e4._network), {}, { stats: n4.stats }));
                 }));
@@ -5382,7 +5388,7 @@ Reason: ${e4}`);
               return e4 ? e4 instanceof MediaStreamTrack ? !!(function(e5, t4) {
                 var n4 = t4.isLocalScreenVideo;
                 return e5 && "live" === e5.readyState && !(function(e6, t5) {
-                  return (!t5.isLocalScreenVideo || "Chrome" !== Uo()) && e6.muted && !Na.has(e6.id);
+                  return (!t5.isLocalScreenVideo || "Chrome" !== Uo()) && e6.muted && !Da.has(e6.id);
                 })(e5, { isLocalScreenVideo: n4 });
               })(e4, { isLocalScreenVideo: false }) || (console.error("Video track is not playable. This test needs a live video track."), false) : (console.error("Video track needs to be of type `MediaStreamTrack`."), false) : (console.error("Missing video track. You must provide a video track in order to run this test."), false);
             } }, { key: "testCallQuality", value: (M2 = v((function* () {
@@ -5458,7 +5464,7 @@ Reason: ${e4}`);
             } }, { key: "getCpuLoadStats", value: function() {
               var e4 = this;
               return new Promise((function(t4) {
-                e4._callState === Dr ? e4.sendMessageToCallMachine({ action: "get-cpu-load-stats" }, (function(e5) {
+                e4._callState === Nr ? e4.sendMessageToCallMachine({ action: "get-cpu-load-stats" }, (function(e5) {
                   t4(e5.cpuStats);
                 })) : t4({ cpuLoadState: void 0, cpuLoadStateReason: void 0, stats: {} });
               }));
@@ -5587,7 +5593,7 @@ Reason: ${e4}`);
             } }, { key: "customTrayButtons", value: function() {
               return Ss(this._callObjectMode, "customTrayButtons()"), ws(), this._customTrayButtons;
             } }, { key: "updateCustomTrayButtons", value: function(e4) {
-              return Ss(this._callObjectMode, "updateCustomTrayButtons()"), ws(), vs(this._callState, "updateCustomTrayButtons()"), Ns(e4) ? (this.sendMessageToCallMachine({ action: "update-custom-tray-buttons", btns: e4 }), this._customTrayButtons = e4, this) : (console.error("updateCustomTrayButtons only accepts a dictionary of the type ".concat(JSON.stringify(cs))), this);
+              return Ss(this._callObjectMode, "updateCustomTrayButtons()"), ws(), vs(this._callState, "updateCustomTrayButtons()"), Ds(e4) ? (this.sendMessageToCallMachine({ action: "update-custom-tray-buttons", btns: e4 }), this._customTrayButtons = e4, this) : (console.error("updateCustomTrayButtons only accepts a dictionary of the type ".concat(JSON.stringify(cs))), this);
             } }, { key: "theme", value: function() {
               return Ss(this._callObjectMode, "theme()"), this.properties.theme;
             } }, { key: "setTheme", value: function(e4) {
@@ -5696,7 +5702,7 @@ Reason: ${e4}`);
                 return "".concat(ls[e5].queryString, "=").concat(n4[e5]);
               })).join("&");
             } }, { key: "needsLoad", value: function() {
-              return [Or, Pr, Nr, jr].includes(this._callState);
+              return [Or, Pr, Dr, jr].includes(this._callState);
             } }, { key: "sendMessageToCallMachine", value: function(e4, t4) {
               if (this._destroyed && (this._logUseAfterDestroy(), this.strictMode)) throw new Error("Use after destroy");
               this._messageChannel.sendMessageToCallMachine(e4, t4, this.callClientId, this._iframe);
@@ -5725,7 +5731,7 @@ Reason: ${e4}`);
                   break;
                 case ki:
                 case Ei:
-                  if (this._callState === Nr) return;
+                  if (this._callState === Dr) return;
                   if (e4.participant && e4.participant.session_id) {
                     var o2 = e4.participant.local ? "local" : e4.participant.session_id;
                     if (this._callObjectMode) {
@@ -5767,7 +5773,7 @@ Reason: ${e4}`);
                   null != d3 && null !== (l2 = d3.error) && void 0 !== l2 && l2.details && (d3.error.details = JSON.parse(d3.error.details)), this._maybeSendToSentry(e4), this._joinedCallback && (this._joinedCallback(null, d3), this._joinedCallback = null), this.emitDailyJSEvent(d3);
                   break;
                 case wi:
-                  this._callState !== jr && this._updateCallState(Nr), this.resetMeetingDependentVars(), this._resolveLeave && (this._resolveLeave(), this._resolveLeave = null), this.emitDailyJSEvent(e4);
+                  this._callState !== jr && this._updateCallState(Dr), this.resetMeetingDependentVars(), this._resolveLeave && (this._resolveLeave(), this._resolveLeave = null), this.emitDailyJSEvent(e4);
                   break;
                 case "selected-devices-updated":
                   e4.devices && this.emitDailyJSEvent(e4);
@@ -5797,7 +5803,7 @@ Reason: ${e4}`);
                   break;
                 case Ii:
                 case Li:
-                case Di:
+                case Ni:
                   this._waitingParticipants = e4.allWaitingParticipants, this.emitDailyJSEvent({ action: e4.action, participant: e4.participant });
                   break;
                 case po:
@@ -5902,7 +5908,7 @@ Reason: ${e4}`);
               var r2, i2, o2 = null !== (r2 = null == t4 ? void 0 : t4.tracks[e4]) && void 0 !== r2 ? r2 : null, a3 = null !== (i2 = null == n4 ? void 0 : n4.tracks[e4]) && void 0 !== i2 ? i2 : null, s3 = null == a3 ? void 0 : a3.track;
               if (s3) {
                 var c2 = this._trackStatePlayable(o2), u2 = this._trackStatePlayable(a3), l2 = this._trackChanged(null == o2 ? void 0 : o2.track, s3);
-                u2 && (c2 && !l2 || this.emitDailyJSEvent({ action: Ni, track: s3, participant: n4, type: e4 }));
+                u2 && (c2 && !l2 || this.emitDailyJSEvent({ action: Di, track: s3, participant: n4, type: e4 }));
               }
             } }, { key: "maybeParticipantTracksStopped", value: function(e4, t4) {
               if (e4) for (var n4 in e4.tracks) this.maybeEventTrackStopped(n4, e4, t4);
@@ -5928,7 +5934,7 @@ Reason: ${e4}`);
               if (e4 !== this._callState || t4 !== this._isPreparingToJoin) {
                 var n4 = this._callState, r2 = this._isPreparingToJoin;
                 this._callState = e4, this._isPreparingToJoin = t4;
-                var i2 = this._callState === Dr;
+                var i2 = this._callState === Nr;
                 this.updateShowAndroidOngoingMeetingNotification(i2);
                 var o2 = gs(n4, r2), a3 = gs(this._callState, this._isPreparingToJoin);
                 o2 !== a3 && (this.updateKeepDeviceAwake(a3), this.updateDeviceAudioMode(a3), this.updateNoOpRecordingEnsuringBackgroundContinuity(a3));
@@ -6039,7 +6045,7 @@ Reason: ${e4}`);
                 return true;
               })(Uo(), Bo()) || Po())), supportsSfu: !!xo(), supportsVideoProcessing: jo(), supportsAudioProcessing: Ro() };
             } }, { key: "version", value: function() {
-              return "0.85.0";
+              return "0.87.0";
             } }, { key: "createCallObject", value: function() {
               var e4 = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {};
               return e4.layout = "none", new t3(null, e4);
@@ -6053,7 +6059,7 @@ Reason: ${e4}`);
               var o2 = i2.iframeStyle;
               o2 || (o2 = r2 === document.body ? { position: "fixed", border: "1px solid black", backgroundColor: "white", width: "375px", height: "450px", right: "1em", bottom: "1em" } : { border: 0, width: "100%", height: "100%" });
               var a3 = document.createElement("iframe");
-              window.navigator && window.navigator.userAgent.match(/Chrome\/61\./) ? a3.allow = "microphone, camera" : a3.allow = "microphone; camera; autoplay; display-capture; screen-wake-lock", a3.style.visibility = "hidden", r2.appendChild(a3), a3.style.visibility = null, Object.keys(o2).forEach((function(e5) {
+              window.navigator && window.navigator.userAgent.match(/Chrome\/61\./) ? a3.allow = "microphone, camera" : a3.allow = "microphone; camera; autoplay; display-capture; screen-wake-lock; compute-pressure;", a3.style.visibility = "hidden", r2.appendChild(a3), a3.style.visibility = null, Object.keys(o2).forEach((function(e5) {
                 return a3.style[e5] = o2[e5];
               })), i2.layout || (i2.customLayout ? i2.layout = "custom-v1" : i2.layout = "browser");
               try {
@@ -6070,7 +6076,7 @@ Reason: ${e4}`);
               var e4 = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : void 0;
               return e4 ? Za[e4] : Object.values(Za)[0];
             } }]);
-            var n3, a2, s2, d2, h2, g2, y2, b2, S2, k2, M2, O2, P2, I2, L2, D2, N2, j2, R2, x2, F2, V2, U2, B2, J2, Y2, $2, q2, W2, G2, z2, H2, K2, Q2, X2, Z2, ee2, te2;
+            var n3, a2, s2, d2, h2, g2, y2, b2, S2, k2, M2, O2, P2, I2, L2, N2, D2, j2, R2, x2, F2, V2, U2, B2, J2, Y2, $2, q2, W2, G2, z2, H2, K2, Q2, X2, Z2, ee2, te2;
           })(_());
           function ps(e3) {
             if (e3.extension) {
@@ -6101,13 +6107,13 @@ Reason: ${e4}`);
           }
           function vs(e3) {
             var t3 = arguments.length > 2 ? arguments[2] : void 0;
-            if (e3 !== Dr) {
+            if (e3 !== Nr) {
               var n3 = "".concat(arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : "This daily-js method", " only supported after join.");
               throw t3 && (n3 += " ".concat(t3)), console.error(n3), new Error(n3);
             }
           }
           function gs(e3, t3) {
-            return [Lr, Dr].includes(e3) || t3;
+            return [Lr, Nr].includes(e3) || t3;
           }
           function ms(e3, t3) {
             var n3 = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : "This daily-js method", r2 = arguments.length > 3 ? arguments[3] : void 0;
@@ -6281,10 +6287,10 @@ Reason: ${e4}`);
             var t3 = e3.allowAllParticipantsKey;
             return "receiveSettings must be of the form { [<remote participant id> | ".concat(Wr).concat(t3 ? ' | "'.concat(Gr, '"') : "", "]: ") + '{ [video: [{ layer: [<non-negative integer> | "inherit"] } | "inherit"]], [screenVideo: [{ layer: [<non-negative integer> | "inherit"] } | "inherit"]] }}}';
           }
-          function Ds() {
+          function Ns() {
             return "customIntegrations should be an object of type ".concat(JSON.stringify(us), ".");
           }
-          function Ns(e3) {
+          function Ds(e3) {
             if (e3 && "object" !== o(e3) || Array.isArray(e3)) return console.error("customTrayButtons should be an Object of the type ".concat(JSON.stringify(cs), ".")), false;
             if (e3) for (var t3 = 0, n3 = Object.entries(e3); t3 < n3.length; t3++) for (var r2 = m(n3[t3], 1)[0], i2 = 0, a2 = Object.entries(e3[r2]); i2 < a2.length; i2++) {
               var s2 = m(a2[i2], 2), c2 = s2[0], u2 = s2[1], l2 = cs.id[c2];
@@ -6304,7 +6310,7 @@ Reason: ${e4}`);
             return true;
           }
           function js(e3) {
-            if (!e3 || e3 && "object" !== o(e3) || Array.isArray(e3)) return console.error(Ds()), false;
+            if (!e3 || e3 && "object" !== o(e3) || Array.isArray(e3)) return console.error(Ns()), false;
             for (var t3 = function(e4) {
               return "".concat(e4, " should be ").concat(us.id[e4]);
             }, n3 = function(e4, t4) {
@@ -6968,6 +6974,23 @@ var require_api = __commonJS({
            * No description
            *
            * @tags Assistants
+           * @name AssistantControllerFindAllOrgDrafts
+           * @summary List All Assistant Drafts
+           * @request GET:/assistant/draft
+           * @secure
+           */
+          assistantControllerFindAllOrgDrafts: (query, params = {}) => this.request({
+            path: `/assistant/draft`,
+            method: "GET",
+            query,
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Assistants
            * @name AssistantControllerFindOne
            * @summary Get Assistant
            * @request GET:/assistant/{id}
@@ -7033,18 +7056,189 @@ var require_api = __commonJS({
             ...params
           }),
           /**
-           * No description
+           * @description Deprecated. Use `GET /assistant/:id/versions` instead.
            *
            * @tags Assistants
            * @name AssistantControllerFindVersions
-           * @summary List Assistant Versions
+           * @summary List Legacy Assistant Versions
            * @request GET:/assistant/{id}/version
+           * @deprecated
            * @secure
            */
           assistantControllerFindVersions: (id, query, params = {}) => this.request({
             path: `/assistant/${id}/version`,
             method: "GET",
             query,
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * @description Returns the version history for the assistant.
+           *
+           * @tags Assistants
+           * @name AssistantControllerFindAllVersions
+           * @summary List Assistant Versions
+           * @request GET:/assistant/{id}/versions
+           * @secure
+           */
+          assistantControllerFindAllVersions: (id, query, params = {}) => this.request({
+            path: `/assistant/${id}/versions`,
+            method: "GET",
+            query,
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Assistants
+           * @name AssistantControllerFindOneVersion
+           * @summary Get Assistant Version
+           * @request GET:/assistant/{id}/versions/{version}
+           * @secure
+           */
+          assistantControllerFindOneVersion: (id, version, query, params = {}) => this.request({
+            path: `/assistant/${id}/versions/${version}`,
+            method: "GET",
+            query,
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Assistants
+           * @name AssistantControllerAssistantVersionMetadataUpdate
+           * @summary Update Assistant Version Metadata
+           * @request PATCH:/assistant/{id}/versions/{version}
+           * @secure
+           */
+          assistantControllerAssistantVersionMetadataUpdate: (id, version, data, params = {}) => this.request({
+            path: `/assistant/${id}/versions/${version}`,
+            method: "PATCH",
+            body: data,
+            secure: true,
+            type: ContentType.Json,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Assistants
+           * @name AssistantControllerSoftDeleteVersion
+           * @summary Delete Assistant Version
+           * @request DELETE:/assistant/{id}/versions/{version}
+           * @secure
+           */
+          assistantControllerSoftDeleteVersion: (id, version, query, params = {}) => this.request({
+            path: `/assistant/${id}/versions/${version}`,
+            method: "DELETE",
+            query,
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * @description Restores the assistant to the selected version.
+           *
+           * @tags Assistants
+           * @name AssistantControllerRestoreVersion
+           * @summary Restore Assistant Version
+           * @request POST:/assistant/{id}/restore/{version}
+           * @secure
+           */
+          assistantControllerRestoreVersion: (id, version, params = {}) => this.request({
+            path: `/assistant/${id}/restore/${version}`,
+            method: "POST",
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Assistants
+           * @name AssistantControllerFindAllDrafts
+           * @summary List Assistant Drafts
+           * @request GET:/assistant/{id}/draft
+           * @secure
+           */
+          assistantControllerFindAllDrafts: (id, query, params = {}) => this.request({
+            path: `/assistant/${id}/draft`,
+            method: "GET",
+            query,
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Assistants
+           * @name AssistantControllerCreateDraft
+           * @summary Create Assistant Draft
+           * @request POST:/assistant/{id}/draft
+           * @secure
+           */
+          assistantControllerCreateDraft: (id, data, params = {}) => this.request({
+            path: `/assistant/${id}/draft`,
+            method: "POST",
+            body: data,
+            secure: true,
+            type: ContentType.Json,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Assistants
+           * @name AssistantControllerFindOneDraft
+           * @summary Get Assistant Draft
+           * @request GET:/assistant/{id}/draft/{draftId}
+           * @secure
+           */
+          assistantControllerFindOneDraft: (id, draftId, params = {}) => this.request({
+            path: `/assistant/${id}/draft/${draftId}`,
+            method: "GET",
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Assistants
+           * @name AssistantControllerUpdateDraft
+           * @summary Update Assistant Draft
+           * @request PATCH:/assistant/{id}/draft/{draftId}
+           * @secure
+           */
+          assistantControllerUpdateDraft: (id, draftId, data, params = {}) => this.request({
+            path: `/assistant/${id}/draft/${draftId}`,
+            method: "PATCH",
+            body: data,
+            secure: true,
+            type: ContentType.Json,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Assistants
+           * @name AssistantControllerDeleteDraft
+           * @summary Delete Assistant Draft
+           * @request DELETE:/assistant/{id}/draft/{draftId}
+           * @secure
+           */
+          assistantControllerDeleteDraft: (id, draftId, params = {}) => this.request({
+            path: `/assistant/${id}/draft/${draftId}`,
+            method: "DELETE",
             secure: true,
             format: "json",
             ...params
@@ -7121,6 +7315,109 @@ var require_api = __commonJS({
           /**
            * No description
            *
+           * @tags Campaigns
+           * @name CampaignControllerCreateV2
+           * @summary Create Campaign V2
+           * @request POST:/v2/campaign
+           * @secure
+           */
+          campaignControllerCreateV2: (data, params = {}) => this.request({
+            path: `/v2/campaign`,
+            method: "POST",
+            body: data,
+            secure: true,
+            type: ContentType.Json,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Campaigns
+           * @name CampaignControllerFindAllV2
+           * @summary List Campaigns V2
+           * @request GET:/v2/campaign
+           * @secure
+           */
+          campaignControllerFindAllV2: (query, params = {}) => this.request({
+            path: `/v2/campaign`,
+            method: "GET",
+            query,
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Campaigns
+           * @name CampaignControllerFindOneV2
+           * @summary Get Campaign V2
+           * @request GET:/v2/campaign/{id}
+           * @secure
+           */
+          campaignControllerFindOneV2: (id, query, params = {}) => this.request({
+            path: `/v2/campaign/${id}`,
+            method: "GET",
+            query,
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Campaigns
+           * @name CampaignControllerUpdateV2
+           * @summary Update Campaign
+           * @request PATCH:/v2/campaign/{id}
+           * @secure
+           */
+          campaignControllerUpdateV2: (id, data, params = {}) => this.request({
+            path: `/v2/campaign/${id}`,
+            method: "PATCH",
+            body: data,
+            secure: true,
+            type: ContentType.Json,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Campaigns
+           * @name CampaignControllerRemoveV2
+           * @summary Delete Campaign
+           * @request DELETE:/v2/campaign/{id}
+           * @secure
+           */
+          campaignControllerRemoveV2: (id, params = {}) => this.request({
+            path: `/v2/campaign/${id}`,
+            method: "DELETE",
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Campaigns
+           * @name CampaignControllerGetCampaignV2Contacts
+           * @summary Get Campaign V2 Contacts
+           * @request GET:/v2/campaign/{id}/contacts
+           * @secure
+           */
+          campaignControllerGetCampaignV2Contacts: (id, query, params = {}) => this.request({
+            path: `/v2/campaign/${id}/contacts`,
+            method: "GET",
+            query,
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
            * @tags Phone Numbers
            * @name PhoneNumberControllerFindAllPaginated
            * @summary List Phone Numbers
@@ -7131,6 +7428,157 @@ var require_api = __commonJS({
             path: `/v2/phone-number`,
             method: "GET",
             query,
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Knowledge Bases V2
+           * @name KnowledgeBaseV2ControllerCreate
+           * @summary Create a Knowledge Base V2
+           * @request POST:/v2/knowledge-base
+           * @secure
+           */
+          knowledgeBaseV2ControllerCreate: (data, params = {}) => this.request({
+            path: `/v2/knowledge-base`,
+            method: "POST",
+            body: data,
+            secure: true,
+            type: ContentType.Json,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Knowledge Bases V2
+           * @name KnowledgeBaseV2ControllerFindAll
+           * @summary List Knowledge Bases V2
+           * @request GET:/v2/knowledge-base
+           * @secure
+           */
+          knowledgeBaseV2ControllerFindAll: (query, params = {}) => this.request({
+            path: `/v2/knowledge-base`,
+            method: "GET",
+            query,
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Knowledge Bases V2
+           * @name KnowledgeBaseV2ControllerFilesGet
+           * @summary List files in a Knowledge Base V2
+           * @request GET:/v2/knowledge-base/{id}/file
+           * @secure
+           */
+          knowledgeBaseV2ControllerFilesGet: (id, params = {}) => this.request({
+            path: `/v2/knowledge-base/${id}/file`,
+            method: "GET",
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Knowledge Bases V2
+           * @name KnowledgeBaseV2ControllerFileAttach
+           * @summary Attach and ingest a file
+           * @request POST:/v2/knowledge-base/{id}/file
+           * @secure
+           */
+          knowledgeBaseV2ControllerFileAttach: (id, data, params = {}) => this.request({
+            path: `/v2/knowledge-base/${id}/file`,
+            method: "POST",
+            body: data,
+            secure: true,
+            type: ContentType.Json,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Knowledge Bases V2
+           * @name KnowledgeBaseV2ControllerFileDetach
+           * @summary Detach a file
+           * @request DELETE:/v2/knowledge-base/{id}/file/{fileId}
+           * @secure
+           */
+          knowledgeBaseV2ControllerFileDetach: (id, fileId, params = {}) => this.request({
+            path: `/v2/knowledge-base/${id}/file/${fileId}`,
+            method: "DELETE",
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Knowledge Bases V2
+           * @name KnowledgeBaseV2ControllerFileRetry
+           * @summary Retry indexing a failed file
+           * @request POST:/v2/knowledge-base/{id}/file/{fileId}/retry
+           * @secure
+           */
+          knowledgeBaseV2ControllerFileRetry: (id, fileId, params = {}) => this.request({
+            path: `/v2/knowledge-base/${id}/file/${fileId}/retry`,
+            method: "POST",
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Knowledge Bases V2
+           * @name KnowledgeBaseV2ControllerUpdate
+           * @summary Update a Knowledge Base V2
+           * @request PATCH:/v2/knowledge-base/{id}
+           * @secure
+           */
+          knowledgeBaseV2ControllerUpdate: (id, data, params = {}) => this.request({
+            path: `/v2/knowledge-base/${id}`,
+            method: "PATCH",
+            body: data,
+            secure: true,
+            type: ContentType.Json,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Knowledge Bases V2
+           * @name KnowledgeBaseV2ControllerFindOne
+           * @summary Get a Knowledge Base V2
+           * @request GET:/v2/knowledge-base/{id}
+           * @secure
+           */
+          knowledgeBaseV2ControllerFindOne: (id, params = {}) => this.request({
+            path: `/v2/knowledge-base/${id}`,
+            method: "GET",
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Knowledge Bases V2
+           * @name KnowledgeBaseV2ControllerRemove
+           * @summary Delete a Knowledge Base V2
+           * @request DELETE:/v2/knowledge-base/{id}
+           * @secure
+           */
+          knowledgeBaseV2ControllerRemove: (id, params = {}) => this.request({
+            path: `/v2/knowledge-base/${id}`,
+            method: "DELETE",
             secure: true,
             format: "json",
             ...params
@@ -7384,7 +7832,7 @@ var require_api = __commonJS({
            *
            * @tags Calls
            * @name CallControllerDeleteCallData
-           * @summary Delete Call Data
+           * @summary Delete Call
            * @request DELETE:/call/{id}
            * @secure
            */
@@ -7433,6 +7881,111 @@ var require_api = __commonJS({
             type: ContentType.Json,
             format: "json",
             ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Calls
+           * @name CallArtifactControllerMonoRecordingDownload
+           * @summary Download Call Mono Recording
+           * @request GET:/call/{id}/mono-recording
+           * @secure
+           */
+          callArtifactControllerMonoRecordingDownload: (id, params = {}) => this.request({
+            path: `/call/${id}/mono-recording`,
+            method: "GET",
+            secure: true,
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Calls
+           * @name CallArtifactControllerStereoRecordingDownload
+           * @summary Download Call Stereo Recording
+           * @request GET:/call/{id}/stereo-recording
+           * @secure
+           */
+          callArtifactControllerStereoRecordingDownload: (id, params = {}) => this.request({
+            path: `/call/${id}/stereo-recording`,
+            method: "GET",
+            secure: true,
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Calls
+           * @name CallArtifactControllerVideoRecordingDownload
+           * @summary Download Call Video Recording
+           * @request GET:/call/{id}/video-recording
+           * @secure
+           */
+          callArtifactControllerVideoRecordingDownload: (id, params = {}) => this.request({
+            path: `/call/${id}/video-recording`,
+            method: "GET",
+            secure: true,
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Calls
+           * @name CallArtifactControllerCustomerRecordingDownload
+           * @summary Download Call Customer Recording
+           * @request GET:/call/{id}/customer-recording
+           * @secure
+           */
+          callArtifactControllerCustomerRecordingDownload: (id, params = {}) => this.request({
+            path: `/call/${id}/customer-recording`,
+            method: "GET",
+            secure: true,
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Calls
+           * @name CallArtifactControllerAssistantRecordingDownload
+           * @summary Download Call Assistant Recording
+           * @request GET:/call/{id}/assistant-recording
+           * @secure
+           */
+          callArtifactControllerAssistantRecordingDownload: (id, params = {}) => this.request({
+            path: `/call/${id}/assistant-recording`,
+            method: "GET",
+            secure: true,
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Calls
+           * @name CallArtifactControllerPcapDownload
+           * @summary Download Call Packet Capture (pcap)
+           * @request GET:/call/{id}/pcap
+           * @secure
+           */
+          callArtifactControllerPcapDownload: (id, params = {}) => this.request({
+            path: `/call/${id}/pcap`,
+            method: "GET",
+            secure: true,
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Calls
+           * @name CallArtifactControllerCallLogsDownload
+           * @summary Download Call Logs
+           * @request GET:/call/{id}/call-logs
+           * @secure
+           */
+          callArtifactControllerCallLogsDownload: (id, params = {}) => this.request({
+            path: `/call/${id}/call-logs`,
+            method: "GET",
+            secure: true,
+            ...params
           })
         });
         __publicField(this, "chat", {
@@ -7469,6 +8022,22 @@ var require_api = __commonJS({
             secure: true,
             type: ContentType.Json,
             format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Chats
+           * @name ChatControllerChatsExport
+           * @summary Export Chats to CSV
+           * @request GET:/chat/export
+           * @secure
+           */
+          chatControllerChatsExport: (query, params = {}) => this.request({
+            path: `/chat/export`,
+            method: "GET",
+            query,
+            secure: true,
             ...params
           }),
           /**
@@ -7679,6 +8248,22 @@ var require_api = __commonJS({
             query,
             secure: true,
             format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Sessions
+           * @name SessionControllerSessionsExport
+           * @summary Export Sessions to CSV
+           * @request GET:/session/export
+           * @secure
+           */
+          sessionControllerSessionsExport: (query, params = {}) => this.request({
+            path: `/session/export`,
+            method: "GET",
+            query,
+            secure: true,
             ...params
           }),
           /**
@@ -7897,6 +8482,23 @@ var require_api = __commonJS({
            * No description
            *
            * @tags Tools
+           * @name ToolControllerFindAllOrgDrafts
+           * @summary List All Tool Drafts
+           * @request GET:/tool/draft
+           * @secure
+           */
+          toolControllerFindAllOrgDrafts: (query, params = {}) => this.request({
+            path: `/tool/draft`,
+            method: "GET",
+            query,
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Tools
            * @name ToolControllerFindOne
            * @summary Get Tool
            * @request GET:/tool/{id}
@@ -7938,6 +8540,160 @@ var require_api = __commonJS({
            */
           toolControllerRemove: (id, params = {}) => this.request({
             path: `/tool/${id}`,
+            method: "DELETE",
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * @description Returns the Postgres-backed version history for the tool.
+           *
+           * @tags Tools
+           * @name ToolControllerFindAllVersions
+           * @summary List Tool Versions
+           * @request GET:/tool/{id}/versions
+           * @secure
+           */
+          toolControllerFindAllVersions: (id, query, params = {}) => this.request({
+            path: `/tool/${id}/versions`,
+            method: "GET",
+            query,
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Tools
+           * @name ToolControllerFindOneVersion
+           * @summary Get Tool Version
+           * @request GET:/tool/{id}/versions/{version}
+           * @secure
+           */
+          toolControllerFindOneVersion: (id, version, query, params = {}) => this.request({
+            path: `/tool/${id}/versions/${version}`,
+            method: "GET",
+            query,
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Tools
+           * @name ToolControllerToolVersionMetadataUpdate
+           * @summary Update Tool Version Metadata
+           * @request PATCH:/tool/{id}/versions/{version}
+           * @secure
+           */
+          toolControllerToolVersionMetadataUpdate: (id, version, data, params = {}) => this.request({
+            path: `/tool/${id}/versions/${version}`,
+            method: "PATCH",
+            body: data,
+            secure: true,
+            type: ContentType.Json,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Tools
+           * @name ToolControllerSoftDeleteVersion
+           * @summary Delete Tool Version
+           * @request DELETE:/tool/{id}/versions/{version}
+           * @secure
+           */
+          toolControllerSoftDeleteVersion: (id, version, query, params = {}) => this.request({
+            path: `/tool/${id}/versions/${version}`,
+            method: "DELETE",
+            query,
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Tools
+           * @name ToolControllerFindAllDrafts
+           * @summary List Tool Drafts
+           * @request GET:/tool/{id}/draft
+           * @secure
+           */
+          toolControllerFindAllDrafts: (id, query, params = {}) => this.request({
+            path: `/tool/${id}/draft`,
+            method: "GET",
+            query,
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Tools
+           * @name ToolControllerCreateDraft
+           * @summary Create Tool Draft
+           * @request POST:/tool/{id}/draft
+           * @secure
+           */
+          toolControllerCreateDraft: (id, data, params = {}) => this.request({
+            path: `/tool/${id}/draft`,
+            method: "POST",
+            body: data,
+            secure: true,
+            type: ContentType.Json,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Tools
+           * @name ToolControllerFindOneDraft
+           * @summary Get Tool Draft
+           * @request GET:/tool/{id}/draft/{draftId}
+           * @secure
+           */
+          toolControllerFindOneDraft: (id, draftId, params = {}) => this.request({
+            path: `/tool/${id}/draft/${draftId}`,
+            method: "GET",
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Tools
+           * @name ToolControllerUpdateDraft
+           * @summary Update Tool Draft
+           * @request PATCH:/tool/{id}/draft/{draftId}
+           * @secure
+           */
+          toolControllerUpdateDraft: (id, draftId, data, params = {}) => this.request({
+            path: `/tool/${id}/draft/${draftId}`,
+            method: "PATCH",
+            body: data,
+            secure: true,
+            type: ContentType.Json,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Tools
+           * @name ToolControllerDeleteDraft
+           * @summary Delete Tool Draft
+           * @request DELETE:/tool/{id}/draft/{draftId}
+           * @secure
+           */
+          toolControllerDeleteDraft: (id, draftId, params = {}) => this.request({
+            path: `/tool/${id}/draft/${draftId}`,
             method: "DELETE",
             secure: true,
             format: "json",
@@ -7991,9 +8747,10 @@ var require_api = __commonJS({
            * @request GET:/file
            * @secure
            */
-          fileControllerFindAll: (params = {}) => this.request({
+          fileControllerFindAll: (query, params = {}) => this.request({
             path: `/file`,
             method: "GET",
+            query,
             secure: true,
             format: "json",
             ...params
@@ -8499,18 +9256,18 @@ var require_api = __commonJS({
             ...params
           })
         });
-        __publicField(this, "reporting", {
+        __publicField(this, "eval", {
           /**
            * No description
            *
-           * @tags Insight
-           * @name InsightControllerCreate
-           * @summary Create Insight
-           * @request POST:/reporting/insight
+           * @tags Simulation Personalities
+           * @name PersonalityControllerCreate
+           * @summary Create Personality
+           * @request POST:/eval/simulation/personality
            * @secure
            */
-          insightControllerCreate: (data, params = {}) => this.request({
-            path: `/reporting/insight`,
+          personalityControllerCreate: (data, params = {}) => this.request({
+            path: `/eval/simulation/personality`,
             method: "POST",
             body: data,
             secure: true,
@@ -8521,14 +9278,14 @@ var require_api = __commonJS({
           /**
            * No description
            *
-           * @tags Insight
-           * @name InsightControllerFindAll
-           * @summary Get Insights
-           * @request GET:/reporting/insight
+           * @tags Simulation Personalities
+           * @name PersonalityControllerFindAll
+           * @summary List Personalities
+           * @request GET:/eval/simulation/personality
            * @secure
            */
-          insightControllerFindAll: (query, params = {}) => this.request({
-            path: `/reporting/insight`,
+          personalityControllerFindAll: (query, params = {}) => this.request({
+            path: `/eval/simulation/personality`,
             method: "GET",
             query,
             secure: true,
@@ -8538,14 +9295,30 @@ var require_api = __commonJS({
           /**
            * No description
            *
-           * @tags Insight
-           * @name InsightControllerUpdate
-           * @summary Update Insight
-           * @request PATCH:/reporting/insight/{id}
+           * @tags Simulation Personalities
+           * @name PersonalityControllerFindOne
+           * @summary Get Personality
+           * @request GET:/eval/simulation/personality/{id}
            * @secure
            */
-          insightControllerUpdate: (id, data, params = {}) => this.request({
-            path: `/reporting/insight/${id}`,
+          personalityControllerFindOne: (id, params = {}) => this.request({
+            path: `/eval/simulation/personality/${id}`,
+            method: "GET",
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Simulation Personalities
+           * @name PersonalityControllerUpdate
+           * @summary Update Personality
+           * @request PATCH:/eval/simulation/personality/{id}
+           * @secure
+           */
+          personalityControllerUpdate: (id, data, params = {}) => this.request({
+            path: `/eval/simulation/personality/${id}`,
             method: "PATCH",
             body: data,
             secure: true,
@@ -8556,30 +9329,14 @@ var require_api = __commonJS({
           /**
            * No description
            *
-           * @tags Insight
-           * @name InsightControllerFindOne
-           * @summary Get Insight
-           * @request GET:/reporting/insight/{id}
+           * @tags Simulation Personalities
+           * @name PersonalityControllerRemove
+           * @summary Delete Personality
+           * @request DELETE:/eval/simulation/personality/{id}
            * @secure
            */
-          insightControllerFindOne: (id, params = {}) => this.request({
-            path: `/reporting/insight/${id}`,
-            method: "GET",
-            secure: true,
-            format: "json",
-            ...params
-          }),
-          /**
-           * No description
-           *
-           * @tags Insight
-           * @name InsightControllerRemove
-           * @summary Delete Insight
-           * @request DELETE:/reporting/insight/{id}
-           * @secure
-           */
-          insightControllerRemove: (id, params = {}) => this.request({
-            path: `/reporting/insight/${id}`,
+          personalityControllerRemove: (id, params = {}) => this.request({
+            path: `/eval/simulation/personality/${id}`,
             method: "DELETE",
             secure: true,
             format: "json",
@@ -8588,14 +9345,14 @@ var require_api = __commonJS({
           /**
            * No description
            *
-           * @tags Insight
-           * @name InsightControllerRun
-           * @summary Run Insight
-           * @request POST:/reporting/insight/{id}/run
+           * @tags Simulation Scenarios
+           * @name ScenarioControllerCreate
+           * @summary Create Scenario
+           * @request POST:/eval/simulation/scenario
            * @secure
            */
-          insightControllerRun: (id, data, params = {}) => this.request({
-            path: `/reporting/insight/${id}/run`,
+          scenarioControllerCreate: (data, params = {}) => this.request({
+            path: `/eval/simulation/scenario`,
             method: "POST",
             body: data,
             secure: true,
@@ -8606,23 +9363,406 @@ var require_api = __commonJS({
           /**
            * No description
            *
-           * @tags Insight
-           * @name InsightControllerPreview
-           * @summary Preview Insight
-           * @request POST:/reporting/insight/preview
+           * @tags Simulation Scenarios
+           * @name ScenarioControllerFindAll
+           * @summary List Scenarios
+           * @request GET:/eval/simulation/scenario
            * @secure
            */
-          insightControllerPreview: (data, params = {}) => this.request({
-            path: `/reporting/insight/preview`,
+          scenarioControllerFindAll: (query, params = {}) => this.request({
+            path: `/eval/simulation/scenario`,
+            method: "GET",
+            query,
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Simulation Scenarios
+           * @name ScenarioControllerFindOne
+           * @summary Get Scenario
+           * @request GET:/eval/simulation/scenario/{id}
+           * @secure
+           */
+          scenarioControllerFindOne: (id, params = {}) => this.request({
+            path: `/eval/simulation/scenario/${id}`,
+            method: "GET",
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Simulation Scenarios
+           * @name ScenarioControllerUpdate
+           * @summary Update Scenario
+           * @request PATCH:/eval/simulation/scenario/{id}
+           * @secure
+           */
+          scenarioControllerUpdate: (id, data, params = {}) => this.request({
+            path: `/eval/simulation/scenario/${id}`,
+            method: "PATCH",
+            body: data,
+            secure: true,
+            type: ContentType.Json,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Simulation Scenarios
+           * @name ScenarioControllerRemove
+           * @summary Delete Scenario
+           * @request DELETE:/eval/simulation/scenario/{id}
+           * @secure
+           */
+          scenarioControllerRemove: (id, params = {}) => this.request({
+            path: `/eval/simulation/scenario/${id}`,
+            method: "DELETE",
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Simulation Runs
+           * @name SimulationRunControllerCreate
+           * @summary Create Simulation Run
+           * @request POST:/eval/simulation/run
+           * @secure
+           */
+          simulationRunControllerCreate: (data, params = {}) => this.request({
+            path: `/eval/simulation/run`,
             method: "POST",
             body: data,
             secure: true,
             type: ContentType.Json,
             format: "json",
             ...params
-          })
-        });
-        __publicField(this, "eval", {
+          }),
+          /**
+           * No description
+           *
+           * @tags Simulation Runs
+           * @name SimulationRunControllerFindAll
+           * @summary List Simulation Runs
+           * @request GET:/eval/simulation/run
+           * @secure
+           */
+          simulationRunControllerFindAll: (query, params = {}) => this.request({
+            path: `/eval/simulation/run`,
+            method: "GET",
+            query,
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Simulation Runs
+           * @name SimulationRunControllerFindOne
+           * @summary Get Simulation Run
+           * @request GET:/eval/simulation/run/{id}
+           * @secure
+           */
+          simulationRunControllerFindOne: (id, params = {}) => this.request({
+            path: `/eval/simulation/run/${id}`,
+            method: "GET",
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Simulation Runs
+           * @name SimulationRunControllerCancelGroup
+           * @summary Cancel Simulation Run
+           * @request PATCH:/eval/simulation/run/{id}
+           * @secure
+           */
+          simulationRunControllerCancelGroup: (id, params = {}) => this.request({
+            path: `/eval/simulation/run/${id}`,
+            method: "PATCH",
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Simulation Runs, Simulation Run Items
+           * @name SimulationRunControllerFindItems
+           * @summary List Simulation Run Items
+           * @request GET:/eval/simulation/run/{id}/item
+           * @secure
+           */
+          simulationRunControllerFindItems: (id, query, params = {}) => this.request({
+            path: `/eval/simulation/run/${id}/item`,
+            method: "GET",
+            query,
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Simulation Runs, Simulation Run Items
+           * @name SimulationRunControllerFindItem
+           * @summary Get Simulation Run Item
+           * @request GET:/eval/simulation/run/{id}/item/{itemId}
+           * @secure
+           */
+          simulationRunControllerFindItem: (id, itemId, params = {}) => this.request({
+            path: `/eval/simulation/run/${id}/item/${itemId}`,
+            method: "GET",
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Simulation Runs, Simulation Run Items
+           * @name SimulationRunControllerCancelItem
+           * @summary Cancel Simulation Run Item
+           * @request PATCH:/eval/simulation/run/{id}/item/{itemId}
+           * @secure
+           */
+          simulationRunControllerCancelItem: (id, itemId, params = {}) => this.request({
+            path: `/eval/simulation/run/${id}/item/${itemId}`,
+            method: "PATCH",
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Simulation Runs, Simulation Run Items
+           * @name SimulationRunControllerGenerateSuggestions
+           * @summary Generate Improvement Suggestions
+           * @request POST:/eval/simulation/run/{id}/item/{itemId}/generate
+           * @secure
+           */
+          simulationRunControllerGenerateSuggestions: (id, itemId, query, params = {}) => this.request({
+            path: `/eval/simulation/run/${id}/item/${itemId}/generate`,
+            method: "POST",
+            query,
+            secure: true,
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Simulation Suites
+           * @name SimulationSuiteControllerCreate
+           * @summary Create Simulation Suite
+           * @request POST:/eval/simulation/suite
+           * @secure
+           */
+          simulationSuiteControllerCreate: (data, params = {}) => this.request({
+            path: `/eval/simulation/suite`,
+            method: "POST",
+            body: data,
+            secure: true,
+            type: ContentType.Json,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Simulation Suites
+           * @name SimulationSuiteControllerFindAll
+           * @summary List Simulation Suites
+           * @request GET:/eval/simulation/suite
+           * @secure
+           */
+          simulationSuiteControllerFindAll: (query, params = {}) => this.request({
+            path: `/eval/simulation/suite`,
+            method: "GET",
+            query,
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Simulation Suites
+           * @name SimulationSuiteControllerFindOne
+           * @summary Get Simulation Suite
+           * @request GET:/eval/simulation/suite/{id}
+           * @secure
+           */
+          simulationSuiteControllerFindOne: (id, params = {}) => this.request({
+            path: `/eval/simulation/suite/${id}`,
+            method: "GET",
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Simulation Suites
+           * @name SimulationSuiteControllerUpdate
+           * @summary Update Simulation Suite
+           * @request PATCH:/eval/simulation/suite/{id}
+           * @secure
+           */
+          simulationSuiteControllerUpdate: (id, data, params = {}) => this.request({
+            path: `/eval/simulation/suite/${id}`,
+            method: "PATCH",
+            body: data,
+            secure: true,
+            type: ContentType.Json,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Simulation Suites
+           * @name SimulationSuiteControllerRemove
+           * @summary Delete Simulation Suite
+           * @request DELETE:/eval/simulation/suite/{id}
+           * @secure
+           */
+          simulationSuiteControllerRemove: (id, params = {}) => this.request({
+            path: `/eval/simulation/suite/${id}`,
+            method: "DELETE",
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * @description Uses AI to analyze an assistant or squad configuration and generate test scenarios
+           *
+           * @tags Simulations
+           * @name SimulationGenerateControllerGenerate
+           * @summary Generate Scenarios with AI
+           * @request POST:/eval/simulation/scenario/generate
+           * @secure
+           */
+          simulationGenerateControllerGenerate: (data, params = {}) => this.request({
+            path: `/eval/simulation/scenario/generate`,
+            method: "POST",
+            body: data,
+            secure: true,
+            type: ContentType.Json,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Simulations
+           * @name SimulationControllerCreate
+           * @summary Create Simulation
+           * @request POST:/eval/simulation
+           * @secure
+           */
+          simulationControllerCreate: (data, params = {}) => this.request({
+            path: `/eval/simulation`,
+            method: "POST",
+            body: data,
+            secure: true,
+            type: ContentType.Json,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Simulations
+           * @name SimulationControllerFindAll
+           * @summary List Simulations
+           * @request GET:/eval/simulation
+           * @secure
+           */
+          simulationControllerFindAll: (query, params = {}) => this.request({
+            path: `/eval/simulation`,
+            method: "GET",
+            query,
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Simulations
+           * @name SimulationControllerFindOne
+           * @summary Get Simulation
+           * @request GET:/eval/simulation/{id}
+           * @secure
+           */
+          simulationControllerFindOne: (id, params = {}) => this.request({
+            path: `/eval/simulation/${id}`,
+            method: "GET",
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Simulations
+           * @name SimulationControllerUpdate
+           * @summary Update Simulation
+           * @request PATCH:/eval/simulation/{id}
+           * @secure
+           */
+          simulationControllerUpdate: (id, data, params = {}) => this.request({
+            path: `/eval/simulation/${id}`,
+            method: "PATCH",
+            body: data,
+            secure: true,
+            type: ContentType.Json,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Simulations
+           * @name SimulationControllerRemove
+           * @summary Delete Simulation
+           * @request DELETE:/eval/simulation/{id}
+           * @secure
+           */
+          simulationControllerRemove: (id, params = {}) => this.request({
+            path: `/eval/simulation/${id}`,
+            method: "DELETE",
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Simulations
+           * @name SimulationControllerGetConcurrency
+           * @summary Get Simulation Concurrency
+           * @request GET:/eval/simulation/concurrency
+           * @secure
+           */
+          simulationControllerGetConcurrency: (params = {}) => this.request({
+            path: `/eval/simulation/concurrency`,
+            method: "GET",
+            secure: true,
+            format: "json",
+            ...params
+          }),
           /**
            * No description
            *
@@ -8770,6 +9910,230 @@ var require_api = __commonJS({
             path: `/eval/run`,
             method: "GET",
             query,
+            secure: true,
+            format: "json",
+            ...params
+          })
+        });
+        __publicField(this, "reporting", {
+          /**
+           * No description
+           *
+           * @tags Insight
+           * @name InsightControllerCreate
+           * @summary Create Insight
+           * @request POST:/reporting/insight
+           * @secure
+           */
+          insightControllerCreate: (data, params = {}) => this.request({
+            path: `/reporting/insight`,
+            method: "POST",
+            body: data,
+            secure: true,
+            type: ContentType.Json,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Insight
+           * @name InsightControllerFindAll
+           * @summary Get Insights
+           * @request GET:/reporting/insight
+           * @secure
+           */
+          insightControllerFindAll: (query, params = {}) => this.request({
+            path: `/reporting/insight`,
+            method: "GET",
+            query,
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Insight
+           * @name InsightControllerUpdate
+           * @summary Update Insight
+           * @request PATCH:/reporting/insight/{id}
+           * @secure
+           */
+          insightControllerUpdate: (id, data, params = {}) => this.request({
+            path: `/reporting/insight/${id}`,
+            method: "PATCH",
+            body: data,
+            secure: true,
+            type: ContentType.Json,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Insight
+           * @name InsightControllerFindOne
+           * @summary Get Insight
+           * @request GET:/reporting/insight/{id}
+           * @secure
+           */
+          insightControllerFindOne: (id, params = {}) => this.request({
+            path: `/reporting/insight/${id}`,
+            method: "GET",
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Insight
+           * @name InsightControllerRemove
+           * @summary Delete Insight
+           * @request DELETE:/reporting/insight/{id}
+           * @secure
+           */
+          insightControllerRemove: (id, params = {}) => this.request({
+            path: `/reporting/insight/${id}`,
+            method: "DELETE",
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Insight
+           * @name InsightControllerRun
+           * @summary Run Insight
+           * @request POST:/reporting/insight/{id}/run
+           * @secure
+           */
+          insightControllerRun: (id, data, params = {}) => this.request({
+            path: `/reporting/insight/${id}/run`,
+            method: "POST",
+            body: data,
+            secure: true,
+            type: ContentType.Json,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Insight
+           * @name InsightControllerPreview
+           * @summary Preview Insight
+           * @request POST:/reporting/insight/preview
+           * @secure
+           */
+          insightControllerPreview: (data, params = {}) => this.request({
+            path: `/reporting/insight/preview`,
+            method: "POST",
+            body: data,
+            secure: true,
+            type: ContentType.Json,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Board
+           * @name BoardControllerCreate
+           * @summary Create Board
+           * @request POST:/reporting/board
+           * @secure
+           */
+          boardControllerCreate: (data, params = {}) => this.request({
+            path: `/reporting/board`,
+            method: "POST",
+            body: data,
+            secure: true,
+            type: ContentType.Json,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Board
+           * @name BoardControllerFindAll
+           * @summary Get Boards
+           * @request GET:/reporting/board
+           * @secure
+           */
+          boardControllerFindAll: (query, params = {}) => this.request({
+            path: `/reporting/board`,
+            method: "GET",
+            query,
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Board
+           * @name BoardControllerMetricsOverviewEnsure
+           * @summary Get Default Metrics Overview Board
+           * @request GET:/reporting/board/default/metrics-overview
+           * @secure
+           */
+          boardControllerMetricsOverviewEnsure: (params = {}) => this.request({
+            path: `/reporting/board/default/metrics-overview`,
+            method: "GET",
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Board
+           * @name BoardControllerUpdate
+           * @summary Update Board
+           * @request PATCH:/reporting/board/{id}
+           * @secure
+           */
+          boardControllerUpdate: (id, data, params = {}) => this.request({
+            path: `/reporting/board/${id}`,
+            method: "PATCH",
+            body: data,
+            secure: true,
+            type: ContentType.Json,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Board
+           * @name BoardControllerFindOne
+           * @summary Get Board
+           * @request GET:/reporting/board/{id}
+           * @secure
+           */
+          boardControllerFindOne: (id, params = {}) => this.request({
+            path: `/reporting/board/${id}`,
+            method: "GET",
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Board
+           * @name BoardControllerRemove
+           * @summary Delete Board
+           * @request DELETE:/reporting/board/{id}
+           * @secure
+           */
+          boardControllerRemove: (id, params = {}) => this.request({
+            path: `/reporting/board/${id}`,
+            method: "DELETE",
             secure: true,
             format: "json",
             ...params
@@ -9030,6 +10394,38 @@ var require_api = __commonJS({
            * No description
            *
            * @tags Orgs
+           * @name OrgControllerPendingInvitationsList
+           * @summary List Pending Organization Invitations
+           * @request GET:/org/{id}/invitations/pending
+           * @secure
+           */
+          orgControllerPendingInvitationsList: (id, params = {}) => this.request({
+            path: `/org/${id}/invitations/pending`,
+            method: "GET",
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Orgs
+           * @name OrgControllerPendingInvitationRevoke
+           * @summary Revoke Pending Organization Invitation
+           * @request DELETE:/org/{id}/invitations/{invitationId}
+           * @secure
+           */
+          orgControllerPendingInvitationRevoke: (id, invitationId, params = {}) => this.request({
+            path: `/org/${id}/invitations/${invitationId}`,
+            method: "DELETE",
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Orgs
            * @name OrgControllerUserUpdate
            * @summary Update User Role
            * @request PATCH:/org/{id}/role
@@ -9055,6 +10451,38 @@ var require_api = __commonJS({
           orgControllerOrgToken: (id, params = {}) => this.request({
             path: `/org/${id}/auth`,
             method: "GET",
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Orgs
+           * @name OrgControllerZdrBuy
+           * @summary Purchase ZDR add-on
+           * @request POST:/org/{id}/zdr
+           * @secure
+           */
+          orgControllerZdrBuy: (id, params = {}) => this.request({
+            path: `/org/${id}/zdr`,
+            method: "POST",
+            secure: true,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Orgs
+           * @name OrgControllerZdrRemove
+           * @summary Remove ZDR add-on
+           * @request DELETE:/org/{id}/zdr
+           * @secure
+           */
+          orgControllerZdrRemove: (id, params = {}) => this.request({
+            path: `/org/${id}/zdr`,
+            method: "DELETE",
             secure: true,
             format: "json",
             ...params
@@ -9419,7 +10847,40 @@ var require_api = __commonJS({
             method: "POST",
             body: data,
             secure: true,
+            type: ContentType.FormData,
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Voice Library
+           * @name VoiceLibraryControllerVoiceLibraryVoiceUpdate
+           * @summary Update a Voice Library voice (name/description).
+           * @request PATCH:/voice-library/{id}
+           * @secure
+           */
+          voiceLibraryControllerVoiceLibraryVoiceUpdate: (id, data, params = {}) => this.request({
+            path: `/voice-library/${id}`,
+            method: "PATCH",
+            body: data,
+            secure: true,
             type: ContentType.Json,
+            format: "json",
+            ...params
+          }),
+          /**
+           * No description
+           *
+           * @tags Voice Library
+           * @name VoiceLibraryControllerVoiceLibraryVoiceDelete
+           * @summary Delete a Voice Library voice.
+           * @request DELETE:/voice-library/{id}
+           * @secure
+           */
+          voiceLibraryControllerVoiceLibraryVoiceDelete: (id, params = {}) => this.request({
+            path: `/voice-library/${id}`,
+            method: "DELETE",
+            secure: true,
             ...params
           })
         });
@@ -9643,6 +11104,25 @@ var require_api = __commonJS({
             ...params
           })
         });
+        __publicField(this, "vapi", {
+          /**
+           * No description
+           *
+           * @tags Providers
+           * @name VoiceProviderControllerCloneVapiVoice
+           * @summary Clone a Vapi Voice (xAI-backed) and add it to your Voice Library.
+           * @request POST:/vapi/voice/clone
+           * @secure
+           */
+          voiceProviderControllerCloneVapiVoice: (data, params = {}) => this.request({
+            path: `/vapi/voice/clone`,
+            method: "POST",
+            body: data,
+            secure: true,
+            type: ContentType.FormData,
+            ...params
+          })
+        });
         __publicField(this, "analytics", {
           /**
            * No description
@@ -9807,11 +11287,19 @@ var require_vapi = __commonJS({
         await player.play();
       }
     }
-    async function buildAudioPlayer(track2, participantId) {
+    async function buildAudioPlayer(track2, participantId, volume) {
       const player = document.createElement("audio");
       player.dataset.participantId = participantId;
+      if (typeof volume === "number") {
+        player.volume = volume;
+      }
       document.body.appendChild(player);
-      await startAudioPlayer(player, track2);
+      try {
+        await startAudioPlayer(player, track2);
+      } catch (error) {
+        player.remove();
+        throw error;
+      }
       return player;
     }
     function destroyAudioPlayer(participantId) {
@@ -9854,6 +11342,15 @@ var require_vapi = __commonJS({
         super();
         __publicField(this, "started", false);
         __publicField(this, "call", null);
+        __publicField(this, "audioPlayer", null);
+        // Survives teardown so the caller's choice persists across calls.
+        __publicField(this, "desiredVolume", null);
+        // Builds are tracked individually, not by one counter: several can be in
+        // flight, they finish out of order, and a teardown must invalidate only the
+        // builds belonging to the participant that left.
+        __publicField(this, "audioBuildSequence", 0);
+        __publicField(this, "pendingAudioBuilds", /* @__PURE__ */ new Map());
+        __publicField(this, "attachedAudioBuild", 0);
         __publicField(this, "speakingTimeout", null);
         __publicField(this, "dailyCallConfig", {});
         __publicField(this, "dailyCallObject", {});
@@ -9870,6 +11367,8 @@ var require_vapi = __commonJS({
           await this.call.destroy();
           this.call = null;
         }
+        this.audioPlayer = null;
+        this.pendingAudioBuilds.clear();
         this.speakingTimeout = null;
       }
       isMobileDevice() {
@@ -9881,6 +11380,24 @@ var require_vapi = __commonJS({
       }
       async sleep(ms) {
         return new Promise((resolve) => setTimeout(resolve, ms));
+      }
+      /**
+       * Reports a failed audio processing update on the SDK's `error` event.
+       *
+       * Daily applies input settings inside its remotely loaded call machine, so a
+       * failure - Krisp's `KrispInitError: Canceled`, for example - arrives as a
+       * rejected promise, which a synchronous try/catch around
+       * `updateInputSettings()` cannot see. Without this the rejection escapes to
+       * the page as an unhandled rejection instead of reaching the listeners
+       * consumers register. Audio processing is non-critical, so the call continues.
+       */
+      emitAudioProcessingError(stage, error) {
+        this.emit("error", {
+          type: `${stage}-error`,
+          stage,
+          error: serializeError(error),
+          timestamp: (/* @__PURE__ */ new Date()).toISOString()
+        });
       }
       async start(assistant, assistantOverrides, squad, workflow, workflowOverrides, options) {
         const startTime = Date.now();
@@ -9955,6 +11472,7 @@ var require_vapi = __commonJS({
           }
           const isVideoRecordingEnabled = webCall?.artifactPlan?.videoRecordingEnabled ?? false;
           const isVideoEnabled = webCall?.assistant?.voice?.provider === "tavus";
+          const callToken = webCall?.transport?.callToken;
           this.emit("call-start-progress", {
             stage: "daily-call-object-creation",
             status: "started",
@@ -10037,24 +11555,27 @@ var require_vapi = __commonJS({
           this.call.on("network-connection", (event) => {
             this.emit("network-connection", event);
           });
-          this.call.on("track-started", async (e) => {
-            if (!e || !e.participant) {
-              return;
-            }
-            if (e.participant?.local) {
-              return;
-            }
-            if (e.participant?.user_name !== "Vapi Speaker") {
-              return;
-            }
-            if (e.track.kind === "video") {
-              this.emit("video", e.track);
-            }
-            if (e.track.kind === "audio") {
-              await buildAudioPlayer(e.track, e.participant.session_id);
-            }
-            this.call?.sendAppMessage("playable");
+          this.call.on("recording-started", (event) => {
+            if (event)
+              this.emit("recording-started", event);
           });
+          this.call.on("recording-stopped", (event) => {
+            if (event)
+              this.emit("recording-stopped", event);
+          });
+          this.call.on("recording-stats", (event) => {
+            if (event)
+              this.emit("recording-stats", event);
+          });
+          this.call.on("recording-error", (event) => {
+            if (event)
+              this.emit("recording-error", event);
+          });
+          this.call.on("recording-upload-completed", (event) => {
+            if (event)
+              this.emit("recording-upload-completed", event);
+          });
+          this.call.on("track-started", (e) => this.handleTrackStarted(e));
           this.call.on("participant-joined", (e) => {
             if (!e || !this.call)
               return;
@@ -10070,8 +11591,25 @@ var require_vapi = __commonJS({
             if (!e) {
               return;
             }
-            destroyAudioPlayer(e.participant.session_id);
+            this.detachAudioPlayer(e.participant.session_id);
           });
+          let recordingRequestedTime = 0;
+          if (isVideoRecordingEnabled) {
+            this.call.once("recording-started", () => {
+              const totalRecordingDelay = ((/* @__PURE__ */ new Date()).getTime() - recordingRequestedTime) / 1e3;
+              this.emit("call-start-progress", {
+                stage: "video-recording-started",
+                status: "completed",
+                timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+                metadata: { delaySeconds: totalRecordingDelay }
+              });
+              this.send({
+                type: "control",
+                control: "say-first-message",
+                videoRecordingStartDelaySeconds: totalRecordingDelay
+              });
+            });
+          }
           const isMobile = this.isMobileDevice();
           this.emit("call-start-progress", {
             stage: "mobile-permissions",
@@ -10104,10 +11642,14 @@ var require_vapi = __commonJS({
             timestamp: (/* @__PURE__ */ new Date()).toISOString()
           });
           const joinStartTime = Date.now();
+          recordingRequestedTime = joinStartTime;
           try {
             await this.call.join({
               // @ts-expect-error This exists
               url: webCall.webCallUrl,
+              // daily-js rejects a `token` key that is present but undefined, so
+              // only include it when the server actually sent one.
+              ...callToken ? { token: callToken } : {},
               subscribeToTracksAutomatically: false
             });
             const joinDuration = Date.now() - joinStartTime;
@@ -10136,43 +11678,29 @@ var require_vapi = __commonJS({
             });
             throw error;
           }
-          if (isVideoRecordingEnabled) {
+          if (isVideoRecordingEnabled && callToken) {
+            this.emit("call-start-progress", {
+              stage: "video-recording-setup",
+              status: "completed",
+              timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+              metadata: { action: "auto-started-via-meeting-token" }
+            });
+          } else if (isVideoRecordingEnabled) {
             this.emit("call-start-progress", {
               stage: "video-recording-setup",
               status: "started",
               timestamp: (/* @__PURE__ */ new Date()).toISOString()
             });
-            const recordingRequestedTime = (/* @__PURE__ */ new Date()).getTime();
             const recordingStartTime = Date.now();
             try {
-              this.call.startRecording({
-                width: 1280,
-                height: 720,
-                backgroundColor: "#FF1F2D3D",
-                layout: {
-                  preset: "default"
-                }
-              });
+              recordingRequestedTime = (/* @__PURE__ */ new Date()).getTime();
+              this.startRecording();
               const recordingSetupDuration = Date.now() - recordingStartTime;
               this.emit("call-start-progress", {
                 stage: "video-recording-setup",
                 status: "completed",
                 duration: recordingSetupDuration,
                 timestamp: (/* @__PURE__ */ new Date()).toISOString()
-              });
-              this.call.on("recording-started", () => {
-                const totalRecordingDelay = ((/* @__PURE__ */ new Date()).getTime() - recordingRequestedTime) / 1e3;
-                this.emit("call-start-progress", {
-                  stage: "video-recording-started",
-                  status: "completed",
-                  timestamp: (/* @__PURE__ */ new Date()).toISOString(),
-                  metadata: { delaySeconds: totalRecordingDelay }
-                });
-                this.send({
-                  type: "control",
-                  control: "say-first-message",
-                  videoRecordingStartDelaySeconds: totalRecordingDelay
-                });
               });
             } catch (error) {
               const recordingSetupDuration = Date.now() - recordingStartTime;
@@ -10207,6 +11735,7 @@ var require_vapi = __commonJS({
           const audioObserverStartTime = Date.now();
           try {
             this.call.startRemoteParticipantsAudioLevelObserver(100);
+            this.call.startLocalAudioLevelObserver(100);
             const audioObserverDuration = Date.now() - audioObserverStartTime;
             this.emit("call-start-progress", {
               stage: "audio-observer-setup",
@@ -10235,8 +11764,15 @@ var require_vapi = __commonJS({
             if (e)
               this.handleRemoteParticipantsAudioLevel(e);
           });
+          this.call.on("local-audio-level", (e) => {
+            if (e)
+              this.handleLocalAudioLevel(e);
+          });
           this.call.on("app-message", (e) => this.onAppMessage(e));
           this.call.on("nonfatal-error", (e) => {
+            if (e?.type === "local-audio-level-observer-error") {
+              this.emit("local-audio-level-observer-error", serializeError(e));
+            }
             if (e?.type === "audio-processor-error") {
               this.call?.updateInputSettings({
                 audio: {
@@ -10246,6 +11782,8 @@ var require_vapi = __commonJS({
                 }
               }).then(() => {
                 (0, daily_guards_1.safeSetLocalAudio)(this.call, true);
+              }).catch((error) => {
+                this.emitAudioProcessingError("audio-processor-recovery", error);
               });
             }
           });
@@ -10262,6 +11800,8 @@ var require_vapi = __commonJS({
                   type: "noise-cancellation"
                 }
               }
+            }).catch((error) => {
+              this.emitAudioProcessingError("audio-processing-setup", error);
             });
             const audioProcessingDuration = Date.now() - audioProcessingStartTime;
             this.emit("call-start-progress", {
@@ -10367,6 +11907,9 @@ var require_vapi = __commonJS({
           this.speakingTimeout = null;
         }, 1e3);
       }
+      handleLocalAudioLevel(e) {
+        this.emit("local-volume-level", e.audioLevel);
+      }
       /**
        * Stops the call by destroying the Daily call object.
        *
@@ -10379,6 +11922,8 @@ var require_vapi = __commonJS({
           await this.call.destroy();
           this.call = null;
         }
+        this.audioPlayer = null;
+        this.pendingAudioBuilds.clear();
         this.speakingTimeout = null;
       }
       /**
@@ -10388,6 +11933,139 @@ var require_vapi = __commonJS({
        */
       send(message) {
         this.call?.sendAppMessage(JSON.stringify(message));
+      }
+      /**
+       * The two places this class touches the DOM, behind indirections so the
+       * lifecycle logic around them is testable without a browser.
+       */
+      audioPlayerBuild(track2, participantId, volume) {
+        return buildAudioPlayer(track2, participantId, volume);
+      }
+      audioPlayerDestroy(participantId) {
+        destroyAudioPlayer(participantId);
+      }
+      /**
+       * The remembered volume, bounded, or null if there is nothing to apply.
+       * Shared by both callers so they cannot disagree: the DOM throws on a
+       * non-finite or out-of-range volume, and that throw would stall the call.
+       */
+      desiredVolumeResolve() {
+        if (this.desiredVolume === null || !Number.isFinite(this.desiredVolume)) {
+          return null;
+        }
+        return Math.min(1, Math.max(0, this.desiredVolume));
+      }
+      /** Shared by the initial and reconnect paths so the two cannot drift. */
+      async handleTrackStarted(e) {
+        if (!e || !e.participant) {
+          return;
+        }
+        if (e.participant?.local) {
+          return;
+        }
+        if (e.participant?.user_name !== "Vapi Speaker") {
+          return;
+        }
+        if (e.track.kind === "video") {
+          this.emitToConsumer("video", e.track);
+        }
+        if (e.track.kind === "audio") {
+          const call = this.call;
+          const build = ++this.audioBuildSequence;
+          this.pendingAudioBuilds.set(build, e.participant.session_id);
+          let player;
+          try {
+            player = await this.audioPlayerBuild(e.track, e.participant.session_id, this.desiredVolumeResolve());
+          } catch (error) {
+            this.pendingAudioBuilds.delete(build);
+            console.error("[vapi] could not start assistant audio", error);
+            this.emitToConsumer("error", {
+              type: "audio-start-failed",
+              error: serializeError(error)
+            });
+            return;
+          }
+          const stillPending = this.pendingAudioBuilds.delete(build);
+          if (!call || this.call !== call || !stillPending || build < this.attachedAudioBuild) {
+            player.remove();
+            return;
+          }
+          this.attachedAudioBuild = build;
+          this.attachAudioPlayer(player);
+        }
+        this.call?.sendAppMessage("playable");
+      }
+      /**
+       * Assigns before emitting, since emit is synchronous and a listener may call
+       * getAudioPlayer or setVolume during the event.
+       */
+      attachAudioPlayer(player) {
+        if (this.audioPlayer && this.audioPlayer !== player) {
+          this.audioPlayer.remove();
+        }
+        const volume = this.desiredVolumeResolve();
+        if (volume !== null) {
+          player.volume = volume;
+        }
+        this.audioPlayer = player;
+        this.emitToConsumer("audio", player);
+      }
+      /**
+       * A listener that throws must not take down the caller: track-started still
+       * has to signal that playback is ready. Not routed to the `error` event,
+       * which EventEmitter throws on when nothing is listening.
+       */
+      emitToConsumer(event, ...args) {
+        try {
+          this.emit(event, ...args);
+        } catch (error) {
+          console.error(`[vapi] ${event} event listener threw`, error);
+        }
+      }
+      /** Drops the reference before removing, so nothing hands out a detached element. */
+      detachAudioPlayer(participantId) {
+        if (this.audioPlayer?.dataset.participantId === participantId) {
+          this.audioPlayer = null;
+        }
+        for (const [build, id] of this.pendingAudioBuilds) {
+          if (id === participantId) {
+            this.pendingAudioBuilds.delete(build);
+          }
+        }
+        this.audioPlayerDestroy(participantId);
+      }
+      /**
+       * The <audio> element playing the assistant, or null before its track has
+       * arrived. Pair with the `audio` event when you need it the moment it exists.
+       */
+      getAudioPlayer() {
+        return this.audioPlayer;
+      }
+      /**
+       * Sets assistant playback volume, 0 to 1.
+       *
+       * The setting is remembered, so it can be applied before the assistant's
+       * audio track has arrived and it survives across calls and mid-call track
+       * replacement. Callers do not have to race the start of the call.
+       *
+       * Values outside 0 to 1 are clamped and non-finite values are ignored, since
+       * the DOM rejects both rather than saturating.
+       *
+       * Only volume set through this method is remembered. Writing `volume`
+       * directly on the element from getAudioPlayer() or the `audio` event applies
+       * to that element alone, and is overwritten the next time one is attached.
+       *
+       * This is playback only. It does not change what the assistant hears, and it
+       * does not affect the levels reported by the `volume-level` event.
+       */
+      setVolume(volume) {
+        if (!Number.isFinite(volume)) {
+          return;
+        }
+        this.desiredVolume = Math.min(1, Math.max(0, volume));
+        if (this.audioPlayer) {
+          this.audioPlayer.volume = this.desiredVolume;
+        }
       }
       setMuted(mute) {
         (0, daily_guards_1.safeSetLocalAudio)(this.call, !mute);
@@ -10446,6 +12124,53 @@ var require_vapi = __commonJS({
       getDailyCallObject() {
         return this.call;
       }
+      /**
+       * Returns the most recent local (microphone) audio level, a number between 0 and 1.
+       *
+       * Useful for detecting when the local participant's microphone is not picking up any
+       * audio (e.g. wrong input device selected, OS-level input volume at 0, or muted
+       * hardware) so you can surface a "we can't hear you" style warning in your UI.
+       *
+       * Returns 0 when there is no active call.
+       */
+      getLocalAudioLevel() {
+        if (!this.call) {
+          return 0;
+        }
+        return this.call.getLocalAudioLevel();
+      }
+      /**
+       * Starts (or restarts) the local audio level observer. The observer is started
+       * automatically when a call begins, but this can be used to change the sampling
+       * interval or restart it if it was stopped.
+       *
+       * While running, the Vapi instance emits 'local-volume-level' events with the local
+       * microphone audio level (0 to 1).
+       *
+       * @param interval How often, in milliseconds, to emit audio level events. Defaults to Daily's default.
+       */
+      async startLocalAudioLevelObserver(interval) {
+        if (!this.call) {
+          throw new Error("Call object is not available.");
+        }
+        await this.call.startLocalAudioLevelObserver(interval);
+      }
+      /**
+       * Stops the local audio level observer. After calling this, 'local-volume-level'
+       * events will no longer be emitted until the observer is started again.
+       */
+      stopLocalAudioLevelObserver() {
+        this.call?.stopLocalAudioLevelObserver();
+      }
+      /**
+       * Returns whether the local audio level observer is currently running.
+       */
+      isLocalAudioLevelObserverRunning() {
+        if (!this.call) {
+          return false;
+        }
+        return this.call.isLocalAudioLevelObserverRunning();
+      }
       startScreenSharing(displayMediaOptions, screenVideoSendSettings) {
         this.call?.startScreenShare({
           displayMediaOptions,
@@ -10454,6 +12179,35 @@ var require_vapi = __commonJS({
       }
       stopScreenSharing() {
         this.call?.stopScreenShare();
+      }
+      /**
+       * Starts (or retries) a cloud recording of the call.
+       *
+       * Recording start is asynchronous: success is signaled by the
+       * 'recording-started' event and failure by 'recording-error'. Daily does not
+       * retry automatically, so if you receive 'recording-error' (e.g. the
+       * recording start timed out), you can call this method again a few seconds
+       * later to retry.
+       */
+      startRecording() {
+        if (!this.call) {
+          throw new Error("Call object is not available.");
+        }
+        this.call.startRecording({
+          width: 1280,
+          height: 720,
+          backgroundColor: "#FF1F2D3D",
+          layout: {
+            preset: "default"
+          }
+        });
+      }
+      /**
+       * Stops the in-progress recording. Completion is signaled by the
+       * 'recording-stopped' event.
+       */
+      stopRecording() {
+        this.call?.stopRecording();
       }
       /**
        * Reconnects to an active call.
@@ -10496,6 +12250,7 @@ var require_vapi = __commonJS({
           }
           const isVideoRecordingEnabled = webCall?.artifactPlan?.videoRecordingEnabled ?? false;
           const isVideoEnabled = webCall?.assistant?.voice?.provider === "tavus";
+          const callToken = webCall?.transport?.callToken;
           this.emit("call-start-progress", {
             stage: "daily-call-object-creation",
             status: "started",
@@ -10559,24 +12314,27 @@ var require_vapi = __commonJS({
           this.call.on("network-connection", (event) => {
             this.emit("network-connection", event);
           });
-          this.call.on("track-started", async (e) => {
-            if (!e || !e.participant) {
-              return;
-            }
-            if (e.participant?.local) {
-              return;
-            }
-            if (e.participant?.user_name !== "Vapi Speaker") {
-              return;
-            }
-            if (e.track.kind === "video") {
-              this.emit("video", e.track);
-            }
-            if (e.track.kind === "audio") {
-              await buildAudioPlayer(e.track, e.participant.session_id);
-            }
-            this.call?.sendAppMessage("playable");
+          this.call.on("recording-started", (event) => {
+            if (event)
+              this.emit("recording-started", event);
           });
+          this.call.on("recording-stopped", (event) => {
+            if (event)
+              this.emit("recording-stopped", event);
+          });
+          this.call.on("recording-stats", (event) => {
+            if (event)
+              this.emit("recording-stats", event);
+          });
+          this.call.on("recording-error", (event) => {
+            if (event)
+              this.emit("recording-error", event);
+          });
+          this.call.on("recording-upload-completed", (event) => {
+            if (event)
+              this.emit("recording-upload-completed", event);
+          });
+          this.call.on("track-started", (e) => this.handleTrackStarted(e));
           this.call.on("participant-joined", (e) => {
             if (!e || !this.call)
               return;
@@ -10592,14 +12350,21 @@ var require_vapi = __commonJS({
             if (!e) {
               return;
             }
-            destroyAudioPlayer(e.participant.session_id);
+            this.detachAudioPlayer(e.participant.session_id);
           });
           this.call.on("remote-participants-audio-level", (e) => {
             if (e)
               this.handleRemoteParticipantsAudioLevel(e);
           });
+          this.call.on("local-audio-level", (e) => {
+            if (e)
+              this.handleLocalAudioLevel(e);
+          });
           this.call.on("app-message", (e) => this.onAppMessage(e));
           this.call.on("nonfatal-error", (e) => {
+            if (e?.type === "local-audio-level-observer-error") {
+              this.emit("local-audio-level-observer-error", serializeError(e));
+            }
             if (e?.type === "audio-processor-error") {
               this.call?.updateInputSettings({
                 audio: {
@@ -10609,9 +12374,28 @@ var require_vapi = __commonJS({
                 }
               }).then(() => {
                 (0, daily_guards_1.safeSetLocalAudio)(this.call, true);
+              }).catch((error) => {
+                this.emitAudioProcessingError("audio-processor-recovery", error);
               });
             }
           });
+          let recordingRequestedTime = 0;
+          if (isVideoRecordingEnabled) {
+            this.call.once("recording-started", () => {
+              const totalRecordingDelay = ((/* @__PURE__ */ new Date()).getTime() - recordingRequestedTime) / 1e3;
+              this.emit("call-start-progress", {
+                stage: "video-recording-started",
+                status: "completed",
+                timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+                metadata: { delaySeconds: totalRecordingDelay }
+              });
+              this.send({
+                type: "control",
+                control: "say-first-message",
+                videoRecordingStartDelaySeconds: totalRecordingDelay
+              });
+            });
+          }
           const isMobile = this.isMobileDevice();
           this.emit("call-start-progress", {
             stage: "mobile-permissions",
@@ -10644,8 +12428,12 @@ var require_vapi = __commonJS({
             timestamp: (/* @__PURE__ */ new Date()).toISOString()
           });
           const joinStartTime = Date.now();
+          recordingRequestedTime = joinStartTime;
           await this.call.join({
             url: webCall.webCallUrl,
+            // daily-js rejects a `token` key that is present but undefined, so
+            // only include it when the server actually sent one.
+            ...callToken ? { token: callToken } : {},
             subscribeToTracksAutomatically: false
           });
           const joinDuration = Date.now() - joinStartTime;
@@ -10655,43 +12443,29 @@ var require_vapi = __commonJS({
             duration: joinDuration,
             timestamp: (/* @__PURE__ */ new Date()).toISOString()
           });
-          if (isVideoRecordingEnabled) {
+          if (isVideoRecordingEnabled && callToken) {
+            this.emit("call-start-progress", {
+              stage: "video-recording-setup",
+              status: "completed",
+              timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+              metadata: { action: "auto-started-via-meeting-token" }
+            });
+          } else if (isVideoRecordingEnabled) {
             this.emit("call-start-progress", {
               stage: "video-recording-setup",
               status: "started",
               timestamp: (/* @__PURE__ */ new Date()).toISOString()
             });
             const recordingStartTime = Date.now();
-            const recordingRequestedTime = (/* @__PURE__ */ new Date()).getTime();
             try {
-              this.call.startRecording({
-                width: 1280,
-                height: 720,
-                backgroundColor: "#FF1F2D3D",
-                layout: {
-                  preset: "default"
-                }
-              });
+              recordingRequestedTime = (/* @__PURE__ */ new Date()).getTime();
+              this.startRecording();
               const recordingSetupDuration = Date.now() - recordingStartTime;
               this.emit("call-start-progress", {
                 stage: "video-recording-setup",
                 status: "completed",
                 duration: recordingSetupDuration,
                 timestamp: (/* @__PURE__ */ new Date()).toISOString()
-              });
-              this.call.on("recording-started", () => {
-                const totalRecordingDelay = ((/* @__PURE__ */ new Date()).getTime() - recordingRequestedTime) / 1e3;
-                this.emit("call-start-progress", {
-                  stage: "video-recording-started",
-                  status: "completed",
-                  timestamp: (/* @__PURE__ */ new Date()).toISOString(),
-                  metadata: { delaySeconds: totalRecordingDelay }
-                });
-                this.send({
-                  type: "control",
-                  control: "say-first-message",
-                  videoRecordingStartDelaySeconds: totalRecordingDelay
-                });
               });
             } catch (error) {
               const recordingSetupDuration = Date.now() - recordingStartTime;
@@ -10720,6 +12494,7 @@ var require_vapi = __commonJS({
           const audioObserverStartTime = Date.now();
           try {
             this.call.startRemoteParticipantsAudioLevelObserver(100);
+            this.call.startLocalAudioLevelObserver(100);
             const audioObserverDuration = Date.now() - audioObserverStartTime;
             this.emit("call-start-progress", {
               stage: "audio-observer-setup",
@@ -10751,6 +12526,8 @@ var require_vapi = __commonJS({
                   type: "noise-cancellation"
                 }
               }
+            }).catch((error) => {
+              this.emitAudioProcessingError("audio-processing-setup", error);
             });
             const audioProcessingDuration = Date.now() - audioProcessingStartTime;
             this.emit("call-start-progress", {
@@ -10924,8 +12701,9 @@ var completionSent = false;
 var callbacks = {};
 var audioContext = null;
 var audioObserver = null;
-var remoteAudio = /* @__PURE__ */ new Set();
-var audioElementsAtStart = /* @__PURE__ */ new Set();
+var outputAudio = null;
+var remoteAudio = null;
+var remoteSourceTimer = null;
 function diagnostic(message, details) {
   if (details === void 0) console.debug(AUDIO_LOG, message);
   else console.debug(AUDIO_LOG, message, details);
@@ -10955,49 +12733,70 @@ async function closeAudioContext() {
 function resetRemoteAudio() {
   audioObserver?.disconnect();
   audioObserver = null;
-  remoteAudio.clear();
-  audioElementsAtStart.clear();
+  if (remoteSourceTimer) clearInterval(remoteSourceTimer);
+  remoteSourceTimer = null;
+  if (outputAudio) {
+    outputAudio.pause();
+    outputAudio.srcObject = null;
+    outputAudio.removeAttribute("src");
+    outputAudio.remove();
+  }
+  outputAudio = null;
+  remoteAudio = null;
 }
-async function playRemoteAudio(audio) {
-  remoteAudio.add(audio);
-  audio.autoplay = true;
-  audio.muted = false;
-  audio.playsInline = true;
-  audio.setAttribute("playsinline", "");
-  audio.setAttribute("webkit-playsinline", "");
-  diagnostic("Remote audio element detected.", {
-    paused: audio.paused,
-    muted: audio.muted,
-    readyState: audio.readyState
-  });
+async function playOutputAudio(vapiAudio = remoteAudio) {
+  if (!outputAudio?.srcObject) return false;
   try {
-    await audio.play();
-    diagnostic("Remote audio play() succeeded.", { paused: audio.paused, readyState: audio.readyState });
+    outputAudio.muted = false;
+    await outputAudio.play();
+    diagnostic("output sink play success");
+    if (vapiAudio) vapiAudio.muted = true;
     callbacks.onAudioReady?.();
     return true;
   } catch (error) {
-    diagnostic("Remote audio play() failed.", { name: error?.name, message: error?.message });
+    diagnostic("output sink play failure", { name: error?.name, message: error?.message });
     if (error?.name === "NotAllowedError") callbacks.onAudioBlocked?.();
     return false;
   }
 }
+function attachRemoteStream(audio) {
+  if (!outputAudio || !audio.srcObject) return false;
+  outputAudio.removeAttribute("src");
+  outputAudio.srcObject = audio.srcObject;
+  diagnostic("remote srcObject attached");
+  if (remoteSourceTimer) clearInterval(remoteSourceTimer);
+  remoteSourceTimer = null;
+  void playOutputAudio(audio);
+  return true;
+}
 function considerAudio(audio) {
-  if (!(audio instanceof HTMLAudioElement) || audioElementsAtStart.has(audio) || remoteAudio.has(audio)) return;
-  void playRemoteAudio(audio);
+  if (!(audio instanceof HTMLAudioElement) || audio === remoteAudio) return;
+  remoteAudio = audio;
+  diagnostic("Vapi remote player detected");
+  if (attachRemoteStream(audio)) return;
+  if (remoteSourceTimer) clearInterval(remoteSourceTimer);
+  let attempts = 0;
+  remoteSourceTimer = setInterval(() => {
+    attempts += 1;
+    if (attachRemoteStream(audio) || attempts >= 300) {
+      clearInterval(remoteSourceTimer);
+      remoteSourceTimer = null;
+    }
+  }, 100);
 }
 function observeRemoteAudio() {
-  audioElementsAtStart = new Set(document.querySelectorAll("audio"));
   audioObserver?.disconnect();
   audioObserver = new MutationObserver((mutations) => {
     for (const mutation of mutations) {
       for (const node of mutation.addedNodes) {
         if (!(node instanceof Element)) continue;
-        if (node.matches("audio")) considerAudio(node);
-        node.querySelectorAll?.("audio").forEach(considerAudio);
+        if (node.matches("audio[data-participant-id]")) considerAudio(node);
+        node.querySelectorAll?.("audio[data-participant-id]").forEach(considerAudio);
       }
     }
   });
   audioObserver.observe(document.body, { childList: true, subtree: true });
+  document.querySelectorAll("audio[data-participant-id]").forEach(considerAudio);
 }
 async function complete() {
   if (completionSent) return;
@@ -11005,6 +12804,7 @@ async function complete() {
   const instance = vapi;
   removeListeners(instance);
   vapi = null;
+  instance?.stop();
   resetRemoteAudio();
   await closeAudioContext();
   callbacks.onState?.("ended");
@@ -11025,6 +12825,18 @@ function variables(profile) {
 }
 async function unlockAudioPlayback() {
   diagnostic("Browser environment.", { userAgent: navigator.userAgent, mobile: isMobileBrowser() });
+  resetRemoteAudio();
+  outputAudio = document.createElement("audio");
+  outputAudio.autoplay = true;
+  outputAudio.playsInline = true;
+  outputAudio.muted = false;
+  outputAudio.setAttribute("playsinline", "");
+  outputAudio.setAttribute("webkit-playsinline", "");
+  outputAudio.setAttribute("aria-hidden", "true");
+  outputAudio.style.display = "none";
+  outputAudio.src = SILENT_WAV;
+  document.body.append(outputAudio);
+  diagnostic("output sink created");
   const AudioContextClass = window.AudioContext || window.webkitAudioContext;
   const pending = [];
   if (AudioContextClass) {
@@ -11040,29 +12852,18 @@ async function unlockAudioPlayback() {
       diagnostic("Web Audio unlock was unavailable.", error?.name);
     }
   }
-  const silentAudio = new Audio(SILENT_WAV);
-  silentAudio.muted = true;
-  silentAudio.playsInline = true;
-  silentAudio.setAttribute("playsinline", "");
-  silentAudio.setAttribute("webkit-playsinline", "");
-  pending.push(silentAudio.play().catch((error) => diagnostic("Silent media unlock was declined.", error?.name)));
+  pending.push(outputAudio.play().catch((error) => diagnostic("Silent media unlock was declined.", { name: error?.name, message: error?.message })));
   await Promise.allSettled(pending);
-  silentAudio.pause();
-  silentAudio.removeAttribute("src");
+  outputAudio?.pause();
   diagnostic("AudioContext after resume.", audioContext?.state || "unavailable");
 }
 window.DreamProtocolVoiceAdapter = {
   unlockAudioPlayback,
   async enableSound() {
-    await unlockAudioPlayback();
-    const results = await Promise.all([...remoteAudio].map(playRemoteAudio));
-    const succeeded = results.some(Boolean) || [...remoteAudio].some((audio) => !audio.paused);
-    if (succeeded) callbacks.onAudioReady?.();
-    return succeeded;
+    return playOutputAudio();
   },
   async connect({ profile, onState, onTranscript, onComplete, onError, onAudioBlocked, onAudioReady }) {
     if (vapi) await this.disconnect();
-    resetRemoteAudio();
     if (!config.vapiPublicKey || !config.vapiAssistantId) throw new Error("Missing Vapi public browser configuration.");
     callbacks = { onState, onTranscript, onComplete, onError, onAudioBlocked, onAudioReady };
     completionSent = false;
@@ -11087,18 +12888,22 @@ window.DreamProtocolVoiceAdapter = {
     listen("error", (error) => {
       console.error(AUDIO_LOG, "Vapi error payload.", error);
       onError?.(error);
-      const instance = vapi;
-      removeListeners(instance);
+      const instance2 = vapi;
+      removeListeners(instance2);
       vapi = null;
+      instance2?.stop();
       resetRemoteAudio();
       void closeAudioContext();
     });
+    const instance = vapi;
     try {
-      return await vapi.start(config.vapiAssistantId, { variableValues: variables(profile) });
+      const result = await instance.start(config.vapiAssistantId, { variableValues: variables(profile) });
+      if (!result) throw new Error("Vapi call did not start.");
+      return result;
     } catch (error) {
-      const instance = vapi;
       removeListeners(instance);
-      vapi = null;
+      if (vapi === instance) vapi = null;
+      instance.stop();
       resetRemoteAudio();
       await closeAudioContext();
       throw error;

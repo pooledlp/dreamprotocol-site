@@ -9,8 +9,9 @@ let completionSent = false;
 let callbacks = {};
 let audioContext = null;
 let audioObserver = null;
-let remoteAudio = new Set();
-let audioElementsAtStart = new Set();
+let outputAudio = null;
+let remoteAudio = null;
+let remoteSourceTimer = null;
 
 function diagnostic(message, details) {
   if (details === undefined) console.debug(AUDIO_LOG, message);
@@ -42,54 +43,76 @@ async function closeAudioContext() {
 function resetRemoteAudio() {
   audioObserver?.disconnect();
   audioObserver = null;
-  remoteAudio.clear();
-  audioElementsAtStart.clear();
+  if (remoteSourceTimer) clearInterval(remoteSourceTimer);
+  remoteSourceTimer = null;
+  if (outputAudio) {
+    outputAudio.pause();
+    outputAudio.srcObject = null;
+    outputAudio.removeAttribute('src');
+    outputAudio.remove();
+  }
+  outputAudio = null;
+  remoteAudio = null;
 }
 
-async function playRemoteAudio(audio) {
-  remoteAudio.add(audio);
-  audio.autoplay = true;
-  audio.muted = false;
-  audio.playsInline = true;
-  audio.setAttribute('playsinline', '');
-  audio.setAttribute('webkit-playsinline', '');
-  diagnostic('Remote audio element detected.', {
-    paused: audio.paused,
-    muted: audio.muted,
-    readyState: audio.readyState
-  });
+async function playOutputAudio(vapiAudio = remoteAudio) {
+  if (!outputAudio?.srcObject) return false;
   try {
-    await audio.play();
-    diagnostic('Remote audio play() succeeded.', { paused: audio.paused, readyState: audio.readyState });
+    outputAudio.muted = false;
+    await outputAudio.play();
+    diagnostic('output sink play success');
+    if (vapiAudio) vapiAudio.muted = true;
     callbacks.onAudioReady?.();
     return true;
   } catch (error) {
-    diagnostic('Remote audio play() failed.', { name: error?.name, message: error?.message });
+    diagnostic('output sink play failure', { name: error?.name, message: error?.message });
     if (error?.name === 'NotAllowedError') callbacks.onAudioBlocked?.();
     return false;
   }
 }
 
+function attachRemoteStream(audio) {
+  if (!outputAudio || !audio.srcObject) return false;
+  outputAudio.removeAttribute('src');
+  outputAudio.srcObject = audio.srcObject;
+  diagnostic('remote srcObject attached');
+  if (remoteSourceTimer) clearInterval(remoteSourceTimer);
+  remoteSourceTimer = null;
+  void playOutputAudio(audio);
+  return true;
+}
+
 function considerAudio(audio) {
-  if (!(audio instanceof HTMLAudioElement) || audioElementsAtStart.has(audio) || remoteAudio.has(audio)) return;
-  // Daily creates these elements after call setup. Ignoring every pre-existing element
-  // keeps the prerecorded example player outside this compatibility workaround.
-  void playRemoteAudio(audio);
+  if (!(audio instanceof HTMLAudioElement) || audio === remoteAudio) return;
+  remoteAudio = audio;
+  diagnostic('Vapi remote player detected');
+  if (attachRemoteStream(audio)) return;
+  // srcObject is a property, so setting it does not produce an observable DOM mutation.
+  // Poll briefly after the SDK mounts its player to catch the remote track arriving.
+  if (remoteSourceTimer) clearInterval(remoteSourceTimer);
+  let attempts = 0;
+  remoteSourceTimer = setInterval(() => {
+    attempts += 1;
+    if (attachRemoteStream(audio) || attempts >= 300) {
+      clearInterval(remoteSourceTimer);
+      remoteSourceTimer = null;
+    }
+  }, 100);
 }
 
 function observeRemoteAudio() {
-  audioElementsAtStart = new Set(document.querySelectorAll('audio'));
   audioObserver?.disconnect();
   audioObserver = new MutationObserver((mutations) => {
     for (const mutation of mutations) {
       for (const node of mutation.addedNodes) {
         if (!(node instanceof Element)) continue;
-        if (node.matches('audio')) considerAudio(node);
-        node.querySelectorAll?.('audio').forEach(considerAudio);
+        if (node.matches('audio[data-participant-id]')) considerAudio(node);
+        node.querySelectorAll?.('audio[data-participant-id]').forEach(considerAudio);
       }
     }
   });
   audioObserver.observe(document.body, { childList: true, subtree: true });
+  document.querySelectorAll('audio[data-participant-id]').forEach(considerAudio);
 }
 
 async function complete() {
@@ -98,6 +121,7 @@ async function complete() {
   const instance = vapi;
   removeListeners(instance);
   vapi = null;
+  instance?.stop();
   resetRemoteAudio();
   await closeAudioContext();
   callbacks.onState?.('ended');
@@ -120,6 +144,19 @@ function variables(profile) {
 
 async function unlockAudioPlayback() {
   diagnostic('Browser environment.', { userAgent: navigator.userAgent, mobile: isMobileBrowser() });
+  resetRemoteAudio();
+  outputAudio = document.createElement('audio');
+  outputAudio.autoplay = true;
+  outputAudio.playsInline = true;
+  outputAudio.muted = false;
+  outputAudio.setAttribute('playsinline', '');
+  outputAudio.setAttribute('webkit-playsinline', '');
+  outputAudio.setAttribute('aria-hidden', 'true');
+  outputAudio.style.display = 'none';
+  outputAudio.src = SILENT_WAV;
+  document.body.append(outputAudio);
+  diagnostic('output sink created');
+
   const AudioContextClass = window.AudioContext || window.webkitAudioContext;
   const pending = [];
   if (AudioContextClass) {
@@ -135,15 +172,9 @@ async function unlockAudioPlayback() {
       diagnostic('Web Audio unlock was unavailable.', error?.name);
     }
   }
-  const silentAudio = new Audio(SILENT_WAV);
-  silentAudio.muted = true;
-  silentAudio.playsInline = true;
-  silentAudio.setAttribute('playsinline', '');
-  silentAudio.setAttribute('webkit-playsinline', '');
-  pending.push(silentAudio.play().catch((error) => diagnostic('Silent media unlock was declined.', error?.name)));
+  pending.push(outputAudio.play().catch((error) => diagnostic('Silent media unlock was declined.', { name: error?.name, message: error?.message })));
   await Promise.allSettled(pending);
-  silentAudio.pause();
-  silentAudio.removeAttribute('src');
+  outputAudio?.pause();
   diagnostic('AudioContext after resume.', audioContext?.state || 'unavailable');
 }
 
@@ -151,16 +182,11 @@ window.DreamProtocolVoiceAdapter = {
   unlockAudioPlayback,
 
   async enableSound() {
-    await unlockAudioPlayback();
-    const results = await Promise.all([...remoteAudio].map(playRemoteAudio));
-    const succeeded = results.some(Boolean) || [...remoteAudio].some((audio) => !audio.paused);
-    if (succeeded) callbacks.onAudioReady?.();
-    return succeeded;
+    return playOutputAudio();
   },
 
   async connect({ profile, onState, onTranscript, onComplete, onError, onAudioBlocked, onAudioReady }) {
     if (vapi) await this.disconnect();
-    resetRemoteAudio();
     if (!config.vapiPublicKey || !config.vapiAssistantId) throw new Error('Missing Vapi public browser configuration.');
     callbacks = { onState, onTranscript, onComplete, onError, onAudioBlocked, onAudioReady };
     completionSent = false;
@@ -188,15 +214,19 @@ window.DreamProtocolVoiceAdapter = {
       const instance = vapi;
       removeListeners(instance);
       vapi = null;
+      instance?.stop();
       resetRemoteAudio();
       void closeAudioContext();
     });
+    const instance = vapi;
     try {
-      return await vapi.start(config.vapiAssistantId, { variableValues: variables(profile) });
+      const result = await instance.start(config.vapiAssistantId, { variableValues: variables(profile) });
+      if (!result) throw new Error('Vapi call did not start.');
+      return result;
     } catch (error) {
-      const instance = vapi;
       removeListeners(instance);
-      vapi = null;
+      if (vapi === instance) vapi = null;
+      instance.stop();
       resetRemoteAudio();
       await closeAudioContext();
       throw error;
