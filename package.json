@@ -3,13 +3,6 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "build": "esbuild src/voice-adapter.js --bundle --format=esm --platform=browser --target=es2020 --outfile=dist/voice-adapter.js",
-    "check": "node --check app.js && node --check src/voice-adapter.js"
-  },
-  "dependencies": {
-    "@vapi-ai/web": "2.7.0"
-  },
-  "devDependencies": {
-    "esbuild": "0.25.9"
+    "check": "node --check app.js"
   }
 }

@@ -18,7 +18,7 @@ The scanner sends `{"url":"https://example.com/"}` to `https://api.dreamprotocol
 
 ## Vapi browser voice
 
-The replaceable `window.DreamProtocolVoiceAdapter` uses the official `@vapi-ai/web` SDK. It receives the verified scanner profile directly; it does not request a voice-session backend. The browser calls the configured assistant with these `assistantOverrides.variableValues`:
+The result panel embeds Vapi's official Web Widget in voice mode. The widget script is pinned to `@vapi-ai/client-sdk-react@0.3.1` and loaded from unpkg; there is no local Vapi SDK bundle or custom audio/WebRTC adapter. It receives the verified scanner profile directly and does not request a voice-session backend. Before mounting the widget, the browser serializes these `assistantOverrides.variableValues`:
 
 - `companyName`
 - `businessWebsite`
@@ -28,13 +28,11 @@ The replaceable `window.DreamProtocolVoiceAdapter` uses the official `@vapi-ai/w
 - `locations`
 - `businessPhone`
 
-Except for the intentionally empty website fallback, unavailable scanner values are sent as `Not provided on the website`. This makes absence explicit to the assistant rather than fabricating context.
+Except for the intentionally empty website value, unavailable scanner values are sent as `Not provided on the website`. This makes absence explicit to the assistant rather than fabricating context. If analysis falls back rather than returning a verified profile, the voice widget is not mounted.
 
-The adapter maps Vapi `call-start`, `speech-start`, `speech-end`, and `call-end` events into provider-neutral UI states. It accepts only final Vapi transcript messages for the visible `YOU` / `ALEX` history. Provider errors are logged to the developer console while the visitor sees a safe fallback message.
+The widget owns microphone permission, audio playback, call controls, and its visible transcript. It uses dark mode, Dream Protocol's blue and lime accent colors, full size, and the widget's supported consent prompt. Provider `error` events are logged to the developer console while the visitor sees a short retry message.
 
-The start tap first unlocks silent browser audio and explicitly preflights `getUserMedia({ audio: true })`; the temporary microphone track is stopped before Vapi starts. Known microphone failures have separate recovery copy, while a connected call whose remote audio is autoplay-blocked offers an **Enable sound** gesture without ending the call. The adapter only hardens audio elements created during the active Vapi/Daily call and leaves the prerecorded example player alone.
-
-Ending a conversation stops Vapi, removes SDK listeners and the call-scoped audio observer, closes the temporary audio context, and clears remote-audio references. A second call can therefore start in the same browser session without duplicate handlers.
+Dream Protocol does not preflight `getUserMedia`, create or unlock an `AudioContext`, observe or mirror Vapi audio elements, select output sinks, or implement browser-specific recovery. Browser media behavior is delegated to Vapi's supported widget.
 
 ### Required Vapi restrictions
 
@@ -46,26 +44,23 @@ The public key **MUST remain restricted in the Vapi dashboard** to:
 
 Review Vapi recording, storage, retention, and jurisdictional consent settings before launch. The page deliberately makes no recording or storage promise.
 
-## Static bundle
+## Static deployment
 
-The pinned SDK and esbuild versions are declared in `package.json`. Run:
+No voice build step is required. The site remains deployable directly to GitHub Pages. Run the JavaScript syntax check with:
 
 ```sh
-npm install
-npm run build
+npm run check
 ```
-
-esbuild bundles `src/voice-adapter.js` and `@vapi-ai/web` into the browser ESM file at `dist/voice-adapter.js`; Node.js is not needed in production.
 
 ### Voice browser QA
 
-Test on a secure origin in Edge and Chrome desktop, Firefox desktop, Chrome Android, and Safari/Chrome on iPhone:
+Test on a secure origin in Edge desktop, Chrome desktop, Firefox desktop, Safari desktop, Chrome Android, Chrome iOS, and Safari iPhone:
 
-1. With microphone permission reset, start a call, allow the prompt, confirm the temporary preflight track closes, and verify Alex, user speech, transcripts, and End conversation.
-2. Repeat with permission already allowed, then explicitly blocked. The blocked case must show **Try again** and recover without reloading after the address-bar permission is changed.
-3. Test no input device and a device busy in another application for their targeted messages.
-4. On mobile, test speaker and a Bluetooth/headset route. Confirm remote audio plays; if autoplay is blocked, confirm the connected call remains active and **Enable sound** recovers it.
-5. End and start a second call without reloading. Confirm there is only one transcript/event stream and no stale audio element handling.
+1. Scan `https://pannuholistic.com` and confirm its verified company, services, description, and available contact/location data appear in the preview.
+2. Select the widget's start control, accept its consent step, allow the normal browser microphone prompt, and confirm the call begins.
+3. Confirm Alex is audible, user microphone audio reaches Alex, and the widget displays the transcript.
+4. Ask “What services do you offer?” and confirm the response uses the scanned services rather than invented information.
+5. End and start a second call without reloading. Also test permission already allowed and explicitly blocked using the widget's standard recovery experience.
 
 ## Lead delivery
 
