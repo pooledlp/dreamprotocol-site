@@ -31,17 +31,10 @@
   let alexEventHandlers = [];
   const alexStartButton = $('#alex-start-button');
 
-  let heroSeconds = 24;
-  const heroTimer = $('.call-time');
-  if (heroTimer && !reducedMotion) {
-    window.setInterval(() => {
-      heroSeconds += 1;
-      heroTimer.textContent = `${String(Math.floor(heroSeconds / 60)).padStart(2, '0')}:${String(heroSeconds % 60).padStart(2, '0')}`;
-    }, 1000);
-  }
-
   alexStartButton.addEventListener('click', () => {
     if (!nativeVapiButton) return;
+    const recording = $('.audio-card audio');
+    if (recording && !recording.paused) recording.pause();
     console.log('[Dream Protocol Vapi] proxying user click to native Vapi control');
     nativeVapiButton.click();
   });
@@ -194,10 +187,10 @@
       if (current.business.phone || current.business.email) addKnowledge('Contact ready', [current.business.phone, current.business.email].filter(Boolean), 'contact-knowledge');
     }
     $('#service-count').textContent = current.business.services?.length ? `${current.business.services.length} discovered` : 'Not found';
-    $('#hours-status').textContent = current.found.hours ? 'Verified ✓' : 'Not found';
+    $('#hours-status').textContent = current.found.hours ? 'Found' : 'Not found';
     $('#location-count').textContent = current.business.locations?.length ? `${current.business.locations.length} found` : 'Not found';
-    $('#contact-status').textContent = current.business.phone || current.business.email ? 'Ready ✓' : 'Not found';
-    $('#preview-label').textContent = current.isFallback ? 'Starting preview' : 'Your preview is ready';
+    $('#contact-status').textContent = current.business.phone || current.business.email ? 'Found' : 'Not found';
+    $('#preview-label').textContent = current.isFallback ? 'Preview unavailable' : 'Your demo is ready';
     demoNotice.textContent = current.isFallback
       ? 'Live voice becomes available after we successfully read the business website.'
       : 'Built only from business information found on your website.';
@@ -423,6 +416,32 @@
     audio.addEventListener('play', () => audio.closest('.audio-card').classList.add('is-playing'));
     ['pause', 'ended'].forEach((event) => audio.addEventListener(event, () => audio.closest('.audio-card').classList.remove('is-playing')));
   }
+
+  const industryExamples = {
+    home: ['Emergency service intake', '“There’s water around the heater and I need help.”', 'Urgency, location, contact details', 'Route complete context to dispatch'],
+    medical: ['New patient request', '“I’d like to schedule my first appointment.”', 'Appointment need and contact details', 'Send the request for office review'],
+    professional: ['New client inquiry', '“I need help with my company’s accounting.”', 'Service need, business context, contact details', 'Prepare a consultation handoff'],
+    property: ['Tenant maintenance intake', '“The heat in my unit stopped working.”', 'Issue, property, urgency, contact details', 'Route the request to the property team']
+  };
+  const industryTabs = [...document.querySelectorAll('[data-industry]')];
+  industryTabs.forEach((tab, index) => {
+    tab.addEventListener('click', () => {
+      industryTabs.forEach((item) => item.setAttribute('aria-selected', String(item === tab)));
+      const example = industryExamples[tab.dataset.industry];
+      $('#industry-title').textContent = example[0];
+      $('#industry-quote').textContent = example[1];
+      $('#industry-intent').textContent = example[2];
+      $('#industry-outcome').textContent = example[3];
+    });
+    tab.addEventListener('keydown', (event) => {
+      if (!['ArrowDown', 'ArrowRight', 'ArrowUp', 'ArrowLeft'].includes(event.key)) return;
+      event.preventDefault();
+      const offset = ['ArrowDown', 'ArrowRight'].includes(event.key) ? 1 : -1;
+      const next = industryTabs[(index + offset + industryTabs.length) % industryTabs.length];
+      next.focus();
+      next.click();
+    });
+  });
 
   const leadForm = $('#lead-form');
   leadForm.addEventListener('submit', async (event) => {
