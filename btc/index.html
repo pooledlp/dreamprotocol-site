@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080b10">
+<title>DreamPredict BTC</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><div class="brand">DreamPredict <span class="orange">BTC</span></div><div id="statusPill" class="pill"><span class="dot"></span><span id="status">Starting</span></div></div>
+  <div class="card"><div class="label">BTC / USD live reference</div><div id="price" class="price">--</div><div id="marketLine" class="small">Loading Coinbase + Kraken…</div></div>
+  <div class="card"><div class="label">Prediction horizon</div><div class="quick"><button type="button" data-h="5">5 MIN</button><button type="button" data-h="10" class="active">10 MIN</button><button type="button" data-h="15">15 MIN</button></div><button id="predict" class="primary" type="button">PREDICT NOW</button></div>
+  <div class="card"><div class="label">Current model preview</div><div id="target" class="small" style="margin-top:5px">Choose a horizon and tap Predict Now to lock a forecast.</div><div id="signal" class="hero amber">ANALYZING</div><div id="prob" class="bigprob">--%</div><div id="probText" class="small">Probability BTC finishes above the reference price at the selected target.</div><div class="meter" style="margin-top:9px"><div id="probFill"></div></div><hr><div id="explain" class="small">Building historical and live signals.</div></div>
+  <div class="grid">
+    <div class="mini"><div class="label">Reference</div><div id="locked" class="val">--</div></div><div class="mini"><div class="label">Predicted median</div><div id="median" class="val">--</div></div>
+    <div class="mini"><div class="label">Likely range</div><div id="range" class="val sm">--</div><div class="small">20–80% analog band</div></div><div class="mini"><div class="label">Walk-forward hit rate</div><div id="hit" class="val">--</div><div id="tests" class="small">--</div></div>
+    <div class="mini"><div class="label">Baseline</div><div id="base" class="val">--</div></div><div class="mini"><div class="label">Model edge</div><div id="edge" class="val">--</div></div>
+  </div>
+  <div class="card"><div class="coverage"><div><div class="label">Data coverage</div><div class="small">Prediction degrades gracefully if a live feed is unavailable.</div></div><div id="coverage" class="num">0%</div></div><div class="meter" style="margin-top:10px"><div id="coverageFill"></div></div>
+    <div class="feedgrid">
+      <div class="feed"><div><div class="feedname">Coinbase 5m history + volume</div><div class="feedsub">10 days of OHLCV for historical analogs/backtesting</div></div><div id="fHist" class="vote neutral">WAIT</div></div>
+      <div class="feed"><div><div class="feedname">Coinbase order book</div><div class="feedsub">Near-market bid/ask depth imbalance</div></div><div id="fCBBook" class="vote neutral">WAIT</div></div>
+      <div class="feed"><div><div class="feedname">Coinbase aggressive flow</div><div class="feedsub">Recent maker-side trades converted to taker direction</div></div><div id="fCBTrades" class="vote neutral">WAIT</div></div>
+      <div class="feed"><div><div class="feedname">Kraken order book</div><div class="feedsub">Independent BTC/USD depth pressure</div></div><div id="fKBook" class="vote neutral">WAIT</div></div>
+      <div class="feed"><div><div class="feedname">Kraken trade flow</div><div class="feedsub">Independent recent buy/sell flow</div></div><div id="fKTrades" class="vote neutral">WAIT</div></div>
+      <div class="feed"><div><div class="feedname">Cross-exchange agreement</div><div class="feedsub">Coinbase vs Kraken spot reference</div></div><div id="fCross" class="vote neutral">WAIT</div></div>
+    </div>
+  </div>
+  <div class="card"><div class="label">Live signal details</div><div class="grid" style="margin-top:10px"><div class="mini"><div class="label">CB book</div><div id="cbBook" class="val">--</div></div><div class="mini"><div class="label">CB taker flow</div><div id="cbTrades" class="val">--</div></div><div class="mini"><div class="label">Kraken book</div><div id="kBook" class="val">--</div></div><div class="mini"><div class="label">Kraken flow</div><div id="kTrades" class="val">--</div></div></div></div>
+  <div class="card"><div class="label">Recent 5-minute BTC closes</div><canvas id="chart" width="600" height="165"></canvas></div>
+  <div class="card"><div class="label">Your completed prediction scorecard</div><div id="score" class="small" style="margin-top:7px">No completed locked predictions yet.</div><div id="history"></div></div>
+  <div class="card"><div class="label">Diagnostics</div><div id="log" class="log">Booting…</div></div>
+  <div class="footer">Experimental research / paper-trading predictor. Historical validation and live signal fusion can improve decision quality but cannot guarantee future market direction. No trades are placed.</div>
+</div>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
