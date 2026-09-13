@@ -3,6 +3,9 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "check": "node --check app.js"
+    "build": "node scripts/build.mjs",
+    "check": "node --check app.js && node --check assets/site.js && node scripts/validate.mjs",
+    "test": "node --test scripts/content.test.mjs scripts/contact.test.mjs",
+    "preview": "node scripts/serve.mjs"
   }
 }

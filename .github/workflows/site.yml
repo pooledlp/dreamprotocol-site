@@ -1,0 +1,54 @@
+name: Build, check, and publish website
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    # Mondays at 16:17 UTC. GitHub schedules may be delayed.
+    - cron: '17 16 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dreamprotocol-site-${{ github.event_name == 'pull_request' && github.ref || 'production' }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build published pages for today
+        run: npm run build
+      - name: Check links, SEO metadata, and JavaScript
+        run: npm run check
+      - name: Test publishing dates and repeatability
+        run: npm test
+      - name: Package only public website files
+        run: node scripts/package-site.mjs
+      - name: Report the editorial queue
+        run: node scripts/queue-status.mjs
+      - name: Upload website artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+  deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy the tested website
+        id: deployment
+        uses: actions/deploy-pages@v4
