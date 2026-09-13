@@ -11,7 +11,7 @@ const sources=[{title:'Microsoft integration documentation',url:'https://learn.m
 // Deliberately synthetic fixture; never deployed or represented as researched content.
 const section='A business can begin by identifying the owner of each incoming request and the information needed for the next decision. This hypothetical workflow illustrates a planning method rather than a promised product feature. Write down what should happen when information is missing, who reviews the exception, and how the team records the outcome. Test the process with sample requests before connecting live systems. The person responsible for the workflow should confirm access and routing with the administrator. Keep the first trial limited to a single process so the team can understand why a request reaches a particular person. Review the sample results together and revise the written handoff instructions before expanding the trial. ';
 const fixture=()=>({slug:'shared-inbox-routing-ownership',title:'How to assign ownership in a shared business inbox',category:'Workflow planning',service:'workflow-automation',description:'Map shared inbox ownership, define exception handling, and prepare a small trial before connecting your business systems together.',takeaway:'Start with a named owner and a written handoff rule, then test the process using sample requests before connecting live customer information.',sections:Array.from({length:4},(_,i)=>({heading:'Planning step '+(i+1)+' for your team',body:section+section.slice(0,350),sourceIndexes:[i%2]})),checklist:['Name a person responsible for reviewing incoming requests.','Write down which details the next team member needs.','Test a small set of sample requests before launch.','Confirm how staff should handle missing information.'],sources:structuredClone(sources)});
-const response=(value,withSources=false)=>({status:'completed',output:[...(withSources?[{type:'web_search_call',action:{sources:sources.map(s=>({url:s.url}))}}]:[]),{type:'message',content:[{type:'output_text',text:typeof value==='string'?value:JSON.stringify(value)}]}],usage:{input_tokens:1,output_tokens:1}});
+const response=(value,withSources=false)=>({status:'completed',output:[...(withSources?[{type:'web_search_call',status:'completed',action:{sources:sources.map(s=>({url:s.url}))}}]:[]),{type:'message',content:[{type:'output_text',text:typeof value==='string'?value:JSON.stringify(value)}]}],usage:{input_tokens:1,output_tokens:1}});
 test('Weekly boundaries and primary-source URL checks are strict',()=>{
  assert.equal(weekKey('2026-09-13'),'2026-09-07');assert.equal(weekKey('2026-09-14'),'2026-09-14');
  assert.throws(()=>weekKey('2026-02-30'));
@@ -33,6 +33,11 @@ test('Three-stage pipeline publishes only after independent sourced approval',as
  assert.equal(requests.length,3);assert.equal(a.review.approved,true);assert.equal(a.publishOn,'2026-09-13');
  assert.equal(requests[0].tool_choice,'required');assert.equal(requests[2].tool_choice,'required');
  assert.equal(requests[1].text.format.strict,true);
+ const openedReview=response({approved:true,reasons:[]});
+ openedReview.output.unshift(...sources.map(s=>({type:'web_search_call',status:'completed',action:{type:'open_page',url:s.url}})));
+ const opened=[response('Research notes',true),response(fixture()),openedReview];
+ const openedArticle=await generate({date:'2026-09-13',existing:[],request:async()=>opened.shift()});
+ assert.equal(openedArticle.review.approved,true,'Directly opened source pages count as reviewed evidence');
  const rejected=[response('Research notes',true),response(fixture()),response({approved:false,reasons:['Unsupported assertion']},true)];
  await assert.rejects(()=>generate({date:'2026-09-13',existing:[],request:async()=>rejected.shift()}),/did not approve/);
  const missing=[response('Research notes',true),response(fixture()),response({approved:true,reasons:[]})];
