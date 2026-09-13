@@ -1,6 +1,8 @@
 {
   "week": "2026-09-07",
   "date": "2026-09-13",
-  "status": "reserved",
-  "runId": "34780465589"
+  "status": "held",
+  "runId": "34780465589",
+  "calls": 3,
+  "reason": "Reviewer did not retrieve every cited source"
 }
