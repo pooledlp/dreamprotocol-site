@@ -1,11 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://dreamprotocol.ai/</loc></url>
+  <url><loc>https://dreamprotocol.ai/services/</loc></url>
   <url><loc>https://dreamprotocol.ai/ai-front-desk/</loc></url>
+  <url><loc>https://dreamprotocol.ai/ai-training/</loc></url>
   <url><loc>https://dreamprotocol.ai/workflow-automation/</loc></url>
   <url><loc>https://dreamprotocol.ai/ai-ready-it-projects/</loc></url>
   <url><loc>https://dreamprotocol.ai/managed-ai-operations/</loc></url>
-  <url><loc>https://dreamprotocol.ai/ai-training/</loc></url>
+  <url><loc>https://dreamprotocol.ai/custom-ai-projects/</loc></url>
+  <url><loc>https://dreamprotocol.ai/industries/</loc></url>
   <url><loc>https://dreamprotocol.ai/ai-receptionist-for-home-services/</loc></url>
+  <url><loc>https://dreamprotocol.ai/industries/professional-services/</loc></url>
+  <url><loc>https://dreamprotocol.ai/industries/tax-accounting/</loc></url>
+  <url><loc>https://dreamprotocol.ai/industries/property-management/</loc></url>
+  <url><loc>https://dreamprotocol.ai/industries/retail-hospitality/</loc></url>
+  <url><loc>https://dreamprotocol.ai/industries/medical-dental/</loc></url>
   <url><loc>https://dreamprotocol.ai/bay-area-ai-services/</loc></url>
+  <url><loc>https://dreamprotocol.ai/pricing/</loc></url>
+  <url><loc>https://dreamprotocol.ai/about/</loc></url>
+  <url><loc>https://dreamprotocol.ai/contact/</loc></url>
+  <url><loc>https://dreamprotocol.ai/resources/</loc></url>
+  <url><loc>https://dreamprotocol.ai/resources/ai-receptionist-cost/</loc></url>
+  <url><loc>https://dreamprotocol.ai/resources/choose-first-automation/</loc></url>
 </urlset>
