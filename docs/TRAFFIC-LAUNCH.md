@@ -14,44 +14,63 @@ Prepared September 13, 2026. This change improves search discovery and inquiry a
 
 ## Website changes
 
-Refresh four service pages and add AI training and home-services receptionist pages. Publish specific, differentiated scope, current pricing, FAQs, and contact links. Include all seven commercial pages in the sitemap, add visible homepage links, use canonical URLs with trailing slashes, and add Organization/Service/Breadcrumb structured data. The unrelated BTC tool is outside this service acquisition change.
+Refresh four service pages and add AI training and home-services receptionist pages. Publish specific, differentiated scope, current pricing, FAQs, and contact links. Include the original seven commercial pages in the sitemap, add visible homepage links, use canonical URLs with trailing slashes, and add Organization/Service/Breadcrumb structured data. The unrelated BTC tool is outside this service acquisition change.
 
 Preserve the existing demo and lead delivery. `attribution.js` keeps the campaign, landing path, and external referrer hostname in sessionStorage for the current tab and attaches them to an inquiry. It does not send pageview events or install analytics. It excludes referrer query strings and stores no form values. Use campaign labels, never customer names or email addresses, in UTM parameters. Browser storage can be disabled; the page must still work.
 
-## Immediate promotion package
+## Bay Area promotion package
 
-Proposed first audience: home-service owners, especially plumbing and HVAC. Confirm the priority market before paid targeting. The campaign hypothesis is that a personalized front-desk demo gives an owner a concrete reason to visit. Demand and cost estimates have not been measured.
+Confirmed by the owner: the entire San Francisco Bay Area, all business audiences, explicitly including tax companies, CPAs, accounting firms, and bookkeepers. Include all nine counties: San Francisco, San Mateo, Santa Clara, Alameda, Contra Costa, Marin, Sonoma, Napa, and Solano. The homepage and regional page welcome businesses across industries; home services are one audience, not the exclusive target.
 
-Landing page: https://dreamprotocol.ai/ai-receptionist-for-home-services/
+Regional landing page: https://dreamprotocol.ai/bay-area-ai-services/
 
-LinkedIn link:
-https://dreamprotocol.ai/ai-receptionist-for-home-services/?utm_source=linkedin&utm_medium=organic_social&utm_campaign=front_desk_demo
+Use a relevant example for each audience while keeping the same regional coverage. These are campaign hypotheses, not verified search demand or conversion forecasts.
 
-Partner link:
-https://dreamprotocol.ai/ai-receptionist-for-home-services/?utm_source=partner&utm_medium=referral&utm_campaign=front_desk_demo
+| Audience | Message | Campaign content label | Page section |
+| --- | --- | --- | --- |
+| Home services | Capture service requests while the crew is working. | home_services | home-services |
+| Medical/dental | Organize administrative callbacks and reviewable staff handoffs. | medical_dental | medical-dental |
+| Tax firms, CPAs, accounting and bookkeeping | Organize client intake, document requests, and routine admin follow-ups. | tax_accounting | tax-accounting |
+| Professional services | Reduce repeated drafting and new-client admin. | professional_services | professional-services |
+| Property/facilities | Route maintenance requests with useful context. | property_facilities | property-facilities |
+| Retail/hospitality | Handle routine questions and connect internal handoffs. | retail_hospitality | retail-hospitality |
+| Other businesses, nonprofits, education teams | Bring a repeated task or team AI training need. | other_businesses | other-businesses |
 
-Founder post, ready for review:
+### Tracked links
 
-> Running a plumbing, HVAC, or other home-service business? Try an AI front desk using your own website.
+General founder post:
+https://dreamprotocol.ai/bay-area-ai-services/?utm_source=linkedin&utm_medium=organic_social&utm_campaign=bay_area_ai&utm_content=all_businesses
+
+Partner referral:
+https://dreamprotocol.ai/bay-area-ai-services/?utm_source=partner&utm_medium=referral&utm_campaign=bay_area_ai&utm_content=all_businesses
+
+For each audience, replace `utm_content=all_businesses` with its campaign content label and append the page section, e.g.:
+https://dreamprotocol.ai/bay-area-ai-services/?utm_source=linkedin&utm_medium=organic_social&utm_campaign=bay_area_ai&utm_content=medical_dental#medical-dental
+
+### Founder post, ready for review
+
+> Bay Area business owners: where is your team losing time to repeat work?
 >
-> I built Dream Protocol’s demo so you can hear a conversation shaped around the business information it finds. The production service is scoped around your intake questions, call routing, and team handoffs.
+> I built Dream Protocol to help businesses train their teams on AI, connect existing tools, automate routine handoffs, and set up AI front desks.
 >
-> Enter your website and try it: [use the LinkedIn link above]
+> Whether you run a tax company, CPA or bookkeeping firm, law office, agency, store, restaurant, service business, or any other business, the starting point is the same: bring one task you want to improve.
 >
-> Front-desk service starts at $399/month, with setup from $995. Usage and integrations are quoted upfront. I’d like feedback from owners on which calls take the most time to handle.
+> You can also try a front-desk demo using your own business website. Explore the options here: [use the general founder link above]
+>
+> Serving the entire San Francisco Bay Area. Workshops are $750; AI front desks start at $399/month with setup from $995. Scope, usage, and integrations are agreed upfront.
 
-Partner outreach draft, only for appropriate existing contacts and only after explicit send authorization:
+### Partner message draft
 
-> I’m building AI front desks for small businesses through Dream Protocol. There’s a demo that starts with a business website and lets the owner try a conversation based on the information it finds. If you work with plumbing or HVAC owners who struggle with call intake, would you be open to trying it and telling me where the handoff needs improvement? [use the partner link above]
+> I’m building practical AI services for businesses across the Bay Area through Dream Protocol: team training, workflow automation, integrations, and AI front desks. If a business you work with has a repeated admin task or a team training need, I’d welcome an introduction. There’s also a website-based front-desk demo they can try here: [use the partner link above]
 
-Suggested 72-hour sequence, subject to publishing/account access:
+### Suggested launch sequence
 
-1. Verify the deployed landing pages, sitemap, and contact flow. Use Search Console URL Inspection to check live accessibility, then submit the sitemap and request indexing of the main landing page. This is a discovery request, not a ranking guarantee.
-2. Publish one founder demo post with the tracked LinkedIn link. Show an actual demo recording with permission to use the business example; make no invented outcome claims.
-3. Share the partner link with relevant existing contacts after authorizing outreach. If posting in a trade community, follow its promotion rules and answer a concrete intake question.
-4. Review actual inquiries and manually label qualified leads. Keep the audience and offer focused until there is evidence to expand.
+1. Verify the regional page in Search Console and submit the expanded sitemap. Request indexing of the regional page after checking accessibility.
+2. Publish the general founder post, then rotate audience-specific examples using the corresponding tracked links. Keep the full Bay Area as the region for every audience.
+3. Use the partner draft with relevant existing contacts after explicit send authorization. Adapt any community post to its audience and promotion rules.
+4. Label actual inquiries by audience and requested service. Compare qualified conversations, not just clicks. Coverage stays broad; messaging can improve from observed results.
 
-Do not activate paid ads until region, budget, account, and conversion measurement are confirmed. Neither money nor authorization from another task is assumed here.
+Region and audience scope are now confirmed. Paid-ad budget, account access, and conversion measurement remain unconfirmed in this task. No ads, social posts, or outreach are activated by this document.
 
 ## Measurement and next actions
 
@@ -72,3 +91,7 @@ References:
 - Campaign attribution survived service-page-to-homepage navigation. A new campaign cleared stale campaign fields. Blocked browser storage did not break the page.
 - JavaScript syntax checks passed for the application and attribution scripts; the homepage uses the updated content-hashed application asset.
 - Live voice calls and actual email delivery were not exercised by these checks.
+
+## Bay Area expansion
+
+Added a regional page covering all nine Bay Area counties and seven audience examples, including a general invitation for other businesses. Added homepage regional copy, service-page links, and areaServed metadata. Sitemap now contains eight commercial pages. No physical office address or local business listing is asserted.
