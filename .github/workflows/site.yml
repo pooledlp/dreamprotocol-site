@@ -57,6 +57,14 @@ jobs:
           npm run build
           npm run check
           npm test
+      - name: Retain editorial diagnostics outside the published site
+        if: always() && steps.reserve.outputs.reserved == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: editorial-diagnostics
+          path: _editorial
+          if-no-files-found: ignore
+          retention-days: 7
       - name: Save the outcome and only commit validated articles
         if: always() && steps.reserve.outputs.reserved == 'true'
         run: |
