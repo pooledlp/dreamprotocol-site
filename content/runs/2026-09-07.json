@@ -1,6 +1,8 @@
 {
   "week": "2026-09-07",
   "date": "2026-09-13",
-  "status": "reserved",
-  "runId": "34780253091"
+  "status": "held",
+  "runId": "34780253091",
+  "calls": 2,
+  "reason": "Invalid section or source reference"
 }
