@@ -33,7 +33,8 @@ export function responseText(response){
 }
 export function consultedSources(response){
  return [...new Set((response.output||[]).flatMap(o=>[
-  ...(o.type==='web_search_call'?(o.action?.sources||[]).map(s=>s.url):[]),
+  ...(o.type==='web_search_call'&&o.status==='completed'?(o.action?.sources||[]).map(s=>s.url):[]),
+  ...(o.type==='web_search_call'&&o.status==='completed'&&['open_page','find_in_page'].includes(o.action?.type)?[o.action.url]:[]),
   ...(o.type==='message'?(o.content||[]).flatMap(c=>(c.annotations||[]).filter(a=>a.type==='url_citation').map(a=>a.url)):[])
  ]).filter(u=>typeof u==='string'&&safeSource(u)).map(norm))];
 }
@@ -89,7 +90,7 @@ export async function generate({date,existing,request,audit=()=>{}}){
  const article=validateArticle(candidate,existing,sources);
  const reviewResponse=await request({instructions:policy+' You are now the independent publication reviewer. Reject any unsupported vendor capability, inaccurate or uncited factual claim, close paraphrase, thin or generic content, repeated topic, invented company experience, or advice outside scope. Search and read every cited source, batching source opens when needed. A plausible article is insufficient; approve only if evidence supports it and it helps a business make a concrete decision. Return approved true with an empty reasons array only if every check passes; otherwise return approved false with the specific rejection reasons.',input:JSON.stringify({article,approvedContext:JSON.parse(context)}),tools:[{type:'web_search',filters:{allowed_domains:domains}}],tool_choice:'required',max_tool_calls:3,include:['web_search_call.action.sources'],text:{format:{type:'json_schema',name:'publication_review',strict:true,schema:reviewSchema}},max_output_tokens:3500});
  const review=JSON.parse(responseText(reviewResponse));
- audit('review',review);
+ audit('review',{...review,consultedSources:consultedSources(reviewResponse),webActions:(reviewResponse.output||[]).filter(o=>o.type==='web_search_call').map(o=>o.action)});
  if(review.approved!==true||!Array.isArray(review.reasons)||review.reasons.length)throw Error('Article held: independent editorial review did not approve it');
  const checked=consultedSources(reviewResponse);
  if(article.sources.some(s=>!checked.includes(norm(s.url))))throw Error('Reviewer did not retrieve every cited source');
