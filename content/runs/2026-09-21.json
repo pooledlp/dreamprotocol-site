@@ -1,6 +1,8 @@
 {
   "week": "2026-09-21",
   "date": "2026-09-21",
-  "status": "reserved",
-  "runId": "35650899382"
+  "status": "held",
+  "runId": "35650899382",
+  "calls": 3,
+  "reason": "Article held: independent editorial review did not approve it"
 }
