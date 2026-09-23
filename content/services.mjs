@@ -72,6 +72,18 @@ export const services = [
     related:['ai-ready-it-projects','managed-ai-operations'], guide:'choose-first-automation'
   },
   {
+    slug:'ai-automation-assessment', name:'AI automation assessment', tag:'Find the best first move', icon:'⌕',
+    title:'AI Automation Assessment for Bay Area Businesses', headline:'Where should AI\nactually start?',
+    description:'A focused review of your workflows, systems, bottlenecks, and automation opportunities with a prioritized action plan instead of a generic AI brainstorm.',
+    image:'dream-protocol-abstract.webp', price:'$750', unit:'/ assessment', setup:'Remote assessment covering up to three business workflows, current tools, major constraints, and recommended next steps.',
+    intro:'If you know AI could help but do not know where the first dollar should go, start here. We look at the work your people repeat, the systems involved, the handoffs that fail, and the places where speed or consistency matter enough to automate.',
+    points:[['Find the expensive friction','Review up to three workflows and identify repetitive work, delays, missed follow-up, duplicate entry, search time, and other operational drag.'],['Separate real automation from AI theater','Identify which steps need AI, which are better handled with normal automation, which depend on integration, and which should stay human.'],['Leave with an ordered plan','Get prioritized opportunities, likely dependencies, key risks, and recommended starting scopes so you can decide what is worth building first.']],
+    deliverables:['Remote review of up to three workflows','Current-system and dependency map','Prioritized automation opportunity list','Recommended first project and next-step scope','Written assessment summary'],
+    example:['Three annoying processes compete for budget','We compare missed-call intake, quote follow-up, and invoice entry, identify the cost and technical path of each, and recommend the first automation based on value, complexity, and risk.'],
+    faqs:[['Is this just a sales call?','No. It is a paid working session with a written assessment. The goal is to identify where automation is worth pursuing and where it is not.'],['Do we need to know what AI tool we want?','No. Start with the business process, current systems, examples, and pain points. Tool selection comes after the workflow is understood.'],['Does the assessment include implementation?','No. Implementation is scoped separately after you decide which opportunity to pursue.']],
+    related:['workflow-automation','custom-ai-projects'], guide:'choose-first-automation'
+  },
+  {
     slug:'ai-ready-it-projects', name:'Systems integration', tag:'Make your tools talk', icon:'⌘',
     title:'Business Systems Integration in the Bay Area', headline:'One business.\nLess swivel-chair work.',
     description:'Connect business systems with clear data mapping, source-of-truth rules, error handling, testing, and maintainable APIs.',
