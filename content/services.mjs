@@ -1,8 +1,8 @@
 export const services = [
   {
     slug:'ai-front-desk', name:'AI receptionist', tag:'Never miss the call', icon:'◉',
-    title:'AI Receptionist for Bay Area Businesses', headline:'Every call answered.\nEvery lead captured.',
-    description:'AI voice reception that answers routine questions, captures intent, qualifies inquiries, routes urgent needs, and hands clean context to your team.',
+    title:'AI Receptionist & Voice Agent for Bay Area Businesses', headline:'Every call answered.\nEvery lead captured.',
+    description:'AI receptionist and AI voice agent systems that answer routine questions, capture intent, qualify inquiries, route urgent needs, and hand clean context to your team.',
     image:'dream-protocol-abstract.webp', price:'From $399', unit:'/ month', setup:'Setup from $995 for one business/location. Usage allowance and overages quoted upfront.',
     intro:'A missed call should not become a missed customer. Your AI receptionist learns the approved facts about your business, handles routine questions, captures the details your team needs, and follows the routing rules you approve.',
     points:[['Answer like your business','Use your approved services, hours, locations, FAQs, and policies so callers get a useful first answer instead of a generic bot response.'],['Capture useful context','Collect the reason for the call, contact details, location, urgency, and other fields your team actually needs before following up.'],['Route the right way','Define transfers, callback requests, escalation rules, and fallback behavior. Booking, CRM, and messaging connections are scoped where available.']],
@@ -13,8 +13,8 @@ export const services = [
   },
   {
     slug:'ai-lead-engine', name:'AI lead engine', tag:'Respond while they are hot', icon:'✦',
-    title:'AI Lead Response and Follow-Up for Bay Area Businesses', headline:'New lead.\nInstant next step.',
-    description:'Respond to new leads, qualify them, follow up automatically, book next steps, update your CRM, and alert a person when the lead is ready.',
+    title:'AI Lead Response & Automated Follow-Up for Bay Area Businesses', headline:'New lead.\nInstant next step.',
+    description:'AI lead response and automated lead follow-up that qualifies inquiries, books next steps, updates your CRM, and alerts a person when the lead is ready.',
     image:'automation-art.webp', price:'From $499', unit:'/ month', setup:'Setup from $1,500 for one lead source and one follow-up path. CRM, SMS, email, and scheduling integrations are scoped based on your stack.',
     intro:'The fastest way to waste ad spend is to make a good lead wait. An AI lead engine watches the approved places new inquiries arrive, responds quickly, gathers missing context, follows up on a defined cadence, and moves qualified opportunities to the next step.',
     points:[['Respond immediately','Trigger from website forms, missed calls, inboxes, or other approved lead sources and send the first useful response without waiting for someone to notice it.'],['Qualify consistently','Ask the questions your team already uses to understand fit, urgency, budget, service area, or project type. Keep exceptions and sensitive decisions with a person.'],['Keep the opportunity moving','Send approved follow-ups, create CRM activity, request a booking, and alert the right person when the lead reaches a handoff point.']],
@@ -25,8 +25,8 @@ export const services = [
   },
   {
     slug:'ai-scheduling-dispatch', name:'AI scheduling & dispatch', tag:'Book and route the work', icon:'⌁',
-    title:'AI Scheduling and Dispatch Automation for Bay Area Businesses', headline:'From request.\nTo booked and routed.',
-    description:'Turn calls and inquiries into scheduled work with availability checks, booking rules, confirmations, reminders, dispatch context, and human exceptions.',
+    title:'AI Appointment Scheduling & Dispatch Automation for Bay Area Businesses', headline:'From request.\nTo booked and routed.',
+    description:'AI appointment scheduling and dispatch automation that turns calls and inquiries into booked work with availability checks, confirmations, reminders, dispatch context, and human exceptions.',
     image:'automation-art.webp', price:'From $2,500', unit:'/ project', setup:'One scheduling or dispatch workflow. Calendar, field-service, CRM, or dispatch-system compatibility is confirmed before scope.',
     intro:'Scheduling gets expensive when staff spend the day bouncing between phones, calendars, technicians, and customers. We build a defined path from request to available next step, with the exceptions and promises kept under your control.',
     points:[['Know what can be booked','Define service types, durations, service areas, working hours, lead times, resource rules, and the situations that require staff review.'],['Connect availability','Use an approved calendar, scheduling platform, or field-service system to check or request time without creating duplicate or impossible bookings.'],['Prepare dispatch context','Carry the customer, location, issue, appointment, notes, and urgency into the handoff so the next person does not have to start over.']],
@@ -49,8 +49,8 @@ export const services = [
   },
   {
     slug:'ai-document-automation', name:'AI document automation', tag:'Stop retyping documents', icon:'▤',
-    title:'AI Document Processing Automation for Bay Area Businesses', headline:'PDF in.\nUseful data out.',
-    description:'Extract, classify, summarize, validate, and route information from PDFs, forms, invoices, purchase orders, applications, and email attachments.',
+    title:'AI Document & Invoice Processing Automation for Bay Area Businesses', headline:'PDF in.\nUseful data out.',
+    description:'AI document processing and invoice automation that extracts, classifies, validates, and routes information from PDFs, forms, invoices, purchase orders, applications, and email attachments.',
     image:'integration-art.webp', price:'From $2,500', unit:'/ workflow', setup:'One document type and one destination workflow. OCR quality, document variability, validation rules, and system access are reviewed before scope.',
     intro:'A surprising amount of office work is still someone opening a document, reading fields, typing them somewhere else, and sending an email. Document automation turns that manual handoff into a controlled process with extraction, validation, review, and routing.',
     points:[['Read the document','Classify incoming files and extract the fields, dates, totals, names, line items, or other information the workflow needs.'],['Validate before action','Check required fields, confidence thresholds, duplicates, totals, formats, and business rules. Send uncertain cases to a person instead of guessing.'],['Send the data somewhere useful','Create or update records, rename and store files, prepare follow-ups, or route the document into the next approved business process.']],
@@ -61,8 +61,8 @@ export const services = [
   },
   {
     slug:'ai-knowledge-agent', name:'AI knowledge agent', tag:'Your company answers itself', icon:'◎',
-    title:'Internal AI Knowledge Assistants for Bay Area Businesses', headline:'Ask your business.\nGet the approved answer.',
-    description:'Give employees an AI assistant grounded in approved SOPs, policies, manuals, documents, and internal knowledge with citations and access controls.',
+    title:'Internal AI Knowledge Base & Assistants for Bay Area Businesses', headline:'Ask your business.\nGet the approved answer.',
+    description:'Give employees an internal AI knowledge base and assistant grounded in approved SOPs, policies, manuals, documents, and company knowledge with citations and access controls.',
     image:'dream-protocol-abstract.webp', price:'From $3,500', unit:'/ project', setup:'One initial knowledge collection and one user experience. Data sources, permissions, update process, and answer-verification requirements are scoped first.',
     intro:'The answer is often somewhere inside the company, buried in a SharePoint folder, PDF, SOP, handbook, or old document. A knowledge agent gives staff a faster way to find approved information while keeping the source visible.',
     points:[['Ground it in approved knowledge','Start with a defined document collection or connected source and decide which information is authoritative enough to answer from.'],['Keep the source visible','Return answers with citations or source links so employees can verify the underlying policy, procedure, or document instead of trusting an unsupported response.'],['Control who can see what','Scope user access, source permissions, update rules, and the situations where the assistant should say it does not know.']],
