@@ -1,6 +1,7 @@
 (() => {
   'use strict';
 
+  const body = document.body;
   const canEnhance = Boolean(document.documentElement && typeof document.querySelectorAll === 'function');
   const media = query => typeof matchMedia === 'function' ? matchMedia(query) : {matches:false};
 
