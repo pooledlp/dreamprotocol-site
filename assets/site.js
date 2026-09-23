@@ -1,105 +1,113 @@
 (() => {
   'use strict';
 
-  const root = document.documentElement;
-  const body = document.body;
-  const finePointer = matchMedia('(pointer:fine)').matches && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const canEnhance = Boolean(document.documentElement && typeof document.querySelectorAll === 'function');
+  const media = query => typeof matchMedia === 'function' ? matchMedia(query) : {matches:false};
 
-  // Site-wide motion language: subtle, fast, and never required for usability.
-  const revealTargets = [
-    '.page-hero > *',
-    '.section-heading',
-    '.service-card',
-    '.price-card',
-    '.guide-card',
-    '.feature',
-    '.region-card',
-    '.wide-note',
-    '.example-panel',
-    '.scope-panel',
-    '.faq-section details',
-    '.founder-grid > *',
-    '.article-body > *',
-    '.process-grid article',
-    '.related-note',
-    '.lead-form',
-    '.audio-card'
-  ].join(',');
+  if (canEnhance) {
+    const root = document.documentElement;
+    const finePointer = media('(pointer:fine)').matches && !media('(prefers-reduced-motion: reduce)').matches;
 
-  const reveal = [...document.querySelectorAll(revealTargets)];
-  reveal.forEach((el,i) => {
-    el.classList.add('dp-reveal');
-    el.style.setProperty('--reveal-delay', (i % 6) * 45 + 'ms');
-  });
-
-  if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    const observer = new IntersectionObserver(entries => {
-      for (const entry of entries) {
-        if (!entry.isIntersecting) continue;
-        entry.target.classList.add('dp-visible');
-        observer.unobserve(entry.target);
-      }
-    }, {threshold:.08, rootMargin:'0px 0px -40px'});
-    reveal.forEach(el => observer.observe(el));
-  } else {
-    reveal.forEach(el => el.classList.add('dp-visible'));
-  }
-
-  // Cursor-reactive glow on high-value surfaces.
-  if (finePointer) {
-    const reactive = [...document.querySelectorAll([
-      '.page-hero',
+    // Site-wide motion language: subtle, fast, and never required for usability.
+    const revealTargets = [
+      '.page-hero > *',
+      '.section-heading',
       '.service-card',
       '.price-card',
       '.guide-card',
+      '.feature',
+      '.region-card',
       '.wide-note',
       '.example-panel',
       '.scope-panel',
+      '.faq-section details',
+      '.founder-grid > *',
+      '.article-body > *',
+      '.process-grid article',
+      '.related-note',
       '.lead-form',
-      '.feature',
-      '.region-card',
-      '.automation-core'
-    ].join(','))];
-    for (const el of reactive) {
-      el.classList.add('dp-reactive');
-      el.addEventListener('pointermove', e => {
-        const rect=el.getBoundingClientRect();
-        el.style.setProperty('--mx', (e.clientX-rect.left)+'px');
-        el.style.setProperty('--my', (e.clientY-rect.top)+'px');
-      }, {passive:true});
+      '.audio-card'
+    ].join(',');
+
+    const reveal = [...document.querySelectorAll(revealTargets)];
+    reveal.forEach((el,i) => {
+      el.classList.add('dp-reveal');
+      el.style.setProperty('--reveal-delay', (i % 6) * 45 + 'ms');
+    });
+
+    if (typeof IntersectionObserver !== 'undefined' && !media('(prefers-reduced-motion: reduce)').matches) {
+      const observer = new IntersectionObserver(entries => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          entry.target.classList.add('dp-visible');
+          observer.unobserve(entry.target);
+        }
+      }, {threshold:.08, rootMargin:'0px 0px -40px'});
+      reveal.forEach(el => observer.observe(el));
+    } else {
+      reveal.forEach(el => el.classList.add('dp-visible'));
     }
-  }
 
-  // Header scroll progress + compact state.
-  let ticking=false;
-  const syncScroll=()=>{
-    const max=Math.max(1,document.documentElement.scrollHeight-innerHeight);
-    const p=Math.min(1,Math.max(0,scrollY/max));
-    root.style.setProperty('--scroll-progress',(p*100).toFixed(2)+'%');
-    document.querySelector('.site-header')?.classList.toggle('is-scrolled',scrollY>24);
-    ticking=false;
-  };
-  addEventListener('scroll',()=>{
-    if(!ticking){ticking=true;requestAnimationFrame(syncScroll);}
-  },{passive:true});
-  syncScroll();
+    // Cursor-reactive glow on high-value surfaces.
+    if (finePointer) {
+      const reactive = [...document.querySelectorAll([
+        '.page-hero',
+        '.service-card',
+        '.price-card',
+        '.guide-card',
+        '.wide-note',
+        '.example-panel',
+        '.scope-panel',
+        '.lead-form',
+        '.feature',
+        '.region-card',
+        '.automation-core'
+      ].join(','))];
+      for (const el of reactive) {
+        el.classList.add('dp-reactive');
+        el.addEventListener('pointermove', e => {
+          const rect=el.getBoundingClientRect();
+          el.style.setProperty('--mx', (e.clientX-rect.left)+'px');
+          el.style.setProperty('--my', (e.clientY-rect.top)+'px');
+        }, {passive:true});
+      }
+    }
 
-  // Small parallax shift in hero/system art only on desktops.
-  if (finePointer) {
-    const stage=document.querySelector('.automation-core,.detail-art,.region-visual,.founder-photo');
-    const hero=document.querySelector('.home-hero,.page-hero');
-    hero?.addEventListener('pointermove',e=>{
-      if(!stage)return;
-      const r=hero.getBoundingClientRect();
-      const x=((e.clientX-r.left)/r.width-.5)*8;
-      const y=((e.clientY-r.top)/r.height-.5)*8;
-      stage.style.setProperty('--tilt-x',x.toFixed(2)+'px');
-      stage.style.setProperty('--tilt-y',y.toFixed(2)+'px');
-    },{passive:true});
-    hero?.addEventListener('pointerleave',()=>{
-      stage?.style.setProperty('--tilt-x','0px');
-      stage?.style.setProperty('--tilt-y','0px');
-    },{passive:true});
+    // Header scroll progress + compact state.
+    if (typeof addEventListener === 'function' && typeof requestAnimationFrame === 'function') {
+      let ticking=false;
+      const syncScroll=()=>{
+        const viewport=typeof innerHeight === 'number' ? innerHeight : 0;
+        const y=typeof scrollY === 'number' ? scrollY : 0;
+        const max=Math.max(1,document.documentElement.scrollHeight-viewport);
+        const p=Math.min(1,Math.max(0,y/max));
+        root.style.setProperty('--scroll-progress',(p*100).toFixed(2)+'%');
+        document.querySelector('.site-header')?.classList.toggle('is-scrolled',y>24);
+        ticking=false;
+      };
+      addEventListener('scroll',()=>{
+        if(!ticking){ticking=true;requestAnimationFrame(syncScroll);}
+      },{passive:true});
+      syncScroll();
+    }
+
+    // Small parallax shift in hero/system art only on desktops.
+    if (finePointer) {
+      const stage=document.querySelector('.automation-core,.detail-art,.region-visual,.founder-photo');
+      const hero=document.querySelector('.home-hero,.page-hero');
+      hero?.addEventListener('pointermove',e=>{
+        if(!stage)return;
+        const r=hero.getBoundingClientRect();
+        const x=((e.clientX-r.left)/r.width-.5)*8;
+        const y=((e.clientY-r.top)/r.height-.5)*8;
+        stage.style.setProperty('--tilt-x',x.toFixed(2)+'px');
+        stage.style.setProperty('--tilt-y',y.toFixed(2)+'px');
+      },{passive:true});
+      hero?.addEventListener('pointerleave',()=>{
+        stage?.style.setProperty('--tilt-x','0px');
+        stage?.style.setProperty('--tilt-y','0px');
+      },{passive:true});
+    }
   }
 
   // Homepage-specific navigation/demo behavior remains owned by app.js.
