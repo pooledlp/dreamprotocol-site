@@ -38,7 +38,11 @@
       '.arch-node',
       '.architecture-ledger > div',
       '.manifesto-band > .shell > *',
-      '.contact-path'
+      '.contact-path',
+      '.ops-sim-heading > *',
+      '.ops-simulator',
+      '.delivery-metrics > div',
+      '.proof-card'
     ].join(',');
 
     const reveal = [...document.querySelectorAll(revealTargets)];
@@ -78,7 +82,8 @@
         '.architecture-console',
         '.service-card-visual',
         '.production-card',
-        '.cinematic-contact .lead-form'
+        '.cinematic-contact .lead-form',
+        '.ops-simulator'
       ].join(','))];
       for (const el of reactive) {
         el.classList.add('dp-reactive');
@@ -125,6 +130,67 @@
         stage?.style.setProperty('--tilt-x','0px');
         stage?.style.setProperty('--tilt-y','0px');
       },{passive:true});
+    }
+
+    // Animated DreamProtocol operating view. This is explicitly an illustrative
+    // simulation, not customer telemetry, so the motion can tell the workflow story
+    // without presenting synthetic activity as production data.
+    const opsSimulator=document.querySelector('[data-ops-simulator]');
+    if (opsSimulator) {
+      const tabs=[...opsSimulator.querySelectorAll('[data-ops-target]')];
+      const scenes=[...opsSimulator.querySelectorAll('[data-ops-scene]')];
+      const reduced=media('(prefers-reduced-motion: reduce)').matches;
+      let current=0;
+      let timer=null;
+      let paused=false;
+
+      const activate=(next)=>{
+        if(!scenes.length)return;
+        current=(next+scenes.length)%scenes.length;
+        scenes.forEach((scene,index)=>{
+          const active=index===current;
+          scene.hidden=!active;
+          scene.classList.toggle('is-active',active);
+        });
+        tabs.forEach((tab,index)=>{
+          const active=index===current;
+          tab.setAttribute('aria-selected',String(active));
+          tab.tabIndex=active?0:-1;
+        });
+      };
+
+      const stop=()=>{
+        if(timer){clearInterval(timer);timer=null;}
+      };
+      const start=()=>{
+        stop();
+        if(reduced||paused||scenes.length<2)return;
+        timer=setInterval(()=>activate(current+1),5200);
+      };
+
+      tabs.forEach((tab,index)=>{
+        tab.addEventListener('click',()=>{
+          activate(index);
+          start();
+        });
+        tab.addEventListener('keydown',event=>{
+          if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+          event.preventDefault();
+          const next=event.key==='Home'?0:event.key==='End'?tabs.length-1:current+(event.key==='ArrowRight'?1:-1);
+          activate(next);
+          tabs[current]?.focus();
+          start();
+        });
+      });
+
+      opsSimulator.addEventListener('pointerenter',()=>{paused=true;stop();},{passive:true});
+      opsSimulator.addEventListener('pointerleave',()=>{paused=false;start();},{passive:true});
+      opsSimulator.addEventListener('focusin',()=>{paused=true;stop();});
+      opsSimulator.addEventListener('focusout',()=>{
+        if(!opsSimulator.contains(document.activeElement)){paused=false;start();}
+      });
+      activate(0);
+      start();
     }
   }
 
