@@ -4262,3 +4262,14 @@ body:not([data-home="true"]) .feature,
     font-size:.58rem
   }
 }
+
+
+/* Lead form submission feedback */
+.form-status.is-success,.form-status.is-error{padding:14px 16px;border-radius:5px;border:1px solid;min-height:0;line-height:1.45}
+.form-status.is-success{background:#dff6b8;border-color:#9fc96a;color:#22391b}
+.form-status.is-error{background:#f4e4de;border-color:#d3a99a;color:#6a3428}
+.form-status strong{display:block;font-size:1rem;letter-spacing:-.01em;margin-bottom:2px}
+.form-status span{display:block;font-size:.76rem}
+.form-status a{color:inherit;border-bottom:1px solid currentColor}
+.lead-form .button.is-sent{opacity:1;cursor:default;background:#caff63;border-color:#a9dd4f;color:#172211}
+@media(max-width:640px){.form-status.is-success,.form-status.is-error{padding:14px}.form-status strong{font-size:1.02rem}.form-status span{font-size:.8rem}}
