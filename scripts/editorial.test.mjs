@@ -47,6 +47,7 @@ test('Approved JSON integrates into site, citations, service links, and discover
  const temp=fs.mkdtempSync(path.join(os.tmpdir(),'dream-researched-'));
  try{
   for(const p of ['content','assets','scripts'])fs.cpSync(path.join(root,p),path.join(temp,p),{recursive:true});
+  fs.copyFileSync(path.join(root,'app.js'),path.join(temp,'app.js'));
   fs.rmSync(path.join(temp,'content/generated'),{recursive:true,force:true});fs.mkdirSync(path.join(temp,'content/generated'));
   const a={...fixture(),publishOn:'2026-09-14',week:'2026-09-14',status:'scheduled',review:{approved:true},generation:{sourceCheckedOn:'2026-09-14'}};
   fs.writeFileSync(path.join(temp,'content/generated/2026-09-14.json'),JSON.stringify(a));
