@@ -4273,3 +4273,42 @@ body:not([data-home="true"]) .feature,
 .form-status a{color:inherit;border-bottom:1px solid currentColor}
 .lead-form .button.is-sent{opacity:1;cursor:default;background:#caff63;border-color:#a9dd4f;color:#172211}
 @media(max-width:640px){.form-status.is-success,.form-status.is-error{padding:14px}.form-status strong{font-size:1.02rem}.form-status span{font-size:.8rem}}
+
+
+/* Mobile brand balance: keep the wordmark primary */
+@media(max-width:680px){
+  .site-header .nav-wrap{
+    height:70px;
+    gap:8px
+  }
+  .site-header .brand{
+    gap:7px;
+    font-size:1.04rem;
+    align-items:center
+  }
+  .site-header .brand-mark{
+    width:18px;
+    height:20px;
+    flex:0 0 18px;
+    border-width:3px;
+    border-radius:0 10px 10px 0;
+    margin-right:0;
+    border-color:#afe66f;
+    transform:skewY(-10deg)
+  }
+  .site-header .brand-mark:after{
+    width:3px;
+    height:13px;
+    left:3px;
+    top:1px;
+    background:#afe66f
+  }
+  .site-header .brand small{
+    margin-top:5px;
+    font-size:.39rem;
+    letter-spacing:.15em
+  }
+  .site-header .nav-wrap nav{
+    top:70px
+  }
+}
