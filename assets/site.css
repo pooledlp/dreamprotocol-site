@@ -1113,6 +1113,7 @@ body[data-home="true"] footer .brand{color:#eaf4e5}
   background:rgba(255,255,255,.025)
 }
 .architecture-step>span{font-size:.5rem;color:#61735c;letter-spacing:.1em}
+.architecture-step>div{display:flex;flex-direction:column;gap:3px}
 .architecture-step strong{font-size:.65rem;color:#dce8d6;letter-spacing:.08em}
 .architecture-step small{font-size:.62rem;color:#7f9479}
 .architecture-arrow{
