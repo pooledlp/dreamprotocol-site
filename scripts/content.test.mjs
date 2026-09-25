@@ -10,6 +10,7 @@ test('Scheduled publishing excludes future content, updates discovery, and is re
  const temp=fs.mkdtempSync(path.join(os.tmpdir(),'dream-content-'));
  try{
   for(const p of ['content','assets','scripts'])fs.cpSync(path.join(root,p),path.join(temp,p),{recursive:true});
+  fs.copyFileSync(path.join(root,'app.js'),path.join(temp,'app.js'));
   // Test the fixed prepared queue independently of future generated articles.
   fs.rmSync(path.join(temp,'content/generated'),{recursive:true,force:true});
   const build=date=>execFileSync(process.execPath,['scripts/build.mjs'],{cwd:temp,env:{...process.env,BUILD_DATE:date},stdio:'pipe'});
