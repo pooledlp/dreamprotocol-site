@@ -31,6 +31,8 @@ jobs:
           node-version: '22'
       - name: Install website build dependencies
         run: npm install --no-audit --no-fund
+      - name: Install website build dependencies
+        run: npm install --no-audit --no-fund
       - name: Reserve one researched article attempt this week
         id: reserve
         env:
