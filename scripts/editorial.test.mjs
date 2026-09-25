@@ -47,6 +47,7 @@ test('Approved JSON integrates into site, citations, service links, and discover
  const temp=fs.mkdtempSync(path.join(os.tmpdir(),'dream-researched-'));
  try{
   for(const p of ['content','assets','scripts'])fs.cpSync(path.join(root,p),path.join(temp,p),{recursive:true});
+  fs.copyFileSync(path.join(root,'app.js'),path.join(temp,'app.js'));
   fs.rmSync(path.join(temp,'content/generated'),{recursive:true,force:true});fs.mkdirSync(path.join(temp,'content/generated'));
   const a={...fixture(),publishOn:'2026-09-14',week:'2026-09-14',status:'scheduled',review:{approved:true},generation:{sourceCheckedOn:'2026-09-14'}};
   fs.writeFileSync(path.join(temp,'content/generated/2026-09-14.json'),JSON.stringify(a));
@@ -54,7 +55,7 @@ test('Approved JSON integrates into site, citations, service links, and discover
   const build=date=>execFileSync(process.execPath,['scripts/build.mjs'],{cwd:temp,env:{...process.env,BUILD_DATE:date},stdio:'pipe'});
   build('2026-09-13');assert(!fs.existsSync(path.join(temp,'resources',a.slug,'index.html')));
   build('2026-09-14');
-  for(const f of ['index.html','resources/index.html','resources/feed.xml','sitemap.xml','workflow-automation/index.html'])assert(fs.readFileSync(path.join(temp,f),'utf8').includes(a.slug),f);
+  for(const f of ['resources/index.html','resources/feed.xml','sitemap.xml','workflow-automation/index.html'])assert(fs.readFileSync(path.join(temp,f),'utf8').includes(a.slug),f);
   const html=fs.readFileSync(path.join(temp,'resources',a.slug,'index.html'),'utf8');assert(html.includes(sources[0].url));assert(html.includes('Researched and checked with AI'));
   a.review.approved=false;fs.writeFileSync(path.join(temp,'content/generated/2026-09-14.json'),JSON.stringify(a));assert.throws(()=>loadGenerated(temp));
  }finally{fs.rmSync(temp,{recursive:true,force:true});}

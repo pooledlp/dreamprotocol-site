@@ -27,7 +27,12 @@
       '.process-grid article',
       '.related-note',
       '.lead-form',
-      '.audio-card'
+      '.audio-card',
+      '.home-trust-rail > .shell > div',
+      '.architecture-step',
+      '.production-card',
+      '.opportunity-card',
+      '.production-flow'
     ].join(',');
 
     const reveal = [...document.querySelectorAll(revealTargets)];

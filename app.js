@@ -176,7 +176,7 @@
     analysisSteps.forEach((step) => {
       step.classList.remove('active');
       const key = step.dataset.field;
-      const discovered = key === 'website' ? succeeded : Boolean(found[key]);
+      const discovered = key === 'website' || key === 'opportunities' ? succeeded : Boolean(found[key]);
       step.classList.toggle('done', discovered);
       step.classList.toggle('missing', !discovered);
     });
@@ -199,6 +199,85 @@
     $('#knowledge-preview').append(section);
   }
 
+  function inferAutomationOpportunities(current) {
+    const business = current.business || {};
+    const context = [
+      business.industry,
+      business.description,
+      ...(business.services || [])
+    ].filter(Boolean).join(' ').toLowerCase();
+    const ideas = [];
+    const add = (title, detail) => {
+      const cleanTitle = cleanString(title, 90);
+      const cleanDetail = cleanString(detail, 220);
+      if (!cleanTitle || ideas.some((item) => item.title.toLowerCase() === cleanTitle.toLowerCase())) return;
+      ideas.push({ title: cleanTitle, detail: cleanDetail });
+    };
+
+    (current.suggestedGoals || []).slice(0, 2).forEach((goal) => {
+      add(goal, 'Potential fit surfaced from the public business profile. We would confirm the real workflow and systems before building it.');
+    });
+
+    if (/dental|dentist|medical|clinic|patient|health|orthodont|chiro|therapy/.test(context)) {
+      add('After-hours front desk', 'Answer routine office questions, capture callback context, and route the request without giving clinical advice.');
+      add('Appointment request handling', 'Collect the scheduling details staff need and connect to the supported booking path where appropriate.');
+      add('Cleaner callback summaries', 'Turn conversations into structured notes for the office instead of another voicemail to replay.');
+    }
+    if (/plumb|hvac|electric|roof|contractor|repair|service|maintenance|landscap|home service/.test(context)) {
+      add('Missed-call and after-hours recovery', 'Capture the job type, location, urgency, and callback details when the team is on another job.');
+      add('Dispatch-ready intake', 'Turn a call or form into clean service context that can be routed to the right person or system.');
+      add('Estimate follow-up', 'Trigger approved follow-up after a quote so good opportunities do not disappear into a forgotten inbox.');
+    }
+    if (/property|tenant|apartment|facility|facilities|real estate|hoa|building/.test(context)) {
+      add('Maintenance request intake', 'Capture property, issue, contact, and urgency context before routing the request.');
+      add('Tenant question handling', 'Answer approved routine questions and send exceptions to the property team.');
+      add('Status and vendor follow-up', 'Keep routine handoffs moving with notifications, tasks, or connected-system updates.');
+    }
+    if (/account|tax|bookkeep|law|legal|consult|professional|insurance|financial/.test(context)) {
+      add('New-client intake', 'Qualify the request, collect the required context, and prepare a cleaner handoff for staff review.');
+      add('Consultation scheduling', 'Move a qualified inquiry into the supported calendar or callback path with fewer back-and-forth messages.');
+      add('Inbox and document routing', 'Classify inbound requests or documents and route the next approved task without repetitive retyping.');
+    }
+    if (/hotel|hospitality|restaurant|retail|venue|event|reservation|spa|salon/.test(context)) {
+      add('Routine customer questions', 'Answer approved questions about hours, services, policies, locations, or availability rules.');
+      add('Reservation or appointment intake', 'Capture the request and connect to the supported booking path when the system allows it.');
+      add('Event and group lead qualification', 'Collect date, size, service, and contact context before the sales or events team follows up.');
+    }
+
+    add('Missed-call recovery', 'Answer or capture inbound opportunities when a person cannot get to the phone.');
+    add('Lead qualification and routing', 'Collect the useful context first, then hand the opportunity to the right person with less back-and-forth.');
+    add('Scheduling and booking requests', 'Turn routine appointment requests into a defined next step using approved availability rules.');
+    add('Automated follow-up', 'Send the approved next message, create the task, or update the connected system so work keeps moving.');
+
+    return ideas.slice(0, 4);
+  }
+
+  function renderAutomationOpportunities(current) {
+    const list = $('#opportunity-list');
+    const panel = $('.opportunity-panel');
+    if (!list || !panel) return;
+    list.replaceChildren();
+    panel.hidden = current.isFallback;
+    if (current.isFallback) return;
+
+    inferAutomationOpportunities(current).forEach((idea, index) => {
+      const article = document.createElement('article');
+      article.className = 'opportunity-card';
+
+      const number = document.createElement('span');
+      number.textContent = String(index + 1).padStart(2, '0');
+
+      const title = document.createElement('h5');
+      title.textContent = idea.title;
+
+      const detail = document.createElement('p');
+      detail.textContent = idea.detail;
+
+      article.append(number, title, detail);
+      list.append(article);
+    });
+  }
+
   function renderProfile(current) {
     $('#employee-name').textContent = current.isFallback ? 'Preview unavailable' : current.employeeName;
     $('#employee-company').textContent = `${current.role} for ${current.company}`;
@@ -216,10 +295,11 @@
     $('#hours-status').textContent = current.found.hours ? 'Found' : 'Not found';
     $('#location-count').textContent = current.business.locations?.length ? `${current.business.locations.length} found` : 'Not found';
     $('#contact-status').textContent = current.business.phone || current.business.email ? 'Found' : 'Not found';
-    $('#preview-label').textContent = current.isFallback ? 'Preview unavailable' : 'Your demo is ready';
+    $('#preview-label').textContent = current.isFallback ? 'Preview unavailable' : 'Your business scan is ready';
     demoNotice.textContent = current.isFallback
       ? 'Live voice becomes available after we successfully read the business website.'
-      : 'Built only from business information found on your website.';
+      : 'Built only from public business information found on your website. Production adds your approved rules, systems, and safeguards.';
+    renderAutomationOpportunities(current);
     initializeAlexVoice(current);
     window.requestAnimationFrame(() => employeeView.classList.add('is-revealed'));
   }
