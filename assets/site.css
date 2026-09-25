@@ -4394,6 +4394,42 @@ a[href^="mailto:"]{overflow-wrap:anywhere;word-break:break-word}
 
   .eyebrow{font-size:.68rem!important}
   .card-number,.step-number{font-size:.68rem!important}
+
+  /* Small interface copy remains readable instead of looking like decoration. */
+  .hero-footnote,
+  body[data-home="true"] .dp-wow .hero-footnote,
+  .principles-strip>.shell,
+  body[data-home="true"] .dp-outcome-strip>.shell,
+  .home-trust-rail b,
+  .window-bar small,
+  .demo-command-center .window-bar small,
+  .demo-copy-rail span,
+  .analysis-steps li,
+  .knowledge-details summary,
+  .service-card .service-card-body>.eyebrow,
+  .guide-copy .eyebrow,
+  .recording-details .eyebrow,
+  .architecture-step>span,
+  .architecture-step strong,
+  .architecture-step small,
+  .production-card>span,
+  .form-intro>span,
+  .form-reassurance span,
+  .breadcrumbs,
+  .protocol-bar>.shell{
+    font-size:.66rem!important;
+    line-height:1.45!important
+  }
+  .core-mark small{font-size:.58rem!important}
+  .hero-cockpit .core-head,
+  .hero-cockpit .core-foot{
+    font-size:.62rem!important;
+    line-height:1.45!important
+  }
+  .cockpit-status span{font-size:.58rem!important}
+  .cockpit-status b{font-size:.64rem!important}
+  .cockpit-status small{font-size:.61rem!important;line-height:1.4!important}
+  .hero-cockpit .core-foot{flex-wrap:wrap;gap:6px 10px}
   .contact-path{font-size:.68rem!important;color:#91a48c}
   .contact-path span{min-height:42px}
 
