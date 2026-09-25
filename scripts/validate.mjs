@@ -42,4 +42,7 @@ assert.equal(sitemap,fs.readFileSync(path.join(root,'public/sitemap.xml'),'utf8'
 assert(fs.readFileSync(path.join(root,'robots.txt'),'utf8').includes('https://dreamprotocol.ai/sitemap.xml'));
 const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
 for(const id of ['website-form','business-url','analysis-view','employee-view','opportunity-list','alex-start-button','lead-form','form-status'])assert(index.includes(`id="${id}"`),'Missing homepage integration ID '+id);
+const app=fs.readFileSync(path.join(root,'app.js'),'utf8');
+assert(app.includes("alexVapi.start(config.vapiAssistantId, widgetOverrides(profile))"),'Homepage voice control must start Vapi directly');
+assert(app.includes("firstMessageMode: 'assistant-speaks-first'"),'Homepage voice demo must force the assistant greeting first');
 console.log(`Validated ${urls.length} pages and ${links} internal links/assets: metadata, headings, schema, fragments, and original integration hooks.`);
