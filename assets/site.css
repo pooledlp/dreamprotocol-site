@@ -4275,40 +4275,172 @@ body:not([data-home="true"]) .feature,
 @media(max-width:640px){.form-status.is-success,.form-status.is-error{padding:14px}.form-status strong{font-size:1.02rem}.form-status span{font-size:.8rem}}
 
 
-/* Mobile brand balance: keep the wordmark primary */
+/* Dream Protocol mobile visual QA pass */
+/* Keep layouts inside the viewport and make long contact text safe everywhere. */
+img,svg,video,canvas,audio{max-width:100%}
+.contact-grid>*,.demo-grid>*,.recording-stage-grid>*,.architecture-grid>*,.hero-grid>*{min-width:0}
+.demo-window,.hero-cockpit,.architecture-console,.recording-console,.lead-form{max-width:100%;min-width:0}
+a[href^="mailto:"]{overflow-wrap:anywhere;word-break:break-word}
+:focus-visible{outline:2px solid var(--dp-neon);outline-offset:3px}
+
+/* Lift low-contrast utility text without flattening the dark cinematic look. */
+.cinematic-contact .contact-copy .eyebrow,
+.cinematic-contact .contact-copy>p,
+.recording-copy>p,
+.architecture-copy>p{color:#b8c9b2!important}
+.cinematic-contact .lead-form label{color:#d2dfcc!important}
+.cinematic-contact .lead-form input::placeholder,
+.cinematic-contact .lead-form textarea::placeholder{color:#93a58e!important}
+.footer-columns h2{color:#94a98d!important}
+.footer-columns p{color:#9daf96!important}
+.footer-bottom{color:#879b81!important}
+
+/* Mobile: readable type, sane wrapping, and less decorative clutter competing with content. */
 @media(max-width:680px){
-  .site-header .nav-wrap{
-    height:70px;
-    gap:8px
-  }
-  .site-header .brand{
-    gap:7px;
-    font-size:1.04rem;
-    align-items:center
-  }
+  html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+  body{overflow-x:hidden}
+  .shell{max-width:100%}
+
+  /* Restore the original mobile logo proportions. */
+  .site-header .brand{font-size:1.02rem}
   .site-header .brand-mark{
-    width:18px;
-    height:20px;
-    flex:0 0 18px;
-    border-width:3px;
-    border-radius:0 10px 10px 0;
-    margin-right:0;
-    border-color:#afe66f;
+    width:25px;
+    height:27px;
+    flex:0 0 25px;
+    border-width:4px;
+    border-radius:0 15px 15px 0;
+    margin-right:3px;
+    border-color:#bfff6c;
     transform:skewY(-10deg)
   }
   .site-header .brand-mark:after{
     width:3px;
-    height:13px;
-    left:3px;
+    height:18px;
+    left:4px;
     top:1px;
-    background:#afe66f
+    background:#bfff6c
   }
   .site-header .brand small{
-    margin-top:5px;
-    font-size:.39rem;
-    letter-spacing:.15em
+    margin-top:7px;
+    font-size:.42rem;
+    letter-spacing:.16em
   }
-  .site-header .nav-wrap nav{
-    top:70px
+
+  /* No link or email is allowed to run off a phone screen. */
+  .text-link,
+  .email-link,
+  .cinematic-contact .contact-copy>.text-link,
+  .footer-top .email-link,
+  .page-hero .email-link{
+    max-width:100%;
+    white-space:normal!important;
+    overflow-wrap:anywhere;
+    word-break:break-word
   }
+  .cinematic-contact .contact-copy>.text-link{
+    display:inline;
+    font-size:.92rem!important;
+    line-height:1.5
+  }
+
+  /* Primary reading text stays comfortably legible. */
+  .hero-sub,
+  .demo-copy>p:not(.eyebrow),
+  .architecture-copy>p,
+  .recording-copy>p,
+  .cinematic-contact .contact-copy>p,
+  .service-card-body>p,
+  .production-card p,
+  .feature p,
+  .wide-note p,
+  .related-note p,
+  .scope-panel>p,
+  .pricing-terms,
+  .article-source,
+  .form-intro>small,
+  .demo-form-note,
+  .demo-notice,
+  .opportunity-card p,
+  .production-flow small,
+  .architecture-note,
+  .recording-details>p:not(.eyebrow){
+    font-size:.88rem!important;
+    line-height:1.62!important
+  }
+
+  /* Utility labels can stay compact, but not microscopic. */
+  .demo-mode-rail,
+  .scan-capabilities span,
+  .agent-telemetry,
+  .opportunity-head>span,
+  .production-flow .kicker,
+  .production-flow>div,
+  .service-card-visual small,
+  .architecture-proof span,
+  .architecture-console-head,
+  .arch-node>span,
+  .arch-node strong,
+  .arch-node small,
+  .architecture-ledger span,
+  .architecture-ledger b,
+  .recording-points span,
+  .recording-console-head,
+  .recording-console-head b,
+  .recording-flow,
+  .footer-command{
+    font-size:.64rem!important;
+    line-height:1.45!important
+  }
+
+  .eyebrow{font-size:.68rem!important}
+  .card-number,.step-number{font-size:.68rem!important}
+  .contact-path{font-size:.68rem!important;color:#91a48c}
+  .contact-path span{min-height:42px}
+
+  /* Dense technical diagrams get room instead of squeezing their copy. */
+  .arch-node{width:128px;min-height:72px}
+  .architecture-map{overflow:hidden}
+  .production-flow>div{gap:7px;flex-wrap:wrap}
+  .recording-main{grid-template-columns:1fr}
+  .recording-audio-card{margin-inline:14px}
+  .recording-flow{gap:5px;flex-wrap:wrap}
+
+  /* Footer becomes an easy-to-scan phone layout. */
+  .footer-top .brand{
+    font-size:1.12rem!important;
+    transform:none!important;
+    max-width:100%
+  }
+  .footer-top .brand-mark{
+    width:25px;
+    height:27px;
+    border-width:4px;
+    margin-right:12px
+  }
+  .footer-top .brand-mark:after{width:3px;height:18px}
+  .footer-top .email-link{font-size:.9rem!important;line-height:1.5}
+  .footer-columns a,.footer-columns p{font-size:.86rem!important}
+  .footer-columns h2{font-size:.69rem!important}
+  .footer-bottom{font-size:.7rem!important}
+}
+
+@media(max-width:520px){
+  .footer-columns{grid-template-columns:1fr!important;gap:28px}
+  .footer-columns>div:last-child{grid-column:auto!important;display:block!important}
+  .footer-command{
+    grid-template-columns:1fr!important;
+    gap:0;
+    padding-block:14px;
+    font-size:.66rem!important
+  }
+  .footer-command>span:last-child{display:none}
+  .footer-command b{text-align:left}
+  .cinematic-contact .contact-grid{gap:30px}
+  .contact-path{grid-template-columns:1fr 1fr!important}
+}
+
+@media(max-width:390px){
+  .cinematic-contact .contact-copy>.text-link{font-size:.86rem!important}
+  .contact-path{grid-template-columns:1fr!important}
+  .hero-footnote{font-size:.62rem!important;line-height:1.5}
 }
