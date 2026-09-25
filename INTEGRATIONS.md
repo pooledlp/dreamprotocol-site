@@ -18,7 +18,7 @@ The scanner sends `{"url":"https://example.com/"}` to `https://api.dreamprotocol
 
 ## Vapi browser voice
 
-After a verified scan, the result panel dynamically imports the pinned official Vapi Web SDK (`@vapi-ai/web@2.7.1`) from jsDelivr's ESM endpoint and creates a Vapi instance with the browser-safe public key. Dream Protocol does not use the older HTML script-tag wrapper because that wrapper is pinned to an older Web SDK release. The current SDK receives the verified scanner profile directly and does not request a voice-session backend. Before starting the call, the browser supplies these `assistantOverrides.variableValues`:
+After a verified scan, the result panel loads a same-origin browser bundle of the pinned official Vapi Web SDK (`@vapi-ai/web@2.7.1`) from `/assets/vapi.bundle.js` and creates a Vapi instance with the browser-safe public key. The bundle is produced at build time with esbuild. Dream Protocol does not use the older HTML script-tag wrapper or a runtime cross-origin module import. The current SDK receives the verified scanner profile directly and does not request a voice-session backend. Before starting the call, the browser supplies these `assistantOverrides.variableValues`:
 
 - `companyName`
 - `businessWebsite`
@@ -48,7 +48,7 @@ Review Vapi recording, storage, retention, and jurisdictional consent settings b
 
 ## Static deployment
 
-No voice build step is required. The site remains deployable directly to GitHub Pages. Run the JavaScript syntax check with:
+The site build bundles the pinned Vapi Web SDK before generating pages. GitHub Actions installs the declared npm dependencies, runs the bundle step, validates the resulting same-origin asset, and then packages it with the rest of the static site. Run the JavaScript syntax check with:
 
 ```sh
 npm run check

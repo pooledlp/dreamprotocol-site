@@ -3,9 +3,15 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "build": "node scripts/build.mjs",
-    "check": "node --check app.js && node --check assets/site.js && node scripts/validate.mjs",
+    "build": "node scripts/bundle-vapi.mjs && node scripts/build.mjs",
+    "check": "node --check app.js && node --check assets/site.js && node --check assets/vapi.bundle.js && node scripts/validate.mjs",
     "test": "node --test scripts/content.test.mjs scripts/contact.test.mjs scripts/editorial.test.mjs",
     "preview": "node scripts/serve.mjs"
+  },
+  "dependencies": {
+    "@vapi-ai/web": "2.7.1"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
   }
 }

@@ -29,6 +29,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Install website build dependencies
+        run: npm install --no-audit --no-fund
       - name: Reserve one researched article attempt this week
         id: reserve
         env:
@@ -94,6 +96,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Install website build dependencies
+        run: npm install --no-audit --no-fund
       - name: Build published pages for today
         run: npm run build
       - name: Check links, SEO metadata, and JavaScript
