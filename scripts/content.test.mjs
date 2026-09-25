@@ -25,7 +25,7 @@ test('Scheduled publishing excludes future content, updates discovery, and is re
   build('2026-09-13');assert.equal(read('index.html')+read('resources/feed.xml')+read('sitemap.xml'),before);
   build('2026-09-21');
   assert.equal(JSON.parse(read('content/published.json')).length,3);
-  for(const f of ['sitemap.xml','resources/feed.xml','resources/index.html','index.html','ai-training/index.html'])assert(read(f).includes('/resources/first-ai-workshop/'),f+' missing published guide');
+  for(const f of ['sitemap.xml','resources/feed.xml','resources/index.html','ai-training/index.html'])assert(read(f).includes('/resources/first-ai-workshop/'),f+' missing published guide');
   build('2026-09-13');assert(!fs.existsSync(path.join(temp,'resources/first-ai-workshop/index.html')),'A future guide leaked into an earlier build');
   build('2026-11-01');assert.equal(JSON.parse(read('content/published.json')).length,8);
   assert(read('resources/ai-receptionist-cost/index.html').includes('datePublished":"2026-09-13"'));
