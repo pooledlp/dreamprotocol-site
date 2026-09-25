@@ -5031,3 +5031,95 @@ a[href^="mailto:"]{overflow-wrap:anywhere;word-break:break-word}
   .about-principles-grid article{min-height:auto;padding:24px 21px}
   .about-principles-grid h3{margin-top:25px}
 }
+
+
+/* Quantified delivery proof */
+.delivery-metrics{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  margin-bottom:28px;
+  border-top:1px solid #cbd4c4;
+  border-left:1px solid #cbd4c4
+}
+.delivery-metrics>div{
+  min-height:138px;
+  padding:24px 22px;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  border-right:1px solid #cbd4c4;
+  border-bottom:1px solid #cbd4c4;
+  background:linear-gradient(180deg,rgba(255,255,255,.7),rgba(255,255,255,.3))
+}
+.delivery-metrics strong{
+  display:block;
+  color:#1a281d;
+  font-family:Manrope,sans-serif;
+  font-size:clamp(2rem,3vw,3.35rem);
+  font-weight:600;
+  line-height:1;
+  letter-spacing:-.06em
+}
+.delivery-metrics span{
+  display:block;
+  max-width:210px;
+  margin-top:10px;
+  color:#5b695c;
+  font-size:.72rem;
+  line-height:1.45
+}
+.proof-grid-six{grid-template-columns:repeat(3,minmax(0,1fr))}
+.proof-result{
+  margin-top:auto;
+  padding-top:18px;
+  border-top:1px solid #d3dbc9;
+  display:flex;
+  flex-direction:column;
+  gap:4px
+}
+.proof-result b{
+  color:#708067;
+  font-family:var(--dp-mono);
+  font-size:.49rem;
+  letter-spacing:.1em
+}
+.proof-result span{
+  color:#2f4032;
+  font-size:.76rem;
+  line-height:1.5;
+  font-weight:600
+}
+.proof-disclosure{
+  margin:21px 0 0;
+  color:#6a786b;
+  font-size:.72rem;
+  line-height:1.6
+}
+
+@media(max-width:960px){
+  .delivery-metrics{grid-template-columns:1fr 1fr}
+  .proof-grid-six{grid-template-columns:1fr 1fr}
+}
+
+@media(max-width:680px){
+  .delivery-metrics{grid-template-columns:1fr 1fr}
+  .delivery-metrics>div{
+    min-height:118px;
+    padding:19px 16px
+  }
+  .delivery-metrics strong{
+    font-size:clamp(1.85rem,10vw,2.8rem)
+  }
+  .delivery-metrics span{
+    font-size:.76rem;
+    line-height:1.45
+  }
+  .proof-grid-six{grid-template-columns:1fr}
+  .proof-result b{font-size:.62rem}
+  .proof-result span{font-size:.82rem}
+  .proof-disclosure{font-size:.78rem;line-height:1.55}
+}
+
+@media(max-width:390px){
+  .delivery-metrics{grid-template-columns:1fr}
+}
