@@ -159,8 +159,15 @@
     const button=form.querySelector('button');
     const status=document.querySelector('#form-status');
     const values=Object.fromEntries(new FormData(form));
+    const originalButton=button.innerHTML;
+    let sent=false;
+
     button.disabled=true;
-    status.textContent='Sending…';
+    button.classList.remove('is-sent');
+    button.innerHTML='Sending… <span aria-hidden="true">→</span>';
+    status.classList.remove('is-success','is-error');
+    status.textContent='Sending your request…';
+
     try {
       const response=await fetch('https://formsubmit.co/ajax/pooledlp@gmail.com',{
         method:'POST',
@@ -178,12 +185,21 @@
       if(!response.ok)throw Error('Delivery failed');
       const result=await response.json();
       if(result.success!==true&&result.success!=='true')throw Error('Delivery failed');
-      form.reset();
-      status.textContent='Got it. We’ll follow up with a practical next step.';
+
+      sent=true;
+      button.classList.add('is-sent');
+      button.innerHTML='Sent <span aria-hidden="true">✓</span>';
+      status.classList.add('is-success');
+      status.innerHTML='<strong>✓ Request sent</strong><span>Thanks. We’ll review your workflow and get back to you shortly.</span>';
+      status.scrollIntoView?.({behavior:media('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'nearest'});
+      setTimeout(()=>form.reset(),1200);
     } catch {
-      status.textContent='We couldn’t send that just now. Your details are still here. Try again or email hello@dreamprotocol.ai.';
+      status.classList.add('is-error');
+      status.innerHTML='<strong>Couldn’t send.</strong><span>Try again or email <a href="mailto:hello@dreamprotocol.ai">hello@dreamprotocol.ai</a>.</span>';
+      button.innerHTML=originalButton;
+      status.scrollIntoView?.({behavior:media('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'nearest'});
     } finally {
-      button.disabled=false;
+      if(!sent)button.disabled=false;
     }
   });
 })();
