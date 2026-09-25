@@ -5437,7 +5437,7 @@ a[href^="mailto:"]{overflow-wrap:anywhere;word-break:break-word}
 }
 .ops-wave i{
   width:3px;
-  height:calc(5px + (var(--n) * 7px) % 26px);
+  height:calc(8px + (var(--n) * .8px));
   min-height:5px;
   max-height:28px;
   border-radius:999px;
