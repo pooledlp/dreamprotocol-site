@@ -32,7 +32,13 @@
       '.architecture-step',
       '.production-card',
       '.opportunity-card',
-      '.production-flow'
+      '.production-flow',
+      '.service-card-visual',
+      '.architecture-console',
+      '.arch-node',
+      '.architecture-ledger > div',
+      '.manifesto-band > .shell > *',
+      '.contact-path'
     ].join(',');
 
     const reveal = [...document.querySelectorAll(revealTargets)];
@@ -67,7 +73,12 @@
         '.lead-form',
         '.feature',
         '.region-card',
-        '.automation-core'
+        '.automation-core',
+        '.demo-command-center',
+        '.architecture-console',
+        '.service-card-visual',
+        '.production-card',
+        '.cinematic-contact .lead-form'
       ].join(','))];
       for (const el of reactive) {
         el.classList.add('dp-reactive');
@@ -88,6 +99,7 @@
         const max=Math.max(1,document.documentElement.scrollHeight-viewport);
         const p=Math.min(1,Math.max(0,y/max));
         root.style.setProperty('--scroll-progress',(p*100).toFixed(2)+'%');
+        root.style.setProperty('--page-y',Math.min(1,y/900).toFixed(3));
         document.querySelector('.site-header')?.classList.toggle('is-scrolled',y>24);
         ticking=false;
       };
@@ -99,7 +111,7 @@
 
     // Small parallax shift in hero/system art only on desktops.
     if (finePointer) {
-      const stage=document.querySelector('.automation-core,.detail-art,.region-visual,.founder-photo');
+      const stage=document.querySelector('.hero-cockpit,.automation-core,.detail-art,.region-visual,.founder-photo');
       const hero=document.querySelector('.home-hero,.page-hero');
       hero?.addEventListener('pointermove',e=>{
         if(!stage)return;
