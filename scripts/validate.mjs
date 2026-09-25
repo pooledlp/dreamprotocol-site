@@ -45,7 +45,8 @@ for(const id of ['website-form','business-url','analysis-view','employee-view','
 const app=fs.readFileSync(path.join(root,'app.js'),'utf8');
 assert(app.includes("alexVapi.start(config.vapiAssistantId, widgetOverrides(profile))"),'Homepage voice control must start Vapi directly');
 assert(app.includes("firstMessageMode: 'assistant-speaks-first'"),'Homepage voice demo must force the assistant greeting first');
-assert(app.includes("@vapi-ai/web@2.7.1/+esm"),'Homepage voice must use the pinned current Vapi Web SDK');
+assert(app.includes("/assets/vapi.bundle.js?v=2.7.1"),'Homepage voice must load the pinned same-origin Vapi Web SDK bundle');
+assert(fs.existsSync(path.join(root,'assets/vapi.bundle.js')),'Bundled Vapi SDK is missing from assets');
 assert(app.includes("listenForAlexEvent('audio'"),'Homepage voice must monitor assistant audio attachment');
 assert(app.includes("alexVapi.setVolume?.(1)"),'Homepage voice must force assistant playback to full volume');
 console.log(`Validated ${urls.length} pages and ${links} internal links/assets: metadata, headings, schema, fragments, and original integration hooks.`);
