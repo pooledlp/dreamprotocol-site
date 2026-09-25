@@ -40,7 +40,7 @@
   let alexCallActive = false;
   let alexAudioReady = false;
   let vapiSDKPromise = null;
-  const VAPI_WEB_SDK_URL = 'https://cdn.jsdelivr.net/npm/@vapi-ai/web@2.7.1/+esm';
+  const VAPI_WEB_SDK_URL = '/assets/vapi.bundle.js?v=2.7.1';
   let alexEventHandlers = [];
   const alexStartButton = $('#alex-start-button');
 
@@ -96,20 +96,34 @@
     }
     if (vapiSDKPromise) return vapiSDKPromise;
 
-    console.log('[Dream Protocol Vapi] loading current Web SDK', VAPI_WEB_SDK_URL);
-    vapiSDKPromise = import(VAPI_WEB_SDK_URL)
-      .then((module) => {
-        const Vapi = module.default || module.Vapi;
-        if (typeof Vapi !== 'function') throw new Error('Vapi Web SDK constructor is unavailable');
-        window.DREAM_PROTOCOL_VAPI_CLASS = Vapi;
-        console.log('[Dream Protocol Vapi] Web SDK 2.7.1 ready');
-        return Vapi;
-      })
-      .catch((error) => {
-        vapiSDKPromise = null;
-        console.error('[Dream Protocol Vapi] Web SDK failed to load', error);
-        throw error;
-      });
+    console.log('[Dream Protocol Vapi] loading same-origin Web SDK bundle', VAPI_WEB_SDK_URL);
+    vapiSDKPromise = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = VAPI_WEB_SDK_URL;
+      script.async = true;
+      const timer = setTimeout(() => {
+        script.remove();
+        reject(new Error('Voice SDK loading timed out'));
+      }, 15000);
+      script.addEventListener('load', () => {
+        clearTimeout(timer);
+        if (typeof window.DREAM_PROTOCOL_VAPI_CLASS !== 'function') {
+          reject(new Error('Bundled Vapi constructor is unavailable'));
+          return;
+        }
+        console.log('[Dream Protocol Vapi] same-origin Web SDK 2.7.1 ready');
+        resolve(window.DREAM_PROTOCOL_VAPI_CLASS);
+      }, {once:true});
+      script.addEventListener('error', () => {
+        clearTimeout(timer);
+        reject(new Error('Bundled Vapi SDK failed to load'));
+      }, {once:true});
+      document.head.append(script);
+    }).catch((error) => {
+      vapiSDKPromise = null;
+      console.error('[Dream Protocol Vapi] same-origin SDK load failed', error);
+      throw error;
+    });
     return vapiSDKPromise;
   }
 
