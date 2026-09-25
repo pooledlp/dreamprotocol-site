@@ -30,9 +30,11 @@ After a verified scan, the result panel loads Vapi's official HTML Script Tag SD
 
 Except for the intentionally empty website value, unavailable scanner values are sent as `Not provided on the website`. This makes absence explicit to the assistant rather than fabricating context. If analysis falls back rather than returning a verified profile, the voice SDK is not loaded and no button is initialized.
 
-The HTML voice widget owns its fixed, bottom-right button position as well as microphone permission, audio playback, and call controls. Dream Protocol waits up to five seconds to report whether the asynchronously rendered button was detected, but does not stop a valid SDK instance if the button takes longer to appear. Its pill button uses Dream Protocol's blue, lime, and red call-state colors. Provider `error` events are logged to the developer console while the visitor sees a short retry message.
+The HTML script-tag package creates the underlying Vapi instance, but Dream Protocol's visible button now starts and stops the call directly through that instance with `start(assistantId, assistantOverrides)` and `stop()`. This avoids proxy-clicking Vapi's hidden floating button, which can lose the original user gesture around Android microphone permission. The native floating button is hidden when it appears, but it is not required for the call to start.
 
-Dream Protocol does not preflight `getUserMedia`, create or unlock an `AudioContext`, observe or mirror Vapi audio elements, select output sinks, or implement browser-specific recovery. Browser media behavior is delegated to Vapi's supported widget.
+The call explicitly sets `firstMessageMode: "assistant-speaks-first"` and supplies the scanned greeting as `firstMessage`. The UI listens for call-start progress, call start/end, speech start/end, and provider errors so visitors see connection state instead of a silent spinner. A 45-second watchdog stops a stalled attempt and restores a retry state.
+
+Dream Protocol does not preflight `getUserMedia`, create or unlock an `AudioContext`, observe or mirror Vapi audio elements, or select output sinks. Microphone permission and media transport remain Vapi/browser responsibilities; only call initiation and UI state are controlled directly.
 
 ### Required Vapi restrictions
 
