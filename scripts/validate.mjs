@@ -41,5 +41,5 @@ for(const url of urls){
 assert.equal(sitemap,fs.readFileSync(path.join(root,'public/sitemap.xml'),'utf8'),'Sitemap copies disagree');
 assert(fs.readFileSync(path.join(root,'robots.txt'),'utf8').includes('https://dreamprotocol.ai/sitemap.xml'));
 const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
-for(const id of ['website-form','business-url','analysis-view','employee-view','alex-start-button','lead-form','form-status','industry-panel'])assert(index.includes(`id="${id}"`),'Missing original integration ID '+id);
+for(const id of ['website-form','business-url','analysis-view','employee-view','opportunity-list','alex-start-button','lead-form','form-status'])assert(index.includes(`id="${id}"`),'Missing homepage integration ID '+id);
 console.log(`Validated ${urls.length} pages and ${links} internal links/assets: metadata, headings, schema, fragments, and original integration hooks.`);
