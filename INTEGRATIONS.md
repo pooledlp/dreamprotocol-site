@@ -18,7 +18,7 @@ The scanner sends `{"url":"https://example.com/"}` to `https://api.dreamprotocol
 
 ## Vapi browser voice
 
-After a verified scan, the result panel loads Vapi's official HTML Script Tag SDK from jsDelivr and initializes its voice button with `window.vapiSDK.run(...)`; there is no React custom element, local Vapi SDK bundle, or custom audio/WebRTC adapter. It receives the verified scanner profile directly and does not request a voice-session backend. Before initializing the button, the browser supplies these `assistantOverrides.variableValues`:
+After a verified scan, the result panel dynamically imports the pinned official Vapi Web SDK (`@vapi-ai/web@2.7.1`) from jsDelivr's ESM endpoint and creates a Vapi instance with the browser-safe public key. Dream Protocol does not use the older HTML script-tag wrapper because that wrapper is pinned to an older Web SDK release. The current SDK receives the verified scanner profile directly and does not request a voice-session backend. Before starting the call, the browser supplies these `assistantOverrides.variableValues`:
 
 - `companyName`
 - `businessWebsite`
@@ -30,11 +30,11 @@ After a verified scan, the result panel loads Vapi's official HTML Script Tag SD
 
 Except for the intentionally empty website value, unavailable scanner values are sent as `Not provided on the website`. This makes absence explicit to the assistant rather than fabricating context. If analysis falls back rather than returning a verified profile, the voice SDK is not loaded and no button is initialized.
 
-The HTML script-tag package creates the underlying Vapi instance, but Dream Protocol's visible button now starts and stops the call directly through that instance with `start(assistantId, assistantOverrides)` and `stop()`. This avoids proxy-clicking Vapi's hidden floating button, which can lose the original user gesture around Android microphone permission. The native floating button is hidden when it appears, but it is not required for the call to start.
+Dream Protocol's visible button starts and stops the current Vapi Web SDK directly with `start(assistantId, assistantOverrides)` and `stop()`. This preserves the original Android user gesture across microphone permission instead of proxy-clicking a hidden widget button.
 
-The call explicitly sets `firstMessageMode: "assistant-speaks-first"` and supplies the scanned greeting as `firstMessage`. The UI listens for call-start progress, call start/end, speech start/end, and provider errors so visitors see connection state instead of a silent spinner. A 45-second watchdog stops a stalled attempt and restores a retry state.
+The call explicitly sets `firstMessageMode: "assistant-speaks-first"` and supplies the scanned greeting as `firstMessage`. The UI listens for call-start progress, call start/end, assistant audio attachment, speech start/end, and provider errors. On audio attachment, Dream Protocol explicitly unmutes the SDK's audio player, sets playback volume to 1.0, requests the default output sink when supported, and retries `play()` if the element is paused. If the SDK reports `audio-start-failed`, the call is stopped and the visitor gets a fresh "Try audio" gesture. A 45-second watchdog handles stalled connections.
 
-Dream Protocol does not preflight `getUserMedia`, create or unlock an `AudioContext`, observe or mirror Vapi audio elements, or select output sinks. Microphone permission and media transport remain Vapi/browser responsibilities; only call initiation and UI state are controlled directly.
+Dream Protocol does not create a second WebRTC stack or replace Vapi's media transport. Microphone capture, assistant media transport, and remote track creation remain Vapi/browser responsibilities; Dream Protocol only controls call initiation, playback readiness, volume, and UI state.
 
 ### Required Vapi restrictions
 
