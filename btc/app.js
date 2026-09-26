@@ -190,9 +190,13 @@ async function refreshScalpShadow(){
     $('scalpTarget').textContent=Number.isFinite(+s.targetExit)?Math.round(+s.targetExit*100)+'¢':'--¢';
     $('scalpEdge').textContent=Number.isFinite(+s.grossEdge)?(+s.grossEdge*100).toFixed(1)+'¢':'--¢';
     $('scalpSpread').textContent=Number.isFinite(+s.spread)?(+s.spread*100).toFixed(1)+'¢':'--¢';
-    $('scalpMessage').textContent=s.eligible
+    const learned=j.learning||{},adaptive=learned.adaptive||{};
+    const learningText=learned.completedTrades>=5
+      ? ' Learning from '+learned.completedTrades+' completed scalps; current adaptive target +'+Math.round(+(s.targetProfit||0)*100)+'¢.'
+      : ' Learning warm-up: '+(learned.completedTrades||0)+' completed scalps so far; bucket tuning starts after 5 samples.';
+    $('scalpMessage').textContent=(s.eligible
       ? (live?'LIVE maker setup eligible: ':'Shadow maker candidate: ')+(s.side==='yes'?'UP':'DOWN')+' near '+Math.round(+s.makerEntry*100)+'¢ with about '+Math.round(+s.targetProfit*100)+'¢ gross target.'
-      : (live?'Live scalper scanning. ':'Shadow scalper scanning. ')+(s.reason||'No qualifying setup right now.');
+      : (live?'Live scalper scanning. ':'Shadow scalper scanning. ')+(s.reason||'No qualifying setup right now.'))+learningText;
     $('scalpCard').className='card scalpCard '+(s.eligible?'candidate':'shadow');
   }catch(e){
     $('scalpCandidate').textContent='STATUS ERROR';
