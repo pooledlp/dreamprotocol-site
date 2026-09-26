@@ -279,6 +279,30 @@
     }
   });
 
+  // Client access preview. This page intentionally does not authenticate,
+  // submit, store, or transmit entered credentials until the real portal ships.
+  const clientLoginButton=document.querySelector('#client-login-button');
+  if(clientLoginButton){
+    const email=document.querySelector('#client-login-email');
+    const password=document.querySelector('#client-login-password');
+    const status=document.querySelector('#client-login-status');
+    const showProvisioning=()=>{
+      if(password)password.value='';
+      if(status){
+        status.classList.add('is-visible');
+        status.innerHTML='<strong>Client access is being provisioned.</strong><span>Active clients receive access directly from Dream Protocol. Email <a href="mailto:hello@dreamprotocol.ai">hello@dreamprotocol.ai</a> if you need access.</span>';
+      }
+      clientLoginButton.classList.add('is-acknowledged');
+      clientLoginButton.innerHTML='Access provisioning <span aria-hidden="true">✓</span>';
+    };
+    clientLoginButton.addEventListener('click',showProvisioning);
+    [email,password].forEach(input=>input?.addEventListener('keydown',event=>{
+      if(event.key!=='Enter')return;
+      event.preventDefault();
+      showProvisioning();
+    }));
+  }
+
   const form = document.querySelector('#lead-form');
   if (!form) return;
   const service = new URLSearchParams(location.search).get('service');
