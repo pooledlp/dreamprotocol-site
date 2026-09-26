@@ -166,9 +166,10 @@
       const stop=()=>{
         if(timer){clearInterval(timer);timer=null;}
       };
+      const autoRotate=!media('(max-width: 820px)').matches;
       const start=()=>{
         stop();
-        if(reduced||paused||scenes.length<2)return;
+        if(reduced||paused||!autoRotate||scenes.length<2)return;
         timer=setInterval(()=>activate(current+1),5200);
       };
 
