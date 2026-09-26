@@ -9,7 +9,7 @@
 <meta http-equiv="Expires" content="0">
 <meta name="robots" content="noindex,nofollow">
 <title>DreamPredict BTC 15M</title>
-<link rel="stylesheet" href="styles.css?v=20260926-5">
+<link rel="stylesheet" href="styles.css?v=20260926-6">
 </head>
 <body>
 <div class="wrap">
@@ -37,6 +37,27 @@
       <div><span>Trades / day</span><b id="botTrades">8</b></div>
     </div>
     <div id="botLock" class="botLock">LIVE MONEY LOCKED</div>
+  </div>
+
+  <div id="scalpCard" class="card scalpCard shadow">
+    <div class="row">
+      <div>
+        <div class="label">Micro scalper</div>
+        <div id="scalpMode" class="scalpMode amber">SHADOW</div>
+      </div>
+      <div class="right">
+        <div class="label">Current setup</div>
+        <div id="scalpCandidate" class="scalpCandidate amber">SCANNING</div>
+      </div>
+    </div>
+    <div id="scalpMessage" class="small scalpMessage">Watching maker-style 3–4¢ opportunities. Shadow mode cannot place scalp orders.</div>
+    <div class="scalpGrid">
+      <div><span>Maker entry</span><b id="scalpEntry">--¢</b></div>
+      <div><span>Target exit</span><b id="scalpTarget">--¢</b></div>
+      <div><span>Gross edge</span><b id="scalpEdge">--¢</b></div>
+      <div><span>Spread</span><b id="scalpSpread">--¢</b></div>
+    </div>
+    <div id="scalpLock" class="scalpLock">SHADOW ONLY · NO SCALP ORDERS</div>
   </div>
 
   <div id="simpleActionCard" class="card simpleAction wait">
@@ -193,7 +214,7 @@
   </div>
 
   <details class="card"><summary class="label">Diagnostics</summary><div id="log" class="log">Booting live engine...</div></details>
-  <div class="footer">Research / decision-support only. The engine never places trades. TAP signals require a positive modeled pricing edge, timing checks, live-data checks, and short stability confirmation. LEAN signals are directional only and are not treated as entries. Kalshi BTC contracts settle using their published rules; no model can guarantee profit.</div>
+  <div class="footer">Experimental automated trading system. The live execution bot can place real Kalshi orders under the displayed risk limits. The micro-scalper is currently shadow-only and cannot place scalp orders. No model can guarantee profit, and losses, fees, slippage, and missed fills remain possible.</div>
 </div>
 <script>
 (() => {
@@ -208,7 +229,7 @@
   window.addEventListener('unhandledrejection', e => showError('PROMISE: ' + (e.reason?.message || e.reason || 'unknown error')));
   const load = (src, done) => {
     const s = document.createElement('script');
-    s.src = src + '?v=20260926-5';
+    s.src = src + '?v=20260926-6';
     s.onload = done;
     s.onerror = () => showError('Could not load ' + src);
     document.body.appendChild(s);
