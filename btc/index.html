@@ -4,35 +4,106 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#080b10">
-<title>DreamPredict BTC</title>
+<meta name="robots" content="noindex,nofollow">
+<title>DreamPredict BTC 15M</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <div class="wrap">
-  <div class="top"><div class="brand">DreamPredict <span class="orange">BTC</span></div><div id="statusPill" class="pill"><span class="dot"></span><span id="status">Starting</span></div></div>
-  <div class="card"><div class="label">BTC / USD live reference</div><div id="price" class="price">--</div><div id="marketLine" class="small">Loading Coinbase + Kraken…</div></div>
-  <div class="card"><div class="label">Prediction horizon</div><div class="quick"><button type="button" data-h="5">5 MIN</button><button type="button" data-h="10" class="active">10 MIN</button><button type="button" data-h="15">15 MIN</button></div><button id="predict" class="primary" type="button">PREDICT NOW</button></div>
-  <div class="card"><div class="label">Current model preview</div><div id="target" class="small" style="margin-top:5px">Choose a horizon and tap Predict Now to lock a forecast.</div><div id="signal" class="hero amber">ANALYZING</div><div id="prob" class="bigprob">--%</div><div id="probText" class="small">Probability BTC finishes above the reference price at the selected target.</div><div class="meter" style="margin-top:9px"><div id="probFill"></div></div><hr><div id="explain" class="small">Building historical and live signals.</div></div>
-  <div class="grid">
-    <div class="mini"><div class="label">Reference</div><div id="locked" class="val">--</div></div><div class="mini"><div class="label">Predicted median</div><div id="median" class="val">--</div></div>
-    <div class="mini"><div class="label">Likely range</div><div id="range" class="val sm">--</div><div class="small">20–80% analog band</div></div><div class="mini"><div class="label">Walk-forward hit rate</div><div id="hit" class="val">--</div><div id="tests" class="small">--</div></div>
-    <div class="mini"><div class="label">Baseline</div><div id="base" class="val">--</div></div><div class="mini"><div class="label">Model edge</div><div id="edge" class="val">--</div></div>
+  <div class="top">
+    <div><div class="brand">DreamPredict <span class="orange">BTC 15M</span></div><div class="eyebrow">LIVE KALSHI EDGE ENGINE</div></div>
+    <div id="statusPill" class="pill"><span class="dot"></span><span id="status">CONNECTING</span></div>
   </div>
-  <div class="card"><div class="coverage"><div><div class="label">Data coverage</div><div class="small">Prediction degrades gracefully if a live feed is unavailable.</div></div><div id="coverage" class="num">0%</div></div><div class="meter" style="margin-top:10px"><div id="coverageFill"></div></div>
-    <div class="feedgrid">
-      <div class="feed"><div><div class="feedname">Coinbase 5m history + volume</div><div class="feedsub">10 days of OHLCV for historical analogs/backtesting</div></div><div id="fHist" class="vote neutral">WAIT</div></div>
-      <div class="feed"><div><div class="feedname">Coinbase order book</div><div class="feedsub">Near-market bid/ask depth imbalance</div></div><div id="fCBBook" class="vote neutral">WAIT</div></div>
-      <div class="feed"><div><div class="feedname">Coinbase aggressive flow</div><div class="feedsub">Recent maker-side trades converted to taker direction</div></div><div id="fCBTrades" class="vote neutral">WAIT</div></div>
-      <div class="feed"><div><div class="feedname">Kraken order book</div><div class="feedsub">Independent BTC/USD depth pressure</div></div><div id="fKBook" class="vote neutral">WAIT</div></div>
-      <div class="feed"><div><div class="feedname">Kraken trade flow</div><div class="feedsub">Independent recent buy/sell flow</div></div><div id="fKTrades" class="vote neutral">WAIT</div></div>
-      <div class="feed"><div><div class="feedname">Cross-exchange agreement</div><div class="feedsub">Coinbase vs Kraken spot reference</div></div><div id="fCross" class="vote neutral">WAIT</div></div>
+
+  <div class="card contract">
+    <div>
+      <div class="label">Active Kalshi contract</div>
+      <div id="window" class="val">Finding current market...</div>
+      <div id="ticker" class="ticker">KXBTC15M</div>
+    </div>
+    <div class="right">
+      <div class="label">Time left</div>
+      <div id="countdown" class="count">--:--</div>
+      <a id="kalshiLink" class="link" target="_blank" rel="noopener" href="https://kalshi.com/markets/kx">OPEN KALSHI</a>
     </div>
   </div>
-  <div class="card"><div class="label">Live signal details</div><div class="grid" style="margin-top:10px"><div class="mini"><div class="label">CB book</div><div id="cbBook" class="val">--</div></div><div class="mini"><div class="label">CB taker flow</div><div id="cbTrades" class="val">--</div></div><div class="mini"><div class="label">Kraken book</div><div id="kBook" class="val">--</div></div><div class="mini"><div class="label">Kraken flow</div><div id="kTrades" class="val">--</div></div></div></div>
-  <div class="card"><div class="label">Recent 5-minute BTC closes</div><canvas id="chart" width="600" height="165"></canvas></div>
-  <div class="card"><div class="label">Your completed prediction scorecard</div><div id="score" class="small" style="margin-top:7px">No completed locked predictions yet.</div><div id="history"></div></div>
-  <div class="card"><div class="label">Diagnostics</div><div id="log" class="log">Booting…</div></div>
-  <div class="footer">Experimental research / paper-trading predictor. Historical validation and live signal fusion can improve decision quality but cannot guarantee future market direction. No trades are placed.</div>
+
+  <div class="headline">
+    <div class="card">
+      <div class="label">BTC live reference</div>
+      <div id="spot" class="price">--</div>
+      <div class="row small"><span>Price to beat <b id="strike">--</b></span><b id="distance" class="amber">--</b></div>
+      <div id="source" class="small source">Loading live feeds...</div>
+    </div>
+
+    <div id="signalCard" class="card signalCard wait">
+      <div class="label">Current call</div>
+      <div id="signal" class="hero amber">WAIT</div>
+      <div id="signalText" class="small">Waiting for a real pricing edge.</div>
+      <div class="actionLine"><span id="sideProb">Model --</span><b id="edgeText">Edge --</b></div>
+      <div id="maxPrice" class="maxPrice">MAX ENTRY --</div>
+    </div>
+  </div>
+
+  <div class="quotes">
+    <div class="quote up">
+      <div class="label">UP / YES</div>
+      <div class="q" id="yesAsk">--¢</div>
+      <div class="small">Ask <span id="yesBid">--¢ bid</span></div>
+      <div class="meter slim"><div id="yesModelFill"></div></div>
+      <div class="small">Model fair <b id="yesFair">--%</b></div>
+    </div>
+    <div class="quote down">
+      <div class="label">DOWN / NO</div>
+      <div class="q" id="noAsk">--¢</div>
+      <div class="small">Ask <span id="noBid">--¢ bid</span></div>
+      <div class="meter slim"><div id="noModelFill"></div></div>
+      <div class="small">Model fair <b id="noFair">--%</b></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="row"><div><div class="label">Why the model is leaning</div><div class="small">Recalculates automatically. No page refresh required.</div></div><div id="freshness" class="liveTag">--</div></div>
+    <div class="reasons">
+      <div class="reason"><span>Distance</span><b id="rDistance">--</b><small>BTC vs target</small></div>
+      <div class="reason"><span>Momentum</span><b id="rMomentum">--</b><small>1m / 5m / 15m</small></div>
+      <div class="reason"><span>Order flow</span><b id="rFlow">--</b><small>Coinbase + Kraken trades</small></div>
+      <div class="reason"><span>Order book</span><b id="rBook">--</b><small>Near-market depth pressure</small></div>
+      <div class="reason"><span>Volatility</span><b id="rVol">--</b><small>Remaining-time uncertainty</small></div>
+      <div class="reason"><span>Kalshi spread</span><b id="rSpread">--</b><small>Execution friction</small></div>
+    </div>
+  </div>
+
+  <div class="grid metrics">
+    <div class="mini"><div class="label">Model UP</div><div id="modelUp" class="val">--%</div></div>
+    <div class="mini"><div class="label">Kalshi UP mid</div><div id="marketUp" class="val">--%</div></div>
+    <div class="mini"><div class="label">UP edge vs ask</div><div id="upEdge" class="val">--</div></div>
+    <div class="mini"><div class="label">DOWN edge vs ask</div><div id="downEdge" class="val">--</div></div>
+  </div>
+
+  <div class="card">
+    <div class="coverage"><div><div class="label">Live data health</div><div class="small">Action calls are suppressed when feeds are stale or incomplete.</div></div><div id="coverage" class="num">0%</div></div>
+    <div class="meter"><div id="coverageFill"></div></div>
+    <div class="health">
+      <div>Kalshi<b id="hKalshi">WAIT</b></div>
+      <div>Coinbase<b id="hCB">WAIT</b></div>
+      <div>Kraken<b id="hK">WAIT</b></div>
+      <div>Microstructure<b id="hMicro">WAIT</b></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="row"><div><div class="label">Live BTC tape</div><div class="small">Recent 1-minute Coinbase closes plus current reference.</div></div><div id="tapeMove" class="val sm">--</div></div>
+    <canvas id="chart" width="760" height="190"></canvas>
+  </div>
+
+  <div class="card">
+    <div class="row"><div><div class="label">Automatically graded calls</div><div id="score" class="small">No settled actionable calls on this browser yet.</div></div><div id="paperPnl" class="val">$0.00</div></div>
+    <div id="history"></div>
+  </div>
+
+  <details class="card"><summary class="label">Diagnostics</summary><div id="log" class="log">Booting live engine...</div></details>
+  <div class="footer">Research / decision-support only. The engine never places trades. BUY signals require the model probability to exceed the current executable Kalshi ask by at least 8 percentage points and pass data-quality checks. Kalshi BTC contracts settle using their published rules; no model can guarantee profit.</div>
 </div>
 <script src="data.js"></script>
 <script src="app.js"></script>
