@@ -2,22 +2,52 @@ function formatWindow(m){if(!m)return'No active market';const o=new Date(m.open_
 function marketLink(m){return m&&m.event_ticker?'https://kalshi.com/markets/kx/'+m.event_ticker.toLowerCase():'https://kalshi.com/markets/kx'}
 function dirLabel(x){return !Number.isFinite(x)?'--':x>.08?'BULL':x<-.08?'BEAR':'NEUTRAL'}
 function colorize(el,v){el.classList.remove('green','red','amber');el.classList.add(v>0?'green':v<0?'red':'amber')}
-function decide(){const model=modelForMarket(),m=state.market;if(!model||!m)return null;const q=marketQuote(m),marketUp=Number.isFinite(q.yesAsk)&&Number.isFinite(q.yesBid)?(q.yesAsk+q.yesBid)/2:Number.isFinite(q.yesAsk)?q.yesAsk:NaN,spread=Number.isFinite(q.yesAsk)&&Number.isFinite(q.yesBid)?q.yesAsk-q.yesBid:NaN,upEdge=Number.isFinite(q.yesAsk)?model.pUp-q.yesAsk:-9,downP=1-model.pUp,downEdge=Number.isFinite(q.noAsk)?downP-q.noAsk:-9;
-  const stale=Date.now()-state.kalshiAt>12000||Date.now()-state.priceAt>12000,final=model.remaining*60<FINAL_GUARD_SECONDS,badSpread=Number.isFinite(spread)&&spread>.10;let side=null,edge=Math.max(upEdge,downEdge),reason='No executable edge above the threshold.';
+function timingPolicy(m,model){
+  const open=Date.parse(m.open_time||0),close=model.close,total=Number.isFinite(open)&&open<close?(close-open)/60000:15;
+  const elapsed=clamp(total-model.remaining,0,total);
+  let phase='OBSERVE',cls='amber',threshold=.12,minProb=.64,noEntry=false,guidance='Opening noise is still being priced. Wait unless the mispricing is unusually large.';
+  if(elapsed>=2&&elapsed<10.5){phase='PRIMARY ENTRY';cls='green';threshold=.08;minProb=.60;guidance='Best balance of information and remaining time. Normal edge threshold applies.'}
+  else if(elapsed>=10.5&&elapsed<13.5){phase='LATE CONFIRMATION';cls='amber';threshold=.10;minProb=.67;guidance='Direction has more evidence, but there is less recovery time. Require a stronger edge.'}
+  else if(elapsed>=13.5||model.remaining<=1.5){phase='NO NEW ENTRY';cls='red';threshold=.99;minProb=.99;noEntry=true;guidance='Too close to the final settlement window. Manage an existing position instead of opening a new one.'}
+  return{open,close,total,elapsed,phase,cls,threshold,minProb,noEntry,guidance}
+}
+function currentSignalPosition(){
+  if(!state.market)return null;
+  return calls().find(x=>x.ticker===state.market.ticker&&!x.result)||null
+}
+function exitPlan(d){
+  const pos=currentSignalPosition();
+  if(!pos)return{action:'NO POSITION',cls:'wait',guidance:'When a BUY signal locks, this panel will continuously decide whether the paper position should hold, take profit, or exit.',bid:NaN,entry:NaN,mark:NaN,p:NaN,choice:'WAIT'};
+  const heldYes=pos.side==='yes',p=heldYes?d.model.pUp:1-d.model.pUp,bid=heldYes?d.q.yesBid:d.q.noBid,entry=+pos.ask,mark=Number.isFinite(bid)?bid-entry:NaN,oppositeEdge=heldYes?d.downEdge:d.upEdge,remaining=d.model.remaining;
+  let action='HOLD / REASSESS',cls='wait',guidance='The live bid is still below the model value. Keep watching for a reversal or a richer exit.';
+  if(p<.48||oppositeEdge>=.08){action='EXIT NOW';cls='down';guidance='The original direction has materially weakened or the opposite side now has an edge.'}
+  else if(Number.isFinite(bid)&&bid>=p+.02){action='TAKE PROFIT';cls='up';guidance='Kalshi is currently offering more on the exit bid than the model thinks the contract is worth.'}
+  else if(Number.isFinite(mark)&&mark>=.15&&p<.80&&remaining>1.25){action='TAKE PROFIT';cls='up';guidance='A large mark-to-market gain is available while the remaining win probability is not dominant.'}
+  else if(remaining<=1.25){
+    if(p>=.90){action='HOLD TO SETTLEMENT';cls='up';guidance='Model probability is very high in the settlement window. Holding avoids paying another trading fee to exit.'}
+    else if(Number.isFinite(bid)&&bid>=p-.02){action='SELL / REDUCE';cls='down';guidance='The live bid is close to model fair value, so locking the result can be preferable to final-minute variance.'}
+    else{action='HOLD / TIGHT WATCH';cls='wait';guidance='The exit bid is discounted versus model value, but final-minute variance is still meaningful.'}
+  }else if(remaining<=3&&p>=.82){action='HOLD TO END';cls='up';guidance='The held side remains strongly favored and the exit bid is not rich enough to justify giving up settlement value.'}
+  return{action,cls,guidance,bid,entry,mark,p,choice:action.includes('SETTLEMENT')||action.includes('TO END')?'HOLD':action.includes('EXIT')||action.includes('SELL')||action.includes('PROFIT')?'SELL':'WATCH'}
+}
+function decide(){const model=modelForMarket(),m=state.market;if(!model||!m)return null;const q=marketQuote(m),marketUp=Number.isFinite(q.yesAsk)&&Number.isFinite(q.yesBid)?(q.yesAsk+q.yesBid)/2:Number.isFinite(q.yesAsk)?q.yesAsk:NaN,spread=Number.isFinite(q.yesAsk)&&Number.isFinite(q.yesBid)?q.yesAsk-q.yesBid:NaN,upEdge=Number.isFinite(q.yesAsk)?model.pUp-q.yesAsk:-9,downP=1-model.pUp,downEdge=Number.isFinite(q.noAsk)?downP-q.noAsk:-9,timing=timingPolicy(m,model);
+  const stale=Date.now()-state.kalshiAt>12000||Date.now()-state.priceAt>12000,final=model.remaining*60<FINAL_GUARD_SECONDS,badSpread=Number.isFinite(spread)&&spread>.10;let side=null,edge=Math.max(upEdge,downEdge),reason='No executable edge above the current timing threshold.';
   if(stale)reason='Live data is stale, so the model is suppressing the trade.';
-  else if(final)reason='Final-minute guard is active near the settlement window.';
+  else if(final||timing.noEntry)reason='No new entry this close to the settlement window.';
   else if(model.coverage<70)reason='Not enough independent live feeds are healthy.';
   else if(badSpread)reason='Kalshi spread is too wide for a clean entry.';
-  else if(upEdge>=EDGE_THRESHOLD&&model.pUp>=.58){side='yes';edge=upEdge;reason='Model UP probability is '+pct(model.pUp)+' versus a live '+cents(q.yesAsk)+' ask.'}
-  else if(downEdge>=EDGE_THRESHOLD&&downP>=.58){side='no';edge=downEdge;reason='Model DOWN probability is '+pct(downP)+' versus a live '+cents(q.noAsk)+' ask.'}
-  return{model,q,marketUp,spread,upEdge,downEdge,side,edge,actionable:!!side,reason,stale,final,badSpread}
+  else if(upEdge>=timing.threshold&&model.pUp>=timing.minProb){side='yes';edge=upEdge;reason='Model UP probability is '+pct(model.pUp)+' versus a live '+cents(q.yesAsk)+' ask during the '+timing.phase.toLowerCase()+' phase.'}
+  else if(downEdge>=timing.threshold&&downP>=timing.minProb){side='no';edge=downEdge;reason='Model DOWN probability is '+pct(downP)+' versus a live '+cents(q.noAsk)+' ask during the '+timing.phase.toLowerCase()+' phase.'}
+  return{model,q,marketUp,spread,upEdge,downEdge,side,edge,actionable:!!side,reason,stale,final,badSpread,timing}
 }
 
 function render(){const m=state.market,d=decide();if(m){$('window').textContent=formatWindow(m);$('ticker').textContent=m.ticker||SERIES;$('kalshiLink').href=marketLink(m)}if(!d)return;const model=d.model,q=d.q,delta=model.spot-model.strike,deltaPct=delta/model.strike;
+  const timing=d.timing,mins=Math.floor(timing.elapsed),secs=Math.floor((timing.elapsed-mins)*60);$('elapsed').textContent=String(mins).padStart(2,'0')+':'+String(secs).padStart(2,'0');$('entryPhase').textContent=timing.phase;$('entryPhase').className='timingHero '+timing.cls;$('entryGuidance').textContent=timing.guidance;$('requiredEdge').textContent=timing.noEntry?'BLOCKED':Math.round(timing.threshold*100)+'¢';$('requiredProb').textContent=timing.noEntry?'BLOCKED':Math.round(timing.minProb*100)+'%';
+  const ep=exitPlan(d);$('exitAction').textContent=ep.action;$('exitAction').className='timingHero '+(ep.cls==='up'?'green':ep.cls==='down'?'red':'amber');$('exitCard').className='card exitCard '+ep.cls;$('exitGuidance').textContent=ep.guidance;$('exitBid').textContent=cents(ep.bid);$('entryPrice').textContent=cents(ep.entry);$('markPnl').textContent=Number.isFinite(ep.mark)?(ep.mark>=0?'+':'')+(ep.mark*100).toFixed(1)+'¢':'--';colorize($('markPnl'),ep.mark);$('heldProb').textContent=pct(ep.p);$('settleChoice').textContent=ep.choice;
   $('spot').textContent=money(model.spot);$('strike').textContent=money(model.strike);$('distance').textContent=(delta>=0?'+':'')+money(delta)+' ('+(deltaPct>=0?'+':'')+(deltaPct*100).toFixed(3)+'%)';colorize($('distance'),delta);
   $('yesAsk').textContent=cents(q.yesAsk);$('yesBid').textContent=cents(q.yesBid)+' bid';$('noAsk').textContent=cents(q.noAsk);$('noBid').textContent=cents(q.noBid)+' bid';$('yesFair').textContent=pct(model.pUp);$('noFair').textContent=pct(1-model.pUp);$('yesModelFill').style.width=(model.pUp*100)+'%';$('noModelFill').style.width=((1-model.pUp)*100)+'%';
   $('modelUp').textContent=pct(model.pUp);$('marketUp').textContent=pct(d.marketUp);$('upEdge').textContent=Number.isFinite(d.upEdge)?(d.upEdge>=0?'+':'')+(d.upEdge*100).toFixed(1)+'¢':'--';$('downEdge').textContent=Number.isFinite(d.downEdge)?(d.downEdge>=0?'+':'')+(d.downEdge*100).toFixed(1)+'¢':'--';colorize($('upEdge'),d.upEdge);colorize($('downEdge'),d.downEdge);
-  let sig='WAIT',cls='wait',prob=model.pUp,max='MAX ENTRY --';if(d.side==='yes'){sig='BUY UP NOW';cls='up';prob=model.pUp;max='DO NOT PAY ABOVE '+Math.floor((model.pUp-EDGE_THRESHOLD)*100)+'¢'}else if(d.side==='no'){sig='BUY DOWN NOW';cls='down';prob=1-model.pUp;max='DO NOT PAY ABOVE '+Math.floor(((1-model.pUp)-EDGE_THRESHOLD)*100)+'¢'}
+  let sig='WAIT',cls='wait',prob=model.pUp,max='MAX ENTRY --';if(d.side==='yes'){sig='BUY UP NOW';cls='up';prob=model.pUp;max='DO NOT PAY ABOVE '+Math.floor((model.pUp-d.timing.threshold)*100)+'¢'}else if(d.side==='no'){sig='BUY DOWN NOW';cls='down';prob=1-model.pUp;max='DO NOT PAY ABOVE '+Math.floor(((1-model.pUp)-d.timing.threshold)*100)+'¢'}
   $('signal').textContent=sig;$('signal').className='hero '+(cls==='up'?'green':cls==='down'?'red':'amber');$('signalCard').className='card signalCard '+cls;$('signalText').textContent=d.reason;$('sideProb').textContent='Model '+(d.side==='no'?'DOWN':'UP')+' '+pct(prob);$('edgeText').textContent='Edge '+(d.edge>-8?(d.edge*100).toFixed(1)+'¢':'--');$('maxPrice').textContent=max;
   $('rDistance').textContent=(delta>=0?'ABOVE ':'BELOW ')+money(Math.abs(delta));colorize($('rDistance'),delta);$('rMomentum').textContent='1m '+(model.mom1*100).toFixed(2)+'% | 5m '+(model.mom5*100).toFixed(2)+'%';colorize($('rMomentum'),model.mom1*.5+model.mom5*.5);$('rFlow').textContent=dirLabel(model.flow);colorize($('rFlow'),model.flow);$('rBook').textContent=dirLabel(model.book);colorize($('rBook'),model.book);$('rVol').textContent=(model.sigma*Math.sqrt(model.remaining)*100).toFixed(2)+'% sigma';$('rSpread').textContent=Number.isFinite(d.spread)?(d.spread*100).toFixed(1)+'¢':'--';colorize($('rSpread'),Number.isFinite(d.spread)&&d.spread>.08?-1:0);
   $('coverage').textContent=model.coverage+'%';$('coverageFill').style.width=model.coverage+'%';$('hKalshi').textContent=Date.now()-state.kalshiAt<12000?'LIVE':'STALE';$('hCB').textContent=state.cbTicker?'LIVE':'OFFLINE';$('hK').textContent=state.kTicker?'LIVE':'OFFLINE';$('hMicro').textContent=(state.cbBook||state.kBook)&&(state.cbTrades||state.kTrades)?'LIVE':'PARTIAL';
