@@ -11,7 +11,7 @@ function stabilizeEntry(rawSide){
   if(!rawSide){s.side=null;s.since=0;s.count=0;return null}
   if(s.side!==rawSide){s.side=rawSide;s.since=now;s.count=1;return null}
   s.count++;
-  return (now-s.since>=8000&&s.count>=3)?rawSide:null
+  return (now-s.since>=6000&&s.count>=3)?rawSide:null
 }
 function stabilizeExit(rawAction,pos){
   const now=Date.now(),s=decisionStability.exit;
@@ -33,10 +33,10 @@ function stabilizeExit(rawAction,pos){
 function timingPolicy(m,model){
   const open=Date.parse(m.open_time||0),close=model.close,total=Number.isFinite(open)&&open<close?(close-open)/60000:15;
   const elapsed=clamp(total-model.remaining,0,total);
-  let phase='OBSERVE',cls='amber',threshold=.10,minProb=.65,noEntry=false,guidance='Opening noise is still being priced. Wait unless the mispricing is unusually large.';
-  if(elapsed>=2&&elapsed<10.5){phase='PRIMARY ENTRY';cls='green';threshold=.07;minProb=.60;guidance='Best balance of information and remaining time. Normal edge threshold applies.'}
-  else if(elapsed>=10.5&&elapsed<14){phase='LATE CONFIRMATION';cls='amber';threshold=.09;minProb=.65;guidance='Direction has more evidence, but there is less recovery time. Require a stronger edge.'}
-  else if(elapsed>=14||model.remaining<=1){phase='NO NEW ENTRY';cls='red';threshold=.99;minProb=.99;noEntry=true;guidance='Too close to the final settlement window. Manage an existing position instead of opening a new one.'}
+  let phase='EARLY ENTRY',cls='amber',threshold=.07,minProb=.60,noEntry=false,guidance='Early window: directional setups can qualify, but they still need a clear pricing edge.';
+  if(elapsed>=1&&elapsed<11.5){phase='ACTIVE ENTRY';cls='green';threshold=.05;minProb=.57;guidance='Main trading window: smaller persistent mispricings can qualify after confirmation.'}
+  else if(elapsed>=11.5&&elapsed<14){phase='LATE ENTRY';cls='amber';threshold=.06;minProb=.60;guidance='Late window: still tradable, but require a little more confidence as settlement approaches.'}
+  else if(elapsed>=14||model.remaining<=1){phase='NO NEW ENTRY';cls='red';threshold=.99;minProb=.99;noEntry=true;guidance='Final minute: no new trade. Manage an existing position or wait for the next contract.'}
   return{open,close,total,elapsed,phase,cls,threshold,minProb,noEntry,guidance}
 }
 function manualPositionKey(){return 'dp_manual_position_v1'}
@@ -75,7 +75,7 @@ function exitPlan(d){
   return{action,cls,guidance,bid,entry,mark,p,choice:action.includes('SETTLEMENT')||action.includes('TO END')?'HOLD':action.includes('EXIT')||action.includes('SELL')||action.includes('PROFIT')?'SELL':'WATCH',side:pos.side}
 }
 function decide(){const model=modelForMarket(),m=state.market;if(!model||!m)return null;const q=marketQuote(m),marketUp=Number.isFinite(q.yesAsk)&&Number.isFinite(q.yesBid)?(q.yesAsk+q.yesBid)/2:Number.isFinite(q.yesAsk)?q.yesAsk:NaN,spread=Number.isFinite(q.yesAsk)&&Number.isFinite(q.yesBid)?q.yesAsk-q.yesBid:NaN,upEdge=Number.isFinite(q.yesAsk)?model.pUp-q.yesAsk:-9,downP=1-model.pUp,downEdge=Number.isFinite(q.noAsk)?downP-q.noAsk:-9,timing=timingPolicy(m,model);
-  const stale=Date.now()-state.kalshiAt>12000||Date.now()-state.priceAt>12000,final=model.remaining*60<FINAL_GUARD_SECONDS,badSpread=Number.isFinite(spread)&&spread>.09;let rawSide=null,leanSide=null,side=null,edge=Math.max(upEdge,downEdge),reason='No executable edge above the current timing threshold.';
+  const stale=Date.now()-state.kalshiAt>12000||Date.now()-state.priceAt>12000,final=model.remaining*60<FINAL_GUARD_SECONDS,badSpread=Number.isFinite(spread)&&spread>.10;let rawSide=null,leanSide=null,side=null,edge=Math.max(upEdge,downEdge),reason='No executable edge above the current timing threshold.';
   if(stale)reason='Live data is stale, so the model is suppressing the trade.';
   else if(final||timing.noEntry)reason='No new entry this close to the settlement window.';
   else if(model.coverage<60)reason='Not enough independent live feeds are healthy.';
@@ -84,15 +84,15 @@ function decide(){const model=modelForMarket(),m=state.market;if(!model||!m)retu
     if(upEdge>=timing.threshold&&model.pUp>=timing.minProb){rawSide='yes';edge=upEdge;reason='UP meets the entry threshold; confirming stability before telling you to tap.'}
     else if(downEdge>=timing.threshold&&downP>=timing.minProb){rawSide='no';edge=downEdge;reason='DOWN meets the entry threshold; confirming stability before telling you to tap.'}
     if(!rawSide){
-      if(upEdge>=.03&&model.pUp>=.55){leanSide='yes';edge=upEdge;reason='UP has a smaller positive edge, but not enough yet for a confirmed entry.'}
-      else if(downEdge>=.03&&downP>=.55){leanSide='no';edge=downEdge;reason='DOWN has a smaller positive edge, but not enough yet for a confirmed entry.'}
-      else if(model.pUp>=.62){leanSide='yes';edge=upEdge;reason='Model direction leans UP, but Kalshi pricing does not yet offer enough value for a TAP signal.'}
-      else if(downP>=.62){leanSide='no';edge=downEdge;reason='Model direction leans DOWN, but Kalshi pricing does not yet offer enough value for a TAP signal.'}
+      if(upEdge>=.02&&model.pUp>=.53){leanSide='yes';edge=upEdge;reason='UP is currently the better value side, but it has not reached the TAP threshold yet.'}
+      else if(downEdge>=.02&&downP>=.53){leanSide='no';edge=downEdge;reason='DOWN is currently the better value side, but it has not reached the TAP threshold yet.'}
+      else if(model.pUp>=.55){leanSide='yes';edge=upEdge;reason='Model direction leans UP. Watch the price for a better entry.'}
+      else if(downP>=.55){leanSide='no';edge=downEdge;reason='Model direction leans DOWN. Watch the price for a better entry.'}
     }
   }
   side=stabilizeEntry(rawSide);
-  if(side==='yes')reason='Confirmed UP setup: '+pct(model.pUp)+' model probability versus '+cents(q.yesAsk)+' ask after an 8-second stability check.';
-  else if(side==='no')reason='Confirmed DOWN setup: '+pct(downP)+' model probability versus '+cents(q.noAsk)+' ask after an 8-second stability check.';
+  if(side==='yes')reason='Confirmed UP setup: '+pct(model.pUp)+' model probability versus '+cents(q.yesAsk)+' ask after a 6-second stability check.';
+  else if(side==='no')reason='Confirmed DOWN setup: '+pct(downP)+' model probability versus '+cents(q.noAsk)+' ask after a 6-second stability check.';
   return{model,q,marketUp,spread,upEdge,downEdge,side,rawSide,leanSide,edge,actionable:!!side,reason,stale,final,badSpread,timing}
 }
 
@@ -128,7 +128,7 @@ function render(){const m=state.market,d=decide();if(m){$('window').textContent=
   }else if(d.rawSide){
     simpleAction='CONFIRMING '+(d.rawSide==='yes'?'UP':'DOWN');
     simpleCls=d.rawSide==='yes'?'up':'down';
-    simpleText='Entry threshold is met. Hold for the 8-second stability confirmation before tapping Kalshi.';
+    simpleText='Entry threshold is met. Hold for the 6-second stability confirmation before tapping Kalshi.';
     simpleSide=d.rawSide==='yes'?'UP':'DOWN';
     simpleProb=pct(d.rawSide==='yes'?model.pUp:1-model.pUp);
     simpleEdge=((d.rawSide==='yes'?d.upEdge:d.downEdge)*100).toFixed(1)+'¢';
@@ -141,7 +141,7 @@ function render(){const m=state.market,d=decide();if(m){$('window').textContent=
     simpleEdge=((d.leanSide==='yes'?d.upEdge:d.downEdge)*100).toFixed(1)+'¢';
     simpleMax='WAIT FOR TAP';
   }else{
-    simpleText='No directional value yet. '+d.timing.guidance;
+    simpleAction=d.timing.noEntry?'NEXT ROUND':'WATCH';simpleText='No confirmed entry right now. '+d.timing.guidance;
   }
   $('simpleAction').textContent=simpleAction;
   $('simpleAction').className='simpleHero '+(simpleCls==='up'?'green':simpleCls==='down'?'red':'amber');
