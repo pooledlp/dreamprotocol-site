@@ -169,7 +169,7 @@
   </div>
 
   <details class="card"><summary class="label">Diagnostics</summary><div id="log" class="log">Booting live engine...</div></details>
-  <div class="footer">Research / decision-support only. The engine never places trades. BUY signals require the model probability to exceed the current executable Kalshi ask by at least 8 percentage points and pass data-quality checks. Kalshi BTC contracts settle using their published rules; no model can guarantee profit.</div>
+  <div class="footer">Research / decision-support only. The engine never places trades. TAP signals require a positive modeled pricing edge, timing checks, live-data checks, and short stability confirmation. LEAN signals are directional only and are not treated as entries. Kalshi BTC contracts settle using their published rules; no model can guarantee profit.</div>
 </div>
 <script>
 (() => {
@@ -184,7 +184,7 @@
   window.addEventListener('unhandledrejection', e => showError('PROMISE: ' + (e.reason?.message || e.reason || 'unknown error')));
   const load = (src, done) => {
     const s = document.createElement('script');
-    s.src = src + '?v=20260926-1';
+    s.src = src + '?v=20260926-2';
     s.onload = done;
     s.onerror = () => showError('Could not load ' + src);
     document.body.appendChild(s);
