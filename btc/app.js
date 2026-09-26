@@ -11,14 +11,28 @@ function timingPolicy(m,model){
   else if(elapsed>=13.5||model.remaining<=1.5){phase='NO NEW ENTRY';cls='red';threshold=.99;minProb=.99;noEntry=true;guidance='Too close to the final settlement window. Manage an existing position instead of opening a new one.'}
   return{open,close,total,elapsed,phase,cls,threshold,minProb,noEntry,guidance}
 }
+function manualPositionKey(){return 'dp_manual_position_v1'}
+function getManualPosition(){try{const p=JSON.parse(localStorage.getItem(manualPositionKey())||'null');return p&&state.market&&p.ticker===state.market.ticker?p:null}catch{return null}}
+function setManualPosition(side){
+  const d=decide(); if(!d||!state.market)return;
+  const ask=side==='yes'?d.q.yesAsk:d.q.noAsk;
+  const p={ticker:state.market.ticker,side,entry:Number.isFinite(ask)?ask:null,created:Date.now()};
+  localStorage.setItem(manualPositionKey(),JSON.stringify(p)); render();
+}
+function clearManualPosition(){localStorage.removeItem(manualPositionKey());render()}
+function activeTrackedPosition(){
+  const manual=getManualPosition();
+  if(manual)return manual;
+  return currentSignalPosition();
+}
 function currentSignalPosition(){
   if(!state.market)return null;
   return calls().find(x=>x.ticker===state.market.ticker&&!x.result)||null
 }
 function exitPlan(d){
-  const pos=currentSignalPosition();
-  if(!pos)return{action:'NO POSITION',cls:'wait',guidance:'When a BUY signal locks, this panel will continuously decide whether the paper position should hold, take profit, or exit.',bid:NaN,entry:NaN,mark:NaN,p:NaN,choice:'WAIT'};
-  const heldYes=pos.side==='yes',p=heldYes?d.model.pUp:1-d.model.pUp,bid=heldYes?d.q.yesBid:d.q.noBid,entry=+pos.ask,mark=Number.isFinite(bid)?bid-entry:NaN,oppositeEdge=heldYes?d.downEdge:d.upEdge,remaining=d.model.remaining;
+  const pos=activeTrackedPosition();
+  if(!pos)return{action:'NO POSITION',cls:'wait',guidance:'When you place a Kalshi bet, tap I BOUGHT UP or I BOUGHT DOWN above. DreamPredict will then manage the exit.',bid:NaN,entry:NaN,mark:NaN,p:NaN,choice:'WAIT',side:null};
+  const heldYes=pos.side==='yes',p=heldYes?d.model.pUp:1-d.model.pUp,bid=heldYes?d.q.yesBid:d.q.noBid,entry=Number.isFinite(+pos.ask)?+pos.ask:+pos.entry,mark=Number.isFinite(bid)&&Number.isFinite(entry)?bid-entry:NaN,oppositeEdge=heldYes?d.downEdge:d.upEdge,remaining=d.model.remaining;
   let action='HOLD / REASSESS',cls='wait',guidance='The live bid is still below the model value. Keep watching for a reversal or a richer exit.';
   if(p<.48||oppositeEdge>=.08){action='EXIT NOW';cls='down';guidance='The original direction has materially weakened or the opposite side now has an edge.'}
   else if(Number.isFinite(bid)&&bid>=p+.02){action='TAKE PROFIT';cls='up';guidance='Kalshi is currently offering more on the exit bid than the model thinks the contract is worth.'}
@@ -28,7 +42,7 @@ function exitPlan(d){
     else if(Number.isFinite(bid)&&bid>=p-.02){action='SELL / REDUCE';cls='down';guidance='The live bid is close to model fair value, so locking the result can be preferable to final-minute variance.'}
     else{action='HOLD / TIGHT WATCH';cls='wait';guidance='The exit bid is discounted versus model value, but final-minute variance is still meaningful.'}
   }else if(remaining<=3&&p>=.82){action='HOLD TO END';cls='up';guidance='The held side remains strongly favored and the exit bid is not rich enough to justify giving up settlement value.'}
-  return{action,cls,guidance,bid,entry,mark,p,choice:action.includes('SETTLEMENT')||action.includes('TO END')?'HOLD':action.includes('EXIT')||action.includes('SELL')||action.includes('PROFIT')?'SELL':'WATCH'}
+  return{action,cls,guidance,bid,entry,mark,p,choice:action.includes('SETTLEMENT')||action.includes('TO END')?'HOLD':action.includes('EXIT')||action.includes('SELL')||action.includes('PROFIT')?'SELL':'WATCH',side:pos.side}
 }
 function decide(){const model=modelForMarket(),m=state.market;if(!model||!m)return null;const q=marketQuote(m),marketUp=Number.isFinite(q.yesAsk)&&Number.isFinite(q.yesBid)?(q.yesAsk+q.yesBid)/2:Number.isFinite(q.yesAsk)?q.yesAsk:NaN,spread=Number.isFinite(q.yesAsk)&&Number.isFinite(q.yesBid)?q.yesAsk-q.yesBid:NaN,upEdge=Number.isFinite(q.yesAsk)?model.pUp-q.yesAsk:-9,downP=1-model.pUp,downEdge=Number.isFinite(q.noAsk)?downP-q.noAsk:-9,timing=timingPolicy(m,model);
   const stale=Date.now()-state.kalshiAt>12000||Date.now()-state.priceAt>12000,final=model.remaining*60<FINAL_GUARD_SECONDS,badSpread=Number.isFinite(spread)&&spread>.10;let side=null,edge=Math.max(upEdge,downEdge),reason='No executable edge above the current timing threshold.';
@@ -44,6 +58,49 @@ function decide(){const model=modelForMarket(),m=state.market;if(!model||!m)retu
 function render(){const m=state.market,d=decide();if(m){$('window').textContent=formatWindow(m);$('ticker').textContent=m.ticker||SERIES;$('kalshiLink').href=marketLink(m)}if(!d)return;const model=d.model,q=d.q,delta=model.spot-model.strike,deltaPct=delta/model.strike;
   const timing=d.timing,mins=Math.floor(timing.elapsed),secs=Math.floor((timing.elapsed-mins)*60);$('elapsed').textContent=String(mins).padStart(2,'0')+':'+String(secs).padStart(2,'0');$('entryPhase').textContent=timing.phase;$('entryPhase').className='timingHero '+timing.cls;$('entryGuidance').textContent=timing.guidance;$('requiredEdge').textContent=timing.noEntry?'BLOCKED':Math.round(timing.threshold*100)+'¢';$('requiredProb').textContent=timing.noEntry?'BLOCKED':Math.round(timing.minProb*100)+'%';
   const ep=exitPlan(d);$('exitAction').textContent=ep.action;$('exitAction').className='timingHero '+(ep.cls==='up'?'green':ep.cls==='down'?'red':'amber');$('exitCard').className='card exitCard '+ep.cls;$('exitGuidance').textContent=ep.guidance;$('exitBid').textContent=cents(ep.bid);$('entryPrice').textContent=cents(ep.entry);$('markPnl').textContent=Number.isFinite(ep.mark)?(ep.mark>=0?'+':'')+(ep.mark*100).toFixed(1)+'¢':'--';colorize($('markPnl'),ep.mark);$('heldProb').textContent=pct(ep.p);$('settleChoice').textContent=ep.choice;
+  const tracked=activeTrackedPosition();
+  let simpleAction='WAIT',simpleCls='wait',simpleText=d.reason,simpleSide='NONE',simpleMax='--¢',simpleProb='--%',simpleEdge='--¢';
+  if(tracked){
+    simpleAction=ep.action;
+    simpleCls=ep.cls==='up'?'up':ep.cls==='down'?'down':'wait';
+    simpleText=ep.guidance;
+    simpleSide=tracked.side==='yes'?'UP':'DOWN';
+    simpleMax=Number.isFinite(ep.bid)?cents(ep.bid):'--¢';
+    simpleProb=pct(ep.p);
+    simpleEdge=Number.isFinite(ep.mark)?(ep.mark>=0?'+':'')+(ep.mark*100).toFixed(1)+'¢':'--';
+  }else if(d.side==='yes'){
+    simpleAction='TAP UP';
+    simpleCls='up';
+    simpleText='Kalshi: tap UP now. Do not pay above '+Math.floor((model.pUp-d.timing.threshold)*100)+'¢.';
+    simpleSide='UP';
+    simpleMax=Math.floor((model.pUp-d.timing.threshold)*100)+'¢';
+    simpleProb=pct(model.pUp);
+    simpleEdge=(d.upEdge*100).toFixed(1)+'¢';
+  }else if(d.side==='no'){
+    simpleAction='TAP DOWN';
+    simpleCls='down';
+    simpleText='Kalshi: tap DOWN now. Do not pay above '+Math.floor(((1-model.pUp)-d.timing.threshold)*100)+'¢.';
+    simpleSide='DOWN';
+    simpleMax=Math.floor(((1-model.pUp)-d.timing.threshold)*100)+'¢';
+    simpleProb=pct(1-model.pUp);
+    simpleEdge=(d.downEdge*100).toFixed(1)+'¢';
+  }else{
+    simpleText='Do nothing yet. '+d.timing.guidance;
+  }
+  $('simpleAction').textContent=simpleAction;
+  $('simpleAction').className='simpleHero '+(simpleCls==='up'?'green':simpleCls==='down'?'red':'amber');
+  $('simpleActionCard').className='card simpleAction '+simpleCls;
+  $('simpleInstruction').textContent=simpleText;
+  $('simpleSide').textContent=simpleSide;
+  $('simpleMax').textContent=simpleMax;
+  $('simpleProb').textContent=simpleProb;
+  $('simpleEdge').textContent=simpleEdge;
+  $('simpleTime').textContent=$('countdown').textContent;
+  if(tracked){
+    const source=getManualPosition()?'MANUAL':'AUTO';
+    $('trackedPosition').textContent='Tracking '+(tracked.side==='yes'?'UP':'DOWN')+' on '+tracked.ticker+' · '+source+' · entry '+(Number.isFinite(+tracked.ask)?cents(+tracked.ask):cents(+tracked.entry));
+  }else $('trackedPosition').textContent='No position tracked on this device.';
+
   $('spot').textContent=money(model.spot);$('strike').textContent=money(model.strike);$('distance').textContent=(delta>=0?'+':'')+money(delta)+' ('+(deltaPct>=0?'+':'')+(deltaPct*100).toFixed(3)+'%)';colorize($('distance'),delta);
   $('yesAsk').textContent=cents(q.yesAsk);$('yesBid').textContent=cents(q.yesBid)+' bid';$('noAsk').textContent=cents(q.noAsk);$('noBid').textContent=cents(q.noBid)+' bid';$('yesFair').textContent=pct(model.pUp);$('noFair').textContent=pct(1-model.pUp);$('yesModelFill').style.width=(model.pUp*100)+'%';$('noModelFill').style.width=((1-model.pUp)*100)+'%';
   $('modelUp').textContent=pct(model.pUp);$('marketUp').textContent=pct(d.marketUp);$('upEdge').textContent=Number.isFinite(d.upEdge)?(d.upEdge>=0?'+':'')+(d.upEdge*100).toFixed(1)+'¢':'--';$('downEdge').textContent=Number.isFinite(d.downEdge)?(d.downEdge>=0?'+':'')+(d.downEdge*100).toFixed(1)+'¢':'--';colorize($('upEdge'),d.upEdge);colorize($('downEdge'),d.downEdge);
@@ -55,7 +112,7 @@ function render(){const m=state.market,d=decide();if(m){$('window').textContent=
   state.model=d;lockCall(d);draw()
 }
 
-function tickCountdown(){const m=state.market;if(!m)return;const close=Date.parse(m.close_time||m.expiration_time),s=Math.max(0,Math.floor((close-Date.now())/1000));$('countdown').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');$('countdown').classList.toggle('red',s<75);if(s<=0&&!state.rolling){state.rolling=true;setTimeout(()=>discoverMarket().then(()=>refreshAll(true)).catch(e=>log('roll '+e.message)).finally(()=>state.rolling=false),1200)}if(state.signalsAt)$('freshness').textContent='UPDATED '+Math.max(0,Math.round((Date.now()-state.signalsAt)/1000))+'s AGO'}
+function tickCountdown(){const m=state.market;if(!m)return;const close=Date.parse(m.close_time||m.expiration_time),s=Math.max(0,Math.floor((close-Date.now())/1000));$('countdown').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');if($('simpleTime'))$('simpleTime').textContent=$('countdown').textContent;$('countdown').classList.toggle('red',s<75);if(s<=0&&!state.rolling){state.rolling=true;setTimeout(()=>discoverMarket().then(()=>refreshAll(true)).catch(e=>log('roll '+e.message)).finally(()=>state.rolling=false),1200)}if(state.signalsAt)$('freshness').textContent='UPDATED '+Math.max(0,Math.round((Date.now()-state.signalsAt)/1000))+'s AGO'}
 
 function draw(){const c=$('chart'),ctx=c.getContext('2d'),rows=candles.slice(-90),live=currentSpot();ctx.clearRect(0,0,c.width,c.height);if(rows.length<2)return;const ps=rows.map(x=>x.c);if(Number.isFinite(live))ps.push(live);const lo=Math.min(...ps),hi=Math.max(...ps),pad=14;ctx.strokeStyle='#213044';ctx.lineWidth=1;for(let z=1;z<4;z++){const y=c.height*z/4;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(c.width,y);ctx.stroke()}ctx.strokeStyle=ps[ps.length-1]>=ps[0]?'#35d07f':'#ff626a';ctx.lineWidth=3;ctx.beginPath();ps.forEach((p,i)=>{const x=pad+i/(ps.length-1)*(c.width-2*pad),y=c.height-pad-(p-lo)/Math.max(1e-9,hi-lo)*(c.height-2*pad);i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke();const move=ps[ps.length-1]/ps[0]-1;$('tapeMove').textContent=(move>=0?'+':'')+(move*100).toFixed(2)+'%';colorize($('tapeMove'),move)}
 
@@ -76,4 +133,9 @@ async function boot(){setStatus('LOADING');renderHistory();
   setInterval(()=>resolveCalls().catch(()=>{}),30000);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshAll(true).catch(()=>{})})
 }
+
+$('boughtUp').addEventListener('click',()=>setManualPosition('yes'));
+$('boughtDown').addEventListener('click',()=>setManualPosition('no'));
+$('clearPosition').addEventListener('click',()=>clearManualPosition());
+
 boot();
