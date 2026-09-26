@@ -26,7 +26,8 @@ async function getSnapshot(force=false){
   if(!force&&snapshotCache&&Date.now()-snapshotAt<1400)return snapshotCache;
   if(snapshotPromise)return snapshotPromise;
   snapshotPromise=getJSON(LIVE_API,9000).then(j=>{
-    if(!j||!j.success)throw new Error(j&&j.error?j.error:'live feed unavailable');
+    if(!j)throw new Error('live feed unavailable');
+    if(Array.isArray(j.errors)&&j.errors.length)log('Backend: '+j.errors.map(x=>x.error).join(' | '));
     snapshotCache=j;snapshotAt=Date.now();return j;
   }).finally(()=>{snapshotPromise=null});
   return snapshotPromise;
@@ -48,15 +49,15 @@ function applySnapshot(j){
   state.signalsAt=(state.cbBook||state.kBook||state.cbTrades||state.kTrades)?now:state.signalsAt;
   if(oldTicker&&state.market&&oldTicker!==state.market.ticker){log('Rolled to '+state.market.ticker);resolveCalls().catch(()=>{})}
 }
-async function discoverMarket(){const j=await getSnapshot(true);applySnapshot(j);if(!state.market)throw new Error('No open '+SERIES+' market');return state.market}
-async function refreshMarket(){const j=await getSnapshot();applySnapshot(j);if(!state.market)throw new Error('No active Kalshi market');return state.market}
+async function discoverMarket(){const j=await getSnapshot(true);applySnapshot(j);if(!state.market){log('No active '+SERIES+' market yet');return null}return state.market}
+async function refreshMarket(){const j=await getSnapshot();applySnapshot(j);return state.market}
 async function cbTicker(){const j=await getSnapshot();applySnapshot(j);if(!state.cbTicker)throw new Error('Coinbase offline');return state.cbTicker}
 async function kTicker(){const j=await getSnapshot();applySnapshot(j);if(!state.kTicker)throw new Error('Kraken offline');return state.kTicker}
 async function cbBook(){const j=await getSnapshot();applySnapshot(j);if(!state.cbBook)throw new Error('Coinbase book offline');return state.cbBook}
 async function kBook(){const j=await getSnapshot();applySnapshot(j);if(!state.kBook)throw new Error('Kraken book offline');return state.kBook}
 async function cbTradeFlow(){const j=await getSnapshot();applySnapshot(j);if(!state.cbTrades)throw new Error('Coinbase flow offline');return state.cbTrades}
 async function kTradeFlow(){const j=await getSnapshot();applySnapshot(j);if(!state.kTrades)throw new Error('Kraken flow offline');return state.kTrades}
-async function loadHistory(){const j=await getSnapshot(true);applySnapshot(j);if(candles.length<30)throw new Error('History feed unavailable');log('History '+candles.length+' bars');return candles}
+async function loadHistory(){const j=await getSnapshot(true);applySnapshot(j);if(candles.length<30)log('History feed partial: '+candles.length+' bars');else log('History '+candles.length+' bars');return candles}
 
 function realizedVolPerSqrtMin(){const rows=candles.slice(-120);if(rows.length<30)return .0008;const r=[];for(let i=1;i<rows.length;i++)r.push(Math.log(rows[i].c/rows[i-1].c));const mu=avg(r),v=avg(r.map(x=>(x-mu)*(x-mu)));return clamp(Math.sqrt(v),.00012,.004)}
 function currentSpot(){const xs=[state.cbTicker&&state.cbTicker.price,state.kTicker&&state.kTicker.price].filter(Number.isFinite);return xs.length?avg(xs):(candles.length?candles[candles.length-1].c:NaN)}
