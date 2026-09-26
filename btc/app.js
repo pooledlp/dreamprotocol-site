@@ -178,7 +178,86 @@ async function refreshPrices(){const jobs=[['cbTicker',cbTicker],['kTicker',kTic
 async function refreshSignals(){const jobs=[['cbBook',cbBook],['kBook',kBook],['cbTrades',cbTradeFlow],['kTrades',kTradeFlow]];await Promise.all(jobs.map(async([k,f])=>{try{state[k]=await f()}catch(e){log(k+' '+e.message)}}));state.signalsAt=Date.now();render()}
 async function refreshAll(forceDiscover=false){try{if(forceDiscover||!state.market)await discoverMarket();else await refreshMarket();await Promise.all([refreshPrices(),refreshSignals()]);setStatus('LIVE',true);render();resolveCalls().catch(()=>{})}catch(e){setStatus('DEGRADED');log('refresh '+e.message);render()}}
 
-async function boot(){setStatus('LOADING');renderHistory();
+async function refreshBotStatus(){
+  try{
+    const j=await getJSON('https://api.dreamprotocol.ai/kalshi-bot/status',7000);
+    $('botMode').textContent=j.mode||'UNKNOWN';
+    $('botMode').className='botMode '+(j.live?'green':'amber');
+    $('botCreds').textContent=j.credentialsConfigured?'CONNECTED':'NOT CONNECTED';
+    $('botCreds').className='botCreds '+(j.credentialsConfigured?'green':'amber');
+    $('botRisk').textContent='setStatus('LOADING');renderHistory();
+  try{const j=await getSnapshot(true);applySnapshot(j);render();setStatus(state.market&&Number.isFinite(currentSpot())?'LIVE':'DEGRADED',!!(state.market&&Number.isFinite(currentSpot())))}catch(e){setStatus('DEGRADED');log('Startup '+e.message)}
+  setInterval(tickCountdown,250);
+  setInterval(()=>refreshPrices().catch(e=>log('price retry '+e.message)),2000);
+  setInterval(()=>refreshMarket().then(()=>{render();if(state.market&&Number.isFinite(currentSpot()))setStatus('LIVE',true)}).catch(e=>{setStatus('DEGRADED');log('market retry '+e.message)}),3000);
+  setInterval(()=>refreshSignals().catch(e=>log('signal retry '+e.message)),5000);
+  setInterval(()=>loadHistory().then(render).catch(e=>log('history retry '+e.message)),60000);
+  setInterval(()=>discoverMarket().then(()=>{render();if(state.market&&Number.isFinite(currentSpot()))setStatus('LIVE',true)}).catch(e=>log('discover retry '+e.message)),15000);
+  setInterval(()=>resolveCalls().catch(()=>{}),30000);
+  setInterval(()=>refreshBotStatus().catch(()=>{}),10000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshAll(true).catch(()=>{})})
+}
+
+$('boughtUp').addEventListener('click',()=>setManualPosition('yes'));
+$('boughtDown').addEventListener('click',()=>setManualPosition('no'));
+$('clearPosition').addEventListener('click',()=>clearManualPosition());
+
+boot();+(j.risk?.maxRiskDollars??'--');
+    $('botDaily').textContent='setStatus('LOADING');renderHistory();
+  try{const j=await getSnapshot(true);applySnapshot(j);render();setStatus(state.market&&Number.isFinite(currentSpot())?'LIVE':'DEGRADED',!!(state.market&&Number.isFinite(currentSpot())))}catch(e){setStatus('DEGRADED');log('Startup '+e.message)}
+  setInterval(tickCountdown,250);
+  setInterval(()=>refreshPrices().catch(e=>log('price retry '+e.message)),2000);
+  setInterval(()=>refreshMarket().then(()=>{render();if(state.market&&Number.isFinite(currentSpot()))setStatus('LIVE',true)}).catch(e=>{setStatus('DEGRADED');log('market retry '+e.message)}),3000);
+  setInterval(()=>refreshSignals().catch(e=>log('signal retry '+e.message)),5000);
+  setInterval(()=>loadHistory().then(render).catch(e=>log('history retry '+e.message)),60000);
+  setInterval(()=>discoverMarket().then(()=>{render();if(state.market&&Number.isFinite(currentSpot()))setStatus('LIVE',true)}).catch(e=>log('discover retry '+e.message)),15000);
+  setInterval(()=>resolveCalls().catch(()=>{}),30000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshAll(true).catch(()=>{})})
+}
+
+$('boughtUp').addEventListener('click',()=>setManualPosition('yes'));
+$('boughtDown').addEventListener('click',()=>setManualPosition('no'));
+$('clearPosition').addEventListener('click',()=>clearManualPosition());
+
+boot();+(j.risk?.maxDailyNotionalDollars??'--');
+    $('botLoss').textContent='setStatus('LOADING');renderHistory();
+  try{const j=await getSnapshot(true);applySnapshot(j);render();setStatus(state.market&&Number.isFinite(currentSpot())?'LIVE':'DEGRADED',!!(state.market&&Number.isFinite(currentSpot())))}catch(e){setStatus('DEGRADED');log('Startup '+e.message)}
+  setInterval(tickCountdown,250);
+  setInterval(()=>refreshPrices().catch(e=>log('price retry '+e.message)),2000);
+  setInterval(()=>refreshMarket().then(()=>{render();if(state.market&&Number.isFinite(currentSpot()))setStatus('LIVE',true)}).catch(e=>{setStatus('DEGRADED');log('market retry '+e.message)}),3000);
+  setInterval(()=>refreshSignals().catch(e=>log('signal retry '+e.message)),5000);
+  setInterval(()=>loadHistory().then(render).catch(e=>log('history retry '+e.message)),60000);
+  setInterval(()=>discoverMarket().then(()=>{render();if(state.market&&Number.isFinite(currentSpot()))setStatus('LIVE',true)}).catch(e=>log('discover retry '+e.message)),15000);
+  setInterval(()=>resolveCalls().catch(()=>{}),30000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshAll(true).catch(()=>{})})
+}
+
+$('boughtUp').addEventListener('click',()=>setManualPosition('yes'));
+$('boughtDown').addEventListener('click',()=>setManualPosition('no'));
+$('clearPosition').addEventListener('click',()=>clearManualPosition());
+
+boot();+(j.risk?.maxDailyLossDollars??'--');
+    $('botTrades').textContent=String(j.risk?.maxTradesPerDay??'--');
+    $('botCard').className='card botCard '+(j.live?'live':'paper');
+    if(j.live){
+      $('botLock').textContent='LIVE EXECUTION ARMED';
+      $('botLock').className='botLock live';
+      $('botMessage').textContent='The bot can place and reduce Kalshi positions automatically under the displayed risk limits.';
+    }else if(j.credentialsConfigured){
+      $('botLock').textContent='LIVE MONEY LOCKED';
+      $('botLock').className='botLock';
+      $('botMessage').textContent='Kalshi credentials are connected, but the real-money arm switch remains off.';
+    }else{
+      $('botLock').textContent='LIVE MONEY LOCKED';
+      $('botLock').className='botLock';
+      $('botMessage').textContent='Paper execution is active. Add Kalshi credentials server-side before real-money mode can ever arm.';
+    }
+  }catch(e){
+    $('botMode').textContent='STATUS ERROR';$('botMode').className='botMode red';
+    $('botMessage').textContent='Could not read execution-bot status: '+e.message;
+  }
+}
+async function boot(){setStatus('LOADING');renderHistory();refreshBotStatus();
   try{const j=await getSnapshot(true);applySnapshot(j);render();setStatus(state.market&&Number.isFinite(currentSpot())?'LIVE':'DEGRADED',!!(state.market&&Number.isFinite(currentSpot())))}catch(e){setStatus('DEGRADED');log('Startup '+e.message)}
   setInterval(tickCountdown,250);
   setInterval(()=>refreshPrices().catch(e=>log('price retry '+e.message)),2000);
