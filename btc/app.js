@@ -181,9 +181,9 @@ async function refreshAll(forceDiscover=false){try{if(forceDiscover||!state.mark
 async function refreshScalpShadow(){
   try{
     const j=await getJSON('https://api.dreamprotocol.ai/kalshi-bot/scalp-shadow',7000);
-    const s=j.scalp||{};
-    $('scalpMode').textContent=j.mode==='SHADOW_ONLY'?'SHADOW':'UNKNOWN';
-    $('scalpMode').className='scalpMode amber';
+    const s=j.scalp||{},live=j.liveOrders===true;
+    $('scalpMode').textContent=live?'LIVE TEST':'SHADOW';
+    $('scalpMode').className='scalpMode '+(live?'green':'amber');
     $('scalpCandidate').textContent=s.eligible?(s.side==='yes'?'UP SCALP':'DOWN SCALP'):'NO SCALP';
     $('scalpCandidate').className='scalpCandidate '+(s.eligible?'green':'amber');
     $('scalpEntry').textContent=Number.isFinite(+s.makerEntry)?Math.round(+s.makerEntry*100)+'¢':'--¢';
@@ -191,14 +191,13 @@ async function refreshScalpShadow(){
     $('scalpEdge').textContent=Number.isFinite(+s.grossEdge)?(+s.grossEdge*100).toFixed(1)+'¢':'--¢';
     $('scalpSpread').textContent=Number.isFinite(+s.spread)?(+s.spread*100).toFixed(1)+'¢':'--¢';
     $('scalpMessage').textContent=s.eligible
-      ? 'Paper maker candidate: '+(s.side==='yes'?'UP':'DOWN')+' near '+Math.round(+s.makerEntry*100)+'¢ with a '+Math.round(+s.targetProfit*100)+'¢ gross target. No real scalp order is being sent.'
-      : 'Scanning for maker-style micro-profits. '+(s.reason||'No qualifying setup right now.');
+      ? (live?'LIVE maker setup eligible: ':'Shadow maker candidate: ')+(s.side==='yes'?'UP':'DOWN')+' near '+Math.round(+s.makerEntry*100)+'¢ with about '+Math.round(+s.targetProfit*100)+'¢ gross target.'
+      : (live?'Live scalper scanning. ':'Shadow scalper scanning. ')+(s.reason||'No qualifying setup right now.');
     $('scalpCard').className='card scalpCard '+(s.eligible?'candidate':'shadow');
-    $('scalpLock').textContent='SHADOW ONLY · NO SCALP ORDERS';
   }catch(e){
     $('scalpCandidate').textContent='STATUS ERROR';
     $('scalpCandidate').className='scalpCandidate red';
-    $('scalpMessage').textContent='Could not read micro-scalper shadow status: '+e.message;
+    $('scalpMessage').textContent='Could not read micro-scalper status: '+e.message;
   }
 }
 
@@ -217,7 +216,110 @@ async function refreshBotStatus(){
     if(j.live){
       $('botLock').textContent='LIVE EXECUTION ARMED';
       $('botLock').className='botLock live';
-      $('botMessage').textContent='The bot can place and reduce Kalshi positions automatically under the displayed risk limits.';
+      $('botMessage').textContent=j.directionalEnabled===false
+        ? 'Execution is live. Directional entries are paused while the isolated micro-scalper test runs.'
+        : 'The bot can place and reduce Kalshi positions automatically under the displayed risk limits.';
+      if(j.scalper){
+        $('scalpMode').textContent=j.scalper.live?'LIVE TEST':'SHADOW';
+        $('scalpMode').className='scalpMode '+(j.scalper.live?'green':'amber');
+        $('scalpLock').textContent=j.scalper.live
+          ? 'LIVE SCALPER ARMED · 
+      $('botLock').textContent='LIVE MONEY LOCKED';
+      $('botLock').className='botLock';
+      $('botMessage').textContent='Kalshi credentials are connected, but the real-money arm switch remains off.';
+    }else{
+      $('botLock').textContent='LIVE MONEY LOCKED';
+      $('botLock').className='botLock';
+      $('botMessage').textContent='Paper execution is active. Add Kalshi credentials server-side before real-money mode can ever arm.';
+    }
+  }catch(e){
+    $('botMode').textContent='STATUS ERROR';
+    $('botMode').className='botMode red';
+    $('botMessage').textContent='Could not read execution-bot status: '+e.message;
+  }
+}
+
+async function boot(){
+  setStatus('LOADING');
+  renderHistory();
+  refreshBotStatus().catch(()=>{});
+  refreshScalpShadow().catch(()=>{});
+  try{
+    const j=await getSnapshot(true);
+    applySnapshot(j);
+    render();
+    setStatus(state.market&&Number.isFinite(currentSpot())?'LIVE':'DEGRADED',!!(state.market&&Number.isFinite(currentSpot())));
+  }catch(e){
+    setStatus('DEGRADED');
+    log('Startup '+e.message);
+  }
+  setInterval(tickCountdown,250);
+  setInterval(()=>refreshPrices().catch(e=>log('price retry '+e.message)),2000);
+  setInterval(()=>refreshMarket().then(()=>{render();if(state.market&&Number.isFinite(currentSpot()))setStatus('LIVE',true)}).catch(e=>{setStatus('DEGRADED');log('market retry '+e.message)}),3000);
+  setInterval(()=>refreshSignals().catch(e=>log('signal retry '+e.message)),5000);
+  setInterval(()=>loadHistory().then(render).catch(e=>log('history retry '+e.message)),60000);
+  setInterval(()=>discoverMarket().then(()=>{render();if(state.market&&Number.isFinite(currentSpot()))setStatus('LIVE',true)}).catch(e=>log('discover retry '+e.message)),15000);
+  setInterval(()=>resolveCalls().catch(()=>{}),30000);
+  setInterval(()=>refreshBotStatus().catch(()=>{}),10000);
+  setInterval(()=>refreshScalpShadow().catch(()=>{}),5000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshAll(true).catch(()=>{})});
+}
+
+$('boughtUp').addEventListener('click',()=>setManualPosition('yes'));
+$('boughtDown').addEventListener('click',()=>setManualPosition('no'));
+$('clearPosition').addEventListener('click',()=>clearManualPosition());
+
+boot();
++j.scalper.maxRiskDollars+' MAX · 
+      $('botLock').textContent='LIVE MONEY LOCKED';
+      $('botLock').className='botLock';
+      $('botMessage').textContent='Kalshi credentials are connected, but the real-money arm switch remains off.';
+    }else{
+      $('botLock').textContent='LIVE MONEY LOCKED';
+      $('botLock').className='botLock';
+      $('botMessage').textContent='Paper execution is active. Add Kalshi credentials server-side before real-money mode can ever arm.';
+    }
+  }catch(e){
+    $('botMode').textContent='STATUS ERROR';
+    $('botMode').className='botMode red';
+    $('botMessage').textContent='Could not read execution-bot status: '+e.message;
+  }
+}
+
+async function boot(){
+  setStatus('LOADING');
+  renderHistory();
+  refreshBotStatus().catch(()=>{});
+  refreshScalpShadow().catch(()=>{});
+  try{
+    const j=await getSnapshot(true);
+    applySnapshot(j);
+    render();
+    setStatus(state.market&&Number.isFinite(currentSpot())?'LIVE':'DEGRADED',!!(state.market&&Number.isFinite(currentSpot())));
+  }catch(e){
+    setStatus('DEGRADED');
+    log('Startup '+e.message);
+  }
+  setInterval(tickCountdown,250);
+  setInterval(()=>refreshPrices().catch(e=>log('price retry '+e.message)),2000);
+  setInterval(()=>refreshMarket().then(()=>{render();if(state.market&&Number.isFinite(currentSpot()))setStatus('LIVE',true)}).catch(e=>{setStatus('DEGRADED');log('market retry '+e.message)}),3000);
+  setInterval(()=>refreshSignals().catch(e=>log('signal retry '+e.message)),5000);
+  setInterval(()=>loadHistory().then(render).catch(e=>log('history retry '+e.message)),60000);
+  setInterval(()=>discoverMarket().then(()=>{render();if(state.market&&Number.isFinite(currentSpot()))setStatus('LIVE',true)}).catch(e=>log('discover retry '+e.message)),15000);
+  setInterval(()=>resolveCalls().catch(()=>{}),30000);
+  setInterval(()=>refreshBotStatus().catch(()=>{}),10000);
+  setInterval(()=>refreshScalpShadow().catch(()=>{}),5000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshAll(true).catch(()=>{})});
+}
+
+$('boughtUp').addEventListener('click',()=>setManualPosition('yes'));
+$('boughtDown').addEventListener('click',()=>setManualPosition('no'));
+$('clearPosition').addEventListener('click',()=>clearManualPosition());
+
+boot();
++j.scalper.maxDailyLossDollars+' LOSS STOP · '+j.scalper.maxTradesPerDay+'/DAY'
+          : 'SHADOW ONLY · NO SCALP ORDERS';
+      }
     }else if(j.credentialsConfigured){
       $('botLock').textContent='LIVE MONEY LOCKED';
       $('botLock').className='botLock';
