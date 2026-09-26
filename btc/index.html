@@ -15,6 +15,32 @@
     <div id="statusPill" class="pill"><span class="dot"></span><span id="status">CONNECTING</span></div>
   </div>
 
+  <div id="simpleActionCard" class="card simpleAction wait">
+    <div class="simpleActionTop">
+      <div>
+        <div class="label">Do this now</div>
+        <div id="simpleAction" class="simpleHero amber">WAIT</div>
+      </div>
+      <div class="right">
+        <div class="label">Time left</div>
+        <div id="simpleTime" class="simpleClock">--:--</div>
+      </div>
+    </div>
+    <div id="simpleInstruction" class="simpleInstruction">Waiting for a clean setup.</div>
+    <div class="simpleStats">
+      <div><span>Tap</span><b id="simpleSide">NONE</b></div>
+      <div><span>Pay up to</span><b id="simpleMax">--¢</b></div>
+      <div><span>Model</span><b id="simpleProb">--%</b></div>
+      <div><span>Edge</span><b id="simpleEdge">--¢</b></div>
+    </div>
+    <div class="positionButtons">
+      <button id="boughtUp" type="button">I BOUGHT UP</button>
+      <button id="boughtDown" type="button">I BOUGHT DOWN</button>
+      <button id="clearPosition" type="button" class="ghost">CLEAR</button>
+    </div>
+    <div id="trackedPosition" class="small trackedPosition">No position tracked on this device.</div>
+  </div>
+
   <div class="card contract">
     <div>
       <div class="label">Active Kalshi contract</div>
@@ -158,7 +184,7 @@
   window.addEventListener('unhandledrejection', e => showError('PROMISE: ' + (e.reason?.message || e.reason || 'unknown error')));
   const load = (src, done) => {
     const s = document.createElement('script');
-    s.src = src + '?v=20260925-6';
+    s.src = src + '?v=20260925-7';
     s.onload = done;
     s.onerror = () => showError('Could not load ' + src);
     document.body.appendChild(s);
