@@ -248,7 +248,7 @@
       },{passive:true});
     }
 
-    if(!document.querySelector('.dp-protocol-beacon')){
+    if(typeof document.createElement==='function' && !document.querySelector('.dp-protocol-beacon')){
       const beacon=document.createElement('div');
       beacon.className='dp-protocol-beacon';
       beacon.setAttribute('aria-hidden','true');
