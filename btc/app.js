@@ -185,58 +185,9 @@ async function refreshBotStatus(){
     $('botMode').className='botMode '+(j.live?'green':'amber');
     $('botCreds').textContent=j.credentialsConfigured?'CONNECTED':'NOT CONNECTED';
     $('botCreds').className='botCreds '+(j.credentialsConfigured?'green':'amber');
-    $('botRisk').textContent='setStatus('LOADING');renderHistory();
-  try{const j=await getSnapshot(true);applySnapshot(j);render();setStatus(state.market&&Number.isFinite(currentSpot())?'LIVE':'DEGRADED',!!(state.market&&Number.isFinite(currentSpot())))}catch(e){setStatus('DEGRADED');log('Startup '+e.message)}
-  setInterval(tickCountdown,250);
-  setInterval(()=>refreshPrices().catch(e=>log('price retry '+e.message)),2000);
-  setInterval(()=>refreshMarket().then(()=>{render();if(state.market&&Number.isFinite(currentSpot()))setStatus('LIVE',true)}).catch(e=>{setStatus('DEGRADED');log('market retry '+e.message)}),3000);
-  setInterval(()=>refreshSignals().catch(e=>log('signal retry '+e.message)),5000);
-  setInterval(()=>loadHistory().then(render).catch(e=>log('history retry '+e.message)),60000);
-  setInterval(()=>discoverMarket().then(()=>{render();if(state.market&&Number.isFinite(currentSpot()))setStatus('LIVE',true)}).catch(e=>log('discover retry '+e.message)),15000);
-  setInterval(()=>resolveCalls().catch(()=>{}),30000);
-  setInterval(()=>refreshBotStatus().catch(()=>{}),10000);
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshAll(true).catch(()=>{})})
-}
-
-$('boughtUp').addEventListener('click',()=>setManualPosition('yes'));
-$('boughtDown').addEventListener('click',()=>setManualPosition('no'));
-$('clearPosition').addEventListener('click',()=>clearManualPosition());
-
-boot();+(j.risk?.maxRiskDollars??'--');
-    $('botDaily').textContent='setStatus('LOADING');renderHistory();
-  try{const j=await getSnapshot(true);applySnapshot(j);render();setStatus(state.market&&Number.isFinite(currentSpot())?'LIVE':'DEGRADED',!!(state.market&&Number.isFinite(currentSpot())))}catch(e){setStatus('DEGRADED');log('Startup '+e.message)}
-  setInterval(tickCountdown,250);
-  setInterval(()=>refreshPrices().catch(e=>log('price retry '+e.message)),2000);
-  setInterval(()=>refreshMarket().then(()=>{render();if(state.market&&Number.isFinite(currentSpot()))setStatus('LIVE',true)}).catch(e=>{setStatus('DEGRADED');log('market retry '+e.message)}),3000);
-  setInterval(()=>refreshSignals().catch(e=>log('signal retry '+e.message)),5000);
-  setInterval(()=>loadHistory().then(render).catch(e=>log('history retry '+e.message)),60000);
-  setInterval(()=>discoverMarket().then(()=>{render();if(state.market&&Number.isFinite(currentSpot()))setStatus('LIVE',true)}).catch(e=>log('discover retry '+e.message)),15000);
-  setInterval(()=>resolveCalls().catch(()=>{}),30000);
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshAll(true).catch(()=>{})})
-}
-
-$('boughtUp').addEventListener('click',()=>setManualPosition('yes'));
-$('boughtDown').addEventListener('click',()=>setManualPosition('no'));
-$('clearPosition').addEventListener('click',()=>clearManualPosition());
-
-boot();+(j.risk?.maxDailyNotionalDollars??'--');
-    $('botLoss').textContent='setStatus('LOADING');renderHistory();
-  try{const j=await getSnapshot(true);applySnapshot(j);render();setStatus(state.market&&Number.isFinite(currentSpot())?'LIVE':'DEGRADED',!!(state.market&&Number.isFinite(currentSpot())))}catch(e){setStatus('DEGRADED');log('Startup '+e.message)}
-  setInterval(tickCountdown,250);
-  setInterval(()=>refreshPrices().catch(e=>log('price retry '+e.message)),2000);
-  setInterval(()=>refreshMarket().then(()=>{render();if(state.market&&Number.isFinite(currentSpot()))setStatus('LIVE',true)}).catch(e=>{setStatus('DEGRADED');log('market retry '+e.message)}),3000);
-  setInterval(()=>refreshSignals().catch(e=>log('signal retry '+e.message)),5000);
-  setInterval(()=>loadHistory().then(render).catch(e=>log('history retry '+e.message)),60000);
-  setInterval(()=>discoverMarket().then(()=>{render();if(state.market&&Number.isFinite(currentSpot()))setStatus('LIVE',true)}).catch(e=>log('discover retry '+e.message)),15000);
-  setInterval(()=>resolveCalls().catch(()=>{}),30000);
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshAll(true).catch(()=>{})})
-}
-
-$('boughtUp').addEventListener('click',()=>setManualPosition('yes'));
-$('boughtDown').addEventListener('click',()=>setManualPosition('no'));
-$('clearPosition').addEventListener('click',()=>clearManualPosition());
-
-boot();+(j.risk?.maxDailyLossDollars??'--');
+    $('botRisk').textContent='$'+(j.risk?.maxRiskDollars??'--');
+    $('botDaily').textContent='$'+(j.risk?.maxDailyNotionalDollars??'--');
+    $('botLoss').textContent='$'+(j.risk?.maxDailyLossDollars??'--');
     $('botTrades').textContent=String(j.risk?.maxTradesPerDay??'--');
     $('botCard').className='card botCard '+(j.live?'live':'paper');
     if(j.live){
@@ -253,12 +204,25 @@ boot();+(j.risk?.maxDailyLossDollars??'--');
       $('botMessage').textContent='Paper execution is active. Add Kalshi credentials server-side before real-money mode can ever arm.';
     }
   }catch(e){
-    $('botMode').textContent='STATUS ERROR';$('botMode').className='botMode red';
+    $('botMode').textContent='STATUS ERROR';
+    $('botMode').className='botMode red';
     $('botMessage').textContent='Could not read execution-bot status: '+e.message;
   }
 }
-async function boot(){setStatus('LOADING');renderHistory();refreshBotStatus();
-  try{const j=await getSnapshot(true);applySnapshot(j);render();setStatus(state.market&&Number.isFinite(currentSpot())?'LIVE':'DEGRADED',!!(state.market&&Number.isFinite(currentSpot())))}catch(e){setStatus('DEGRADED');log('Startup '+e.message)}
+
+async function boot(){
+  setStatus('LOADING');
+  renderHistory();
+  refreshBotStatus().catch(()=>{});
+  try{
+    const j=await getSnapshot(true);
+    applySnapshot(j);
+    render();
+    setStatus(state.market&&Number.isFinite(currentSpot())?'LIVE':'DEGRADED',!!(state.market&&Number.isFinite(currentSpot())));
+  }catch(e){
+    setStatus('DEGRADED');
+    log('Startup '+e.message);
+  }
   setInterval(tickCountdown,250);
   setInterval(()=>refreshPrices().catch(e=>log('price retry '+e.message)),2000);
   setInterval(()=>refreshMarket().then(()=>{render();if(state.market&&Number.isFinite(currentSpot()))setStatus('LIVE',true)}).catch(e=>{setStatus('DEGRADED');log('market retry '+e.message)}),3000);
@@ -266,7 +230,8 @@ async function boot(){setStatus('LOADING');renderHistory();refreshBotStatus();
   setInterval(()=>loadHistory().then(render).catch(e=>log('history retry '+e.message)),60000);
   setInterval(()=>discoverMarket().then(()=>{render();if(state.market&&Number.isFinite(currentSpot()))setStatus('LIVE',true)}).catch(e=>log('discover retry '+e.message)),15000);
   setInterval(()=>resolveCalls().catch(()=>{}),30000);
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshAll(true).catch(()=>{})})
+  setInterval(()=>refreshBotStatus().catch(()=>{}),10000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshAll(true).catch(()=>{})});
 }
 
 $('boughtUp').addEventListener('click',()=>setManualPosition('yes'));
