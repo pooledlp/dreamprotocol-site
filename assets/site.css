@@ -5866,3 +5866,379 @@ a[href^="mailto:"]{overflow-wrap:anywhere;word-break:break-word}
   .ops-activity{grid-template-columns:1fr}
   .ops-event{border-right:0}
 }
+
+
+/* =========================================================
+   DREAM PROTOCOL // CINEMATIC EXPERIENCE PASS
+   A progressive enhancement layer: cinematic continuity,
+   richer depth, responsive motion, and app-like navigation.
+   ========================================================= */
+
+@view-transition{navigation:auto}
+.site-header{view-transition-name:dp-header}
+.site-header .brand{view-transition-name:dp-brand}
+::view-transition-old(root){
+  animation:dpPageOut .24s cubic-bezier(.4,0,1,1) both
+}
+::view-transition-new(root){
+  animation:dpPageIn .42s cubic-bezier(.16,1,.3,1) both
+}
+::view-transition-old(dp-header),
+::view-transition-new(dp-header),
+::view-transition-old(dp-brand),
+::view-transition-new(dp-brand){
+  animation-duration:.28s
+}
+@keyframes dpPageOut{
+  to{opacity:.2;transform:translateY(-7px) scale(.997);filter:blur(2px)}
+}
+@keyframes dpPageIn{
+  from{opacity:.15;transform:translateY(11px) scale(.997);filter:blur(4px)}
+  to{opacity:1;transform:none;filter:none}
+}
+
+html{background:#07100e}
+body{
+  background:
+    radial-gradient(circle at 12% 8%,rgba(210,255,115,.035),transparent 22rem),
+    radial-gradient(circle at 88% 22%,rgba(127,255,198,.025),transparent 24rem),
+    var(--paper);
+}
+h1,h2,h3{text-wrap:balance}
+p{text-wrap:pretty}
+
+/* Scroll presence gives every major scene a quiet "powered" edge without
+   resetting or flashing its content. */
+.dp-presence{
+  position:relative;
+  transition:box-shadow .8s cubic-bezier(.2,.7,.2,1)
+}
+.dp-presence.is-current{
+  box-shadow:
+    inset 0 1px rgba(210,255,115,.07),
+    inset 0 -1px rgba(127,255,198,.045)
+}
+
+/* Signature system activity beacon. Desktop only, decorative and pointer-free. */
+.dp-protocol-beacon{
+  position:fixed;
+  right:13px;
+  top:50%;
+  z-index:90;
+  width:9px;
+  height:74px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  transform:translateY(-50%);
+  pointer-events:none;
+  opacity:.48
+}
+.dp-protocol-beacon:before{
+  content:"";
+  position:absolute;
+  width:1px;
+  height:100%;
+  background:linear-gradient(transparent,rgba(210,255,115,.22),transparent)
+}
+.dp-protocol-beacon i{
+  position:relative;
+  width:5px;
+  height:5px;
+  border-radius:50%;
+  background:#d2ff73;
+  box-shadow:0 0 14px rgba(210,255,115,.72);
+  animation:dpBeacon 2.8s ease-in-out infinite
+}
+.dp-protocol-beacon i:nth-child(2){animation-delay:.55s}
+.dp-protocol-beacon i:nth-child(3){animation-delay:1.1s}
+@keyframes dpBeacon{
+  0%,100%{opacity:.2;transform:scale(.72)}
+  45%{opacity:1;transform:scale(1.18)}
+}
+
+/* Header feels like a persistent control surface. */
+.site-header{
+  box-shadow:
+    0 12px 44px rgba(0,0,0,.18),
+    inset 0 -1px rgba(255,255,255,.015)
+}
+.site-header:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  opacity:.32;
+  background:
+    radial-gradient(520px 70px at var(--header-x,50%) 0,rgba(210,255,115,.09),transparent 70%)
+}
+.site-header .nav-wrap{position:relative;z-index:1}
+.site-header .nav-wrap>.button,
+body[data-home="true"] .hero-primary{
+  translate:var(--mag-x,0px) var(--mag-y,0px)
+}
+.button,
+.demo-float-cta{
+  translate:var(--mag-x,0px) var(--mag-y,0px);
+  transition:
+    translate .18s cubic-bezier(.2,.7,.2,1),
+    transform .2s ease,
+    background .2s ease,
+    color .2s ease,
+    box-shadow .2s ease
+}
+.button:active,.demo-float-cta:active{scale:.985}
+
+/* Make the hero read like a live system, not a static illustration. */
+body[data-home="true"] .home-hero.dp-wow{
+  background:
+    radial-gradient(circle at 17% 18%,rgba(193,255,99,.075),transparent 25rem),
+    radial-gradient(circle at 84% 56%,rgba(87,255,205,.055),transparent 27rem),
+    #07100e
+}
+body[data-home="true"] .hero-aurora{
+  opacity:.86;
+  filter:blur(48px);
+  animation-duration:18s
+}
+.hero-cockpit{
+  box-shadow:
+    0 56px 150px rgba(0,0,0,.52),
+    0 0 70px rgba(210,255,115,.035),
+    0 0 0 1px rgba(210,255,115,.035) inset,
+    0 1px rgba(255,255,255,.045) inset
+}
+.hero-cockpit .signal-node{
+  box-shadow:0 0 0 1px rgba(210,255,115,.06) inset;
+  animation:dpNodeSignal 4.8s ease-in-out infinite
+}
+.hero-cockpit .signal-node:nth-of-type(2){animation-delay:.8s}
+.hero-cockpit .signal-node:nth-of-type(3){animation-delay:1.6s}
+.hero-cockpit .signal-node:nth-of-type(4){animation-delay:2.4s}
+@keyframes dpNodeSignal{
+  0%,100%{border-color:rgba(210,255,115,.12);filter:none}
+  48%{border-color:rgba(210,255,115,.38);filter:drop-shadow(0 0 8px rgba(210,255,115,.16))}
+}
+.core-ring{
+  filter:drop-shadow(0 0 10px rgba(210,255,115,.055))
+}
+
+/* Premium, product-like surfaces across every page. */
+:is(.service-card,.price-card,.guide-card,.proof-card,.production-card,.opportunity-card,.feature,.region-card,.wide-note){
+  transform:translateZ(0);
+  backface-visibility:hidden;
+}
+:is(.service-card,.price-card,.guide-card,.proof-card,.production-card,.opportunity-card):hover{
+  border-color:rgba(126,164,94,.62)!important;
+  box-shadow:
+    0 34px 90px rgba(26,48,21,.13),
+    0 0 0 1px rgba(210,255,115,.055) inset
+}
+.service-card,
+.price-card,
+.guide-card,
+.proof-card,
+.production-card,
+.opportunity-card{
+  will-change:transform
+}
+.service-card:hover,
+.price-card:hover,
+.guide-card:hover,
+.proof-card:hover,
+.production-card:hover,
+.opportunity-card:hover{
+  transform:translateY(-8px)
+}
+
+/* Headings now have a deliberate protocol line that visually carries
+   the visitor from one scene to the next. */
+.section-heading,
+.ops-sim-heading,
+.credibility-heading,
+.platform-copy,
+.recording-copy{
+  position:relative
+}
+.section-heading:after,
+.credibility-heading:after{
+  content:"";
+  display:block;
+  width:min(150px,34vw);
+  height:1px;
+  margin-top:24px;
+  background:linear-gradient(90deg,rgba(112,145,78,.72),rgba(210,255,115,.55),transparent);
+  transform-origin:left;
+  scale:.72 1;
+  opacity:.62;
+  transition:scale .8s cubic-bezier(.16,1,.3,1),opacity .8s ease
+}
+.dp-presence.is-current .section-heading:after,
+.dp-presence.is-current .credibility-heading:after{
+  scale:1 1;
+  opacity:1
+}
+
+/* The three most cinematic UI blocks get a continuous edge-energy treatment. */
+.ops-simulator,
+.recording-console,
+.platform-window,
+.demo-command-center{
+  isolation:isolate
+}
+.ops-simulator:after,
+.recording-console:after,
+.platform-window:after,
+.demo-command-center:after{
+  content:"";
+  position:absolute;
+  inset:-1px;
+  z-index:8;
+  border-radius:inherit;
+  pointer-events:none;
+  opacity:.42;
+  background:
+    linear-gradient(115deg,transparent 0 38%,rgba(210,255,115,.11) 48%,transparent 58% 100%);
+  background-size:240% 100%;
+  animation:dpEdgeTravel 9s linear infinite
+}
+@keyframes dpEdgeTravel{
+  0%{background-position:190% 0}
+  100%{background-position:-70% 0}
+}
+
+/* Operations simulator stays alive continuously between scenes. */
+.ops-simulator{
+  box-shadow:
+    0 62px 150px rgba(0,0,0,.43),
+    0 0 50px rgba(210,255,115,.028),
+    inset 0 1px rgba(255,255,255,.03)
+}
+.ops-orb{
+  box-shadow:
+    0 0 0 1px rgba(210,255,115,.24),
+    0 0 78px rgba(198,255,104,.23),
+    0 0 130px rgba(127,255,198,.055)
+}
+
+/* Dark product sections get stronger depth, while light sections keep clarity. */
+.demo-section,
+.recording-stage,
+.ops-sim-section,
+.platform-preview{
+  position:relative;
+  isolation:isolate
+}
+.demo-section:before,
+.recording-stage:before,
+.platform-preview:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  opacity:.28;
+  background:
+    linear-gradient(rgba(210,255,115,.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(210,255,115,.025) 1px,transparent 1px);
+  background-size:62px 62px;
+  mask-image:radial-gradient(ellipse at center,black 15%,transparent 76%)
+}
+.demo-section>.shell,
+.recording-stage>.shell,
+.platform-preview>.shell{position:relative;z-index:1}
+
+/* Forms feel like product interfaces instead of generic form boxes. */
+.lead-form,
+.website-form,
+.alex-widget-panel{
+  box-shadow:
+    0 24px 70px rgba(29,48,23,.075),
+    inset 0 1px rgba(255,255,255,.42)
+}
+input,textarea{
+  transition:border-color .18s ease,box-shadow .18s ease,background .18s ease
+}
+input:focus,textarea:focus{
+  outline:none;
+  border-color:#88a967;
+  box-shadow:0 0 0 4px rgba(118,151,82,.11);
+  background:#fff
+}
+
+/* FAQ interaction feels immediate without over-animation. */
+.faq-section details{
+  transition:background .22s ease,padding .22s ease
+}
+.faq-section details[open]{
+  background:rgba(210,255,115,.045);
+  padding-inline:16px
+}
+
+/* Mobile is intentionally bold and readable, not a shrunk desktop composition. */
+@media(max-width:900px){
+  .dp-protocol-beacon{display:none}
+  .site-header .nav-wrap nav.open{
+    background:rgba(7,16,14,.985)!important;
+    border-color:rgba(210,255,115,.12)!important;
+    backdrop-filter:blur(22px)
+  }
+  .site-header .nav-wrap nav.open a{color:#cbd9c5}
+  .site-header .nav-wrap nav.open a:hover,
+  .site-header .nav-wrap nav.open a[aria-current="page"]{color:#f4faef}
+}
+
+@media(max-width:680px){
+  body{background:var(--paper)}
+  .section{padding-block:74px}
+  .page-hero{padding-block:48px 64px}
+  .eyebrow{font-size:.64rem;line-height:1.55;letter-spacing:.105em}
+  .page-hero>p:not(.eyebrow),
+  .section-heading p:not(.eyebrow){font-size:1rem;line-height:1.72}
+  body[data-home="true"] .dp-wow .hero-copy h1{
+    font-size:clamp(3.05rem,14.4vw,4.55rem);
+    line-height:.94
+  }
+  body[data-home="true"] .dp-wow .hero-intro{
+    font-size:1.08rem;
+    line-height:1.52
+  }
+  body[data-home="true"] .dp-wow .hero-sub{
+    font-size:.93rem;
+    line-height:1.72
+  }
+  .service-card,
+  .price-card,
+  .guide-card,
+  .proof-card{
+    border-radius:10px
+  }
+  .service-card>p:not(.eyebrow),
+  .proof-card p,
+  .feature p{
+    font-size:.9rem;
+    line-height:1.68
+  }
+  .service-card h3{font-size:1.32rem}
+  .site-header:before{display:none}
+  .ops-simulator:after,
+  .recording-console:after,
+  .platform-window:after,
+  .demo-command-center:after{
+    opacity:.24;
+    animation-duration:12s
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  ::view-transition-old(root),
+  ::view-transition-new(root){animation:none}
+  .dp-protocol-beacon i,
+  .hero-cockpit .signal-node,
+  .ops-simulator:after,
+  .recording-console:after,
+  .platform-window:after,
+  .demo-command-center:after{animation:none!important}
+}
