@@ -225,7 +225,7 @@
       presenceTargets.forEach(el=>el.classList.add('is-current'));
     }
 
-    if(finePointer){
+    if(media('(pointer:fine)').matches && !media('(prefers-reduced-motion: reduce)').matches){
       const magnets=[...document.querySelectorAll('.button,.demo-float-cta')];
       for(const el of magnets){
         el.addEventListener('pointermove',event=>{
