@@ -213,17 +213,22 @@ async function refreshBotStatus(){
     $('botLoss').textContent='$'+(j.risk?.maxDailyLossDollars??'--');
     $('botTrades').textContent=String(j.risk?.maxTradesPerDay??'--');
     $('botCard').className='card botCard '+(j.live?'live':'paper');
+
+    if(j.scalper){
+      $('scalpMode').textContent=j.scalper.live?'LIVE TEST':'SHADOW';
+      $('scalpMode').className='scalpMode '+(j.scalper.live?'green':'amber');
+      $('scalpLock').textContent=j.scalper.live
+        ? 'LIVE SCALPER ARMED · $'+j.scalper.maxRiskDollars+' MAX · $'+j.scalper.maxDailyLossDollars+' LOSS STOP · '+j.scalper.maxTradesPerDay+'/DAY'
+        : 'SHADOW ONLY · NO SCALP ORDERS';
+    }
+
     if(j.live){
       $('botLock').textContent='LIVE EXECUTION ARMED';
       $('botLock').className='botLock live';
       $('botMessage').textContent=j.directionalEnabled===false
         ? 'Execution is live. Directional entries are paused while the isolated micro-scalper test runs.'
         : 'The bot can place and reduce Kalshi positions automatically under the displayed risk limits.';
-      if(j.scalper){
-        $('scalpMode').textContent=j.scalper.live?'LIVE TEST':'SHADOW';
-        $('scalpMode').className='scalpMode '+(j.scalper.live?'green':'amber');
-        $('scalpLock').textContent=j.scalper.live
-          ? 'LIVE SCALPER ARMED · 
+    }else if(j.credentialsConfigured){
       $('botLock').textContent='LIVE MONEY LOCKED';
       $('botLock').className='botLock';
       $('botMessage').textContent='Kalshi credentials are connected, but the real-money arm switch remains off.';
