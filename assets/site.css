@@ -6430,3 +6430,140 @@ body:not([data-home="true"]) .service-card>p:not(.eyebrow){font-size:.9rem;line-
   body:not([data-home="true"]) .page-hero{padding-block:58px 78px}
   body:not([data-home="true"]) .page-hero h1{font-size:clamp(3.15rem,14.3vw,4.65rem);line-height:.92}
 }
+
+
+/* DREAM PROTOCOL // AI SALES POLISH */
+
+/* The capability band should read like AI product modules, not a legacy stats table. */
+.credibility-section .delivery-metrics{
+  gap:10px!important;
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+  overflow:visible
+}
+.credibility-section .delivery-metrics>div{
+  min-height:168px;
+  justify-content:space-between;
+  border:1px solid rgba(8,17,11,.86)!important;
+  border-radius:14px;
+  background:
+    radial-gradient(circle at 82% 18%,rgba(210,255,115,.09),transparent 34%),
+    #0a160f!important;
+  box-shadow:0 18px 44px rgba(35,69,24,.12)
+}
+.credibility-section .delivery-metrics strong{
+  color:#d8ff80!important;
+  font-family:var(--dp-mono);
+  font-size:clamp(1.65rem,2.5vw,2.75rem)!important;
+  font-weight:800;
+  letter-spacing:.035em
+}
+.credibility-section .delivery-metrics span{
+  max-width:250px;
+  color:#c5d5bf!important;
+  font-size:.78rem;
+  line-height:1.55
+}
+.credibility-section .proof-grid{
+  gap:10px;
+  border:0
+}
+.credibility-section .proof-card{
+  min-height:390px;
+  border:1px solid rgba(14,34,16,.15)!important;
+  border-radius:14px;
+  background:rgba(250,255,239,.78)!important
+}
+.credibility-section .proof-status{
+  border-color:rgba(27,60,25,.14);
+  background:rgba(255,255,255,.52);
+  color:#31552c
+}
+.credibility-section .proof-result b{
+  color:#31552c;
+  font-size:.52rem
+}
+.credibility-section .proof-result span{
+  color:#304b2c;
+  font-weight:700
+}
+.credibility-section .proof-disclosure{
+  max-width:900px;
+  margin-top:26px
+}
+
+/* The AI-first architecture copy deserves a little more breathing room. */
+.architecture-copy>p{
+  font-size:.96rem;
+  max-width:620px
+}
+.architecture-proof{
+  gap:8px;
+  margin-top:30px
+}
+.architecture-proof span{
+  background:rgba(210,255,115,.035)
+}
+.production-card h3{
+  font-size:1.2rem
+}
+.production-card p{
+  font-size:.82rem
+}
+
+/* Make the homepage journey feel deliberate: demo and offers get the strongest CTAs. */
+.dp-demo-priority .demo-copy h2,
+.flagship-section .section-heading h2{
+  text-wrap:balance
+}
+.dp-demo-priority .demo-copy>p:not(.eyebrow){
+  font-size:.94rem;
+  line-height:1.76
+}
+.cinematic-pricing{
+  border-top:1px solid rgba(91,111,76,.14)
+}
+
+/* Inner service pages: keep AI value above implementation details. */
+body:not([data-home="true"]) .detail-intro h2{
+  max-width:720px
+}
+body:not([data-home="true"]) .detail-intro>p{
+  max-width:680px
+}
+
+/* Mobile: keep the new AI modules readable and punchy. */
+@media(max-width:680px){
+  .credibility-section .delivery-metrics{
+    grid-template-columns:1fr 1fr
+  }
+  .credibility-section .delivery-metrics>div{
+    min-height:146px;
+    padding:20px 17px!important
+  }
+  .credibility-section .delivery-metrics strong{
+    font-size:clamp(1.45rem,7.2vw,2.15rem)!important
+  }
+  .credibility-section .delivery-metrics span{
+    font-size:.72rem
+  }
+  .credibility-section .proof-card{
+    min-height:auto;
+    padding:26px 22px 27px
+  }
+  .credibility-section .proof-card h3{
+    font-size:1.5rem
+  }
+  .home-trust-rail b{
+    font-size:.63rem
+  }
+  .home-trust-rail small{
+    font-size:.62rem
+  }
+}
+@media(max-width:390px){
+  .credibility-section .delivery-metrics{
+    grid-template-columns:1fr
+  }
+}
