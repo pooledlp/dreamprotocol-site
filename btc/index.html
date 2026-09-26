@@ -45,6 +45,46 @@
     </div>
   </div>
 
+  <div class="card timingCard">
+    <div class="row">
+      <div>
+        <div class="label">Entry timing</div>
+        <div id="entryPhase" class="timingHero amber">WAIT / OBSERVE</div>
+      </div>
+      <div class="right">
+        <div class="label">Elapsed</div>
+        <div id="elapsed" class="timingClock">--:--</div>
+      </div>
+    </div>
+    <div id="entryGuidance" class="small timingText">The engine is waiting for enough live data to judge the entry window.</div>
+    <div class="timingGrid">
+      <div><span>Preferred zone</span><b id="preferredZone">2:00–10:30</b></div>
+      <div><span>Required edge</span><b id="requiredEdge">--</b></div>
+      <div><span>Min confidence</span><b id="requiredProb">--</b></div>
+      <div><span>Fee / spread buffer</span><b id="feeBuffer">Included</b></div>
+    </div>
+  </div>
+
+  <div id="exitCard" class="card exitCard wait">
+    <div class="row">
+      <div>
+        <div class="label">If you entered on the signal</div>
+        <div id="exitAction" class="timingHero amber">NO POSITION</div>
+      </div>
+      <div class="right">
+        <div class="label">Live exit bid</div>
+        <div id="exitBid" class="timingClock">--¢</div>
+      </div>
+    </div>
+    <div id="exitGuidance" class="small timingText">When the site locks a BUY signal, this panel will continuously decide whether the paper position should hold, take profit, or exit.</div>
+    <div class="timingGrid">
+      <div><span>Signal entry</span><b id="entryPrice">--¢</b></div>
+      <div><span>Gross mark</span><b id="markPnl">--</b></div>
+      <div><span>Held-side model</span><b id="heldProb">--%</b></div>
+      <div><span>Settlement choice</span><b id="settleChoice">WAIT</b></div>
+    </div>
+  </div>
+
   <div class="quotes">
     <div class="quote up">
       <div class="label">UP / YES</div>
@@ -118,7 +158,7 @@
   window.addEventListener('unhandledrejection', e => showError('PROMISE: ' + (e.reason?.message || e.reason || 'unknown error')));
   const load = (src, done) => {
     const s = document.createElement('script');
-    s.src = src + '?v=20260925-5';
+    s.src = src + '?v=20260925-6';
     s.onload = done;
     s.onerror = () => showError('Could not load ' + src);
     document.body.appendChild(s);
