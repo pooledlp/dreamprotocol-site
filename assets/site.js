@@ -82,6 +82,10 @@
         '.architecture-console',
         '.service-card-visual',
         '.production-card',
+        '.proof-card',
+        '.opportunity-card',
+        '.recording-console',
+        '.platform-window',
         '.cinematic-contact .lead-form',
         '.ops-simulator'
       ].join(','))];
@@ -193,6 +197,64 @@
       start();
     }
   }
+
+    // Cinematic sitewide experience: section presence, magnetic CTAs,
+    // and a small system-status beacon. All effects are progressive enhancement.
+    body.dataset.dpExperience='cinematic';
+
+    const presenceTargets=[...document.querySelectorAll([
+      'main > section',
+      'main > .section',
+      '.page-hero',
+      '.recording-stage',
+      '.platform-preview'
+    ].join(','))];
+    presenceTargets.forEach((el,index)=>{
+      el.classList.add('dp-presence');
+      el.style.setProperty('--dp-section-order',String(index));
+    });
+
+    if(typeof IntersectionObserver!=='undefined'){
+      const presenceObserver=new IntersectionObserver(entries=>{
+        for(const entry of entries){
+          entry.target.classList.toggle('is-current',entry.isIntersecting&&entry.intersectionRatio>.16);
+        }
+      },{threshold:[0,.16,.42],rootMargin:'-12% 0px -18%'});
+      presenceTargets.forEach(el=>presenceObserver.observe(el));
+    }else{
+      presenceTargets.forEach(el=>el.classList.add('is-current'));
+    }
+
+    if(finePointer){
+      const magnets=[...document.querySelectorAll('.button,.demo-float-cta')];
+      for(const el of magnets){
+        el.addEventListener('pointermove',event=>{
+          const r=el.getBoundingClientRect();
+          const x=((event.clientX-r.left)/r.width-.5)*6;
+          const y=((event.clientY-r.top)/r.height-.5)*5;
+          el.style.setProperty('--mag-x',x.toFixed(2)+'px');
+          el.style.setProperty('--mag-y',y.toFixed(2)+'px');
+        },{passive:true});
+        el.addEventListener('pointerleave',()=>{
+          el.style.setProperty('--mag-x','0px');
+          el.style.setProperty('--mag-y','0px');
+        },{passive:true});
+      }
+
+      const header=document.querySelector('.site-header');
+      header?.addEventListener('pointermove',event=>{
+        const r=header.getBoundingClientRect();
+        header.style.setProperty('--header-x',((event.clientX-r.left)/r.width*100).toFixed(1)+'%');
+      },{passive:true});
+    }
+
+    if(!document.querySelector('.dp-protocol-beacon')){
+      const beacon=document.createElement('div');
+      beacon.className='dp-protocol-beacon';
+      beacon.setAttribute('aria-hidden','true');
+      beacon.innerHTML='<i></i><i></i><i></i>';
+      document.body.append(beacon);
+    }
 
   // Homepage-specific navigation/demo behavior remains owned by app.js.
   if (body.dataset.home === 'true') return;
