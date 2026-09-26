@@ -9,7 +9,7 @@
 <meta http-equiv="Expires" content="0">
 <meta name="robots" content="noindex,nofollow">
 <title>DreamPredict BTC 15M</title>
-<link rel="stylesheet" href="styles.css?v=20260926-8">
+<link rel="stylesheet" href="styles.css?v=20260926-report1">
 </head>
 <body>
 <div class="wrap">
@@ -22,28 +22,29 @@
     <div class="row">
       <div>
         <div class="label">Auto execution bot</div>
-        <div id="botMode" class="botMode amber">PAPER</div>
+        <div id="botMode" class="botMode amber">CHECKING</div>
       </div>
       <div class="right">
         <div class="label">Kalshi API</div>
-        <div id="botCreds" class="botCreds amber">NOT CONNECTED</div>
+        <div id="botCreds" class="botCreds amber">CHECKING</div>
       </div>
     </div>
-    <div id="botMessage" class="small botMessage">Autonomous decisions are running, but real-money orders are hard-locked.</div>
+    <div id="botMessage" class="small botMessage">Reading current execution status and risk limits.</div>
+    <div id="riskScope" class="label">Execution limits</div>
     <div class="botGrid">
-      <div><span>Max / trade</span><b id="botRisk">$5</b></div>
-      <div><span>Daily notional</span><b id="botDaily">$40</b></div>
-      <div><span>Daily loss stop</span><b id="botLoss">$20</b></div>
-      <div><span>Trades / day</span><b id="botTrades">8</b></div>
+      <div><span>Max / trade</span><b id="botRisk">--</b></div>
+      <div><span>Daily notional</span><b id="botDaily">--</b></div>
+      <div><span>Daily loss stop</span><b id="botLoss">--</b></div>
+      <div><span>Trades / day</span><b id="botTrades">--</b></div>
     </div>
-    <div id="botLock" class="botLock">LIVE MONEY LOCKED</div>
+    <div id="botLock" class="botLock">CHECKING EXECUTION STATUS</div>
   </div>
 
   <div id="scalpCard" class="card scalpCard shadow">
     <div class="row">
       <div>
         <div class="label">Micro scalper</div>
-        <div id="scalpMode" class="scalpMode amber">LIVE TEST</div>
+        <div id="scalpMode" class="scalpMode amber">CHECKING</div>
       </div>
       <div class="right">
         <div class="label">Current setup</div>
@@ -58,6 +59,19 @@
       <div><span>Spread</span><b id="scalpSpread">--¢</b></div>
     </div>
     <div id="scalpLock" class="scalpLock">CHECKING LIVE SCALPER...</div>
+  </div>
+
+  <div class="card" id="livePnlCard" aria-live="polite">
+    <div class="label">Live micro-scalper · realized net P&amp;L</div>
+    <div id="liveNet" class="hero amber">--</div>
+    <div id="livePnlStatus" class="small">Checking filled trades and fees...</div>
+    <div class="botGrid">
+      <div><span>Realized gross</span><b id="liveGross">--</b></div>
+      <div><span>Allocated fees</span><b id="liveFees">--</b></div>
+      <div><span>Completed entries</span><b id="liveTrades">--</b></div>
+      <div><span>Open holdings at cost</span><b id="liveOpen">--</b></div>
+    </div>
+    <div id="livePnlNote" class="small">Actual results are separate from the paper scorecard below.</div>
   </div>
 
   <div id="simpleActionCard" class="card simpleAction wait">
@@ -229,7 +243,7 @@
   window.addEventListener('unhandledrejection', e => showError('PROMISE: ' + (e.reason?.message || e.reason || 'unknown error')));
   const load = (src, done) => {
     const s = document.createElement('script');
-    s.src = src + '?v=20260926-8';
+    s.src = src + '?v=20260926-report1';
     s.onload = done;
     s.onerror = () => showError('Could not load ' + src);
     document.body.appendChild(s);

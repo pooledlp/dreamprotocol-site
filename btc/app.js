@@ -163,42 +163,46 @@ function render(){const m=state.market,d=decide();if(m){$('window').textContent=
   let sig='WAIT',cls='wait',prob=model.pUp,max='MAX ENTRY --';if(d.side==='yes'){sig='BUY UP NOW';cls='up';prob=model.pUp;max='DO NOT PAY ABOVE '+Math.floor((model.pUp-d.timing.threshold)*100)+'¢'}else if(d.side==='no'){sig='BUY DOWN NOW';cls='down';prob=1-model.pUp;max='DO NOT PAY ABOVE '+Math.floor(((1-model.pUp)-d.timing.threshold)*100)+'¢'}else if(d.rawSide==='yes'){sig='CONFIRMING UP';cls='up';prob=model.pUp}else if(d.rawSide==='no'){sig='CONFIRMING DOWN';cls='down';prob=1-model.pUp}else if(d.leanSide==='yes'){sig='LEAN UP';cls='up';prob=model.pUp}else if(d.leanSide==='no'){sig='LEAN DOWN';cls='down';prob=1-model.pUp}
   $('signal').textContent=sig;$('signal').className='hero '+(cls==='up'?'green':cls==='down'?'red':'amber');$('signalCard').className='card signalCard '+cls;$('signalText').textContent=d.reason;$('sideProb').textContent='Model '+(d.side==='no'?'DOWN':'UP')+' '+pct(prob);$('edgeText').textContent='Edge '+(d.edge>-8?(d.edge*100).toFixed(1)+'¢':'--');$('maxPrice').textContent=max;
   $('rDistance').textContent=(delta>=0?'ABOVE ':'BELOW ')+money(Math.abs(delta));colorize($('rDistance'),delta);$('rMomentum').textContent='1m '+(model.mom1*100).toFixed(2)+'% | 5m '+(model.mom5*100).toFixed(2)+'%';colorize($('rMomentum'),model.mom1*.5+model.mom5*.5);$('rFlow').textContent=dirLabel(model.flow);colorize($('rFlow'),model.flow);$('rBook').textContent=dirLabel(model.book);colorize($('rBook'),model.book);$('rVol').textContent=(model.sigma*Math.sqrt(model.remaining)*100).toFixed(2)+'% sigma';$('rSpread').textContent=Number.isFinite(d.spread)?(d.spread*100).toFixed(1)+'¢':'--';colorize($('rSpread'),Number.isFinite(d.spread)&&d.spread>.08?-1:0);
-  $('coverage').textContent=model.coverage+'%';$('coverageFill').style.width=model.coverage+'%';$('hKalshi').textContent=Date.now()-state.kalshiAt<12000?'LIVE':'STALE';$('hCB').textContent=state.cbTicker?'LIVE':'OFFLINE';$('hK').textContent=state.kTicker?'LIVE':'OFFLINE';$('hMicro').textContent=(state.cbBook||state.kBook)&&(state.cbTrades||state.kTrades)?'LIVE':'PARTIAL';
-  $('source').textContent='Coinbase '+(state.cbTicker?money(state.cbTicker.price):'offline')+' | Kraken '+(state.kTicker?money(state.kTicker.price):'offline')+' | Kalshi quote live';$('freshness').textContent=state.signalsAt?'UPDATED '+Math.max(0,Math.round((Date.now()-state.signalsAt)/1000))+'s AGO':'--';
+  $('coverage').textContent=model.coverage+'%';$('coverageFill').style.width=model.coverage+'%';$('hKalshi').textContent=Date.now()-state.kalshiAt<12000?'LIVE':'STALE';$('hCB').textContent=state.cbTicker?(feedFresh(state.priceAt)?'LIVE':'STALE'):'OFFLINE';$('hK').textContent=state.kTicker?(feedFresh(state.priceAt)?'LIVE':'STALE'):'OFFLINE';$('hMicro').textContent=(state.cbBook||state.kBook)&&(state.cbTrades||state.kTrades)?(feedFresh(state.signalsAt)?'LIVE':'STALE'):'PARTIAL';
+  $('source').textContent='Coinbase '+(state.cbTicker?money(state.cbTicker.price):'offline')+' | Kraken '+(state.kTicker?money(state.kTicker.price):'offline')+' | Kalshi quote '+(feedFresh(state.kalshiAt)?'live':'stale');$('freshness').textContent=state.signalsAt?'UPDATED '+Math.max(0,Math.round((Date.now()-state.signalsAt)/1000))+'s AGO':'--';
   state.model=d;if(d.actionable)lockCall(d);draw()
 }
 
-function tickCountdown(){const m=state.market;if(!m)return;const close=Date.parse(m.close_time||m.expiration_time),s=Math.max(0,Math.floor((close-Date.now())/1000));$('countdown').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');if($('simpleTime'))$('simpleTime').textContent=$('countdown').textContent;$('countdown').classList.toggle('red',s<75);if(s<=0&&!state.rolling){state.rolling=true;setTimeout(()=>discoverMarket().then(()=>refreshAll(true)).catch(e=>log('roll '+e.message)).finally(()=>state.rolling=false),1200)}if(state.signalsAt)$('freshness').textContent='UPDATED '+Math.max(0,Math.round((Date.now()-state.signalsAt)/1000))+'s AGO'}
+function tickCountdown(){updateFeedStatus();const m=state.market;if(!m)return;const close=Date.parse(m.close_time||m.expiration_time),s=Math.max(0,Math.floor((close-Date.now())/1000));$('countdown').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');if($('simpleTime'))$('simpleTime').textContent=$('countdown').textContent;$('countdown').classList.toggle('red',s<75);if(s<=0&&!state.rolling){state.rolling=true;setTimeout(()=>discoverMarket().then(()=>refreshAll(true)).catch(e=>log('roll '+e.message)).finally(()=>state.rolling=false),1200)}if(state.signalsAt)$('freshness').textContent='UPDATED '+Math.max(0,Math.round((Date.now()-state.signalsAt)/1000))+'s AGO'}
 
 function draw(){const c=$('chart'),ctx=c.getContext('2d'),rows=candles.slice(-90),live=currentSpot();ctx.clearRect(0,0,c.width,c.height);if(rows.length<2)return;const ps=rows.map(x=>x.c);if(Number.isFinite(live))ps.push(live);const lo=Math.min(...ps),hi=Math.max(...ps),pad=14;ctx.strokeStyle='#213044';ctx.lineWidth=1;for(let z=1;z<4;z++){const y=c.height*z/4;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(c.width,y);ctx.stroke()}ctx.strokeStyle=ps[ps.length-1]>=ps[0]?'#35d07f':'#ff626a';ctx.lineWidth=3;ctx.beginPath();ps.forEach((p,i)=>{const x=pad+i/(ps.length-1)*(c.width-2*pad),y=c.height-pad-(p-lo)/Math.max(1e-9,hi-lo)*(c.height-2*pad);i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke();const move=ps[ps.length-1]/ps[0]-1;$('tapeMove').textContent=(move>=0?'+':'')+(move*100).toFixed(2)+'%';colorize($('tapeMove'),move)}
 
 function renderHistory(){const a=calls(),done=a.filter(x=>x.result),wins=done.filter(x=>x.win).length,pnl=done.reduce((s,x)=>s+(+x.pnl||0),0);$('score').textContent=done.length?(wins+'/'+done.length+' correct | '+(wins/done.length*100).toFixed(1)+'% hit rate | DreamPredict paper calls only'):'Fresh scorecard: no settled DreamPredict calls yet.';$('paperPnl').textContent=(pnl>=0?'+':'')+'$'+pnl.toFixed(2);colorize($('paperPnl'),pnl);$('history').innerHTML=a.slice(0,12).map(r=>'<div class="historyRow"><div><b>'+(r.side==='yes'?'UP':'DOWN')+'</b> @ '+cents(r.ask)+' <span class="small">'+new Date(r.created).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})+'</span><div class="small">'+r.ticker+' | model '+pct(r.p)+' | edge '+(r.edge*100).toFixed(1)+'¢</div></div><div class="'+(r.result?(r.win?'green':'red'):'amber')+'"><b>'+(r.result?(r.win?'WIN':'LOSS'):'OPEN')+'</b>'+(r.pnl!==null&&r.pnl!==undefined?'<div class="small">'+(r.pnl>=0?'+':'')+'$'+r.pnl.toFixed(2)+'</div>':'')+'</div></div>').join('')}
 
-async function refreshPrices(){const jobs=[['cbTicker',cbTicker],['kTicker',kTicker]];await Promise.all(jobs.map(async([k,f])=>{try{state[k]=await f()}catch(e){log(k+' '+e.message)}}));state.priceAt=Date.now();render()}
-async function refreshSignals(){const jobs=[['cbBook',cbBook],['kBook',kBook],['cbTrades',cbTradeFlow],['kTrades',kTradeFlow]];await Promise.all(jobs.map(async([k,f])=>{try{state[k]=await f()}catch(e){log(k+' '+e.message)}}));state.signalsAt=Date.now();render()}
-async function refreshAll(forceDiscover=false){try{if(forceDiscover||!state.market)await discoverMarket();else await refreshMarket();await Promise.all([refreshPrices(),refreshSignals()]);setStatus('LIVE',true);render();resolveCalls().catch(()=>{})}catch(e){setStatus('DEGRADED');log('refresh '+e.message);render()}}
+async function refreshPrices(){const jobs=[['cbTicker',cbTicker],['kTicker',kTicker]];await Promise.all(jobs.map(async([k,f])=>{try{state[k]=await f()}catch(e){log(k+' '+e.message)}}));updateFeedStatus();render()}
+async function refreshSignals(){const jobs=[['cbBook',cbBook],['kBook',kBook],['cbTrades',cbTradeFlow],['kTrades',kTradeFlow]];await Promise.all(jobs.map(async([k,f])=>{try{state[k]=await f()}catch(e){log(k+' '+e.message)}}));updateFeedStatus();render()}
+async function refreshAll(forceDiscover=false){try{if(forceDiscover||!state.market)await discoverMarket();else await refreshMarket();await Promise.all([refreshPrices(),refreshSignals()]);updateFeedStatus();render();resolveCalls().catch(()=>{})}catch(e){setStatus('DEGRADED');log('refresh '+e.message);render()}}
 
 async function refreshScalpShadow(){
   try{
     const j=await getJSON('https://api.dreamprotocol.ai/kalshi-bot/scalp-shadow',7000);
-    const s=j.scalp||{},live=j.liveOrders===true;
+    if(j.ok===false||!j.scalp)throw new Error('setup unavailable');
+    const s=j.scalp,live=j.liveOrders===true;
+    const valid=v=>v!==null&&v!==undefined&&v!==''&&Number.isFinite(+v);
     $('scalpMode').textContent=live?'LIVE TEST':'SHADOW';
     $('scalpMode').className='scalpMode '+(live?'green':'amber');
     $('scalpCandidate').textContent=s.eligible?(s.side==='yes'?'UP SCALP':'DOWN SCALP'):'NO SCALP';
     $('scalpCandidate').className='scalpCandidate '+(s.eligible?'green':'amber');
-    $('scalpEntry').textContent=Number.isFinite(+s.makerEntry)?Math.round(+s.makerEntry*100)+'¢':'--¢';
-    $('scalpTarget').textContent=Number.isFinite(+s.targetExit)?Math.round(+s.targetExit*100)+'¢':'--¢';
-    $('scalpEdge').textContent=Number.isFinite(+s.grossEdge)?(+s.grossEdge*100).toFixed(1)+'¢':'--¢';
-    $('scalpSpread').textContent=Number.isFinite(+s.spread)?(+s.spread*100).toFixed(1)+'¢':'--¢';
+    $('scalpEntry').textContent=valid(s.makerEntry)?Math.round(+s.makerEntry*100)+'¢':'--¢';
+    $('scalpTarget').textContent=valid(s.targetExit)?Math.round(+s.targetExit*100)+'¢':'--¢';
+    $('scalpEdge').textContent=valid(s.grossEdge)?(+s.grossEdge*100).toFixed(1)+'¢':'--¢';
+    $('scalpSpread').textContent=valid(s.spread)?(+s.spread*100).toFixed(1)+'¢':'--¢';
     const learned=j.learning||{},adaptive=learned.adaptive||{};
     const learningText=learned.completedTrades>=5
       ? ' Learning from '+learned.completedTrades+' completed scalps; current adaptive target +'+Math.round(+(s.targetProfit||0)*100)+'¢.'
       : ' Learning warm-up: '+(learned.completedTrades||0)+' completed scalps so far; bucket tuning starts after 5 samples.';
     $('scalpMessage').textContent=(s.eligible
-      ? (live?'LIVE maker setup eligible: ':'Shadow maker candidate: ')+(s.side==='yes'?'UP':'DOWN')+' near '+Math.round(+s.makerEntry*100)+'¢ with about '+Math.round(+s.targetProfit*100)+'¢ gross target.'
+      ? 'Model candidate (not an order): '+(s.side==='yes'?'UP':'DOWN')+' near '+Math.round(+s.makerEntry*100)+'¢ with about '+Math.round(+s.targetProfit*100)+'¢ gross target.'
       : (live?'Live scalper scanning. ':'Shadow scalper scanning. ')+(s.reason||'No qualifying setup right now.'))+learningText;
     $('scalpCard').className='card scalpCard '+(s.eligible?'candidate':'shadow');
   }catch(e){
+    for(const id of ['scalpEntry','scalpTarget','scalpEdge','scalpSpread'])$(id).textContent='--¢';
+    $('scalpCard').className='card scalpCard shadow';
     $('scalpCandidate').textContent='STATUS ERROR';
     $('scalpCandidate').className='scalpCandidate red';
     $('scalpMessage').textContent='Could not read micro-scalper status: '+e.message;
@@ -208,14 +212,17 @@ async function refreshScalpShadow(){
 async function refreshBotStatus(){
   try{
     const j=await getJSON('https://api.dreamprotocol.ai/kalshi-bot/status',7000);
+    if(typeof j.live!=='boolean'||!j.risk)throw new Error('status unavailable');
+    const risk=j.directionalEnabled===false?j.scalper:j.risk;
+    $('riskScope').textContent=j.directionalEnabled===false?'Micro-scalper limits':'Directional bot limits';
     $('botMode').textContent=j.mode||'UNKNOWN';
     $('botMode').className='botMode '+(j.live?'green':'amber');
     $('botCreds').textContent=j.credentialsConfigured?'CONNECTED':'NOT CONNECTED';
     $('botCreds').className='botCreds '+(j.credentialsConfigured?'green':'amber');
-    $('botRisk').textContent='$'+(j.risk?.maxRiskDollars??'--');
-    $('botDaily').textContent='$'+(j.risk?.maxDailyNotionalDollars??'--');
-    $('botLoss').textContent='$'+(j.risk?.maxDailyLossDollars??'--');
-    $('botTrades').textContent=String(j.risk?.maxTradesPerDay??'--');
+    $('botRisk').textContent='$'+(risk?.maxRiskDollars??'--');
+    $('botDaily').textContent='$'+(risk?.maxDailyNotionalDollars??'--');
+    $('botLoss').textContent='$'+(risk?.maxDailyLossDollars??'--');
+    $('botTrades').textContent=String(risk?.maxTradesPerDay??'--');
     $('botCard').className='card botCard '+(j.live?'live':'paper');
 
     if(j.scalper){
@@ -242,34 +249,62 @@ async function refreshBotStatus(){
       $('botMessage').textContent='Paper execution is active. Add Kalshi credentials server-side before real-money mode can ever arm.';
     }
   }catch(e){
+    $('botCreds').textContent='UNKNOWN';$('botCreds').className='botCreds amber';
+    $('botCard').className='card botCard paper';
+    $('botLock').textContent='EXECUTION STATUS UNKNOWN';$('botLock').className='botLock';
+    $('scalpLock').textContent='SCALPER STATUS UNKNOWN';
+    for(const id of ['botRisk','botDaily','botLoss','botTrades'])$(id).textContent='--';
     $('botMode').textContent='STATUS ERROR';
     $('botMode').className='botMode red';
     $('botMessage').textContent='Could not read execution-bot status: '+e.message;
   }
 }
 
+
+let reportPending=false;
+async function refreshScalpAccounting(){
+  if(reportPending)return;reportPending=true;
+  try{
+    const j=await getJSON('https://api.dreamprotocol.ai/kalshi-bot/pnl',12000);
+    const t=j.today,at=Date.parse(j.asOf);
+    if(j.ok!==true||j.complete!==true||!t||!Number.isFinite(at)||Date.now()-at>90000)throw new Error(j.complete===false?'Fills and fees are still being reconciled.':'Results are unavailable or stale.');
+    if(!['realizedNetDollars','realizedGrossDollars','realizedFeesDollars','openCostDollars','completed','wins','openContracts'].every(k=>typeof t[k]==='number'&&Number.isFinite(t[k])))throw new Error('Incomplete results.');
+    $('liveNet').textContent=money(t.realizedNetDollars);colorize($('liveNet'),t.realizedNetDollars);
+    $('liveGross').textContent=money(t.realizedGrossDollars);$('liveFees').textContent=money(t.realizedFeesDollars);
+    $('liveTrades').textContent=t.completed+' closed · '+t.wins+' winners';$('liveOpen').textContent=money(t.openCostDollars);
+    $('livePnlStatus').textContent=j.day+' UTC · Filled prices and actual fees · As of '+new Date(at).toLocaleTimeString();
+    $('livePnlNote').textContent='Realized net includes allocated entry and exit fees on closed contracts. Open holdings ('+t.openContracts+' contracts) are shown at cost, not as profit. Win count uses fully closed entries.';
+  }catch(e){
+    for(const id of ['liveNet','liveGross','liveFees','liveTrades','liveOpen'])$(id).textContent='--';
+    $('liveNet').className='hero amber';$('livePnlStatus').textContent='RESULTS NOT VERIFIED';
+    $('livePnlNote').textContent=e.message+' No profit or loss total is shown until the records reconcile.';
+  }finally{reportPending=false}
+}
+
 async function boot(){
   setStatus('LOADING');
   renderHistory();
   refreshBotStatus().catch(()=>{});
+  refreshScalpAccounting().catch(()=>{});
   refreshScalpShadow().catch(()=>{});
   try{
     const j=await getSnapshot(true);
     applySnapshot(j);
     render();
-    setStatus(state.market&&Number.isFinite(currentSpot())?'LIVE':'DEGRADED',!!(state.market&&Number.isFinite(currentSpot())));
+    updateFeedStatus();
   }catch(e){
     setStatus('DEGRADED');
     log('Startup '+e.message);
   }
   setInterval(tickCountdown,250);
   setInterval(()=>refreshPrices().catch(e=>log('price retry '+e.message)),2000);
-  setInterval(()=>refreshMarket().then(()=>{render();if(state.market&&Number.isFinite(currentSpot()))setStatus('LIVE',true)}).catch(e=>{setStatus('DEGRADED');log('market retry '+e.message)}),3000);
+  setInterval(()=>refreshMarket().then(()=>{render();if(state.market&&Number.isFinite(currentSpot()))updateFeedStatus()}).catch(e=>{setStatus('DEGRADED');log('market retry '+e.message)}),3000);
   setInterval(()=>refreshSignals().catch(e=>log('signal retry '+e.message)),5000);
   setInterval(()=>loadHistory().then(render).catch(e=>log('history retry '+e.message)),60000);
-  setInterval(()=>discoverMarket().then(()=>{render();if(state.market&&Number.isFinite(currentSpot()))setStatus('LIVE',true)}).catch(e=>log('discover retry '+e.message)),15000);
+  setInterval(()=>discoverMarket().then(()=>{render();if(state.market&&Number.isFinite(currentSpot()))updateFeedStatus()}).catch(e=>log('discover retry '+e.message)),15000);
   setInterval(()=>resolveCalls().catch(()=>{}),30000);
   setInterval(()=>refreshBotStatus().catch(()=>{}),10000);
+  setInterval(()=>refreshScalpAccounting().catch(()=>{}),30000);
   setInterval(()=>refreshScalpShadow().catch(()=>{}),5000);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshAll(true).catch(()=>{})});
 }
@@ -279,3 +314,4 @@ $('boughtDown').addEventListener('click',()=>setManualPosition('no'));
 $('clearPosition').addEventListener('click',()=>clearManualPosition());
 
 boot();
+

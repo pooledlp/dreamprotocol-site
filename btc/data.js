@@ -5,6 +5,10 @@ const FINAL_GUARD_SECONDS=75;
 const $=id=>document.getElementById(id);
 let candles=[],state={market:null,kalshiAt:0,priceAt:0,signalsAt:0,cbTicker:null,kTicker:null,cbBook:null,kBook:null,cbTrades:null,kTrades:null,model:null,rolling:false};
 let snapshotCache=null,snapshotAt=0,snapshotPromise=null;
+const snapshotTimes=new WeakMap();
+const feedFresh=at=>at>0&&Date.now()-at<12000;
+const liveDataFresh=()=>!!state.market&&feedFresh(state.kalshiAt)&&feedFresh(state.priceAt)&&Number.isFinite(currentSpot());
+function updateFeedStatus(){setStatus(liveDataFresh()?'LIVE':'DEGRADED',liveDataFresh())}
 
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
@@ -18,7 +22,7 @@ function log(s){const e=$('log');if(!e)return;e.textContent+='\n'+new Date().toL
 function setStatus(s,on=false){$('status').textContent=s;$('statusPill').className='pill'+(on?' live':'')}
 async function getJSON(url,ms=7000){const ac=new AbortController(),t=setTimeout(()=>ac.abort(),ms);try{const r=await fetch(url,{cache:'no-store',signal:ac.signal,headers:{Accept:'application/json'}});if(!r.ok)throw new Error('HTTP '+r.status);return await r.json()}finally{clearTimeout(t)}}
 
-function dollarField(m,name,legacy){const v=m&&m[name];if(v!==undefined&&v!==null&&v!=='')return +v;const c=m&&m[legacy];return Number.isFinite(+c)?+c/100:NaN}
+function dollarField(m,name,legacy){const v=m&&m[name];if(v!==undefined&&v!==null&&v!=='')return +v;const c=m&&m[legacy];return c!==null&&c!==undefined&&c!==''&&Number.isFinite(+c)?+c/100:NaN}
 function marketQuote(m){const yb=dollarField(m,'yes_bid_dollars','yes_bid'),ya=dollarField(m,'yes_ask_dollars','yes_ask'),nb=dollarField(m,'no_bid_dollars','no_bid'),na=dollarField(m,'no_ask_dollars','no_ask');return{yesBid:yb,yesAsk:Number.isFinite(ya)?ya:(Number.isFinite(nb)?1-nb:NaN),noBid:nb,noAsk:Number.isFinite(na)?na:(Number.isFinite(yb)?1-yb:NaN)}}
 function parseStrike(m){for(const k of ['floor_strike','strike','cap_strike']){const n=+(m&&m[k]);if(Number.isFinite(n)&&n>1000)return n}const parts=[m&&m.functional_strike,m&&m.subtitle,m&&m.yes_sub_title,m&&m.title,m&&m.rules_primary].filter(Boolean);for(const s of parts){const hits=String(s).match(/\$?([0-9]{2,3}(?:,[0-9]{3})+(?:\.\d+)?|[0-9]{4,6}(?:\.\d+)?)/g)||[];for(const h of hits){const n=+h.replace(/[$,]/g,'');if(n>1000&&n<1000000)return n}}return NaN}
 
@@ -26,9 +30,9 @@ async function getSnapshot(force=false){
   if(!force&&snapshotCache&&Date.now()-snapshotAt<1400)return snapshotCache;
   if(snapshotPromise)return snapshotPromise;
   snapshotPromise=getJSON(LIVE_API,9000).then(j=>{
-    if(!j)throw new Error('live feed unavailable');
+    if(!j||j.ok===false||j.error)throw new Error('live feed unavailable');
     if(Array.isArray(j.errors)&&j.errors.length)log('Backend: '+j.errors.map(x=>x.error).join(' | '));
-    snapshotCache=j;snapshotAt=Date.now();return j;
+    snapshotCache=j;snapshotAt=Date.now();snapshotTimes.set(j,snapshotAt);return j;
   }).finally(()=>{snapshotPromise=null});
   return snapshotPromise;
 }
@@ -43,8 +47,8 @@ function applySnapshot(j){
   state.cbTrades=Number.isFinite(j.signals&&j.signals.cbFlow)?{score:+j.signals.cbFlow}:null;
   state.kTrades=Number.isFinite(j.signals&&j.signals.kFlow)?{score:+j.signals.kFlow}:null;
   if(Array.isArray(j.candles)&&j.candles.length)candles=j.candles.map(x=>({t:+x.t,l:+x.l,h:+x.h,o:+x.o,c:+x.c,v:+x.v})).sort((a,b)=>a.t-b.t);
-  const now=Date.now();
-  state.kalshiAt=state.market?now:state.kalshiAt;
+  const now=snapshotTimes.get(j)||0;
+  state.kalshiAt=j.market?now:state.kalshiAt;
   state.priceAt=(state.cbTicker||state.kTicker)?now:state.priceAt;
   state.signalsAt=(state.cbBook||state.kBook||state.cbTrades||state.kTrades)?now:state.signalsAt;
   if(oldTicker&&state.market&&oldTicker!==state.market.ticker){log('Rolled to '+state.market.ticker);resolveCalls().catch(()=>{})}
@@ -78,5 +82,5 @@ function modelForMarket(){const m=state.market;if(!m)return null;const strike=pa
 function calls(){try{return JSON.parse(localStorage.getItem('dp_kalshi_calls_v4')||'[]')}catch{return[]}}
 function saveCalls(a){localStorage.setItem('dp_kalshi_calls_v4',JSON.stringify(a.slice(0,200)))}
 function lockCall(d){if(!d||!d.actionable||!state.market)return;const a=calls();if(a.some(x=>x.ticker===state.market.ticker))return;const side=d.side,ask=side==='yes'?d.q.yesAsk:d.q.noAsk,p=side==='yes'?d.model.pUp:1-d.model.pUp;a.unshift({ticker:state.market.ticker,created:Date.now(),close:d.model.close,side,ask,p,edge:d.edge,target:d.model.strike,spot:d.model.spot,result:null,pnl:null});saveCalls(a);log('LOCKED '+side.toUpperCase()+' '+state.market.ticker+' @ '+cents(ask));renderHistory()}
-function marketResult(m){const r=String((m&&m.result)||(m&&m.outcome)||'').toLowerCase();if(['yes','up','1','true'].includes(r))return'yes';if(['no','down','0','false'].includes(r))return'no';const sv=+(m&&((m.settlement_value_dollars!==undefined)?m.settlement_value_dollars:m.settlement_value));if(Number.isFinite(sv))return sv>=.5?'yes':'no';return null}
+function marketResult(m){const r=String((m&&m.result)||(m&&m.outcome)||'').toLowerCase();if(['yes','up','1','true'].includes(r))return'yes';if(['no','down','0','false'].includes(r))return'no';const raw=m&&((m.settlement_value_dollars!==undefined)?m.settlement_value_dollars:m.settlement_value),sv=raw===null||raw===undefined||raw===''?NaN:+raw;if(Number.isFinite(sv))return sv>=.5?'yes':'no';return null}
 async function resolveCalls(){const a=calls();let changed=false;for(const r of a){if(r.result||Date.now()<r.close+30000)continue;try{const j=await getJSON(LIVE_API+'?ticker='+encodeURIComponent(r.ticker),7000),m=j.market||j,res=marketResult(m);if(res){r.result=res;r.win=res===r.side;r.pnl=r.win?1-r.ask:-r.ask;r.settled=Date.now();changed=true}}catch(e){log('settlement '+r.ticker+' '+e.message)}}if(changed)saveCalls(a);renderHistory()}
