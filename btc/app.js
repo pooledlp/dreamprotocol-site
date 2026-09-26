@@ -178,6 +178,30 @@ async function refreshPrices(){const jobs=[['cbTicker',cbTicker],['kTicker',kTic
 async function refreshSignals(){const jobs=[['cbBook',cbBook],['kBook',kBook],['cbTrades',cbTradeFlow],['kTrades',kTradeFlow]];await Promise.all(jobs.map(async([k,f])=>{try{state[k]=await f()}catch(e){log(k+' '+e.message)}}));state.signalsAt=Date.now();render()}
 async function refreshAll(forceDiscover=false){try{if(forceDiscover||!state.market)await discoverMarket();else await refreshMarket();await Promise.all([refreshPrices(),refreshSignals()]);setStatus('LIVE',true);render();resolveCalls().catch(()=>{})}catch(e){setStatus('DEGRADED');log('refresh '+e.message);render()}}
 
+async function refreshScalpShadow(){
+  try{
+    const j=await getJSON('https://api.dreamprotocol.ai/kalshi-bot/scalp-shadow',7000);
+    const s=j.scalp||{};
+    $('scalpMode').textContent=j.mode==='SHADOW_ONLY'?'SHADOW':'UNKNOWN';
+    $('scalpMode').className='scalpMode amber';
+    $('scalpCandidate').textContent=s.eligible?(s.side==='yes'?'UP SCALP':'DOWN SCALP'):'NO SCALP';
+    $('scalpCandidate').className='scalpCandidate '+(s.eligible?'green':'amber');
+    $('scalpEntry').textContent=Number.isFinite(+s.makerEntry)?Math.round(+s.makerEntry*100)+'¢':'--¢';
+    $('scalpTarget').textContent=Number.isFinite(+s.targetExit)?Math.round(+s.targetExit*100)+'¢':'--¢';
+    $('scalpEdge').textContent=Number.isFinite(+s.grossEdge)?(+s.grossEdge*100).toFixed(1)+'¢':'--¢';
+    $('scalpSpread').textContent=Number.isFinite(+s.spread)?(+s.spread*100).toFixed(1)+'¢':'--¢';
+    $('scalpMessage').textContent=s.eligible
+      ? 'Paper maker candidate: '+(s.side==='yes'?'UP':'DOWN')+' near '+Math.round(+s.makerEntry*100)+'¢ with a '+Math.round(+s.targetProfit*100)+'¢ gross target. No real scalp order is being sent.'
+      : 'Scanning for maker-style micro-profits. '+(s.reason||'No qualifying setup right now.');
+    $('scalpCard').className='card scalpCard '+(s.eligible?'candidate':'shadow');
+    $('scalpLock').textContent='SHADOW ONLY · NO SCALP ORDERS';
+  }catch(e){
+    $('scalpCandidate').textContent='STATUS ERROR';
+    $('scalpCandidate').className='scalpCandidate red';
+    $('scalpMessage').textContent='Could not read micro-scalper shadow status: '+e.message;
+  }
+}
+
 async function refreshBotStatus(){
   try{
     const j=await getJSON('https://api.dreamprotocol.ai/kalshi-bot/status',7000);
@@ -214,6 +238,7 @@ async function boot(){
   setStatus('LOADING');
   renderHistory();
   refreshBotStatus().catch(()=>{});
+  refreshScalpShadow().catch(()=>{});
   try{
     const j=await getSnapshot(true);
     applySnapshot(j);
@@ -231,6 +256,7 @@ async function boot(){
   setInterval(()=>discoverMarket().then(()=>{render();if(state.market&&Number.isFinite(currentSpot()))setStatus('LIVE',true)}).catch(e=>log('discover retry '+e.message)),15000);
   setInterval(()=>resolveCalls().catch(()=>{}),30000);
   setInterval(()=>refreshBotStatus().catch(()=>{}),10000);
+  setInterval(()=>refreshScalpShadow().catch(()=>{}),5000);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshAll(true).catch(()=>{})});
 }
 
