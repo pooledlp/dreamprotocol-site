@@ -5629,14 +5629,20 @@ a[href^="mailto:"]{overflow-wrap:anywhere;word-break:break-word}
   color:#d2ff73;
   font-size:.7rem
 }
+/*
+ * Keep scene changes visually continuous. The old entrance animation faded each
+ * newly selected scene from opacity:0, which read as a black flash on mobile
+ * when the simulator advanced. Settle the layers with transform-only motion so
+ * the panel is fully painted on every frame while still feeling alive.
+ */
 .ops-scene.is-active .ops-scene-copy{
-  animation:opsSceneIn .55s ease both
+  animation:opsSceneSettle .46s cubic-bezier(.2,.7,.2,1) both
 }
 .ops-scene.is-active .ops-motion{
-  animation:opsSceneIn .7s .08s ease both
+  animation:opsSceneSettle .56s .04s cubic-bezier(.2,.7,.2,1) both
 }
 .ops-scene.is-active .ops-activity{
-  animation:opsSceneIn .7s .16s ease both
+  animation:opsSceneSettle .56s .08s cubic-bezier(.2,.7,.2,1) both
 }
 
 @keyframes opsScanlines{
@@ -5681,9 +5687,9 @@ a[href^="mailto:"]{overflow-wrap:anywhere;word-break:break-word}
   0%,12%,100%{opacity:.42;transform:translateY(5px)}
   26%,65%{opacity:1;transform:translateY(0)}
 }
-@keyframes opsSceneIn{
-  from{opacity:0;transform:translateY(12px)}
-  to{opacity:1;transform:translateY(0)}
+@keyframes opsSceneSettle{
+  from{transform:translateY(8px) scale(.997)}
+  to{transform:translateY(0) scale(1)}
 }
 
 /* Stronger business-outcome proof, while keeping claims qualified. */
