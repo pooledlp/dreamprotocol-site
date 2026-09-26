@@ -35,13 +35,14 @@ async function refreshPrices(){const jobs=[['cbTicker',cbTicker],['kTicker',kTic
 async function refreshSignals(){const jobs=[['cbBook',cbBook],['kBook',kBook],['cbTrades',cbTradeFlow],['kTrades',kTradeFlow]];await Promise.all(jobs.map(async([k,f])=>{try{state[k]=await f()}catch(e){log(k+' '+e.message)}}));state.signalsAt=Date.now();render()}
 async function refreshAll(forceDiscover=false){try{if(forceDiscover||!state.market)await discoverMarket();else await refreshMarket();await Promise.all([refreshPrices(),refreshSignals()]);setStatus('LIVE',true);render();resolveCalls().catch(()=>{})}catch(e){setStatus('DEGRADED');log('refresh '+e.message);render()}}
 
-async function boot(){setStatus('LOADING');renderHistory();try{await Promise.all([loadHistory(),discoverMarket()]);await refreshAll(false);setStatus('LIVE',true)}catch(e){setStatus('DATA ERROR');log('FATAL '+e.message)}
+async function boot(){setStatus('LOADING');renderHistory();
+  try{const j=await getSnapshot(true);applySnapshot(j);render();setStatus(state.market&&Number.isFinite(currentSpot())?'LIVE':'DEGRADED',!!(state.market&&Number.isFinite(currentSpot())))}catch(e){setStatus('DEGRADED');log('Startup '+e.message)}
   setInterval(tickCountdown,250);
-  setInterval(()=>refreshPrices().catch(()=>{}),2000);
-  setInterval(()=>refreshMarket().then(render).catch(()=>{}),3000);
-  setInterval(()=>refreshSignals().catch(()=>{}),5000);
-  setInterval(()=>loadHistory().then(render).catch(()=>{}),60000);
-  setInterval(()=>discoverMarket().then(render).catch(()=>{}),20000);
+  setInterval(()=>refreshPrices().catch(e=>log('price retry '+e.message)),2000);
+  setInterval(()=>refreshMarket().then(()=>{render();if(state.market&&Number.isFinite(currentSpot()))setStatus('LIVE',true)}).catch(e=>{setStatus('DEGRADED');log('market retry '+e.message)}),3000);
+  setInterval(()=>refreshSignals().catch(e=>log('signal retry '+e.message)),5000);
+  setInterval(()=>loadHistory().then(render).catch(e=>log('history retry '+e.message)),60000);
+  setInterval(()=>discoverMarket().then(()=>{render();if(state.market&&Number.isFinite(currentSpot()))setStatus('LIVE',true)}).catch(e=>log('discover retry '+e.message)),15000);
   setInterval(()=>resolveCalls().catch(()=>{}),30000);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshAll(true).catch(()=>{})})
 }
