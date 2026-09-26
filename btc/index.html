@@ -164,7 +164,7 @@
   </div>
 
   <div class="card">
-    <div class="row"><div><div class="label">Automatically graded calls</div><div id="score" class="small">No settled actionable calls on this browser yet.</div></div><div id="paperPnl" class="val">$0.00</div></div>
+    <div class="row"><div><div class="label">DreamPredict paper calls</div><div id="score" class="small">Fresh scorecard after stability update. Kalshi's Past arrows are actual market outcomes; this section tracks DreamPredict's own calls.</div></div><div id="paperPnl" class="val">$0.00</div></div>
     <div id="history"></div>
   </div>
 
@@ -184,7 +184,7 @@
   window.addEventListener('unhandledrejection', e => showError('PROMISE: ' + (e.reason?.message || e.reason || 'unknown error')));
   const load = (src, done) => {
     const s = document.createElement('script');
-    s.src = src + '?v=20260925-7';
+    s.src = src + '?v=20260926-1';
     s.onload = done;
     s.onerror = () => showError('Could not load ' + src);
     document.body.appendChild(s);
