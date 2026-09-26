@@ -75,8 +75,8 @@ function modelForMarket(){const m=state.market;if(!m)return null;const strike=pa
   return{pUp:clamp(p,.01,.99),strike,spot,remaining,sigma,mom1,mom5,mom15,book,flow,coverage,close}
 }
 
-function calls(){try{return JSON.parse(localStorage.getItem('dp_kalshi_calls_v3')||'[]')}catch{return[]}}
-function saveCalls(a){localStorage.setItem('dp_kalshi_calls_v3',JSON.stringify(a.slice(0,200)))}
+function calls(){try{return JSON.parse(localStorage.getItem('dp_kalshi_calls_v4')||'[]')}catch{return[]}}
+function saveCalls(a){localStorage.setItem('dp_kalshi_calls_v4',JSON.stringify(a.slice(0,200)))}
 function lockCall(d){if(!d||!d.actionable||!state.market)return;const a=calls();if(a.some(x=>x.ticker===state.market.ticker))return;const side=d.side,ask=side==='yes'?d.q.yesAsk:d.q.noAsk,p=side==='yes'?d.model.pUp:1-d.model.pUp;a.unshift({ticker:state.market.ticker,created:Date.now(),close:d.model.close,side,ask,p,edge:d.edge,target:d.model.strike,spot:d.model.spot,result:null,pnl:null});saveCalls(a);log('LOCKED '+side.toUpperCase()+' '+state.market.ticker+' @ '+cents(ask));renderHistory()}
 function marketResult(m){const r=String((m&&m.result)||(m&&m.outcome)||'').toLowerCase();if(['yes','up','1','true'].includes(r))return'yes';if(['no','down','0','false'].includes(r))return'no';const sv=+(m&&((m.settlement_value_dollars!==undefined)?m.settlement_value_dollars:m.settlement_value));if(Number.isFinite(sv))return sv>=.5?'yes':'no';return null}
 async function resolveCalls(){const a=calls();let changed=false;for(const r of a){if(r.result||Date.now()<r.close+30000)continue;try{const j=await getJSON(LIVE_API+'?ticker='+encodeURIComponent(r.ticker),7000),m=j.market||j,res=marketResult(m);if(res){r.result=res;r.win=res===r.side;r.pnl=r.win?1-r.ask:-r.ask;r.settled=Date.now();changed=true}}catch(e){log('settlement '+r.ticker+' '+e.message)}}if(changed)saveCalls(a);renderHistory()}
