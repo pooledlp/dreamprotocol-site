@@ -4,6 +4,18 @@ const cents=n=>Number.isFinite(+n)?(+n*100).toFixed(1)+'¢':'--';
 const money=n=>Number.isFinite(+n)?new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2}).format(+n):'--';
 const pct=n=>Number.isFinite(+n)?(+n*100).toFixed(1)+'%':'--';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let strategy={minNet:.04,minProb:.70,minEntry:.60,maxEntry:.80,maxSpread:.025,minEdge:.05,makerOnly:true};
+function gateSummary(r){
+  if(r?.eligible)return{label:'SWEET SPOT',cls:'green',detail:'Execution candidate'};
+  const reasons=[];
+  if(Number.isFinite(+r?.estimatedNetTarget)&&+r.estimatedNetTarget<strategy.minNet)reasons.push('net '+cents(r.estimatedNetTarget)+' < '+cents(strategy.minNet));
+  if(Number.isFinite(+r?.spread)&&+r.spread>strategy.maxSpread)reasons.push('spread '+cents(r.spread)+' > '+cents(strategy.maxSpread));
+  if(Number.isFinite(+r?.grossEdge)&&+r.grossEdge<strategy.minEdge)reasons.push('edge '+cents(r.grossEdge)+' < '+cents(strategy.minEdge));
+  if(Number.isFinite(+r?.makerEntry)&&(+r.makerEntry<strategy.minEntry||+r.makerEntry>strategy.maxEntry))reasons.push('entry '+cents(r.makerEntry)+' outside '+cents(strategy.minEntry)+'–'+cents(strategy.maxEntry));
+  const bestP=Math.max(Number.isFinite(+r?.pUp)?+r.pUp:0,Number.isFinite(+r?.pDown)?+r.pDown:0);
+  if(bestP&&bestP<strategy.minProb)reasons.push('fair '+pct(bestP)+' < '+pct(strategy.minProb));
+  return{label:'BLOCKED',cls:'amber',detail:reasons.slice(0,2).join(' · ')||'fails live execution gates'};
+}
 async function json(path,ms=8000){const ac=new AbortController(),t=setTimeout(()=>ac.abort(),ms);try{const r=await fetch(API+path,{cache:'no-store',signal:ac.signal});if(!r.ok)throw new Error('HTTP '+r.status);return await r.json()}finally{clearTimeout(t)}}
 function klass(v){return v>0?'green':v<0?'red':'amber'}
 function remaining(min){if(!Number.isFinite(+min))return'--:--';const s=Math.max(0,Math.round(+min*60));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
@@ -40,6 +52,18 @@ function tickTimers(){
 }
 function renderStatus(s){
   const live=!!s?.scalper?.live;
+  strategy={
+    minNet:Number.isFinite(+s?.scalper?.minEstimatedNetTargetCents)?+s.scalper.minEstimatedNetTargetCents/100:.04,
+    minProb:Number.isFinite(+s?.scalper?.minModelProbability)?+s.scalper.minModelProbability:.70,
+    minEntry:Array.isArray(s?.scalper?.entryCostBandCents)?+s.scalper.entryCostBandCents[0]/100:.60,
+    maxEntry:Array.isArray(s?.scalper?.entryCostBandCents)?+s.scalper.entryCostBandCents[1]/100:.80,
+    maxSpread:Number.isFinite(+s?.scalper?.maxSpreadCents)?+s.scalper.maxSpreadCents/100:.025,
+    minEdge:Number.isFinite(+s?.scalper?.minGrossEdgeCents)?+s.scalper.minGrossEdgeCents/100:.05,
+    makerOnly:s?.scalper?.makerOnlyEntries!==false
+  };
+  const gate=$('strategyGate');
+  if(gate)gate.textContent=(strategy.makerOnly?'MAKER ONLY · ':'')+
+    cents(strategy.minEntry)+'–'+cents(strategy.maxEntry)+' entry · ≥'+cents(strategy.minNet)+' net · ≥'+pct(strategy.minProb)+' fair · ≤'+cents(strategy.maxSpread)+' spread';
   $('mode').textContent=live?'LIVE MULTI-MARKET':'SHADOW / PAPER';
   $('mode').className='big '+(live?'green':'amber');
   $('assets').textContent=(s?.scalper?.assets||['BTC','ETH','SOL','XRP','DOGE']).join(' · ');
@@ -65,7 +89,10 @@ function renderScan(j){
     $('selectedTime').dataset.end=Number.isFinite(end)?String(end):'';
     $('selectedTime').textContent=remaining(top.remainingMinutes);
     $('selectedEndTime').textContent=Number.isFinite(end)?endLabel(end):'--';
-    $('selectedReason').textContent=top.reason||'No qualifying setup yet.';
+    const gate=gateSummary(top);
+    $('selectedReason').textContent=top.eligible
+      ?(top.reason||'Live execution candidate.')
+      :'WATCH ONLY · '+gate.detail+'. These projected cents are diagnostics, not a trade target.';
     $('entry').textContent=cents(top.makerEntry);
     $('target').textContent=cents(top.targetExit);
     $('gross').textContent=cents(top.grossEdge);
@@ -82,10 +109,11 @@ function renderScan(j){
   }
   $('markets').innerHTML=rows.map((r,i)=>{
     const end=Number.isFinite(+r.remainingMinutes)?now+(+r.remainingMinutes*60000):NaN;
+    const gate=gateSummary(r);
     return `<div class="market ${i===0?'active ':''}${r.eligible?'eligible':''}">
-      <div class="marketTop"><div class="marketAsset">${esc(r.asset)}</div><div class="badge">${r.eligible?'ELIGIBLE':'WATCH'}</div></div>
+      <div class="marketTop"><div class="marketAsset">${esc(r.asset)}</div><div class="badge ${gate.cls}">${gate.label}</div></div>
       <div class="marketMain ${r.eligible?(r.side==='yes'?'green':'red'):'amber'}">${r.eligible?(r.side==='yes'?'UP / YES':'DOWN / NO'):'WAIT'}</div>
-      <div class="marketMeta">Net target <b>${cents(r.estimatedNetTarget)}</b><br>Gross edge ${cents(r.grossEdge)} · spread ${cents(r.spread)}<br><b class="countdown" data-end="${Number.isFinite(end)?end:''}">${remaining(r.remainingMinutes)}</b> left · ${Number.isFinite(end)?endLabel(end):'--'}</div>
+      <div class="marketMeta">${r.eligible?'Expected net':'Projected net'} <b>${cents(r.estimatedNetTarget)}</b><br>Gross edge ${cents(r.grossEdge)} · spread ${cents(r.spread)}<br><span class="gateReason">${esc(gate.detail)}</span><br><b class="countdown" data-end="${Number.isFinite(end)?end:''}">${remaining(r.remainingMinutes)}</b> left · ${Number.isFinite(end)?endLabel(end):'--'}</div>
     </div>`;
   }).join('')||'<div class="muted">No supported markets returned yet.</div>';
   tickTimers();
