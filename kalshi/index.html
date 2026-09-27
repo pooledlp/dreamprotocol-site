@@ -6,14 +6,14 @@
 <meta name="theme-color" content="#070a0f">
 <meta name="robots" content="noindex,nofollow">
 <title>DreamPredict Multi-Market 15M</title>
-<link rel="stylesheet" href="styles.css?v=20260926-multi1">
+<link rel="stylesheet" href="styles.css?v=20260926-summary1">
 </head>
 <body>
 <div class="shell">
   <header>
     <div>
       <div class="brand">DreamPredict <span>MULTI 15M</span></div>
-      <div class="sub">KALSHI CRYPTO EXECUTION ENGINE</div>
+      <div class="sub">KALSHI 15-MINUTE EXECUTION ENGINE</div>
     </div>
     <div id="health" class="pill amber"><i></i><b>CONNECTING</b></div>
   </header>
@@ -30,6 +30,23 @@
       </div>
     </div>
     <div id="modeText" class="muted">Reading live bot state and global risk controls.</div>
+  </section>
+
+  <section class="card dailyCard" aria-live="polite">
+    <div class="sectionHead">
+      <div>
+        <div class="label">Today at a glance</div>
+        <div id="todayState" class="muted">Loading completed trades and realized results.</div>
+      </div>
+      <div id="todayBadge" class="tag">TODAY</div>
+    </div>
+    <div class="dailyGrid">
+      <div><span>Trades today</span><b id="todayTrades">--</b></div>
+      <div><span>Record</span><b id="todayRecord">--</b></div>
+      <div><span>Net P&amp;L</span><b id="todayNet" class="amber">--</b></div>
+      <div><span>Last trade</span><b id="lastTrade">--</b></div>
+    </div>
+    <div id="lastTradeDetail" class="muted dailyDetail">Waiting for live activity.</div>
   </section>
 
   <section class="card selected">
@@ -106,6 +123,6 @@
     <a href="../btc/">BTC DETAIL VIEW</a>
   </footer>
 </div>
-<script src="app.js?v=20260926-multi1"></script>
+<script src="app.js?v=20260926-summary1"></script>
 </body>
 </html>
