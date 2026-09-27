@@ -43,7 +43,7 @@ function gate(r){
   const minNet=swing?strategy.swingMinNet:strategy.minNet;
   const minEdge=swing?strategy.swingMinEdge:strategy.minEdge;
   const minProb=swing?strategy.swingMinProb:strategy.minProb;
-  if(r?.eligible)return{label:r?.signal&&r.signal!=='VALUE'&&r.signal!=='NONE'?r.signal:(r?.projected?'CANDIDATE':'READY'),cls:r?.projected?'blue':'green',why:r?.projected?'projected gates pass; exact CF still decides':'all execution gates pass'};
+  if(r?.eligible)return{label:r?.bidderMode==='TAKE'?'TAKE':'BID',cls:r?.projected?'blue':'green',why:r?.projected?'reservation price available; exact CF still decides':'price-state reservation is live'};
   const why=[];
   if(hasNum(r?.estimatedNetTarget)&&+r.estimatedNetTarget<minNet)why.push('net '+cents(r.estimatedNetTarget)+' < '+cents(minNet));
   if(hasNum(r?.grossEdge)&&+r.grossEdge<minEdge)why.push('edge '+cents(r.grossEdge)+' < '+cents(minEdge));
@@ -84,7 +84,7 @@ function renderStatus(s){
   setText('mode',coreLive?'DIR LIVE':'PAPER');
   setClass('mode',coreLive?'green':'amber');
   setText('strategyVersion',sc.strategyVersion||'--');
-  setText('strategyGate','UP/DOWN · DIP/PEAK aware · '+cents(strategy.minEntry)+'–'+cents(strategy.maxEntry)+' entry · ≥'+cents(strategy.minNet)+' net ('+cents(strategy.swingMinNet)+' swing) · ≥'+pct(strategy.minProb)+' fair ('+pct(strategy.swingMinProb)+' swing)');
+  setText('strategyGate','SUPER BIDDER · price-state reservation · '+cents(strategy.minEntry)+'–'+cents(strategy.maxEntry)+' max entry · no timed confirmation · exact CF decides fair value');
   setText('riskTrade',money(sc.maxRiskDollars));
   setText('riskConcurrent',Number.isFinite(+sc.maxConcurrentPositions)?sc.maxConcurrentPositions:'--');
   setText('riskSameSide',Number.isFinite(+sc.maxSameDirectionPositions)?sc.maxSameDirectionPositions:'--');
@@ -118,30 +118,35 @@ function renderEngine(e){
   setText('feedDetail',detail.join(' · ')||'No feed telemetry.');
 
   if(e?.lastResult?.ticker){
-    const r=e.lastResult,dr=r?.directional||{},c=dr?.candidate||{},rem=+r?.decision?.remaining;
+    const r=e.lastResult,dr=r?.directional||{},c=dr?.candidate||{},b=dr?.bidPlan||{},rem=+r?.decision?.remaining;
     const end=Number.isFinite(rem)?Date.now()+rem*60000:NaN;
     const action=String(dr?.action||'');
-    const state=action==='directional-entry'?'ORDER SENT':
+    const state=action==='directional-take'?'TAKEN':
+      action==='directional-bid'?'BID LIVE':
+      action==='directional-bid-resting'?'BIDDING':
       action==='directional-hold'?'HOLD':
-      action==='directional-confirming'?'CONFIRMING':
+      action==='directional-market-complete'?'SETTLED':
       action==='risk-stop'?'RISK STOP':
       'WAIT';
-    const cls=state==='ORDER SENT'||state==='HOLD'?'green':state==='CONFIRMING'?'blue':'amber';
+    const cls=state==='TAKEN'||state==='BID LIVE'||state==='BIDDING'||state==='HOLD'?'green':'amber';
     heroExact=true;
     setText('selectedAsset',r.asset||asset(r.ticker));
     setText('selectedTicker',r.ticker||'--');
     setText('selectedState',state);setClass('selectedState','state '+cls);
     if(Number.isFinite(end))$('selectedTime').dataset.end=String(end);
     setText('selectedTime',remaining(rem));setText('selectedEndTime',Number.isFinite(end)?'ends '+absTime(end):'--');
-    const confirm=action==='directional-confirming'&&Number.isFinite(+dr.confirmations)
-      ?' · '+dr.confirmations+'/'+dr.required+' confirms'
-      :'';
     const signal=(c.signal&&c.signal!=='VALUE'&&c.signal!=='NONE')
       ?c.signal+' '+(hasNum(c.signalStrength)?Number(c.signalStrength).toFixed(1)+'x':'')+' · '
       :'';
-    setText('selectedReason',signal+(c.reason||dr.reason||'exact CF evaluation')+confirm);
-    setText('entry',cents(c.cost));setText('net',cents(c.netEdge));
-    setText('gross',cents(c.grossEdge));setText('spread',cents(c.spread));setText('target','100.0¢');
+    const bidder=b?.mode&&b.mode!=='WAIT'
+      ?b.mode+' · max '+cents(b.reservationPrice)+' · market '+cents(b.marketBid)+'/'+cents(b.marketAsk)+' · '
+      :'';
+    setText('selectedReason',signal+bidder+(b.reason||c.reason||dr.reason||'exact CF price-state evaluation'));
+    const px=hasNum(b.desiredPrice)?b.desiredPrice:c.cost;
+    const net=hasNum(b.expectedNetEdge)?b.expectedNetEdge:c.netEdge;
+    const gross=hasNum(c.fair)&&hasNum(px)?+c.fair-+px:c.grossEdge;
+    setText('entry',cents(px));setText('net',cents(net));
+    setText('gross',cents(gross));setText('spread',cents(c.spread));setText('target',hasNum(b.reservationPrice)?cents(b.reservationPrice):'100.0¢');
     setText('prob',c.side?(c.side==='yes'?'YES ':'NO ')+pct(c.fair):'--');
   }
   paintHealth();
@@ -156,10 +161,14 @@ function renderScan(j){
     const g=gate(top),side=inferSide(top),p=side==='no'?top.pDown:top.pUp;
     const end=Number.isFinite(+top.remainingMinutes)?Date.now()+ +top.remainingMinutes*60000:NaN;
     setText('selectedAsset',top.asset||j.asset||'--');setText('selectedTicker',top.ticker||'--');
-    setText('selectedState',top.eligible?'CANDIDATE':'WAIT');setClass('selectedState','state '+(top.eligible?'blue':'amber'));
+    const scanState=top.eligible?(top.bidderMode==='TAKE'?'TAKE':'BID'):'WAIT';
+    setText('selectedState',scanState);setClass('selectedState','state '+(top.eligible?'blue':'amber'));
     if(Number.isFinite(end))$('selectedTime').dataset.end=String(end);
     setText('selectedTime',remaining(top.remainingMinutes));setText('selectedEndTime',Number.isFinite(end)?'ends '+absTime(end):'--');
-    setText('selectedReason','PROJECTED · '+g.why);
+    const priceState=top.eligible&&hasNum(top.reservationPrice)
+      ?'PROJECTED '+String(top.bidderMode||'BID')+' · max '+cents(top.reservationPrice)+' · '
+      :'PROJECTED · ';
+    setText('selectedReason',priceState+g.why);
     setText('prob',side?(side==='yes'?'YES ':'NO ')+pct(p):'--');
     setText('entry',cents(top.makerEntry));setText('net',cents(top.estimatedNetTarget));setText('gross',cents(top.grossEdge));setText('spread',cents(top.spread));setText('target','100.0¢');
   }
