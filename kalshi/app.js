@@ -6,8 +6,8 @@ const pct=n=>Number.isFinite(+n)?(+n*100).toFixed(0)+'%':'--';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const asset=t=>String(t||'').match(/^KX([A-Z]+)15M/)?.[1]||String(t||'').split('-')[0].replace(/^KX/,'').replace(/15M$/,'')||'--';
 
-let strategy={minNet:.04,minProb:.70,minEntry:.60,maxEntry:.80,maxSpread:.025,minEdge:.05,makerOnly:true};
-let coreLive=false,engineHealthy=false,hasScan=false,lastScan=0,lastDeep=0;
+let strategy={minNet:.05,minProb:.65,minEntry:.20,maxEntry:.80,maxSpread:.03,minEdge:.08};
+let coreLive=false,engineHealthy=false,hasScan=false,heroExact=false,lastScan=0,lastDeep=0;
 let fastBusy=false,scanBusy=false,deepBusy=false;
 
 async function json(path,ms=6000){
@@ -38,7 +38,7 @@ function inferSide(r){
   return null;
 }
 function gate(r){
-  if(r?.eligible)return{label:'SWEET SPOT',cls:'green',why:'all execution gates pass'};
+  if(r?.eligible)return{label:r?.projected?'CANDIDATE':'SWEET SPOT',cls:r?.projected?'blue':'green',why:r?.projected?'projected gates pass; exact CF still decides':'all execution gates pass'};
   const why=[];
   if(Number.isFinite(+r?.estimatedNetTarget)&&+r.estimatedNetTarget<strategy.minNet)why.push('net '+cents(r.estimatedNetTarget)+' < '+cents(strategy.minNet));
   if(Number.isFinite(+r?.grossEdge)&&+r.grossEdge<strategy.minEdge)why.push('edge '+cents(r.grossEdge)+' < '+cents(strategy.minEdge));
@@ -62,26 +62,25 @@ function tick(){
   setText('rolloverCountdown',remaining((next-now)/60000));
 }
 function renderStatus(s){
-  coreLive=!!s?.scalper?.live;
-  const sc=s?.scalper||{};
+  const sc=s?.strategy||{};
+  coreLive=!!sc.live;
   strategy={
-    minNet:Number.isFinite(+sc.minEstimatedNetTargetCents)?+sc.minEstimatedNetTargetCents/100:.04,
-    minProb:Number.isFinite(+sc.minModelProbability)?+sc.minModelProbability:.70,
-    minEntry:Array.isArray(sc.entryCostBandCents)?+sc.entryCostBandCents[0]/100:.60,
+    minNet:Number.isFinite(+sc.minNetEdgeCents)?+sc.minNetEdgeCents/100:.05,
+    minProb:Number.isFinite(+sc.minModelProbability)?+sc.minModelProbability:.65,
+    minEntry:Array.isArray(sc.entryCostBandCents)?+sc.entryCostBandCents[0]/100:.20,
     maxEntry:Array.isArray(sc.entryCostBandCents)?+sc.entryCostBandCents[1]/100:.80,
-    maxSpread:Number.isFinite(+sc.maxSpreadCents)?+sc.maxSpreadCents/100:.025,
-    minEdge:Number.isFinite(+sc.minGrossEdgeCents)?+sc.minGrossEdgeCents/100:.05,
-    makerOnly:sc.makerOnlyEntries!==false
+    maxSpread:Number.isFinite(+sc.maxSpreadCents)?+sc.maxSpreadCents/100:.03,
+    minEdge:Number.isFinite(+sc.minGrossEdgeCents)?+sc.minGrossEdgeCents/100:.08
   };
-  setText('mode',coreLive?'LIVE':'PAPER');
+  setText('mode',coreLive?'DIR LIVE':'PAPER');
   setClass('mode',coreLive?'green':'amber');
   setText('strategyVersion',sc.strategyVersion||'--');
-  setText('strategyGate',(strategy.makerOnly?'MAKER ONLY · ':'')+cents(strategy.minEntry)+'–'+cents(strategy.maxEntry)+' · ≥'+cents(strategy.minNet)+' net · ≥'+pct(strategy.minProb)+' fair');
+  setText('strategyGate','UP/DOWN · '+cents(strategy.minEntry)+'–'+cents(strategy.maxEntry)+' entry · ≥'+cents(strategy.minNet)+' net edge · ≥'+pct(strategy.minProb)+' fair');
   setText('riskTrade',money(sc.maxRiskDollars));
   setText('riskLoss',money(sc.maxDailyLossDollars));
   setText('riskNotional',money(sc.maxDailyNotionalDollars));
   setText('riskTrades',Number.isFinite(+sc.maxTradesPerDay)?sc.maxTradesPerDay:'--');
-  setText('refs','CF indexes: '+((sc.referenceIndexes||[]).join(' · ')||'--')+' · Kalshi quotes/fills · exchange history fallback');
+  setText('refs','Exact CF RTI for entries · Kalshi live quotes/fills · settlement-aware probability · exchange history fallback');
 }
 function renderEngine(e){
   engineHealthy=!!e?.ok&&!e?.lastError;
@@ -108,19 +107,29 @@ function renderEngine(e){
   if(ws.lastError)detail.push('socket: '+ws.lastError);
   setText('feedDetail',detail.join(' · ')||'No feed telemetry.');
 
-  if(!hasScan&&e?.lastResult?.ticker){
-    const r=e.lastResult,sc=r?.scalp?.scalp||{},rem=+r?.decision?.remaining;
+  if(e?.lastResult?.ticker){
+    const r=e.lastResult,dr=r?.directional||{},c=dr?.candidate||{},rem=+r?.decision?.remaining;
     const end=Number.isFinite(rem)?Date.now()+rem*60000:NaN;
+    const action=String(dr?.action||'');
+    const state=action==='directional-entry'?'ORDER SENT':
+      action==='directional-hold'?'HOLD':
+      action==='directional-confirming'?'CONFIRMING':
+      action==='risk-stop'?'RISK STOP':
+      'WAIT';
+    const cls=state==='ORDER SENT'||state==='HOLD'?'green':state==='CONFIRMING'?'blue':'amber';
+    heroExact=true;
     setText('selectedAsset',r.asset||asset(r.ticker));
     setText('selectedTicker',r.ticker||'--');
-    setText('selectedState','WAIT');
-    setClass('selectedState','state amber');
+    setText('selectedState',state);setClass('selectedState','state '+cls);
     if(Number.isFinite(end))$('selectedTime').dataset.end=String(end);
-    setText('selectedTime',remaining(rem));
-    setText('selectedEndTime',Number.isFinite(end)?'ends '+absTime(end):'--');
-    setText('selectedReason','ENGINE LIVE · market scan updating');
-    setText('entry',cents(sc.makerEntry));setText('net',cents(sc.estimatedNetTarget));
-    setText('gross',cents(sc.grossEdge));setText('spread',cents(sc.spread));setText('target',cents(sc.targetExit));
+    setText('selectedTime',remaining(rem));setText('selectedEndTime',Number.isFinite(end)?'ends '+absTime(end):'--');
+    const confirm=action==='directional-confirming'&&Number.isFinite(+dr.confirmations)
+      ?' · '+dr.confirmations+'/'+dr.required+' confirms'
+      :'';
+    setText('selectedReason',(c.reason||dr.reason||'exact CF evaluation')+confirm);
+    setText('entry',cents(c.cost));setText('net',cents(c.netEdge));
+    setText('gross',cents(c.grossEdge));setText('spread',cents(c.spread));setText('target','100.0¢');
+    setText('prob',c.side?(c.side==='yes'?'YES ':'NO ')+pct(c.fair):'--');
   }
   paintHealth();
 }
@@ -130,16 +139,16 @@ function renderScan(j){
   setText('scanStamp',absTime(lastScan));setText('scanCount',rows.length+' live');
   const ranked=[...rows].sort((a,b)=>(b.eligible?1:0)-(a.eligible?1:0)+(+(b.score||0)-+(a.score||0)));
   const top=ranked[0]||null;
-  if(top){
+  if(top&&!heroExact){
     const g=gate(top),side=inferSide(top),p=side==='no'?top.pDown:top.pUp;
     const end=Number.isFinite(+top.remainingMinutes)?Date.now()+ +top.remainingMinutes*60000:NaN;
     setText('selectedAsset',top.asset||j.asset||'--');setText('selectedTicker',top.ticker||'--');
-    setText('selectedState',top.eligible?'SWEET SPOT':'WAIT');setClass('selectedState','state '+(top.eligible?'green':'amber'));
+    setText('selectedState',top.eligible?'CANDIDATE':'WAIT');setClass('selectedState','state '+(top.eligible?'blue':'amber'));
     if(Number.isFinite(end))$('selectedTime').dataset.end=String(end);
     setText('selectedTime',remaining(top.remainingMinutes));setText('selectedEndTime',Number.isFinite(end)?'ends '+absTime(end):'--');
-    setText('selectedReason',top.eligible?'READY · '+g.why:'WAIT · '+g.why);
+    setText('selectedReason','PROJECTED · '+g.why);
     setText('prob',side?(side==='yes'?'YES ':'NO ')+pct(p):'--');
-    setText('entry',cents(top.makerEntry));setText('net',cents(top.estimatedNetTarget));setText('gross',cents(top.grossEdge));setText('spread',cents(top.spread));setText('target',cents(top.targetExit));
+    setText('entry',cents(top.makerEntry));setText('net',cents(top.estimatedNetTarget));setText('gross',cents(top.grossEdge));setText('spread',cents(top.spread));setText('target','100.0¢');
   }
   $('markets').innerHTML=ranked.map((r,i)=>{
     const g=gate(r),side=inferSide(r),p=side==='no'?r.pDown:r.pUp;
