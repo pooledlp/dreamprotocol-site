@@ -11,3 +11,5 @@
   .activityRowTime .activityTime{grid-column:2/4;text-align:right}
   .scanTags{gap:4px}.scanTags .tag{font-size:8px;padding:5px 6px}
 }
+
+.strategyGate{margin-top:12px;border:1px solid #2c4357;background:#0a121c;border-radius:12px;padding:10px 12px;font-size:11px;font-weight:800;letter-spacing:.03em;color:#9cc6ef}.gateReason{color:#a9b8c8;font-weight:700}.badge.green{border-color:#2e8b61;color:#42db8f}.badge.amber{border-color:#6a4a27;color:#ffb05f}@media(max-width:520px){.strategyGate{font-size:10px;line-height:1.5}.gateReason{display:inline-block;margin-top:2px}}
