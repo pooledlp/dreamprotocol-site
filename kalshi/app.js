@@ -72,8 +72,37 @@ function renderStatus(s){
   $('riskNotional').textContent=money(s?.scalper?.maxDailyNotionalDollars);
   $('riskLoss').textContent=money(s?.scalper?.maxDailyLossDollars);
   $('riskTrades').textContent=Number.isFinite(+s?.scalper?.maxTradesPerDay)?s.scalper.maxTradesPerDay:'--';
-  $('refs').textContent='Kalshi WebSocket · '+(s?.scalper?.referenceIndexes||[]).join(' · ')+' · exchange spot/history feeds';
+  $('refs').textContent='Exact CF indexes: '+((s?.scalper?.referenceIndexes||[]).join(' · ')||'--')+' · Kalshi quotes/fills · exchange spot/history fallback';
+  $('strategyVersion').textContent=s?.scalper?.strategyVersion||'--';
+  $('executionStyle').textContent=(s?.scalper?.makerOnlyEntries?'MAKER ONLY':'MIXED EXECUTION')+' · '+(s?.scalper?.settlementModel||'settlement model --');
   return live;
+}
+
+function renderEngine(e){
+  const ws=e?.websocket||{},open=!!ws.open;
+  const age=Number.isFinite(+ws.lastMessageAgeMs)?+ws.lastMessageAgeMs:NaN;
+  const fresh=open&&Number.isFinite(age)&&age<2500;
+  $('wsState').textContent=fresh?'LIVE / FRESH':open?'LIVE / STALE':'OFFLINE';
+  $('wsState').className=fresh?'green':open?'amber':'red';
+  $('feedAge').textContent=Number.isFinite(age)?Math.round(age)+' ms since last message':'no live message';
+  $('refCount').textContent=Number.isFinite(+ws.referenceCount)?ws.referenceCount:'--';
+  $('refTargets').textContent=(Number.isFinite(+ws.targetCount)?ws.targetCount:'--')+' subscribed markets';
+  $('quoteCount').textContent=Number.isFinite(+ws.quoteCount)?ws.quoteCount:'--';
+  $('quoteTargets').textContent=(Number.isFinite(+ws.targetCount)?ws.targetCount:'--')+' quote targets';
+  $('engineCycles').textContent=Number.isFinite(+e?.cycleCount)?Number(e.cycleCount).toLocaleString():'--';
+  $('engineTrigger').textContent=e?.lastTrigger?String(e.lastTrigger).replaceAll('-',' '):'--';
+  const fh=$('feedHealth');
+  if(fh){
+    fh.textContent=fresh?'CF FEED HEALTHY':open?'CF FEED STALE':'CF FEED OFFLINE';
+    fh.className='tag '+(fresh?'green':open?'amber':'red');
+  }
+  const details=[];
+  if(Number.isFinite(+ws.messageCount))details.push(Number(ws.messageCount).toLocaleString()+' websocket messages');
+  if(Number.isFinite(+ws.reconnectCount))details.push(ws.reconnectCount+' reconnects');
+  if(Number.isFinite(+ws.referenceCount)&&Number.isFinite(+ws.targetCount))details.push(ws.referenceCount+'/'+ws.targetCount+' exact CF references currently populated');
+  if(Number.isFinite(+ws.quoteCount)&&Number.isFinite(+ws.targetCount))details.push(ws.quoteCount+'/'+ws.targetCount+' live market quotes populated');
+  if(ws.lastError)details.push('last socket error: '+ws.lastError);
+  $('feedDetail').textContent=details.join(' · ')||'No feed telemetry returned.';
 }
 function renderScan(j){
   const rows=Array.isArray(j?.markets)?j.markets:[];
@@ -164,9 +193,14 @@ async function refresh(){
     $('health').className='pill '+(q?.ok?'green':'amber');$('health').querySelector('b').textContent=q?.ok?(live?'LIVE':'SCANNING'):'DEGRADED';
     if(Date.now()-lastDeep>10000){
       lastDeep=Date.now();
-      const [p,a]=await Promise.allSettled([json('/kalshi-bot/pnl'),json('/kalshi-bot/activity')]);
+      const [p,a,e]=await Promise.allSettled([
+        json('/kalshi-bot/pnl'),
+        json('/kalshi-bot/activity'),
+        json('/kalshi-bot/engine-status')
+      ]);
       if(p.status==='fulfilled')renderPnl(p.value);
       if(a.status==='fulfilled')renderActivity(a.value);
+      if(e.status==='fulfilled')renderEngine(e.value);
     }
   }catch(e){
     $('health').className='pill red';$('health').querySelector('b').textContent='ENGINE ERROR';$('selectedReason').textContent=e.message||String(e);
