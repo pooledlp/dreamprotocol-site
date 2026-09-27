@@ -53,6 +53,11 @@
       <span>Position</span>
       <b id="openState" class="amber">CHECKING</b>
     </div>
+    <div class="activityStat">
+      <span>Next rollover</span>
+      <b id="rolloverCountdown" class="amber">--:--</b>
+      <small id="rolloverTime" class="timeSub">--</small>
+    </div>
   </section>
 
   <section class="card selected">
@@ -64,7 +69,8 @@
       </div>
       <div class="right">
         <div id="selectedSide" class="side amber">WAIT</div>
-        <div id="selectedTime" class="clock">--:--</div>
+        <div id="selectedTime" class="clock countdown" data-end="">--:--</div>
+        <div id="selectedEndTime" class="timeSub">--</div>
       </div>
     </div>
     <div id="selectedReason" class="reason">Comparing supported 15-minute markets.</div>
@@ -84,7 +90,7 @@
         <div class="label">Live market scanner</div>
         <div class="muted">Ranked by supported model edge after execution filters.</div>
       </div>
-      <div id="scanCount" class="tag">--</div>
+      <div class="scanTags"><div id="scanStamp" class="tag">--</div><div id="scanCount" class="tag">--</div></div>
     </div>
     <div id="markets" class="marketGrid"></div>
   </section>
@@ -129,6 +135,6 @@
     <a href="../btc/">BTC DETAIL VIEW</a>
   </footer>
 </div>
-<script src="app.js?v=20260926-activity2"></script>
+<script src="app.js?v=20260926-timing1"></script>
 </body>
 </html>
