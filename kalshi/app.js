@@ -7,13 +7,36 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 async function json(path,ms=8000){const ac=new AbortController(),t=setTimeout(()=>ac.abort(),ms);try{const r=await fetch(API+path,{cache:'no-store',signal:ac.signal});if(!r.ok)throw new Error('HTTP '+r.status);return await r.json()}finally{clearTimeout(t)}}
 function klass(v){return v>0?'green':v<0?'red':'amber'}
 function remaining(min){if(!Number.isFinite(+min))return'--:--';const s=Math.max(0,Math.round(+min*60));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
-function ageLabel(iso){
-  const t=Date.parse(iso||'');if(!Number.isFinite(t))return'--';
+function absoluteTime(isoOrMs){
+  const t=typeof isoOrMs==='number'?isoOrMs:Date.parse(isoOrMs||'');
+  if(!Number.isFinite(t))return'--';
+  return new Date(t).toLocaleTimeString([],{hour:'numeric',minute:'2-digit',second:'2-digit'});
+}
+function ageLabel(isoOrMs){
+  const t=typeof isoOrMs==='number'?isoOrMs:Date.parse(isoOrMs||'');if(!Number.isFinite(t))return'--';
   const s=Math.max(0,Math.floor((Date.now()-t)/1000));
   if(s<60)return s+'s ago';
-  const m=Math.floor(s/60);if(m<60)return m+'m ago';
-  const h=Math.floor(m/60);if(h<24)return h+'h '+(m%60)+'m ago';
-  return Math.floor(h/24)+'d ago';
+  const m=Math.floor(s/60),ss=s%60;if(m<60)return m+'m '+ss+'s ago';
+  const hh=Math.floor(m/60);if(hh<24)return hh+'h '+(m%60)+'m ago';
+  return Math.floor(hh/24)+'d ago';
+}
+function endLabel(ms){
+  if(!Number.isFinite(ms))return'--';
+  return 'ends '+new Date(ms).toLocaleTimeString([],{hour:'numeric',minute:'2-digit',second:'2-digit'});
+}
+function tickTimers(){
+  const now=Date.now();
+  document.querySelectorAll('[data-end]').forEach(el=>{
+    const end=+el.dataset.end;if(!Number.isFinite(end)||!end)return;
+    el.textContent=remaining((end-now)/60000);
+  });
+  document.querySelectorAll('[data-ago]').forEach(el=>{
+    const t=+el.dataset.ago;if(Number.isFinite(t)&&t)el.textContent=ageLabel(t);
+  });
+  const next=Math.ceil((now+1)/(15*60*1000))*(15*60*1000);
+  const rc=$('rolloverCountdown'),rt=$('rolloverTime');
+  if(rc)rc.textContent=remaining((next-now)/60000);
+  if(rt)rt.textContent=absoluteTime(next);
 }
 function renderStatus(s){
   const live=!!s?.scalper?.live;
@@ -30,14 +53,18 @@ function renderStatus(s){
 }
 function renderScan(j){
   const rows=Array.isArray(j?.markets)?j.markets:[];
-  const top=rows[0]||null;
+  const top=rows[0]||null,now=Date.now();
   $('scanCount').textContent=rows.length+' LIVE';
+  $('scanStamp').textContent='SCAN '+absoluteTime(now);
   if(top){
+    const end=Number.isFinite(+top.remainingMinutes)?now+(+top.remainingMinutes*60000):NaN;
     $('selectedAsset').textContent=top.asset||j.asset||'--';
     $('selectedTicker').textContent=top.ticker||j.ticker||'--';
     $('selectedSide').textContent=top.eligible?(top.side==='yes'?'UP / YES':'DOWN / NO'):'WAIT';
     $('selectedSide').className='side '+(top.eligible?(top.side==='yes'?'green':'red'):'amber');
+    $('selectedTime').dataset.end=Number.isFinite(end)?String(end):'';
     $('selectedTime').textContent=remaining(top.remainingMinutes);
+    $('selectedEndTime').textContent=Number.isFinite(end)?endLabel(end):'--';
     $('selectedReason').textContent=top.reason||'No qualifying setup yet.';
     $('entry').textContent=cents(top.makerEntry);
     $('target').textContent=cents(top.targetExit);
@@ -47,14 +74,21 @@ function renderScan(j){
     const p=top.side==='no'?top.pDown:top.pUp;
     $('prob').textContent=(top.side==='no'?'DOWN ':'UP ')+pct(p);
   }else{
-    $('selectedAsset').textContent=j?.asset||'--';$('selectedTicker').textContent=j?.ticker||'SCANNING...';$('selectedSide').textContent='WAIT';$('selectedTime').textContent=remaining(j?.remainingMinutes);
+    const end=Number.isFinite(+j?.remainingMinutes)?now+(+j.remainingMinutes*60000):NaN;
+    $('selectedAsset').textContent=j?.asset||'--';$('selectedTicker').textContent=j?.ticker||'SCANNING...';$('selectedSide').textContent='WAIT';
+    $('selectedTime').dataset.end=Number.isFinite(end)?String(end):'';
+    $('selectedTime').textContent=remaining(j?.remainingMinutes);
+    $('selectedEndTime').textContent=Number.isFinite(end)?endLabel(end):'--';
   }
-  $('markets').innerHTML=rows.map((r,i)=>`
-    <div class="market ${i===0?'active ':''}${r.eligible?'eligible':''}">
+  $('markets').innerHTML=rows.map((r,i)=>{
+    const end=Number.isFinite(+r.remainingMinutes)?now+(+r.remainingMinutes*60000):NaN;
+    return `<div class="market ${i===0?'active ':''}${r.eligible?'eligible':''}">
       <div class="marketTop"><div class="marketAsset">${esc(r.asset)}</div><div class="badge">${r.eligible?'ELIGIBLE':'WATCH'}</div></div>
       <div class="marketMain ${r.eligible?(r.side==='yes'?'green':'red'):'amber'}">${r.eligible?(r.side==='yes'?'UP / YES':'DOWN / NO'):'WAIT'}</div>
-      <div class="marketMeta">Net target <b>${cents(r.estimatedNetTarget)}</b><br>Gross edge ${cents(r.grossEdge)} · spread ${cents(r.spread)}<br>${remaining(r.remainingMinutes)} left</div>
-    </div>`).join('')||'<div class="muted">No supported markets returned yet.</div>';
+      <div class="marketMeta">Net target <b>${cents(r.estimatedNetTarget)}</b><br>Gross edge ${cents(r.grossEdge)} · spread ${cents(r.spread)}<br><b class="countdown" data-end="${Number.isFinite(end)?end:''}">${remaining(r.remainingMinutes)}</b> left · ${Number.isFinite(end)?endLabel(end):'--'}</div>
+    </div>`;
+  }).join('')||'<div class="muted">No supported markets returned yet.</div>';
+  tickTimers();
 }
 function renderPnl(j){
   const t=j?.today;
@@ -78,13 +112,21 @@ function renderPnl(j){
 function renderActivity(j){
   const ps=Array.isArray(j?.positions)?j.positions:[],os=Array.isArray(j?.orders)?j.orders:[];
   $('activityTag').textContent=ps.length+' OPEN · '+os.length+' ORDERS';
-  $('positions').innerHTML=ps.length?ps.map(p=>`<div class="activityRow"><b>${esc(p.ticker)}</b><span>Position ${esc(p.position)}</span><span>Exposure ${money(p.exposure)}</span><span>P&amp;L ${money((+p.realizedPnl||0)-(+p.fees||0))}</span></div>`).join(''):'<div class="muted">No open bot-owned position.</div>';
-  $('orders').innerHTML=os.slice(0,8).map(o=>`<div class="activityRow"><b>${esc(o.ticker)}</b><span>${esc(o.status||'--')}</span><span>${esc(o.clientOrderId?.includes('-entry-')?'ENTRY':'EXIT')}</span><span>${cents(o.yesPrice)}</span></div>`).join('');
+  $('positions').innerHTML=ps.length?ps.map(p=>{
+    const t=Date.parse(p.lastUpdated||'');
+    return `<div class="activityRow activityRowTime"><b>${esc(p.ticker)}</b><span>Position ${esc(p.position)}</span><span>Exposure ${money(p.exposure)}</span><span>P&amp;L ${money((+p.realizedPnl||0)-(+p.fees||0))}</span><span class="activityTime">${Number.isFinite(t)?absoluteTime(t):'--'}<small data-ago="${Number.isFinite(t)?t:''}">${Number.isFinite(t)?ageLabel(t):'--'}</small></span></div>`;
+  }).join(''):'<div class="muted">No open bot-owned position.</div>';
+  $('orders').innerHTML=os.slice(0,10).map(o=>{
+    const t=Date.parse(o.lastUpdateTime||o.createdTime||'');
+    return `<div class="activityRow activityRowTime"><b>${esc(o.ticker)}</b><span>${esc(o.status||'--')}</span><span>${esc(o.clientOrderId?.includes('-entry-')?'ENTRY':'EXIT')}</span><span>${cents(o.yesPrice)}</span><span class="activityTime">${Number.isFinite(t)?absoluteTime(t):'--'}<small data-ago="${Number.isFinite(t)?t:''}">${Number.isFinite(t)?ageLabel(t):'--'}</small></span></div>`;
+  }).join('');
   const lastExit=os.find(o=>String(o.status||'').toLowerCase()==='executed'&&String(o.clientOrderId||'').includes('-exit-'));
   const lastExecuted=lastExit||os.find(o=>String(o.status||'').toLowerCase()==='executed');
-  $('lastTrade').textContent=lastExecuted?ageLabel(lastExecuted.lastUpdateTime||lastExecuted.createdTime):'NONE TODAY';
+  const lastT=lastExecuted?Date.parse(lastExecuted.lastUpdateTime||lastExecuted.createdTime||''):NaN;
+  $('lastTrade').innerHTML=Number.isFinite(lastT)?absoluteTime(lastT)+'<small class="timeSub" data-ago="'+lastT+'">'+ageLabel(lastT)+'</small>':'NONE TODAY';
   $('openState').textContent=ps.length?ps.length+' OPEN':'FLAT';
   $('openState').className=ps.length?'green':'amber';
+  tickTimers();
 }
 let lastDeep=0;
 async function refresh(){
@@ -102,4 +144,4 @@ async function refresh(){
     $('health').className='pill red';$('health').querySelector('b').textContent='ENGINE ERROR';$('selectedReason').textContent=e.message||String(e);
   }
 }
-refresh();setInterval(refresh,3000);
+refresh();tickTimers();setInterval(refresh,3000);setInterval(tickTimers,1000);
