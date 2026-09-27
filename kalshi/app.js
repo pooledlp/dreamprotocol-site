@@ -1,8 +1,9 @@
 const API='https://api.dreamprotocol.ai';
 const $=id=>document.getElementById(id);
-const cents=n=>Number.isFinite(+n)?(+n*100).toFixed(1)+'¢':'--';
-const money=n=>Number.isFinite(+n)?new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2}).format(+n):'--';
-const pct=n=>Number.isFinite(+n)?(+n*100).toFixed(0)+'%':'--';
+const hasNum=n=>n!==null&&n!==undefined&&n!==''&&Number.isFinite(+n);
+const cents=n=>hasNum(n)?(+n*100).toFixed(1)+'¢':'--';
+const money=n=>hasNum(n)?new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2}).format(+n):'--';
+const pct=n=>hasNum(n)?(+n*100).toFixed(0)+'%':'--';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const asset=t=>String(t||'').match(/^KX([A-Z]+)15M/)?.[1]||String(t||'').split('-')[0].replace(/^KX/,'').replace(/15M$/,'')||'--';
 
@@ -40,10 +41,10 @@ function inferSide(r){
 function gate(r){
   if(r?.eligible)return{label:r?.projected?'CANDIDATE':'SWEET SPOT',cls:r?.projected?'blue':'green',why:r?.projected?'projected gates pass; exact CF still decides':'all execution gates pass'};
   const why=[];
-  if(Number.isFinite(+r?.estimatedNetTarget)&&+r.estimatedNetTarget<strategy.minNet)why.push('net '+cents(r.estimatedNetTarget)+' < '+cents(strategy.minNet));
-  if(Number.isFinite(+r?.grossEdge)&&+r.grossEdge<strategy.minEdge)why.push('edge '+cents(r.grossEdge)+' < '+cents(strategy.minEdge));
-  if(Number.isFinite(+r?.makerEntry)&&(+r.makerEntry<strategy.minEntry||+r.makerEntry>strategy.maxEntry))why.push('entry '+cents(r.makerEntry)+' outside '+cents(strategy.minEntry)+'–'+cents(strategy.maxEntry));
-  if(Number.isFinite(+r?.spread)&&+r.spread>strategy.maxSpread)why.push('spread '+cents(r.spread)+' > '+cents(strategy.maxSpread));
+  if(hasNum(r?.estimatedNetTarget)&&+r.estimatedNetTarget<strategy.minNet)why.push('net '+cents(r.estimatedNetTarget)+' < '+cents(strategy.minNet));
+  if(hasNum(r?.grossEdge)&&+r.grossEdge<strategy.minEdge)why.push('edge '+cents(r.grossEdge)+' < '+cents(strategy.minEdge));
+  if(hasNum(r?.makerEntry)&&(+r.makerEntry<strategy.minEntry||+r.makerEntry>strategy.maxEntry))why.push('entry '+cents(r.makerEntry)+' outside '+cents(strategy.minEntry)+'–'+cents(strategy.maxEntry));
+  if(hasNum(r?.spread)&&+r.spread>strategy.maxSpread)why.push('spread '+cents(r.spread)+' > '+cents(strategy.maxSpread));
   const side=inferSide(r),p=side==='no'?+r?.pDown:+r?.pUp;
   if(Number.isFinite(p)&&p<strategy.minProb)why.push('fair '+pct(p)+' < '+pct(strategy.minProb));
   return{label:'BLOCKED',cls:'amber',why:why.slice(0,2).join(' · ')||'fails execution gates'};
@@ -157,7 +158,7 @@ function renderScan(j){
       '<span class="scanState '+g.cls+'">'+g.label+'</span>'+
       '<span>'+(side?(side==='yes'?'YES ':'NO ')+pct(p):'--')+'</span>'+
       '<span>'+cents(r.makerEntry)+'</span>'+
-      '<span class="'+(Number(r.estimatedNetTarget)>=strategy.minNet?'green':'')+'">'+cents(r.estimatedNetTarget)+'</span>'+
+      '<span class="'+(hasNum(r.estimatedNetTarget)&&Number(r.estimatedNetTarget)>=strategy.minNet?'green':'')+'">'+cents(r.estimatedNetTarget)+'</span>'+
       '<span>'+cents(r.spread)+'</span>'+
       '<span class="scanWhy">'+esc(g.why)+'</span>'+
     '</div>';
