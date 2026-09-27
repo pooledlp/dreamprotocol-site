@@ -8,8 +8,8 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const asset=t=>String(t||'').match(/^KX([A-Z]+)15M/)?.[1]||String(t||'').split('-')[0].replace(/^KX/,'').replace(/15M$/,'')||'--';
 
 let strategy={minNet:.025,minProb:.58,minEntry:.20,maxEntry:.85,maxSpread:.03,minEdge:.045,swingMinNet:.02,swingMinProb:.55,swingMinEdge:.035};
-let coreLive=false,engineHealthy=false,hasScan=false,heroExact=false,lastScan=0,lastDeep=0;
-let fastBusy=false,scanBusy=false,deepBusy=false;
+let coreLive=false,engineHealthy=false,hasScan=false,heroExact=false,lastScan=0,lastDeep=0,lastActivity=0;
+let fastBusy=false,scanBusy=false,deepBusy=false,activityBusy=false;
 
 async function json(path,ms=6000){
   const ac=new AbortController(),timer=setTimeout(()=>ac.abort(),ms);
@@ -234,12 +234,57 @@ function pairTrades(orders){
   }
   return out.sort((a,b)=>b.time-a.time).slice(0,6);
 }
+function bidderEventRows(orders){
+  const entries=[...(orders||[])]
+    .filter(o=>String(o?.clientOrderId||'').includes('-entry-'))
+    .sort((a,b)=>orderTime(b)-orderTime(a));
+  return entries.slice(0,14).map((o,i)=>{
+    const status=String(o.status||'').toLowerCase();
+    const side=orderSide(o),price=orderCost(o),time=orderTime(o);
+    const filled=+(o.filled||0),remaining=+(o.remaining||0);
+    const newer=entries.slice(0,i).find(n=>
+      n.ticker===o.ticker&&orderSide(n)===side&&orderTime(n)>time&&orderTime(n)-time<25000
+    );
+    let action='ORDER',cls='amber',detail=status||'unknown';
+    if((status==='resting'||status==='open'||status==='pending')&&remaining>0){
+      action='LIVE BID';cls='green';detail='resting on book · '+remaining+' remaining';
+    }else if(filled>0&&(status==='executed'||remaining===0)){
+      action='FILLED';cls='blue';detail=filled+' filled';
+    }else if(status==='canceled'){
+      if(newer){
+        action='REPRICED';cls='amber';
+        const np=orderCost(newer);
+        detail='replaced '+cents(price)+' → '+cents(np);
+      }else{
+        action='CANCELED';cls='amber';detail='stale reservation removed';
+      }
+    }
+    return{o,time,side,price,action,cls,detail};
+  });
+}
 function renderActivity(j){
   const ps=Array.isArray(j?.positions)?j.positions:[],os=Array.isArray(j?.orders)?j.orders:[];
+  const events=bidderEventRows(os);
+  const liveBids=events.filter(x=>x.action==='LIVE BID');
+  const reprices=events.filter(x=>x.action==='REPRICED').length;
   setText('openState',ps.length?ps.length+' OPEN':'FLAT');setClass('openState',ps.length?'green':'amber');
-  setText('activityTag',ps.length+' open · '+os.length+' raw orders');
+  setText('bidderState',liveBids.length?liveBids.length+' LIVE':events.length?'WORKING':'IDLE');
+  setClass('bidderState',liveBids.length?'green':events.length?'blue':'amber');
+  setText('activityTag',ps.length+' open · '+liveBids.length+' live bid'+(liveBids.length===1?'':'s'));
+  setText('bidTapeTag',liveBids.length+' live · '+reprices+' repriced');
+  setClass('bidTapeTag','tag '+(liveBids.length?'green':'amber'));
+  $('bidTape').innerHTML=events.length?events.map(x=>
+    '<div class="bidEvent">'+
+      '<span class="bidTime">'+absTime(x.time)+'</span>'+
+      '<b class="bidAsset">'+esc(asset(x.o.ticker))+'</b>'+
+      '<span>'+String(x.side||'').toUpperCase()+'</span>'+
+      '<span class="bidPrice">'+cents(x.price)+'</span>'+
+      '<span class="bidAction '+x.cls+'">'+x.action+'</span>'+
+      '<span class="bidDetail">'+esc(x.detail)+'</span>'+
+    '</div>'
+  ).join(''):'<div class="empty">No recent bidder activity. Waiting for a qualified reservation price.</div>';
   $('positions').innerHTML=ps.length?ps.map(p=>'<div class="rawRow"><b>'+esc(p.ticker)+'</b><span>'+String(p.side||'').toUpperCase()+' · position '+esc(p.position)+'</span><span>'+money(p.exposure)+'</span><span>'+absTime(p.lastUpdated)+'</span></div>').join(''):'<div class="empty">No open bot-owned position.</div>';
-  $('orders').innerHTML=os.slice(0,10).map(o=>'<div class="rawRow"><b>'+esc(o.ticker)+'</b><span>'+esc(o.status)+'</span><span>'+ (String(o.clientOrderId||'').includes('-entry-')?'ENTRY':'EXIT')+'</span><span>'+absTime(orderTime(o))+'</span></div>').join('');
+  $('orders').innerHTML=os.slice(0,12).map(o=>'<div class="rawRow"><b>'+esc(o.ticker)+'</b><span>'+esc(o.status)+'</span><span>'+ (String(o.clientOrderId||'').includes('-entry-')?'ENTRY '+String(orderSide(o)).toUpperCase()+' '+cents(orderCost(o)):'EXIT')+'</span><span>'+absTime(orderTime(o))+'</span></div>').join('');
 }
 async function refreshFast(){
   if(fastBusy)return;fastBusy=true;
@@ -257,15 +302,25 @@ async function refreshScan(force=false){
   catch{if(!hasScan)setText('selectedReason','ENGINE LIVE · market scan retrying')}
   finally{scanBusy=false}
 }
+async function refreshActivity(force=false){
+  if(activityBusy)return;if(!force&&Date.now()-lastActivity<2200)return;
+  lastActivity=Date.now();activityBusy=true;
+  try{
+    const a=await json('/kalshi-bot/activity',6000);
+    if(a?.ok)renderActivity(a);
+  }catch{
+    setText('bidTapeTag','activity retrying');
+    setClass('bidTapeTag','tag amber');
+  }finally{activityBusy=false}
+}
 async function refreshDeep(force=false){
   if(deepBusy)return;if(!force&&Date.now()-lastDeep<8000)return;
   lastDeep=Date.now();deepBusy=true;
   try{
-    const [p,a]=await Promise.allSettled([json('/kalshi-bot/pnl',12000),json('/kalshi-bot/activity',8000)]);
-    if(p.status==='fulfilled')renderPnl(p.value);
-    if(a.status==='fulfilled')renderActivity(a.value);
+    const p=await json('/kalshi-bot/pnl',12000);
+    if(p?.ok)renderPnl(p);
   }finally{deepBusy=false}
 }
-async function refresh(){await refreshFast();void refreshScan();void refreshDeep()}
-refresh();void refreshScan(true);void refreshDeep(true);tick();
+async function refresh(){await refreshFast();void refreshScan();void refreshActivity();void refreshDeep()}
+refresh();void refreshScan(true);void refreshActivity(true);void refreshDeep(true);tick();
 setInterval(refresh,2500);setInterval(tick,1000);
