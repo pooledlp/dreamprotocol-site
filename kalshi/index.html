@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#070a0f">
 <meta name="robots" content="noindex,nofollow">
 <title>DreamPredict Multi-Market 15M</title>
-<link rel="stylesheet" href="styles.css?v=20260926-multi1">
+<link rel="stylesheet" href="styles.css?v=20260926-activity1">
 </head>
 <body>
 <div class="shell">
@@ -30,6 +30,29 @@
       </div>
     </div>
     <div id="modeText" class="muted">Reading live bot state and global risk controls.</div>
+  </section>
+
+  <section class="activityStrip" aria-live="polite">
+    <div class="activityStat">
+      <span>Trades today</span>
+      <b id="todayTrades">--</b>
+    </div>
+    <div class="activityStat">
+      <span>Win / loss</span>
+      <b id="todayWL">--</b>
+    </div>
+    <div class="activityStat">
+      <span>Net today</span>
+      <b id="todayNet" class="amber">--</b>
+    </div>
+    <div class="activityStat">
+      <span>Last trade</span>
+      <b id="lastTrade">--</b>
+    </div>
+    <div class="activityStat">
+      <span>Position</span>
+      <b id="openState" class="amber">CHECKING</b>
+    </div>
   </section>
 
   <section class="card selected">
@@ -106,6 +129,6 @@
     <a href="../btc/">BTC DETAIL VIEW</a>
   </footer>
 </div>
-<script src="app.js?v=20260926-multi1"></script>
+<script src="app.js?v=20260926-activity1"></script>
 </body>
 </html>

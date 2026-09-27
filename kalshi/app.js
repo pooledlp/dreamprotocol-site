@@ -7,6 +7,14 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 async function json(path,ms=8000){const ac=new AbortController(),t=setTimeout(()=>ac.abort(),ms);try{const r=await fetch(API+path,{cache:'no-store',signal:ac.signal});if(!r.ok)throw new Error('HTTP '+r.status);return await r.json()}finally{clearTimeout(t)}}
 function klass(v){return v>0?'green':v<0?'red':'amber'}
 function remaining(min){if(!Number.isFinite(+min))return'--:--';const s=Math.max(0,Math.round(+min*60));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
+function ageLabel(iso){
+  const t=Date.parse(iso||'');if(!Number.isFinite(t))return'--';
+  const s=Math.max(0,Math.floor((Date.now()-t)/1000));
+  if(s<60)return s+'s ago';
+  const m=Math.floor(s/60);if(m<60)return m+'m ago';
+  const h=Math.floor(m/60);if(h<24)return h+'h '+(m%60)+'m ago';
+  return Math.floor(h/24)+'d ago';
+}
 function renderStatus(s){
   const live=!!s?.scalper?.live;
   $('mode').textContent=live?'LIVE MULTI-MARKET':'SHADOW / PAPER';
@@ -50,12 +58,21 @@ function renderScan(j){
 }
 function renderPnl(j){
   const t=j?.today;
-  if(!j?.ok||!t){$('pnl').textContent='--';$('pnlNote').textContent=j?.errors?.join(' · ')||'Accounting data unavailable.';return}
+  if(!j?.ok||!t){
+    $('pnl').textContent='--';$('pnlNote').textContent=j?.errors?.join(' · ')||'Accounting data unavailable.';
+    $('todayTrades').textContent='--';$('todayWL').textContent='--';$('todayNet').textContent='--';$('todayNet').className='amber';
+    return
+  }
   const n=+t.realizedNetDollars||0;$('pnl').textContent=money(n);$('pnl').className='pnl '+klass(n);
   $('pnlGross').textContent=money(t.realizedGrossDollars);
   $('pnlFees').textContent=money(t.realizedFeesDollars);
   $('pnlTrades').textContent=t.completed??'--';
   $('pnlOpen').textContent=money(t.openCostDollars);
+  const completed=Number.isFinite(+t.completed)?+t.completed:0,wins=Number.isFinite(+t.wins)?+t.wins:0,losses=Math.max(0,completed-wins);
+  $('todayTrades').textContent=completed;
+  $('todayWL').textContent=wins+'W / '+losses+'L';
+  $('todayNet').textContent=money(n);
+  $('todayNet').className=klass(n);
   $('pnlNote').textContent=j.complete?'Reconciled from actual fills, settlements, and fees.':'Accounting is partial; totals are suppressed where attribution is uncertain.';
 }
 function renderActivity(j){
@@ -63,6 +80,11 @@ function renderActivity(j){
   $('activityTag').textContent=ps.length+' OPEN · '+os.length+' ORDERS';
   $('positions').innerHTML=ps.length?ps.map(p=>`<div class="activityRow"><b>${esc(p.ticker)}</b><span>Position ${esc(p.position)}</span><span>Exposure ${money(p.exposure)}</span><span>P&amp;L ${money((+p.realizedPnl||0)-(+p.fees||0))}</span></div>`).join(''):'<div class="muted">No open bot-owned position.</div>';
   $('orders').innerHTML=os.slice(0,8).map(o=>`<div class="activityRow"><b>${esc(o.ticker)}</b><span>${esc(o.status||'--')}</span><span>${esc(o.clientOrderId?.includes('-entry-')?'ENTRY':'EXIT')}</span><span>${cents(o.yesPrice)}</span></div>`).join('');
+  const lastExit=os.find(o=>String(o.status||'').toLowerCase()==='executed'&&String(o.clientOrderId||'').includes('-exit-'));
+  const lastExecuted=lastExit||os.find(o=>String(o.status||'').toLowerCase()==='executed');
+  $('lastTrade').textContent=lastExecuted?ageLabel(lastExecuted.lastUpdateTime||lastExecuted.createdTime):'NONE TODAY';
+  $('openState').textContent=ps.length?ps.length+' OPEN':'FLAT';
+  $('openState').className=ps.length?'green':'amber';
 }
 let lastDeep=0;
 async function refresh(){
