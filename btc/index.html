@@ -248,7 +248,7 @@
     s.onerror = () => showError('Could not load ' + src);
     document.body.appendChild(s);
   };
-  load('data.js', () => load('app.js', () => {
+  load('data.js?v=20260926-precision1', () => load('app.js?v=20260926-precision1', () => {
     if (status && status.textContent === 'LOADING ENGINE') status.textContent = 'STARTING';
   }));
 })();
