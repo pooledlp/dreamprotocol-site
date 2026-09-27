@@ -196,9 +196,12 @@ async function refreshScalpShadow(){
     const learningText=learned.completedTrades>=5
       ? ' Learning from '+learned.completedTrades+' completed scalps; current adaptive target +'+Math.round(+(s.targetProfit||0)*100)+'¢.'
       : ' Learning warm-up: '+(learned.completedTrades||0)+' completed scalps so far; bucket tuning starts after 5 samples.';
+    const feeText=valid(s.estimatedExitFee)&&valid(s.estimatedNetTarget)
+      ? ' Estimated exit fee '+(+s.estimatedExitFee*100).toFixed(1)+'¢; estimated net target '+(+s.estimatedNetTarget*100).toFixed(1)+'¢/contract.'
+      : '';
     $('scalpMessage').textContent=(s.eligible
-      ? 'Model candidate (not an order): '+(s.side==='yes'?'UP':'DOWN')+' near '+Math.round(+s.makerEntry*100)+'¢ with about '+Math.round(+s.targetProfit*100)+'¢ gross target.'
-      : (live?'Live scalper scanning. ':'Shadow scalper scanning. ')+(s.reason||'No qualifying setup right now.'))+learningText;
+      ? 'Precision candidate (not an order): '+(s.side==='yes'?'UP':'DOWN')+' near '+Math.round(+s.makerEntry*100)+'¢ with about '+Math.round(+s.targetProfit*100)+'¢ gross target.'+feeText
+      : (live?'Live precision scalper scanning. ':'Shadow scalper scanning. ')+(s.reason||'No qualifying setup right now.')+feeText)+learningText;
     $('scalpCard').className='card scalpCard '+(s.eligible?'candidate':'shadow');
   }catch(e){
     for(const id of ['scalpEntry','scalpTarget','scalpEdge','scalpSpread'])$(id).textContent='--¢';
@@ -237,7 +240,9 @@ async function refreshBotStatus(){
       $('botLock').textContent='LIVE EXECUTION ARMED';
       $('botLock').className='botLock live';
       $('botMessage').textContent=j.directionalEnabled===false
-        ? 'Execution is live. Directional entries are paused while the isolated micro-scalper test runs.'
+        ? (j.scalper?.selectionMode==='precision'
+          ? 'Execution is live. Directional entries are paused. Precision scalper requires persistent edge, fee-adjusted net room, tighter spreads, and quarantines statistically weak price buckets.'
+          : 'Execution is live. Directional entries are paused while the isolated micro-scalper test runs.')
         : 'The bot can place and reduce Kalshi positions automatically under the displayed risk limits.';
     }else if(j.credentialsConfigured){
       $('botLock').textContent='LIVE MONEY LOCKED';
