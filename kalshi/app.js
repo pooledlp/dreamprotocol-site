@@ -86,10 +86,11 @@ function renderStatus(s){
   setText('strategyVersion',sc.strategyVersion||'--');
   setText('strategyGate','UP/DOWN · DIP/PEAK aware · '+cents(strategy.minEntry)+'–'+cents(strategy.maxEntry)+' entry · ≥'+cents(strategy.minNet)+' net ('+cents(strategy.swingMinNet)+' swing) · ≥'+pct(strategy.minProb)+' fair ('+pct(strategy.swingMinProb)+' swing)');
   setText('riskTrade',money(sc.maxRiskDollars));
+  setText('riskConcurrent',Number.isFinite(+sc.maxConcurrentPositions)?sc.maxConcurrentPositions:'--');
+  setText('riskSameSide',Number.isFinite(+sc.maxSameDirectionPositions)?sc.maxSameDirectionPositions:'--');
   setText('riskLoss',money(sc.maxDailyLossDollars));
-  setText('riskNotional',money(sc.maxDailyNotionalDollars));
-  setText('riskTrades',Number.isFinite(+sc.maxTradesPerDay)?sc.maxTradesPerDay:'--');
-  setText('refs','Exact CF RTI for entries · Kalshi live quotes/fills · settlement-aware probability · exchange history fallback');
+  setText('riskPortfolio','Up to '+(Number.isFinite(+sc.maxConcurrentPositions)?sc.maxConcurrentPositions:'--')+' simultaneous positions · max '+money(sc.maxConcurrentRiskDollars)+' open risk · '+money(sc.maxDailyNotionalDollars)+' daily notional · '+(Number.isFinite(+sc.maxTradesPerDay)?sc.maxTradesPerDay:'--')+' max trades');
+  setText('refs','Exact CF RTI for entries · Kalshi live quotes/fills · settlement-aware probability · correlation-aware multi-crypto portfolio');
 }
 function renderEngine(e){
   engineHealthy=!!e?.ok&&!e?.lastError;
@@ -228,7 +229,7 @@ function renderActivity(j){
   const ps=Array.isArray(j?.positions)?j.positions:[],os=Array.isArray(j?.orders)?j.orders:[];
   setText('openState',ps.length?ps.length+' OPEN':'FLAT');setClass('openState',ps.length?'green':'amber');
   setText('activityTag',ps.length+' open · '+os.length+' raw orders');
-  $('positions').innerHTML=ps.length?ps.map(p=>'<div class="rawRow"><b>'+esc(p.ticker)+'</b><span>position '+esc(p.position)+'</span><span>'+money(p.exposure)+'</span><span>'+absTime(p.lastUpdated)+'</span></div>').join(''):'<div class="empty">No open bot-owned position.</div>';
+  $('positions').innerHTML=ps.length?ps.map(p=>'<div class="rawRow"><b>'+esc(p.ticker)+'</b><span>'+String(p.side||'').toUpperCase()+' · position '+esc(p.position)+'</span><span>'+money(p.exposure)+'</span><span>'+absTime(p.lastUpdated)+'</span></div>').join(''):'<div class="empty">No open bot-owned position.</div>';
   $('orders').innerHTML=os.slice(0,10).map(o=>'<div class="rawRow"><b>'+esc(o.ticker)+'</b><span>'+esc(o.status)+'</span><span>'+ (String(o.clientOrderId||'').includes('-entry-')?'ENTRY':'EXIT')+'</span><span>'+absTime(orderTime(o))+'</span></div>').join('');
 }
 async function refreshFast(){
