@@ -7,11 +7,20 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 async function json(path,ms=8000){const ac=new AbortController(),t=setTimeout(()=>ac.abort(),ms);try{const r=await fetch(API+path,{cache:'no-store',signal:ac.signal});if(!r.ok)throw new Error('HTTP '+r.status);return await r.json()}finally{clearTimeout(t)}}
 function klass(v){return v>0?'green':v<0?'red':'amber'}
 function remaining(min){if(!Number.isFinite(+min))return'--:--';const s=Math.max(0,Math.round(+min*60));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
+function signedMoney(n){if(!Number.isFinite(+n))return'--';const v=+n;return(v>0?'+':'')+money(v)}
+function timeAgo(value){
+  const at=Date.parse(value||'');if(!Number.isFinite(at))return'--';
+  const sec=Math.max(0,Math.floor((Date.now()-at)/1000));
+  if(sec<60)return sec+'s ago';
+  const min=Math.floor(sec/60);if(min<60)return min+'m ago';
+  const hr=Math.floor(min/60);if(hr<24)return hr+'h '+(min%60)+'m ago';
+  const day=Math.floor(hr/24);return day+'d ago';
+}
 function renderStatus(s){
   const live=!!s?.scalper?.live;
   $('mode').textContent=live?'LIVE MULTI-MARKET':'SHADOW / PAPER';
   $('mode').className='big '+(live?'green':'amber');
-  $('assets').textContent=(s?.scalper?.assets||['BTC','ETH','SOL','XRP','DOGE']).join(' · ');
+  $('assets').textContent=(s?.scalper?.assets||['BTC','ETH','SOL','XRP','DOGE','BNB','HYPE','ZEC','NEAR','GOLD','SILVER','COPPER','WTI','NATGAS','PALLADIUM','PLATINUM']).join(' · ');
   $('modeText').textContent=live?'Real-money scalper is armed. Ranked market selection and global exposure guard are active.':'Execution is not live; scanner is evaluating setups only.';
   $('riskTrade').textContent=money(s?.scalper?.maxRiskDollars);
   $('riskNotional').textContent=money(s?.scalper?.maxDailyNotionalDollars);
@@ -58,6 +67,38 @@ function renderPnl(j){
   $('pnlOpen').textContent=money(t.openCostDollars);
   $('pnlNote').textContent=j.complete?'Reconciled from actual fills, settlements, and fees.':'Accounting is partial; totals are suppressed where attribution is uncertain.';
 }
+function renderDailySummary(pnlData,activityData){
+  const t=pnlData?.today;
+  const orders=Array.isArray(activityData?.orders)?activityData.orders:[];
+  const exits=orders.filter(o=>o?.status==='executed'&&String(o?.clientOrderId||'').includes('-exit-'));
+  const last=exits.sort((a,b)=>Date.parse(b.lastUpdateTime||b.createdTime||0)-Date.parse(a.lastUpdateTime||a.createdTime||0))[0]||null;
+  if(!pnlData?.ok||!t){
+    $('todayTrades').textContent='--';
+    $('todayRecord').textContent='--';
+    $('todayNet').textContent='--';
+    $('todayNet').className='amber';
+    $('lastTrade').textContent=last?timeAgo(last.lastUpdateTime||last.createdTime):'--';
+    $('lastTradeDetail').textContent=last?('Last completed: '+last.ticker):'No completed trade in the current activity window.';
+    $('todayState').textContent='Daily accounting is temporarily unavailable.';
+    return;
+  }
+  const completed=Number.isFinite(+t.completed)?+t.completed:0;
+  const wins=Number.isFinite(+t.wins)?+t.wins:0;
+  const losses=Math.max(0,completed-wins);
+  const net=+t.realizedNetDollars||0;
+  $('todayTrades').textContent=completed;
+  $('todayRecord').textContent=wins+'W / '+losses+'L';
+  $('todayNet').textContent=signedMoney(net);
+  $('todayNet').className=klass(net);
+  $('lastTrade').textContent=last?timeAgo(last.lastUpdateTime||last.createdTime):(completed?'Earlier today':'None yet');
+  $('lastTradeDetail').textContent=last
+    ?('Last completed: '+last.ticker+' · '+(String(last.clientOrderId||'').includes('-no-')?'NO':'YES')+' side · '+cents(last.noPrice??last.yesPrice))
+    :(completed+' completed trade'+(completed===1?'':'s')+' recorded today.');
+  $('todayState').textContent=completed
+    ?('Bot has been active today · '+wins+' wins, '+losses+' losses · '+money(t.entryNotionalDollars||0)+' entry notional.')
+    :'Bot is live and waiting for the first completed setup today.';
+  $('todayBadge').textContent=completed?(completed+' TRADE'+(completed===1?'':'S')):'WAITING';
+}
 function renderActivity(j){
   const ps=Array.isArray(j?.positions)?j.positions:[],os=Array.isArray(j?.orders)?j.orders:[];
   $('activityTag').textContent=ps.length+' OPEN · '+os.length+' ORDERS';
@@ -75,6 +116,7 @@ async function refresh(){
       const [p,a]=await Promise.allSettled([json('/kalshi-bot/pnl'),json('/kalshi-bot/activity')]);
       if(p.status==='fulfilled')renderPnl(p.value);
       if(a.status==='fulfilled')renderActivity(a.value);
+      renderDailySummary(p.status==='fulfilled'?p.value:null,a.status==='fulfilled'?a.value:null);
     }
   }catch(e){
     $('health').className='pill red';$('health').querySelector('b').textContent='ENGINE ERROR';$('selectedReason').textContent=e.message||String(e);
