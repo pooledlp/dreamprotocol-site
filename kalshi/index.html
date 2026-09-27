@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#070a0f">
 <meta name="robots" content="noindex,nofollow">
 <title>DreamPredict Multi-Market 15M</title>
-<link rel="stylesheet" href="styles.css?v=20260927-sweetspot1">
+<link rel="stylesheet" href="styles.css?v=20260927-system2">
 </head>
 <body>
 <div class="shell">
@@ -31,6 +31,34 @@
     </div>
     <div id="modeText" class="muted">Reading live bot state and global risk controls.</div>
     <div id="strategyGate" class="strategyGate">Loading v7 sweet-spot gates...</div>
+  </section>
+
+  <section class="systemStrip" aria-live="polite">
+    <div class="systemStat">
+      <span>Strategy</span>
+      <b id="strategyVersion">--</b>
+      <small id="executionStyle">--</small>
+    </div>
+    <div class="systemStat">
+      <span>CF reference</span>
+      <b id="wsState" class="amber">CHECKING</b>
+      <small id="feedAge">--</small>
+    </div>
+    <div class="systemStat">
+      <span>Exact refs</span>
+      <b id="refCount">--</b>
+      <small id="refTargets">--</small>
+    </div>
+    <div class="systemStat">
+      <span>Live quotes</span>
+      <b id="quoteCount">--</b>
+      <small id="quoteTargets">--</small>
+    </div>
+    <div class="systemStat">
+      <span>Engine cycles</span>
+      <b id="engineCycles">--</b>
+      <small id="engineTrigger">--</small>
+    </div>
   </section>
 
   <section class="activityStrip" aria-live="polite">
@@ -89,7 +117,7 @@
     <div class="sectionHead">
       <div>
         <div class="label">Live market scanner</div>
-        <div class="muted">Ranked by supported model edge after execution filters.</div>
+        <div class="muted">WATCH = diagnostics only. SWEET SPOT = passes the current live execution gates.</div>
       </div>
       <div class="scanTags"><div id="scanStamp" class="tag">--</div><div id="scanCount" class="tag">--</div></div>
     </div>
@@ -108,7 +136,7 @@
       <div class="muted topSpace">One bot-owned market may have exposure at a time. Existing positions take priority over new scans.</div>
     </div>
     <div class="card">
-      <div class="label">Realized micro-scalper P&amp;L</div>
+      <div class="label">Today's reconciled P&amp;L</div>
       <div id="pnl" class="pnl amber">--</div>
       <div class="metricGrid risk">
         <div><span>Gross</span><b id="pnlGross">--</b></div>
@@ -116,7 +144,7 @@
         <div><span>Completed</span><b id="pnlTrades">--</b></div>
         <div><span>Open cost</span><b id="pnlOpen">--</b></div>
       </div>
-      <div id="pnlNote" class="muted topSpace">Waiting for reconciled fills.</div>
+      <div id="pnlNote" class="muted topSpace">Includes today's earlier strategy versions. New v7 performance should be judged from new v7 fills.</div>
     </div>
   </section>
 
@@ -127,8 +155,15 @@
   </section>
 
   <section class="card compact">
-    <div class="label">Reference feeds</div>
-    <div id="refs" class="muted">CF Benchmarks + Kalshi WebSocket + exchange spot/history feeds.</div>
+    <div class="sectionHead">
+      <div>
+        <div class="label">Reference & execution feeds</div>
+        <div class="muted">Exact CF Benchmarks RTI drives live crypto execution. Stale or missing exact references fail closed.</div>
+      </div>
+      <div id="feedHealth" class="tag amber">CHECKING</div>
+    </div>
+    <div id="refs" class="muted topSpace">CF Benchmarks + Kalshi WebSocket + exchange spot/history feeds.</div>
+    <div id="feedDetail" class="feedDetail">Waiting for engine feed telemetry.</div>
   </section>
 
   <footer>
@@ -136,6 +171,6 @@
     <a href="../btc/">BTC DETAIL VIEW</a>
   </footer>
 </div>
-<script src="app.js?v=20260927-sweetspot1"></script>
+<script src="app.js?v=20260927-system2"></script>
 </body>
 </html>
