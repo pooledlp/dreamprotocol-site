@@ -78,6 +78,7 @@ function renderStatus(s){
   return live;
 }
 
+let hasScanData=false;
 function renderEngine(e){
   const ws=e?.websocket||{},open=!!ws.open;
   const age=Number.isFinite(+ws.lastMessageAgeMs)?+ws.lastMessageAgeMs:NaN;
@@ -103,8 +104,35 @@ function renderEngine(e){
   if(Number.isFinite(+ws.quoteCount)&&Number.isFinite(+ws.targetCount))details.push(ws.quoteCount+'/'+ws.targetCount+' live market quotes populated');
   if(ws.lastError)details.push('last socket error: '+ws.lastError);
   $('feedDetail').textContent=details.join(' · ')||'No feed telemetry returned.';
+
+  // Give the dashboard an immediate useful first paint from the lightweight
+  // engine-status endpoint while the heavier all-market scanner refreshes.
+  if(!hasScanData&&e?.lastResult?.ticker){
+    const r=e.lastResult,sc=r?.scalp?.scalp||null;
+    const rem=Number.isFinite(+r?.decision?.remaining)?+r.decision.remaining:NaN;
+    const end=Number.isFinite(rem)?Date.now()+rem*60000:NaN;
+    $('selectedAsset').textContent=r.asset||'--';
+    $('selectedTicker').textContent=r.ticker||'--';
+    $('selectedSide').textContent='WAIT';
+    $('selectedSide').className='side amber';
+    $('selectedTime').dataset.end=Number.isFinite(end)?String(end):'';
+    $('selectedTime').textContent=remaining(rem);
+    $('selectedEndTime').textContent=Number.isFinite(end)?endLabel(end):'--';
+    $('selectedReason').textContent=r?.scalp?.reason
+      ?'ENGINE LIVE · '+r.scalp.reason
+      :'ENGINE LIVE · full market scan loading';
+    if(sc){
+      $('entry').textContent=cents(sc.makerEntry);
+      $('target').textContent=cents(sc.targetExit);
+      $('gross').textContent=cents(sc.grossEdge);
+      $('net').textContent=cents(sc.estimatedNetTarget);
+      $('spread').textContent=cents(sc.spread);
+    }
+    $('prob').textContent='--';
+  }
 }
 function renderScan(j){
+  hasScanData=true;
   const rows=Array.isArray(j?.markets)?j.markets:[];
   const top=rows[0]||null,now=Date.now();
   $('scanCount').textContent=rows.length+' LIVE';
@@ -185,25 +213,89 @@ function renderActivity(j){
   $('openState').className=ps.length?'green':'amber';
   tickTimers();
 }
-let lastDeep=0;
-async function refresh(){
+let lastDeep=0,lastScan=0;
+let fastBusy=false,scanBusy=false,deepBusy=false;
+let coreLive=false,engineHealthy=false;
+
+function paintHealth(){
+  const h=$('health'),b=h?.querySelector('b');
+  if(!h||!b)return;
+  if(coreLive&&engineHealthy){h.className='pill green';b.textContent='LIVE';return}
+  if(coreLive||engineHealthy){h.className='pill amber';b.textContent='LIVE / SYNCING';return}
+  h.className='pill amber';b.textContent='CONNECTING';
+}
+
+async function refreshFast(){
+  if(fastBusy)return;
+  fastBusy=true;
   try{
-    const [s,q]=await Promise.all([json('/kalshi-bot/status'),json('/kalshi-bot/scalp-shadow')]);
-    const live=renderStatus(s);renderScan(q);
-    $('health').className='pill '+(q?.ok?'green':'amber');$('health').querySelector('b').textContent=q?.ok?(live?'LIVE':'SCANNING'):'DEGRADED';
-    if(Date.now()-lastDeep>10000){
-      lastDeep=Date.now();
-      const [p,a,e]=await Promise.allSettled([
-        json('/kalshi-bot/pnl'),
-        json('/kalshi-bot/activity'),
-        json('/kalshi-bot/engine-status')
-      ]);
-      if(p.status==='fulfilled')renderPnl(p.value);
-      if(a.status==='fulfilled')renderActivity(a.value);
-      if(e.status==='fulfilled')renderEngine(e.value);
+    const [sr,er]=await Promise.allSettled([
+      json('/kalshi-bot/status',4500),
+      json('/kalshi-bot/engine-status',4500)
+    ]);
+    if(sr.status==='fulfilled'){
+      coreLive=renderStatus(sr.value);
     }
-  }catch(e){
-    $('health').className='pill red';$('health').querySelector('b').textContent='ENGINE ERROR';$('selectedReason').textContent=e.message||String(e);
+    if(er.status==='fulfilled'&&er.value?.ok){
+      engineHealthy=true;
+      renderEngine(er.value);
+    }
+    paintHealth();
+  }finally{
+    fastBusy=false;
   }
 }
-refresh();tickTimers();setInterval(refresh,3000);setInterval(tickTimers,1000);
+
+async function refreshScan(force=false){
+  if(scanBusy)return;
+  const now=Date.now();
+  if(!force&&now-lastScan<6000)return;
+  lastScan=now;scanBusy=true;
+  try{
+    const q=await json('/kalshi-bot/scalp-shadow',15000);
+    if(q?.ok){
+      renderScan(q);
+      paintHealth();
+    }else if(!hasScanData){
+      $('selectedReason').textContent='Engine live · market scanner warming up.';
+    }
+  }catch(e){
+    // A slow multi-market scan must never make the entire live dashboard look
+    // dead. Keep the last good scan and let the next cycle retry.
+    if(!hasScanData)$('selectedReason').textContent='Engine live · market scanner retrying.';
+  }finally{
+    scanBusy=false;
+  }
+}
+
+async function refreshDeep(force=false){
+  if(deepBusy)return;
+  const now=Date.now();
+  if(!force&&now-lastDeep<15000)return;
+  lastDeep=now;deepBusy=true;
+  try{
+    const [p,a]=await Promise.allSettled([
+      json('/kalshi-bot/pnl',12000),
+      json('/kalshi-bot/activity',12000)
+    ]);
+    if(p.status==='fulfilled')renderPnl(p.value);
+    if(a.status==='fulfilled')renderActivity(a.value);
+  }finally{
+    deepBusy=false;
+  }
+}
+
+async function refresh(){
+  // Fast status paints first. Expensive market/account calls run independently
+  // so a slow endpoint cannot freeze or falsely error the dashboard.
+  await refreshFast();
+  void refreshScan();
+  void refreshDeep();
+}
+
+refresh();
+void refreshScan(true);
+void refreshDeep(true);
+tickTimers();
+setInterval(refresh,3000);
+setInterval(tickTimers,1000);
