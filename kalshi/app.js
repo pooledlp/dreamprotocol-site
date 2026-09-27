@@ -135,7 +135,9 @@ function renderEngine(e){
     const confirm=action==='directional-confirming'&&Number.isFinite(+dr.confirmations)
       ?' · '+dr.confirmations+'/'+dr.required+' confirms'
       :'';
-    const signal=c.signal&&c.signal!=='VALUE'&&c.signal!=='NONE'?(c.signal+' '+(hasNum(c.signalStrength)?Number(c.signalStrength).toFixed(1)+'x · '):''):'';
+    const signal=(c.signal&&c.signal!=='VALUE'&&c.signal!=='NONE')
+      ?c.signal+' '+(hasNum(c.signalStrength)?Number(c.signalStrength).toFixed(1)+'x':'')+' · '
+      :'';
     setText('selectedReason',signal+(c.reason||dr.reason||'exact CF evaluation')+confirm);
     setText('entry',cents(c.cost));setText('net',cents(c.netEdge));
     setText('gross',cents(c.grossEdge));setText('spread',cents(c.spread));setText('target','100.0¢');
