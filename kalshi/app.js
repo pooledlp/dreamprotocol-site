@@ -7,7 +7,7 @@ const pct=n=>hasNum(n)?(+n*100).toFixed(0)+'%':'--';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const asset=t=>String(t||'').match(/^KX([A-Z]+)15M/)?.[1]||String(t||'').split('-')[0].replace(/^KX/,'').replace(/15M$/,'')||'--';
 
-let strategy={minNet:.05,minProb:.65,minEntry:.20,maxEntry:.80,maxSpread:.03,minEdge:.08};
+let strategy={minNet:.025,minProb:.58,minEntry:.20,maxEntry:.85,maxSpread:.03,minEdge:.045,swingMinNet:.02,swingMinProb:.55,swingMinEdge:.035};
 let coreLive=false,engineHealthy=false,hasScan=false,heroExact=false,lastScan=0,lastDeep=0;
 let fastBusy=false,scanBusy=false,deepBusy=false;
 
@@ -39,15 +39,20 @@ function inferSide(r){
   return null;
 }
 function gate(r){
-  if(r?.eligible)return{label:r?.projected?'CANDIDATE':'SWEET SPOT',cls:r?.projected?'blue':'green',why:r?.projected?'projected gates pass; exact CF still decides':'all execution gates pass'};
+  const swing=r?.signal==='DIP'||r?.signal==='PEAK';
+  const minNet=swing?strategy.swingMinNet:strategy.minNet;
+  const minEdge=swing?strategy.swingMinEdge:strategy.minEdge;
+  const minProb=swing?strategy.swingMinProb:strategy.minProb;
+  if(r?.eligible)return{label:r?.signal&&r.signal!=='VALUE'&&r.signal!=='NONE'?r.signal:(r?.projected?'CANDIDATE':'READY'),cls:r?.projected?'blue':'green',why:r?.projected?'projected gates pass; exact CF still decides':'all execution gates pass'};
   const why=[];
-  if(hasNum(r?.estimatedNetTarget)&&+r.estimatedNetTarget<strategy.minNet)why.push('net '+cents(r.estimatedNetTarget)+' < '+cents(strategy.minNet));
-  if(hasNum(r?.grossEdge)&&+r.grossEdge<strategy.minEdge)why.push('edge '+cents(r.grossEdge)+' < '+cents(strategy.minEdge));
+  if(hasNum(r?.estimatedNetTarget)&&+r.estimatedNetTarget<minNet)why.push('net '+cents(r.estimatedNetTarget)+' < '+cents(minNet));
+  if(hasNum(r?.grossEdge)&&+r.grossEdge<minEdge)why.push('edge '+cents(r.grossEdge)+' < '+cents(minEdge));
   if(hasNum(r?.makerEntry)&&(+r.makerEntry<strategy.minEntry||+r.makerEntry>strategy.maxEntry))why.push('entry '+cents(r.makerEntry)+' outside '+cents(strategy.minEntry)+'–'+cents(strategy.maxEntry));
   if(hasNum(r?.spread)&&+r.spread>strategy.maxSpread)why.push('spread '+cents(r.spread)+' > '+cents(strategy.maxSpread));
   const side=inferSide(r),p=side==='no'?+r?.pDown:+r?.pUp;
-  if(Number.isFinite(p)&&p<strategy.minProb)why.push('fair '+pct(p)+' < '+pct(strategy.minProb));
-  return{label:'BLOCKED',cls:'amber',why:why.slice(0,2).join(' · ')||'fails execution gates'};
+  if(Number.isFinite(p)&&p<minProb)why.push('fair '+pct(p)+' < '+pct(minProb));
+  const sig=r?.signal&&r.signal!=='VALUE'&&r.signal!=='NONE'?r.signal+' '+(hasNum(r.signalStrength)?Number(r.signalStrength).toFixed(1)+'x':'')+' · ':'';
+  return{label:'BLOCKED',cls:'amber',why:sig+(why.slice(0,2).join(' · ')||r?.reason||'fails execution gates')};
 }
 function paintHealth(){
   const live=coreLive&&engineHealthy;
@@ -66,17 +71,20 @@ function renderStatus(s){
   const sc=s?.strategy||{};
   coreLive=!!sc.live;
   strategy={
-    minNet:Number.isFinite(+sc.minNetEdgeCents)?+sc.minNetEdgeCents/100:.05,
-    minProb:Number.isFinite(+sc.minModelProbability)?+sc.minModelProbability:.65,
+    minNet:Number.isFinite(+sc.minNetEdgeCents)?+sc.minNetEdgeCents/100:.025,
+    minProb:Number.isFinite(+sc.minModelProbability)?+sc.minModelProbability:.58,
     minEntry:Array.isArray(sc.entryCostBandCents)?+sc.entryCostBandCents[0]/100:.20,
-    maxEntry:Array.isArray(sc.entryCostBandCents)?+sc.entryCostBandCents[1]/100:.80,
+    maxEntry:Array.isArray(sc.entryCostBandCents)?+sc.entryCostBandCents[1]/100:.85,
     maxSpread:Number.isFinite(+sc.maxSpreadCents)?+sc.maxSpreadCents/100:.03,
-    minEdge:Number.isFinite(+sc.minGrossEdgeCents)?+sc.minGrossEdgeCents/100:.08
+    minEdge:Number.isFinite(+sc.minGrossEdgeCents)?+sc.minGrossEdgeCents/100:.045,
+    swingMinNet:Number.isFinite(+sc.swingMinNetEdgeCents)?+sc.swingMinNetEdgeCents/100:.02,
+    swingMinProb:Number.isFinite(+sc.swingMinModelProbability)?+sc.swingMinModelProbability:.55,
+    swingMinEdge:Number.isFinite(+sc.swingMinGrossEdgeCents)?+sc.swingMinGrossEdgeCents/100:.035
   };
   setText('mode',coreLive?'DIR LIVE':'PAPER');
   setClass('mode',coreLive?'green':'amber');
   setText('strategyVersion',sc.strategyVersion||'--');
-  setText('strategyGate','UP/DOWN · '+cents(strategy.minEntry)+'–'+cents(strategy.maxEntry)+' entry · ≥'+cents(strategy.minNet)+' net edge · ≥'+pct(strategy.minProb)+' fair');
+  setText('strategyGate','UP/DOWN · DIP/PEAK aware · '+cents(strategy.minEntry)+'–'+cents(strategy.maxEntry)+' entry · ≥'+cents(strategy.minNet)+' net ('+cents(strategy.swingMinNet)+' swing) · ≥'+pct(strategy.minProb)+' fair ('+pct(strategy.swingMinProb)+' swing)');
   setText('riskTrade',money(sc.maxRiskDollars));
   setText('riskLoss',money(sc.maxDailyLossDollars));
   setText('riskNotional',money(sc.maxDailyNotionalDollars));
@@ -127,7 +135,8 @@ function renderEngine(e){
     const confirm=action==='directional-confirming'&&Number.isFinite(+dr.confirmations)
       ?' · '+dr.confirmations+'/'+dr.required+' confirms'
       :'';
-    setText('selectedReason',(c.reason||dr.reason||'exact CF evaluation')+confirm);
+    const signal=c.signal&&c.signal!=='VALUE'&&c.signal!=='NONE'?(c.signal+' '+(hasNum(c.signalStrength)?Number(c.signalStrength).toFixed(1)+'x · '):''):'';
+    setText('selectedReason',signal+(c.reason||dr.reason||'exact CF evaluation')+confirm);
     setText('entry',cents(c.cost));setText('net',cents(c.netEdge));
     setText('gross',cents(c.grossEdge));setText('spread',cents(c.spread));setText('target','100.0¢');
     setText('prob',c.side?(c.side==='yes'?'YES ':'NO ')+pct(c.fair):'--');
