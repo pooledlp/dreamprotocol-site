@@ -3,174 +3,153 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#070a0f">
+<meta name="theme-color" content="#071019">
 <meta name="robots" content="noindex,nofollow">
-<title>DreamPredict Multi-Market 15M</title>
-<link rel="stylesheet" href="styles.css?v=20260927-fastfix3">
+<title>DreamPredict | Live 15M Engine</title>
+<link rel="stylesheet" href="styles.css?v=20260927-cockpit1">
 </head>
 <body>
-<div class="shell">
-  <header>
-    <div>
-      <div class="brand">DreamPredict <span>MULTI 15M</span></div>
-      <div class="sub">KALSHI 15-MINUTE EXECUTION ENGINE</div>
+<div class="app">
+  <header class="topbar">
+    <div class="brandBlock">
+      <div class="brand">DreamPredict <span>15M</span></div>
+      <div class="sub">LIVE KALSHI EXECUTION CONSOLE</div>
     </div>
-    <div id="health" class="pill amber"><i></i><b>CONNECTING</b></div>
+    <div class="topStatus">
+      <div id="feedDot" class="dot amber"></div>
+      <div>
+        <b id="healthText">CONNECTING</b>
+        <small id="healthSub">engine + CF feed</small>
+      </div>
+    </div>
   </header>
 
-  <section id="modeCard" class="card heroCard">
-    <div class="split">
-      <div>
-        <div class="label">Execution mode</div>
-        <div id="mode" class="big amber">CHECKING</div>
-      </div>
-      <div class="right">
-        <div class="label">Markets enabled</div>
-        <div id="assets" class="assetLine">BTC · ETH · SOL · XRP · DOGE</div>
-      </div>
-    </div>
-    <div id="modeText" class="muted">Reading live bot state and global risk controls.</div>
-    <div id="strategyGate" class="strategyGate">Loading v7 sweet-spot gates...</div>
+  <section class="tickerStrip">
+    <div><span>MODE</span><b id="mode">--</b></div>
+    <div><span>CF FEED</span><b id="feedAge">--</b></div>
+    <div><span>POSITION</span><b id="openState">--</b></div>
+    <div><span>NET TODAY</span><b id="todayNet">--</b></div>
+    <div><span>W / L</span><b id="todayWL">--</b></div>
+    <div><span>ROLLOVER</span><b id="rolloverCountdown">--:--</b></div>
   </section>
 
-  <section class="systemStrip" aria-live="polite">
-    <div class="systemStat">
-      <span>Strategy</span>
-      <b id="strategyVersion">--</b>
-      <small id="executionStyle">--</small>
-    </div>
-    <div class="systemStat">
-      <span>CF reference</span>
-      <b id="wsState" class="amber">CHECKING</b>
-      <small id="feedAge">--</small>
-    </div>
-    <div class="systemStat">
-      <span>Exact refs</span>
-      <b id="refCount">--</b>
-      <small id="refTargets">--</small>
-    </div>
-    <div class="systemStat">
-      <span>Live quotes</span>
-      <b id="quoteCount">--</b>
-      <small id="quoteTargets">--</small>
-    </div>
-    <div class="systemStat">
-      <span>Engine cycles</span>
-      <b id="engineCycles">--</b>
-      <small id="engineTrigger">--</small>
-    </div>
-  </section>
-
-  <section class="activityStrip" aria-live="polite">
-    <div class="activityStat">
-      <span>Trades today</span>
-      <b id="todayTrades">--</b>
-    </div>
-    <div class="activityStat">
-      <span>Win / loss</span>
-      <b id="todayWL">--</b>
-    </div>
-    <div class="activityStat">
-      <span>Net today</span>
-      <b id="todayNet" class="amber">--</b>
-    </div>
-    <div class="activityStat">
-      <span>Last trade</span>
-      <b id="lastTrade">--</b>
-    </div>
-    <div class="activityStat">
-      <span>Position</span>
-      <b id="openState" class="amber">CHECKING</b>
-    </div>
-    <div class="activityStat">
-      <span>Next rollover</span>
-      <b id="rolloverCountdown" class="amber">--:--</b>
-      <small id="rolloverTime" class="timeSub">--</small>
-    </div>
-  </section>
-
-  <section class="card selected">
-    <div class="label">Execution priority right now</div>
-    <div class="selectedTop">
-      <div>
-        <div id="selectedAsset" class="assetHero">--</div>
-        <div id="selectedTicker" class="ticker">SCANNING...</div>
+  <main>
+    <section class="hero">
+      <div class="heroHead">
+        <div>
+          <div class="eyebrow">BEST OPPORTUNITY RIGHT NOW</div>
+          <div class="assetLine">
+            <span id="selectedAsset" class="asset">--</span>
+            <span id="selectedState" class="state amber">SCANNING</span>
+          </div>
+          <div id="selectedTicker" class="ticker">Waiting for market scan...</div>
+        </div>
+        <div class="timeBox">
+          <b id="selectedTime" data-end="">--:--</b>
+          <small id="selectedEndTime">--</small>
+        </div>
       </div>
-      <div class="right">
-        <div id="selectedSide" class="side amber">WAIT</div>
-        <div id="selectedTime" class="clock countdown" data-end="">--:--</div>
-        <div id="selectedEndTime" class="timeSub">--</div>
-      </div>
-    </div>
-    <div id="selectedReason" class="reason">Comparing supported 15-minute markets.</div>
-    <div class="metricGrid">
-      <div><span>Maker entry</span><b id="entry">--</b></div>
-      <div><span>Target exit</span><b id="target">--</b></div>
-      <div><span>Gross edge</span><b id="gross">--</b></div>
-      <div><span>Est. net target</span><b id="net">--</b></div>
-      <div><span>Spread</span><b id="spread">--</b></div>
-      <div><span>Model side</span><b id="prob">--</b></div>
-    </div>
-  </section>
 
-  <section class="card">
-    <div class="sectionHead">
-      <div>
-        <div class="label">Live market scanner</div>
-        <div class="muted">WATCH = diagnostics only. SWEET SPOT = passes the current live execution gates.</div>
-      </div>
-      <div class="scanTags"><div id="scanStamp" class="tag">--</div><div id="scanCount" class="tag">--</div></div>
-    </div>
-    <div id="markets" class="marketGrid"></div>
-  </section>
+      <div id="selectedReason" class="decisionReason">Loading live execution gates.</div>
 
-  <section class="two">
-    <div class="card">
-      <div class="label">Global live limits</div>
-      <div class="metricGrid risk">
-        <div><span>Max / trade</span><b id="riskTrade">--</b></div>
-        <div><span>Daily notional</span><b id="riskNotional">--</b></div>
-        <div><span>Daily loss stop</span><b id="riskLoss">--</b></div>
-        <div><span>Trades / day</span><b id="riskTrades">--</b></div>
+      <div class="metrics">
+        <div><span>SIDE</span><b id="prob">--</b></div>
+        <div><span>MAKER ENTRY</span><b id="entry">--</b></div>
+        <div><span>NET EDGE</span><b id="net">--</b></div>
+        <div><span>GROSS EDGE</span><b id="gross">--</b></div>
+        <div><span>SPREAD</span><b id="spread">--</b></div>
+        <div><span>TARGET</span><b id="target">--</b></div>
       </div>
-      <div class="muted topSpace">One bot-owned market may have exposure at a time. Existing positions take priority over new scans.</div>
-    </div>
-    <div class="card">
-      <div class="label">Today's reconciled P&amp;L</div>
-      <div id="pnl" class="pnl amber">--</div>
-      <div class="metricGrid risk">
-        <div><span>Gross</span><b id="pnlGross">--</b></div>
-        <div><span>Fees</span><b id="pnlFees">--</b></div>
-        <div><span>Completed</span><b id="pnlTrades">--</b></div>
-        <div><span>Open cost</span><b id="pnlOpen">--</b></div>
+
+      <div id="gateBar" class="gateBar">
+        <span id="strategyVersion">strategy --</span>
+        <b id="strategyGate">loading gates...</b>
       </div>
-      <div id="pnlNote" class="muted topSpace">Includes today's earlier strategy versions. New v7 performance should be judged from new v7 fills.</div>
-    </div>
-  </section>
+    </section>
 
-  <section class="card">
-    <div class="sectionHead"><div><div class="label">Bot activity</div><div class="muted">Latest bot-owned orders and open positions.</div></div><div id="activityTag" class="tag">--</div></div>
-    <div id="positions" class="activity"></div>
-    <div id="orders" class="activity"></div>
-  </section>
-
-  <section class="card compact">
-    <div class="sectionHead">
-      <div>
-        <div class="label">Reference & execution feeds</div>
-        <div class="muted">Exact CF Benchmarks RTI drives live crypto execution. Stale or missing exact references fail closed.</div>
+    <section class="panel scannerPanel">
+      <div class="panelHead">
+        <div>
+          <div class="eyebrow">LIVE MARKET SCANNER</div>
+          <div class="panelTitle">Whole field, one glance</div>
+        </div>
+        <div class="scanMeta">
+          <span id="scanStamp">--</span>
+          <span id="scanCount">--</span>
+        </div>
       </div>
-      <div id="feedHealth" class="tag amber">CHECKING</div>
-    </div>
-    <div id="refs" class="muted topSpace">CF Benchmarks + Kalshi WebSocket + exchange spot/history feeds.</div>
-    <div id="feedDetail" class="feedDetail">Waiting for engine feed telemetry.</div>
-  </section>
+      <div class="scanHeader">
+        <span>MARKET</span><span>STATE</span><span>SIDE</span><span>ENTRY</span><span>NET</span><span>SPREAD</span><span>WHY</span>
+      </div>
+      <div id="markets" class="scanList">
+        <div class="empty">Scanning markets...</div>
+      </div>
+    </section>
 
-  <footer>
-    Experimental automated trading system. Models can be wrong and real-money trading can lose money. Fees, slippage, missed fills, outages, and settlement behavior can affect results.
-    <a href="../btc/">BTC DETAIL VIEW</a>
-  </footer>
+    <section class="summaryGrid">
+      <div class="panel">
+        <div class="eyebrow">TODAY</div>
+        <div class="pnlRow">
+          <div><span>Net</span><b id="pnl">--</b></div>
+          <div><span>Trades</span><b id="todayTrades">--</b></div>
+          <div><span>Gross</span><b id="pnlGross">--</b></div>
+          <div><span>Fees</span><b id="pnlFees">--</b></div>
+        </div>
+        <div id="pnlNote" class="finePrint">Today's total includes earlier strategy versions.</div>
+      </div>
+
+      <div class="panel">
+        <div class="eyebrow">LIVE LIMITS</div>
+        <div class="limitRow">
+          <div><span>Per trade</span><b id="riskTrade">--</b></div>
+          <div><span>Daily loss</span><b id="riskLoss">--</b></div>
+          <div><span>Notional</span><b id="riskNotional">--</b></div>
+          <div><span>Max trades</span><b id="riskTrades">--</b></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel tradesPanel">
+      <div class="panelHead">
+        <div>
+          <div class="eyebrow">RECENT TRADES</div>
+          <div class="panelTitle">Completed positions</div>
+        </div>
+        <div id="activityTag" class="tag">--</div>
+      </div>
+      <div class="tradeHeader">
+        <span>TIME</span><span>ASSET</span><span>SIDE</span><span>ENTRY</span><span>EXIT</span><span>MOVE</span>
+      </div>
+      <div id="trades" class="tradeList"><div class="empty">No completed bot trades loaded.</div></div>
+
+      <details class="advanced">
+        <summary>Advanced order log</summary>
+        <div id="positions" class="rawList"></div>
+        <div id="orders" class="rawList"></div>
+      </details>
+    </section>
+
+    <details class="panel systemPanel">
+      <summary>
+        <div>
+          <div class="eyebrow">SYSTEM HEALTH</div>
+          <div class="panelTitle">Engine + reference feeds</div>
+        </div>
+        <span id="feedHealth" class="tag amber">CHECKING</span>
+      </summary>
+      <div class="healthGrid">
+        <div><span>CF state</span><b id="wsState">--</b></div>
+        <div><span>Exact refs</span><b id="refCount">--</b><small id="refTargets">--</small></div>
+        <div><span>Live quotes</span><b id="quoteCount">--</b><small id="quoteTargets">--</small></div>
+        <div><span>Cycles</span><b id="engineCycles">--</b><small id="engineTrigger">--</small></div>
+      </div>
+      <div id="refs" class="finePrint">Waiting for reference-feed configuration.</div>
+      <div id="feedDetail" class="finePrint">Waiting for engine telemetry.</div>
+    </details>
+  </main>
+
+  <footer>Experimental automated trading system. Real-money trading can lose money.</footer>
 </div>
-<script src="app.js?v=20260927-fastfix3"></script>
+<script src="app.js?v=20260927-cockpit1"></script>
 </body>
 </html>
