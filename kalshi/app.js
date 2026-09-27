@@ -161,6 +161,19 @@ function renderPnl(j){
   setText('todayNet',money(net));setClass('todayNet',net>0?'green':net<0?'red':'amber');
   setText('pnl',money(net));setClass('pnl',net>0?'green':net<0?'red':'amber');
   setText('pnlGross',money(t.realizedGrossDollars));setText('pnlFees',money(t.realizedFeesDollars));
+
+  const trades=Array.isArray(j?.recentTrades)?j.recentTrades:[];
+  $('trades').innerHTML=trades.length?trades.slice(0,10).map(t=>{
+    const move=Number.isFinite(+t.netDollars)?+t.netDollars:NaN;
+    return '<div class="tradeRow">'+
+      '<span>'+absTime(t.closedAt)+'</span>'+
+      '<b>'+esc(t.asset||asset(t.ticker))+'</b>'+
+      '<span>'+String(t.side||'').toUpperCase()+'</span>'+
+      '<span>'+cents(t.entryPrice)+'</span>'+
+      '<span>'+cents(t.exitPrice)+'</span>'+
+      '<span class="tradeMove '+(move>=0?'pos':'neg')+'">'+money(move)+'</span>'+
+    '</div>';
+  }).join(''):'<div class="empty">No reconciled completed trades yet.</div>';
 }
 function orderTime(o){return Date.parse(o?.lastUpdateTime||o?.createdTime||'')||0}
 function orderSide(o){
@@ -193,11 +206,7 @@ function pairTrades(orders){
 function renderActivity(j){
   const ps=Array.isArray(j?.positions)?j.positions:[],os=Array.isArray(j?.orders)?j.orders:[];
   setText('openState',ps.length?ps.length+' OPEN':'FLAT');setClass('openState',ps.length?'green':'amber');
-  setText('activityTag',ps.length+' open · '+os.length+' orders');
-  const trades=pairTrades(os);
-  $('trades').innerHTML=trades.length?trades.map(t=>
-    '<div class="tradeRow"><span>'+absTime(t.time)+'</span><b>'+esc(t.asset)+'</b><span>'+(t.side==='yes'?'YES':'NO')+'</span><span>'+cents(t.entry)+'</span><span>'+cents(t.exit)+'</span><span class="tradeMove '+(t.move>=0?'pos':'neg')+'">'+cents(t.move)+'</span></div>'
-  ).join(''):'<div class="empty">No completed trades in the current activity window.</div>';
+  setText('activityTag',ps.length+' open · '+os.length+' raw orders');
   $('positions').innerHTML=ps.length?ps.map(p=>'<div class="rawRow"><b>'+esc(p.ticker)+'</b><span>position '+esc(p.position)+'</span><span>'+money(p.exposure)+'</span><span>'+absTime(p.lastUpdated)+'</span></div>').join(''):'<div class="empty">No open bot-owned position.</div>';
   $('orders').innerHTML=os.slice(0,10).map(o=>'<div class="rawRow"><b>'+esc(o.ticker)+'</b><span>'+esc(o.status)+'</span><span>'+ (String(o.clientOrderId||'').includes('-entry-')?'ENTRY':'EXIT')+'</span><span>'+absTime(orderTime(o))+'</span></div>').join('');
 }
@@ -218,10 +227,10 @@ async function refreshScan(force=false){
   finally{scanBusy=false}
 }
 async function refreshDeep(force=false){
-  if(deepBusy)return;if(!force&&Date.now()-lastDeep<15000)return;
+  if(deepBusy)return;if(!force&&Date.now()-lastDeep<8000)return;
   lastDeep=Date.now();deepBusy=true;
   try{
-    const [p,a]=await Promise.allSettled([json('/kalshi-bot/pnl',10000),json('/kalshi-bot/activity',10000)]);
+    const [p,a]=await Promise.allSettled([json('/kalshi-bot/pnl',12000),json('/kalshi-bot/activity',8000)]);
     if(p.status==='fulfilled')renderPnl(p.value);
     if(a.status==='fulfilled')renderActivity(a.value);
   }finally{deepBusy=false}
