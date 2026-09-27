@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#071019">
 <meta name="robots" content="noindex,nofollow">
 <title>DreamPredict | Live 15M Engine</title>
-<link rel="stylesheet" href="styles.css?v=20260927-superbid1">
+<link rel="stylesheet" href="styles.css?v=20260927-bidtape1">
 </head>
 <body>
 <div class="app">
@@ -28,6 +28,7 @@
     <div><span>MODE</span><b id="mode">--</b></div>
     <div><span>CF FEED</span><b id="feedAge">--</b></div>
     <div><span>POSITION</span><b id="openState">--</b></div>
+    <div><span>BIDS</span><b id="bidderState">--</b></div>
     <div><span>NET TODAY</span><b id="todayNet">--</b></div>
     <div><span>W / L</span><b id="todayWL">--</b></div>
     <div><span>ROLLOVER</span><b id="rolloverCountdown">--:--</b></div>
@@ -110,6 +111,23 @@
       </div>
     </section>
 
+    <section class="panel bidTapePanel">
+      <div class="panelHead">
+        <div>
+          <div class="eyebrow">SUPER BIDDER TAPE</div>
+          <div class="panelTitle">Live bids, cancels & reprices</div>
+          <div class="finePrint">Polled every ~2.5 seconds so short-lived 8-second reservations stay visible after cancellation.</div>
+        </div>
+        <div id="bidTapeTag" class="tag amber">waiting</div>
+      </div>
+      <div class="bidHeader">
+        <span>TIME</span><span>ASSET</span><span>SIDE</span><span>PRICE</span><span>ACTION</span><span>DETAIL</span>
+      </div>
+      <div id="bidTape" class="bidTape">
+        <div class="empty">Waiting for bidder activity...</div>
+      </div>
+    </section>
+
     <section class="panel tradesPanel">
       <div class="panelHead">
         <div>
@@ -151,6 +169,6 @@
 
   <footer>Experimental automated trading system. Real-money trading can lose money.</footer>
 </div>
-<script src="app.js?v=20260927-superbid1"></script>
+<script src="app.js?v=20260927-bidtape1"></script>
 </body>
 </html>
