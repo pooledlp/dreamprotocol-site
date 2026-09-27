@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#070a0f">
+<meta name="robots" content="noindex,nofollow">
+<title>DreamPredict Multi-Market 15M</title>
+<link rel="stylesheet" href="styles.css?v=20260926-multi1">
+</head>
+<body>
+<div class="shell">
+  <header>
+    <div>
+      <div class="brand">DreamPredict <span>MULTI 15M</span></div>
+      <div class="sub">KALSHI CRYPTO EXECUTION ENGINE</div>
+    </div>
+    <div id="health" class="pill amber"><i></i><b>CONNECTING</b></div>
+  </header>
+
+  <section id="modeCard" class="card heroCard">
+    <div class="split">
+      <div>
+        <div class="label">Execution mode</div>
+        <div id="mode" class="big amber">CHECKING</div>
+      </div>
+      <div class="right">
+        <div class="label">Markets enabled</div>
+        <div id="assets" class="assetLine">BTC · ETH · SOL · XRP · DOGE</div>
+      </div>
+    </div>
+    <div id="modeText" class="muted">Reading live bot state and global risk controls.</div>
+  </section>
+
+  <section class="card selected">
+    <div class="label">Execution priority right now</div>
+    <div class="selectedTop">
+      <div>
+        <div id="selectedAsset" class="assetHero">--</div>
+        <div id="selectedTicker" class="ticker">SCANNING...</div>
+      </div>
+      <div class="right">
+        <div id="selectedSide" class="side amber">WAIT</div>
+        <div id="selectedTime" class="clock">--:--</div>
+      </div>
+    </div>
+    <div id="selectedReason" class="reason">Comparing supported 15-minute markets.</div>
+    <div class="metricGrid">
+      <div><span>Maker entry</span><b id="entry">--</b></div>
+      <div><span>Target exit</span><b id="target">--</b></div>
+      <div><span>Gross edge</span><b id="gross">--</b></div>
+      <div><span>Est. net target</span><b id="net">--</b></div>
+      <div><span>Spread</span><b id="spread">--</b></div>
+      <div><span>Model side</span><b id="prob">--</b></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="sectionHead">
+      <div>
+        <div class="label">Live market scanner</div>
+        <div class="muted">Ranked by supported model edge after execution filters.</div>
+      </div>
+      <div id="scanCount" class="tag">--</div>
+    </div>
+    <div id="markets" class="marketGrid"></div>
+  </section>
+
+  <section class="two">
+    <div class="card">
+      <div class="label">Global live limits</div>
+      <div class="metricGrid risk">
+        <div><span>Max / trade</span><b id="riskTrade">--</b></div>
+        <div><span>Daily notional</span><b id="riskNotional">--</b></div>
+        <div><span>Daily loss stop</span><b id="riskLoss">--</b></div>
+        <div><span>Trades / day</span><b id="riskTrades">--</b></div>
+      </div>
+      <div class="muted topSpace">One bot-owned market may have exposure at a time. Existing positions take priority over new scans.</div>
+    </div>
+    <div class="card">
+      <div class="label">Realized micro-scalper P&amp;L</div>
+      <div id="pnl" class="pnl amber">--</div>
+      <div class="metricGrid risk">
+        <div><span>Gross</span><b id="pnlGross">--</b></div>
+        <div><span>Fees</span><b id="pnlFees">--</b></div>
+        <div><span>Completed</span><b id="pnlTrades">--</b></div>
+        <div><span>Open cost</span><b id="pnlOpen">--</b></div>
+      </div>
+      <div id="pnlNote" class="muted topSpace">Waiting for reconciled fills.</div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="sectionHead"><div><div class="label">Bot activity</div><div class="muted">Latest bot-owned orders and open positions.</div></div><div id="activityTag" class="tag">--</div></div>
+    <div id="positions" class="activity"></div>
+    <div id="orders" class="activity"></div>
+  </section>
+
+  <section class="card compact">
+    <div class="label">Reference feeds</div>
+    <div id="refs" class="muted">CF Benchmarks + Kalshi WebSocket + exchange spot/history feeds.</div>
+  </section>
+
+  <footer>
+    Experimental automated trading system. Models can be wrong and real-money trading can lose money. Fees, slippage, missed fills, outages, and settlement behavior can affect results.
+    <a href="../btc/">BTC DETAIL VIEW</a>
+  </footer>
+</div>
+<script src="app.js?v=20260926-multi1"></script>
+</body>
+</html>
