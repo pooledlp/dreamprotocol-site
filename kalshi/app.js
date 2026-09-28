@@ -8,7 +8,7 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const asset=t=>String(t||'').match(/^KX([A-Z]+)15M/)?.[1]||String(t||'').split('-')[0].replace(/^KX/,'').replace(/15M$/,'')||'--';
 
 let strategy={minNet:.025,minProb:.58,minEntry:.20,maxEntry:.85,maxSpread:.03,minEdge:.045,swingMinNet:.02,swingMinProb:.55,swingMinEdge:.035};
-let coreLive=false,engineHealthy=false,hasScan=false,heroExact=false,lastScan=0,lastDeep=0,lastActivity=0;
+let coreLive=false,paperMode=false,paperState=null,engineHealthy=false,hasScan=false,heroExact=false,lastScan=0,lastDeep=0,lastActivity=0;
 let fastBusy=false,scanBusy=false,deepBusy=false,activityBusy=false;
 
 async function json(path,ms=6000){
@@ -70,6 +70,7 @@ function tick(){
 function renderStatus(s){
   const sc=s?.strategy||{};
   coreLive=!!sc.live;
+  paperMode=!coreLive&&!!sc.autonomousPaper;
   strategy={
     minNet:Number.isFinite(+sc.minNetEdgeCents)?+sc.minNetEdgeCents/100:.025,
     minProb:Number.isFinite(+sc.minModelProbability)?+sc.minModelProbability:.58,
@@ -81,20 +82,70 @@ function renderStatus(s){
     swingMinProb:Number.isFinite(+sc.swingMinModelProbability)?+sc.swingMinModelProbability:.55,
     swingMinEdge:Number.isFinite(+sc.swingMinGrossEdgeCents)?+sc.swingMinGrossEdgeCents/100:.035
   };
-  setText('mode',coreLive?'DIR LIVE':'PAPER');
-  setClass('mode',coreLive?'green':'amber');
+  setText('mode',coreLive?'DIR LIVE':paperMode?'AUTO PAPER':'PAPER');
+  setClass('mode',coreLive?'green':paperMode?'blue':'amber');
   setText('strategyVersion',sc.strategyVersion||'--');
   setText('strategyGate','SUPER BIDDER · price-state reservation · '+cents(strategy.minEntry)+'–'+cents(strategy.maxEntry)+' max entry · no timed confirmation · exact CF decides fair value');
   setText('riskTrade',money(sc.maxRiskDollars));
   setText('riskConcurrent',Number.isFinite(+sc.maxConcurrentPositions)?sc.maxConcurrentPositions:'--');
   setText('riskSameSide',Number.isFinite(+sc.maxSameDirectionPositions)?sc.maxSameDirectionPositions:'--');
-  setText('riskLoss',money(sc.maxDailyLossDollars));
-  setText('riskPortfolio','Up to '+(Number.isFinite(+sc.maxConcurrentPositions)?sc.maxConcurrentPositions:'--')+' simultaneous positions · max '+money(sc.maxConcurrentRiskDollars)+' open risk · '+money(sc.maxDailyNotionalDollars)+' daily notional · '+(Number.isFinite(+sc.maxTradesPerDay)?sc.maxTradesPerDay:'--')+' max trades');
-  setText('refs','Exact CF RTI for entries · Kalshi live quotes/fills · settlement-aware probability · correlation-aware multi-crypto portfolio');
+  setText('riskLoss',money(paperMode?sc.paperDailyLossStopDollars:sc.maxDailyLossDollars));
+  setText('riskPortfolio',paperMode
+    ?'Autonomous simulation · '+money(sc.maxRiskDollars)+' max modeled risk · '+money(sc.maxDailyNotionalDollars)+' daily notional · '+(Number.isFinite(+sc.paperMaxTradesPerDay)?sc.paperMaxTradesPerDay:'--')+' max paper entries'
+    :'Up to '+(Number.isFinite(+sc.maxConcurrentPositions)?sc.maxConcurrentPositions:'--')+' simultaneous positions · max '+money(sc.maxConcurrentRiskDollars)+' open risk · '+money(sc.maxDailyNotionalDollars)+' daily notional · '+(Number.isFinite(+sc.maxTradesPerDay)?sc.maxTradesPerDay:'--')+' max trades');
+  setText('refs',paperMode
+    ?'Real Kalshi + CF feeds · simulated executable fills · persistent v24 position management'
+    :'Exact CF RTI for entries · Kalshi live quotes/fills · settlement-aware probability · correlation-aware multi-crypto portfolio');
 }
+function renderPaperState(p){
+  paperState=p||null;
+  if(!paperMode||!p)return;
+  const recent=Array.isArray(p.recent)?p.recent:[],wins=recent.filter(t=>+t.netDollars>0).length;
+  const net=+p.realized||0,gross=recent.reduce((sum,t)=>sum+(+t.grossDollars||0),0);
+  const fees=recent.reduce((sum,t)=>sum+((+t.entryFee||0)+(+t.exitFee||0))*(+t.count||1),0);
+  setText('todayTrades',Number.isFinite(+p.trades)?p.trades:0);
+  setText('todayWL',recent.length?wins+'W / '+Math.max(0,recent.length-wins)+'L':'0W / 0L');
+  setText('todayNet',money(net));setClass('todayNet',net>0?'green':net<0?'red':'amber');
+  setText('pnl',money(net));setClass('pnl',net>0?'green':net<0?'red':'amber');
+  setText('pnlGross',money(gross));setText('pnlFees',money(fees));
+
+  const pos=p.position,pending=p.pending;
+  setText('openState',pos?'1 OPEN':'FLAT');setClass('openState',pos?'green':'amber');
+  setText('bidderState',pending?(pending.kind==='entry'?'PAPER BID':'PAPER EXIT'):pos?'MANAGING':'SCANNING');
+  setClass('bidderState',pending||pos?'blue':'amber');
+  setText('activityTag',(pos?'1 open':'flat')+' · '+(pending?pending.kind+' resting':'no resting order'));
+  setText('bidTapeTag',pending?'1 simulated order':'paper idle');
+  setClass('bidTapeTag','tag '+(pending?'blue':'amber'));
+
+  $('bidTape').innerHTML=pending
+    ?'<div class="bidEvent"><span class="bidTime">'+absTime(pending.createdAt)+'</span><b class="bidAsset">'+esc(pending.asset)+'</b><span>'+String(pending.side||'').toUpperCase()+'</span><span class="bidPrice">'+cents(pending.price)+'</span><span class="bidAction blue">PAPER '+String(pending.kind||'').toUpperCase()+'</span><span class="bidDetail">simulated resting order against live quotes</span></div>'
+    :'<div class="empty">Autonomous paper engine is scanning live markets.</div>';
+
+  $('positions').innerHTML=pos
+    ?'<div class="rawRow"><b>'+esc(pos.ticker)+'</b><span>'+String(pos.side||'').toUpperCase()+' · '+esc(pos.count)+' contract'+(+pos.count===1?'':'s')+'</span><span>entry '+cents(pos.entryCost)+'</span><span>'+absTime(pos.enteredAt)+'</span></div>'
+    :'<div class="empty">No open simulated position.</div>';
+
+  $('orders').innerHTML=pending
+    ?'<div class="rawRow"><b>'+esc(pending.ticker)+'</b><span>SIMULATED</span><span>'+String(pending.kind||'').toUpperCase()+' '+String(pending.side||'').toUpperCase()+' '+cents(pending.price)+'</span><span>'+absTime(pending.createdAt)+'</span></div>'
+    :'<div class="empty">No simulated resting order.</div>';
+
+  $('trades').innerHTML=recent.length?recent.slice(0,10).map(t=>{
+    const move=+t.netDollars||0;
+    return '<div class="tradeRow">'+
+      '<span>'+absTime(t.exitedAt)+'</span>'+
+      '<b>'+esc(t.asset||asset(t.ticker))+'</b>'+
+      '<span>'+String(t.side||'').toUpperCase()+'</span>'+
+      '<span>'+cents(t.entryCost)+'</span>'+
+      '<span>'+cents(t.exitCost)+'</span>'+
+      '<span class="tradeMove '+(move>=0?'pos':'neg')+'">'+money(move)+'</span>'+
+    '</div>';
+  }).join(''):'<div class="empty">No completed autonomous paper trades yet.</div>';
+}
+
 function renderEngine(e){
   engineHealthy=!!e?.ok&&!e?.lastError;
   const ws=e?.websocket||{},age=Number.isFinite(+ws.lastMessageAgeMs)?+ws.lastMessageAgeMs:NaN;
+  if(paperMode)renderPaperState(e?.runtime?.paper);
   const fresh=!!ws.open&&Number.isFinite(age)&&age<2500;
   setText('feedAge',Number.isFinite(age)?Math.round(age)+'ms':'--');
   setClass('feedAge',fresh?'green':ws.open?'amber':'red');
@@ -127,8 +178,15 @@ function renderEngine(e){
       action==='directional-hold'?'HOLD':
       action==='directional-market-complete'?'SETTLED':
       action==='risk-stop'?'RISK STOP':
+      action==='paper-entry'?'PAPER FILLED':
+      action==='paper-maker-entry'||action==='paper-entry-resting'?'PAPER BID':
+      action==='paper-hold'?'PAPER HOLD':
+      action==='paper-maker-exit'||action==='paper-exit-resting'?'PAPER EXIT':
+      action==='paper-exit'?'PAPER CLOSED':
+      action==='paper-settled'?'PAPER SETTLED':
+      action==='paper-risk-stop'?'PAPER STOP':
       'WAIT';
-    const cls=state==='TAKEN'||state==='BID LIVE'||state==='BIDDING'||state==='HOLD'?'green':'amber';
+    const cls=state==='TAKEN'||state==='BID LIVE'||state==='BIDDING'||state==='HOLD'?'green':state.startsWith('PAPER')?'blue':'amber';
     heroExact=true;
     setText('selectedAsset',r.asset||asset(r.ticker));
     setText('selectedTicker',r.ticker||'--');
@@ -141,7 +199,8 @@ function renderEngine(e){
     const bidder=b?.mode&&b.mode!=='WAIT'
       ?b.mode+' · max '+cents(b.reservationPrice)+' · market '+cents(b.marketBid)+'/'+cents(b.marketAsk)+' · '
       :'';
-    setText('selectedReason',signal+bidder+(b.reason||c.reason||dr.reason||'exact CF price-state evaluation'));
+    const manager=dr?.positionPlan?.reason||dr?.reason||'';
+    setText('selectedReason',signal+bidder+(manager||b.reason||c.reason||'exact CF price-state evaluation'));
     const px=hasNum(b.desiredPrice)?b.desiredPrice:c.cost;
     const net=hasNum(b.expectedNetEdge)?b.expectedNetEdge:c.netEdge;
     const gross=hasNum(c.fair)&&hasNum(px)?+c.fair-+px:c.grossEdge;
@@ -186,6 +245,7 @@ function renderScan(j){
   }).join('')||'<div class="empty">No active supported markets.</div>';
 }
 function renderPnl(j){
+  if(paperMode)return;
   const t=j?.today;if(!j?.ok||!t)return;
   const net=+t.realizedNetDollars||0,completed=+t.completed||0,wins=+t.wins||0;
   setText('todayTrades',completed);setText('todayWL',wins+'W / '+Math.max(0,completed-wins)+'L');
@@ -263,6 +323,7 @@ function bidderEventRows(orders){
   });
 }
 function renderActivity(j){
+  if(paperMode)return;
   const ps=Array.isArray(j?.positions)?j.positions:[],os=Array.isArray(j?.orders)?j.orders:[];
   const events=bidderEventRows(os);
   const liveBids=events.filter(x=>x.action==='LIVE BID');
