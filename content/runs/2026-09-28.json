@@ -1,6 +1,8 @@
 {
   "week": "2026-09-28",
   "date": "2026-09-28",
-  "status": "reserved",
-  "runId": "36489468281"
+  "status": "approved",
+  "runId": "36489468281",
+  "slug": "invoice-intake-automation-with-power-automate-and-ai-builder",
+  "calls": 3
 }
