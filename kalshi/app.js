@@ -8,7 +8,7 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const asset=t=>String(t||'').match(/^KX([A-Z]+)15M/)?.[1]||String(t||'').split('-')[0].replace(/^KX/,'').replace(/15M$/,'')||'--';
 
 let strategy={minNet:.025,minProb:.58,minEntry:.20,maxEntry:.85,maxSpread:.03,minEdge:.045,swingMinNet:.02,swingMinProb:.55,swingMinEdge:.035};
-let coreLive=false,paperMode=false,paperState=null,engineHealthy=false,hasScan=false,heroExact=false,lastScan=0,lastDeep=0,lastActivity=0;
+let coreLive=false,signalMode=false,paperMode=false,paperState=null,engineHealthy=false,hasScan=false,heroExact=false,lastScan=0,lastDeep=0,lastActivity=0;
 let fastBusy=false,scanBusy=false,deepBusy=false,activityBusy=false;
 
 async function json(path,ms=6000){
@@ -55,9 +55,9 @@ function gate(r){
   return{label:'BLOCKED',cls:'amber',why:sig+(why.slice(0,2).join(' · ')||r?.reason||'fails execution gates')};
 }
 function paintHealth(){
-  const live=coreLive&&engineHealthy;
-  setText('healthText',live?'LIVE':coreLive||engineHealthy?'SYNCING':'CONNECTING');
-  const dot=$('feedDot');if(dot)dot.className='dot '+(live?'green':coreLive||engineHealthy?'amber':'amber');
+  const live=(coreLive||signalMode)&&engineHealthy;
+  setText('healthText',live?'LIVE':coreLive||signalMode||engineHealthy?'SYNCING':'CONNECTING');
+  const dot=$('feedDot');if(dot)dot.className='dot '+(live?'green':coreLive||signalMode||engineHealthy?'amber':'amber');
 }
 function tick(){
   const now=Date.now();
@@ -70,6 +70,7 @@ function tick(){
 function renderStatus(s){
   const sc=s?.strategy||{};
   coreLive=!!sc.live;
+  signalMode=!!s?.signalLive||s?.mode==='LIVE_SIGNAL';
   paperMode=!coreLive&&!!sc.autonomousPaper;
   strategy={
     minNet:Number.isFinite(+sc.minNetEdgeCents)?+sc.minNetEdgeCents/100:.025,
@@ -82,20 +83,24 @@ function renderStatus(s){
     swingMinProb:Number.isFinite(+sc.swingMinModelProbability)?+sc.swingMinModelProbability:.55,
     swingMinEdge:Number.isFinite(+sc.swingMinGrossEdgeCents)?+sc.swingMinGrossEdgeCents/100:.035
   };
-  setText('mode',coreLive?'DIR LIVE':paperMode?'AUTO PAPER':'PAPER');
-  setClass('mode',coreLive?'green':paperMode?'blue':'amber');
+  setText('mode',coreLive?'DIR LIVE':signalMode?'LIVE SIGNAL':paperMode?'AUTO PAPER':'PAPER');
+  setClass('mode',coreLive?'green':signalMode?'blue':paperMode?'blue':'amber');
   setText('strategyVersion',sc.strategyVersion||'--');
   setText('strategyGate','SUPER BIDDER · price-state reservation · '+cents(strategy.minEntry)+'–'+cents(strategy.maxEntry)+' max entry · no timed confirmation · exact CF decides fair value');
   setText('riskTrade',money(sc.maxRiskDollars));
   setText('riskConcurrent',Number.isFinite(+sc.maxConcurrentPositions)?sc.maxConcurrentPositions:'--');
   setText('riskSameSide',Number.isFinite(+sc.maxSameDirectionPositions)?sc.maxSameDirectionPositions:'--');
   setText('riskLoss',money(paperMode?sc.paperDailyLossStopDollars:sc.maxDailyLossDollars));
-  setText('riskPortfolio',paperMode
-    ?'Autonomous simulation · '+money(sc.maxRiskDollars)+' max modeled risk · '+money(sc.maxDailyNotionalDollars)+' daily notional · '+(Number.isFinite(+sc.paperMaxTradesPerDay)?sc.paperMaxTradesPerDay:'--')+' max paper entries'
-    :'Up to '+(Number.isFinite(+sc.maxConcurrentPositions)?sc.maxConcurrentPositions:'--')+' simultaneous positions · max '+money(sc.maxConcurrentRiskDollars)+' open risk · '+money(sc.maxDailyNotionalDollars)+' daily notional · '+(Number.isFinite(+sc.maxTradesPerDay)?sc.maxTradesPerDay:'--')+' max trades');
-  setText('refs',paperMode
-    ?'Real Kalshi + CF feeds · simulated executable fills · persistent v24 position management'
-    :'Exact CF RTI for entries · Kalshi live quotes/fills · settlement-aware probability · correlation-aware multi-crypto portfolio');
+  setText('riskPortfolio',signalMode
+    ?'LIVE SIGNAL ONLY · no order submission · '+money(Math.min(+sc.maxRiskDollars||1,1))+' max modeled manual entry risk · autonomous paper v3 continues in background'
+    :paperMode
+      ?'Autonomous simulation · '+money(sc.maxRiskDollars)+' max modeled risk · '+money(sc.maxDailyNotionalDollars)+' daily notional · '+(Number.isFinite(+sc.paperMaxTradesPerDay)?sc.paperMaxTradesPerDay:'--')+' max paper entries'
+      :'Up to '+(Number.isFinite(+sc.maxConcurrentPositions)?sc.maxConcurrentPositions:'--')+' simultaneous positions · max '+money(sc.maxConcurrentRiskDollars)+' open risk · '+money(sc.maxDailyNotionalDollars)+' daily notional · '+(Number.isFinite(+sc.maxTradesPerDay)?sc.maxTradesPerDay:'--')+' max trades');
+  setText('refs',signalMode
+    ?'Exact CF RTI + live Kalshi quotes · read-only v24 model ticket · YOU place any real order manually'
+    :paperMode
+      ?'Real Kalshi + CF feeds · simulated executable fills · persistent v24 position management'
+      :'Exact CF RTI for entries · Kalshi live quotes/fills · settlement-aware probability · correlation-aware multi-crypto portfolio');
 }
 function renderPaperState(p){
   paperState=p||null;
@@ -168,7 +173,7 @@ function renderEngine(e){
   if(ws.lastError)detail.push('socket: '+ws.lastError);
   setText('feedDetail',detail.join(' · ')||'No feed telemetry.');
 
-  if(e?.lastResult?.ticker){
+  if(e?.lastResult?.ticker&&!signalMode){
     const r=e.lastResult,dr=r?.directional||{},c=dr?.candidate||{},b=dr?.bidPlan||{},rem=+r?.decision?.remaining;
     const end=Number.isFinite(rem)?Date.now()+rem*60000:NaN;
     const action=String(dr?.action||'');
@@ -210,6 +215,37 @@ function renderEngine(e){
   }
   paintHealth();
 }
+function renderLiveSignal(j){
+  if(!signalMode||!j?.ok)return;
+  const c=j?.candidate||null;
+  heroExact=true;
+  if(!c){
+    setText('selectedAsset','--');setText('selectedTicker','--');
+    setText('selectedState','WAIT');setClass('selectedState','state amber');
+    setText('selectedReason','LIVE SIGNAL · NO ORDER SENT · no exact-CF candidate available');
+    setText('prob','--');setText('entry','--');setText('net','--');setText('gross','--');setText('spread','--');setText('target','--');
+    return;
+  }
+  const rem=+c.remainingMinutes,end=Number.isFinite(rem)?Date.now()+rem*60000:NaN;
+  setText('selectedAsset',c.asset||asset(c.ticker));
+  setText('selectedTicker',c.ticker||'--');
+  setText('selectedState',c.eligible?'LIVE SIGNAL':'WAIT');
+  setClass('selectedState','state '+(c.eligible?'blue':'amber'));
+  if(Number.isFinite(end))$('selectedTime').dataset.end=String(end);
+  setText('selectedTime',remaining(rem));
+  setText('selectedEndTime',Number.isFinite(end)?'ends '+absTime(end):'--');
+  const exec=c.executionMode&&c.executionMode!=='WAIT'
+    ?String(c.executionMode)+' · market '+cents(c.marketBid)+'/'+cents(c.marketAsk)+' · max '+cents(c.reservationPrice)+' · '
+    :'';
+  setText('selectedReason','NO ORDER SENT · '+exec+(c.reason||'v24 exact-CF live signal'));
+  setText('prob',c.side?String(c.side).toUpperCase()+' '+pct(c.modelFair):'--');
+  setText('entry',cents(c.entryPrice));
+  setText('net',cents(c.expectedNetEdge));
+  setText('gross',cents(c.grossEdge));
+  setText('spread',cents(c.spread));
+  setText('target',hasNum(c.reservationPrice)?cents(c.reservationPrice):'--');
+}
+
 function renderScan(j){
   const rows=Array.isArray(j?.markets)?j.markets:[];
   hasScan=true;lastScan=Date.now();
@@ -359,8 +395,13 @@ async function refreshFast(){
 async function refreshScan(force=false){
   if(scanBusy)return;if(!force&&Date.now()-lastScan<5000)return;
   scanBusy=true;
-  try{const q=await json('/kalshi-bot/scalp-shadow',12000);if(q?.ok)renderScan(q)}
-  catch{if(!hasScan)setText('selectedReason','ENGINE LIVE · market scan retrying')}
+  try{
+    const jobs=[json('/kalshi-bot/scalp-shadow',12000)];
+    if(signalMode)jobs.push(json('/kalshi-bot/live-signal',12000));
+    const out=await Promise.allSettled(jobs);
+    if(out[0]?.status==='fulfilled'&&out[0].value?.ok)renderScan(out[0].value);
+    if(signalMode&&out[1]?.status==='fulfilled'&&out[1].value?.ok)renderLiveSignal(out[1].value);
+  }catch{if(!hasScan)setText('selectedReason','ENGINE LIVE · market scan retrying')}
   finally{scanBusy=false}
 }
 async function refreshActivity(force=false){
