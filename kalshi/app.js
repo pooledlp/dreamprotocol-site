@@ -14,7 +14,13 @@ const dateTime=v=>{
   return Number.isFinite(t)?new Date(t).toLocaleString([],{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'--';
 };
 const actionTime=o=>o?.actionTime||o?.closeTime||null;
-const kalshiUrl=ticker=>'https://kalshi.com/markets_by_ticker/'+encodeURIComponent(String(ticker||'').toLowerCase());
+const kalshiAppUrl=()=>{
+  const fallback='https://kalshi.com/f/install';
+  if(/Android/i.test(navigator.userAgent)){
+    return 'intent://kalshi.com/f/install#Intent;scheme=https;package=com.kalshi.mobile;S.browser_fallback_url='+encodeURIComponent(fallback)+';end';
+  }
+  return fallback;
+};
 const timeLeft=v=>{
   const t=Date.parse(v||'');
   if(!Number.isFinite(t))return '--';
@@ -108,7 +114,9 @@ function renderHero(s){
     setText('heroStake',money(s?.paperStakeDollars||10));
     setText('orbLabel','SCANNING');
     const orb=$('probOrb');if(orb)orb.style.setProperty('--prob','0');
-    const heroLink=$('heroKalshiLink');if(heroLink){heroLink.hidden=true;heroLink.removeAttribute('href')}
+    const heroActions=$('heroTradeActions');if(heroActions)heroActions.hidden=true;
+    const heroLink=$('heroKalshiLink');if(heroLink)heroLink.removeAttribute('href');
+    const heroCopy=$('heroCopyTicker');if(heroCopy)heroCopy.dataset.copyTicker='';
     return;
   }
 
@@ -126,8 +134,12 @@ function renderHero(s){
   setText('orbProb',pct(o.modelProbability));
   setText('orbLabel',qualified?String(o.side||'').toUpperCase()+' EDGE':'WATCH');
   const orb=$('probOrb');if(orb)orb.style.setProperty('--prob',String(Math.max(0,Math.min(100,Math.round((+o.modelProbability||0)*100)))));
+  const heroActions=$('heroTradeActions');
   const heroLink=$('heroKalshiLink');
-  if(heroLink){heroLink.hidden=!o.ticker;if(o.ticker)heroLink.href=kalshiUrl(o.ticker)}
+  const heroCopy=$('heroCopyTicker');
+  if(heroActions)heroActions.hidden=!o.ticker;
+  if(heroLink&&o.ticker)heroLink.href=kalshiAppUrl();
+  if(heroCopy)heroCopy.dataset.copyTicker=o.ticker||'';
 }
 
 function opportunityCard(o){
@@ -145,7 +157,7 @@ function opportunityCard(o){
     '</div>'+
     '<div class="oppResearch">'+esc(sourceLine)+' · confidence '+pct(o.confidence)+(q?' · '+money(o.paperStake)+' paper / '+esc(o.contracts)+' contracts':'')+'</div>'+
     '<div class="oppCountdown" data-countdown="'+esc(actionTime(o)||'')+'">TIME LEFT '+timeLeft(actionTime(o))+'</div>'+
-    '<div class="tradeActions"><span class="ticker">'+esc(o.ticker||'')+'</span><a class="kalshiLink" href="'+esc(kalshiUrl(o.ticker))+'" target="_blank" rel="noopener">OPEN EXACT TRADE IN KALSHI ↗</a></div>'+
+    '<div class="tradeActions"><span class="ticker">'+esc(o.ticker||'')+'</span><button type="button" class="copyTicker" data-copy-ticker="'+esc(o.ticker||'')+'">COPY TICKER</button><a class="kalshiLink" href="'+esc(kalshiAppUrl())+'">OPEN KALSHI APP ↗</a></div>'+
   '</article>';
 }
 
@@ -173,7 +185,7 @@ function renderPositions(s){
     '<div class="position">'+
       '<div class="rowTop"><b>'+esc(p.city||p.category||'Prediction')+' · '+esc(String(p.side||'').toUpperCase())+'</b><span>'+money(p.stake)+' paper</span></div>'+
       '<div class="rowMeta"><span>'+esc(p.subtitle||p.title||p.ticker)+'</span><span>model '+pct(p.modelProbability)+'</span><span>market '+pct(p.marketProbability)+'</span><span>edge '+edgePct(p.edge)+'</span><span>'+esc(p.contracts)+' contracts</span><span data-countdown="'+esc(actionTime(p)||'')+'">TIME LEFT '+timeLeft(actionTime(p))+'</span><span>settles '+dateTime(p.closeTime)+'</span></div>'+
-      '<div class="tradeActions"><span class="ticker">'+esc(p.ticker||'')+'</span><a class="kalshiLink" href="'+esc(kalshiUrl(p.ticker))+'" target="_blank" rel="noopener">OPEN EXACT TRADE IN KALSHI ↗</a></div>'+
+      '<div class="tradeActions"><span class="ticker">'+esc(p.ticker||'')+'</span><button type="button" class="copyTicker" data-copy-ticker="'+esc(p.ticker||'')+'">COPY TICKER</button><a class="kalshiLink" href="'+esc(kalshiAppUrl())+'">OPEN KALSHI APP ↗</a></div>'+
     '</div>'
   ).join(''):'<div class="empty">No open paper predictions yet.</div>';
   updateCountdowns();
@@ -188,7 +200,7 @@ function renderHistory(s){
     '<div class="historyRow">'+
       '<div class="rowTop"><b>'+esc(t.city||t.category||'Prediction')+' · '+esc(String(t.side||'').toUpperCase())+'</b><span class="'+(t.won?'win':'loss')+'">'+(t.won?'WIN ':'LOSS ')+money(t.netDollars)+'</span></div>'+
       '<div class="rowMeta"><span>'+esc(t.subtitle||t.title||t.ticker)+'</span><span>model '+pct(t.modelProbability)+'</span><span>result '+esc(String(t.result||'').toUpperCase())+'</span><span>'+dateTime(t.settledAt)+'</span></div>'+
-      '<div class="tradeActions"><span class="ticker">'+esc(t.ticker||'')+'</span><a class="kalshiLink" href="'+esc(kalshiUrl(t.ticker))+'" target="_blank" rel="noopener">VIEW IN KALSHI ↗</a></div>'+
+      '<div class="tradeActions"><span class="ticker">'+esc(t.ticker||'')+'</span><button type="button" class="copyTicker" data-copy-ticker="'+esc(t.ticker||'')+'">COPY TICKER</button><a class="kalshiLink" href="'+esc(kalshiAppUrl())+'">OPEN KALSHI APP ↗</a></div>'+
     '</div>'
   ).join(''):'<div class="empty">No settled predictions yet.</div>';
 }
@@ -199,7 +211,7 @@ function categoryPickRow(o){
     '<div class="categoryPickTop"><b>'+esc(String(o.side||'').toUpperCase())+' · '+pct(o.modelProbability)+'</b><span>'+esc(q?(o.qualification||'PAPER READY'):'WATCH')+'</span></div>'+
     '<div class="categoryPickTitle">'+esc(o.title||o.subtitle||o.ticker)+'</div>'+
     '<div class="categoryPickMeta"><span>market '+pct(o.marketProbability)+'</span><span>edge '+edgePct(o.edge)+'</span><span data-countdown="'+esc(actionTime(o)||'')+'">TIME LEFT '+timeLeft(actionTime(o))+'</span></div>'+
-    '<div class="tradeActions"><span class="ticker">'+esc(o.ticker||'')+'</span><a class="kalshiLink" href="'+esc(kalshiUrl(o.ticker))+'" target="_blank" rel="noopener">OPEN EXACT TRADE IN KALSHI ↗</a></div>'+
+    '<div class="tradeActions"><span class="ticker">'+esc(o.ticker||'')+'</span><button type="button" class="copyTicker" data-copy-ticker="'+esc(o.ticker||'')+'">COPY TICKER</button><a class="kalshiLink" href="'+esc(kalshiAppUrl())+'">OPEN KALSHI APP ↗</a></div>'+
   '</div>';
 }
 function renderCategoryDetail(s){
@@ -284,6 +296,21 @@ async function refresh(force=false){
     if(btn){btn.disabled=false;btn.textContent='Refresh research'}
   }
 }
+
+document.addEventListener('click',async event=>{
+  const button=event.target.closest('[data-copy-ticker]');
+  if(!button)return;
+  const ticker=button.getAttribute('data-copy-ticker')||'';
+  if(!ticker)return;
+  try{
+    await navigator.clipboard.writeText(ticker);
+    const old=button.textContent;
+    button.textContent='COPIED';
+    setTimeout(()=>button.textContent=old,1200);
+  }catch{
+    window.prompt('Copy this Kalshi ticker:',ticker);
+  }
+});
 
 $('categories')?.addEventListener('click',event=>{
   const button=event.target.closest('[data-category]');
