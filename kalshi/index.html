@@ -29,16 +29,17 @@
     <div><span>REALIZED</span><b id="realized">$0.00</b></div>
     <div><span>RECORD</span><b id="record">0W / 0L</b></div>
     <div><span>LAST RESEARCH</span><b id="lastScan">--</b></div>
+    <div><span>BET WINDOW</span><b id="window">1-6 HRS</b></div>
   </section>
 
   <main>
     <section class="hero panel">
       <div class="heroGrid">
         <div class="heroCopy">
-          <div class="eyebrow">BEST RESEARCHED OPPORTUNITY</div>
+          <div class="eyebrow">BEST CALL IN THE NEXT FEW HOURS</div>
           <div id="heroStatus" class="heroStatus hunting">HUNTING</div>
           <h1 id="heroTitle">Scanning the future...</h1>
-          <p id="heroSubtitle">DreamPredict is comparing independent data against live prediction-market prices.</p>
+          <p id="heroSubtitle">DreamPredict is hunting only near-term markets, then comparing independent research against live prediction-market prices.</p>
           <div id="heroResearch" class="researchLine">Independent research engines are warming up.</div>
           <div class="heroMetrics">
             <div><span>OUR ODDS</span><b id="heroModel">--</b></div>
@@ -70,8 +71,8 @@
       <div class="panelHead">
         <div>
           <div class="eyebrow">FORTUNE BOARD</div>
-          <h2>Best edges across researchable markets</h2>
-          <p>Ranked by independent probability, confidence, and price advantage.</p>
+          <h2>What looks strongest in the next few hours</h2>
+          <p>Only markets closing soon are shown here. Ranked by independent probability, confidence, and price advantage.</p>
         </div>
         <button id="refreshBtn" class="refreshBtn" type="button">Refresh research</button>
       </div>
@@ -113,6 +114,9 @@
         <span class="tag paper">PAPER ONLY</span>
       </div>
       <div id="categories" class="categoryGrid"></div>
+      <div id="categoryDetail" class="categoryDetail">
+        <div class="categoryPrompt">Tap Weather, Sports, Economics, or Fed to expand its best near-term predictions.</div>
+      </div>
     </section>
 
     <section class="method panel">
