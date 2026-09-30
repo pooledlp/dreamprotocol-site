@@ -96,18 +96,25 @@ function health(ok,error){
 function selectedOpportunity(s){
   const scan=s?.scan||{};
   const qualified=Array.isArray(scan.qualified)?scan.qualified:[];
-  if(qualified.length)return{row:qualified[0],qualified:true};
+  if(qualified.length)return{row:qualified[0],qualified:true,test:false};
+  const open=Array.isArray(s?.positions)?s.positions:[];
+  if(open.length){
+    const strong=open.find(p=>p.paperTier==="STRONG");
+    if(strong)return{row:strong,qualified:true,test:false,position:true};
+    return{row:open[0],qualified:false,test:true,position:true};
+  }
   const opps=nearTermOpportunities(s);
   const tradeable=opps.find(o=>Number.isFinite(+o.marketPrice)&&+o.marketPrice>=.04&&+o.marketPrice<=.96);
-  return{row:tradeable||opps[0]||null,qualified:false};
+  return{row:tradeable||opps[0]||null,qualified:false,test:false};
 }
 
 function renderHero(s){
   const pick=selectedOpportunity(s),o=pick.row;
-  const qualified=pick.qualified&&!!o?.qualified;
+  const qualified=!!pick.qualified&&(pick.position||!!o?.qualified);
+  const test=!!pick.test;
   const status=$('heroStatus');
   if(status){
-    status.textContent=qualified?'PAPER READY':o?'WATCH ONLY':'NO BET NOW';
+    status.textContent=qualified?'STRONG PAPER PICK':test?'TEST PAPER PICK':o?'WATCH ONLY':'NO BET NOW';
     status.className='heroStatus '+(qualified?'found':'hunting');
   }
   if(!o){
@@ -125,18 +132,18 @@ function renderHero(s){
   }
 
   setText('heroTitle',o.title||((o.city||'Weather')+' prediction'));
-  setText('heroSubtitle',(o.city?o.city+' · ':'')+(o.subtitle||o.ticker||'')+(qualified?' · PAPER READY':' · WATCH ONLY · NOT A BET'));
+  setText('heroSubtitle',(o.city?o.city+' · ':'')+(o.subtitle||o.ticker||'')+(qualified?' · STRONG PAPER PICK':test?' · TEST PAPER PICK · LOWER THRESHOLD':' · WATCH ONLY · NOT A BET'));
   setText('heroResearch',o?.research?.rationale||'Independent research loaded.');
   setText('heroModel',pct(o.modelProbability));
-  setText('heroMarket',pct(o.marketProbability));
+  setText('heroMarket',pct(o.marketProbability??o.entryPrice));
   setText('heroEdge',edgePct(o.edge));
   setText('heroConfidence',pct(o.confidence));
-  setText('heroSide',qualified?String(o.side||'').toUpperCase():'WAIT');
-  setText('heroStake',qualified?money(o.paperStake||s?.paperStakeDollars||10):money(s?.paperStakeDollars||10));
-  setText('heroContracts',qualified?String(o.contracts||'--'):'--');
-  setText('heroProfit',qualified?money(o.profitIfWin):'--');
+  setText('heroSide',(qualified||test)?String(o.side||'').toUpperCase():'WAIT');
+  setText('heroStake',(qualified||test)?money(o.paperStake||o.stake||s?.paperStakeDollars||10):money(s?.paperStakeDollars||10));
+  setText('heroContracts',(qualified||test)?String(o.contracts||'--'):'--');
+  setText('heroProfit',(qualified||test)?money(Number.isFinite(+o.profitIfWin)?+o.profitIfWin:(+o.contracts||0)-(+o.stake||0)):'--');
   setText('orbProb',pct(o.modelProbability));
-  setText('orbLabel',qualified?String(o.side||'').toUpperCase()+' EDGE':'WATCH ONLY');
+  setText('orbLabel',qualified?String(o.side||'').toUpperCase()+' STRONG':test?String(o.side||'').toUpperCase()+' TEST':'WATCH ONLY');
   const orb=$('probOrb');if(orb)orb.style.setProperty('--prob',String(Math.max(0,Math.min(100,Math.round((+o.modelProbability||0)*100)))));
   const heroActions=$('heroTradeActions');
   const heroLink=$('heroKalshiLink');
@@ -185,13 +192,14 @@ function renderPositions(s){
   setText('openCount',rows.length+' OPEN');
   const el=$('positions');
   if(!el)return;
-  el.innerHTML=rows.length?rows.map(p=>
-    '<div class="position">'+
-      '<div class="rowTop"><b>'+esc(p.city||p.category||'Prediction')+' · '+esc(String(p.side||'').toUpperCase())+'</b><span>'+money(p.stake)+' paper</span></div>'+
-      '<div class="rowMeta"><span>'+esc(p.subtitle||p.title||p.ticker)+'</span><span>model '+pct(p.modelProbability)+'</span><span>market '+pct(p.marketProbability)+'</span><span>edge '+edgePct(p.edge)+'</span><span>'+esc(p.contracts)+' contracts</span><span data-countdown="'+esc(actionTime(p)||'')+'">TIME LEFT '+timeLeft(actionTime(p))+'</span><span>settles '+dateTime(p.closeTime)+'</span></div>'+
-      '<div class="tradeActions"><span class="ticker">'+esc(p.ticker||'')+'</span><button type="button" class="copyTicker" data-copy-ticker="'+esc(p.ticker||'')+'">COPY TICKER</button><a class="kalshiLink" href="'+esc(kalshiAppUrl())+'">OPEN KALSHI APP ↗</a></div>'+
-    '</div>'
-  ).join(''):'<div class="empty">No open paper predictions yet.</div>';
+  el.innerHTML=rows.length?rows.map(p=>{
+    const test=p.paperTier==="TEST";
+    return '<div class="position '+(test?'testPosition':'')+'">'+
+      '<div class="rowTop"><b>'+esc(p.city||p.category||'Prediction')+' · '+esc(String(p.side||'').toUpperCase())+'</b><span class="'+(test?'testTag':'strongTag')+'">'+(test?'TEST PAPER PICK':'STRONG PAPER PICK')+'</span></div>'+
+      '<div class="rowMeta"><span>'+esc(p.subtitle||p.title||p.ticker)+'</span><span>'+money(p.stake)+' paper</span><span>model '+pct(p.modelProbability)+'</span><span>entry '+pct(p.marketProbability||p.entryPrice)+'</span><span>edge '+edgePct(p.edge)+'</span><span>'+esc(p.contracts)+' contracts</span><span data-countdown="'+esc(actionTime(p)||'')+'">TIME LEFT '+timeLeft(actionTime(p))+'</span></div>'+
+      (test?'<div class="watchOnly">PAPER TEST ONLY · LOWER THRESHOLD · NO REAL-MONEY LINK</div>':'<div class="tradeActions"><span class="ticker">'+esc(p.ticker||'')+'</span><button type="button" class="copyTicker" data-copy-ticker="'+esc(p.ticker||'')+'">COPY TICKER</button><a class="kalshiLink" href="'+esc(kalshiAppUrl())+'">OPEN KALSHI APP ↗</a></div>')+
+    '</div>';
+  }).join(''):'<div class="empty">No open paper predictions yet.</div>';
   updateCountdowns();
 }
 
