@@ -59,12 +59,16 @@ function hoursLeft(v){
   const t=Date.parse(v||'');
   return Number.isFinite(t)?(t-Date.now())/3600000:NaN;
 }
+const blockedQualifications=new Set(['LATE DAY','TOO SOON','TOO FAR','NO ACTION TIME','NO CLOSE TIME']);
+function isBlockedOpportunity(o){
+  return blockedQualifications.has(String(o?.qualification||'').toUpperCase());
+}
 function nearTermOpportunities(s,category=null){
   const all=Array.isArray(s?.scan?.opportunities)?s.scan.opportunities:[];
   const {max}=entryWindow(s);
   return all.filter(o=>{
     const h=hoursLeft(actionTime(o));
-    return Number.isFinite(h)&&h>0&&h<=max&&(!category||String(o.category||'').toUpperCase()===String(category).toUpperCase());
+    return Number.isFinite(h)&&h>0&&h<=max&&!isBlockedOpportunity(o)&&(!category||String(o.category||'').toUpperCase()===String(category).toUpperCase());
   });
 }
 
@@ -103,16 +107,16 @@ function renderHero(s){
   const qualified=pick.qualified&&!!o?.qualified;
   const status=$('heroStatus');
   if(status){
-    status.textContent=qualified?'PAPER PICK READY':'HUNTING';
+    status.textContent=qualified?'PAPER READY':o?'WATCH ONLY':'NO BET NOW';
     status.className='heroStatus '+(qualified?'found':'hunting');
   }
   if(!o){
-    setText('heroTitle','Scanning the future...');
-    setText('heroSubtitle','No researched market is closing in the next few hours.');
-    setText('heroResearch','DreamPredict is waiting for a market to enter the short-horizon window.');
+    setText('heroTitle','No bet right now');
+    setText('heroSubtitle','Nothing currently passes DreamPredict’s timing, confidence, and edge rules.');
+    setText('heroResearch','The engine is still researching, but it will not surface blocked or stale contracts as a bet.');
     ['heroModel','heroMarket','heroEdge','heroConfidence','heroSide','heroContracts','heroProfit','orbProb'].forEach(id=>setText(id,'--'));
     setText('heroStake',money(s?.paperStakeDollars||10));
-    setText('orbLabel','SCANNING');
+    setText('orbLabel','NO BET');
     const orb=$('probOrb');if(orb)orb.style.setProperty('--prob','0');
     const heroActions=$('heroTradeActions');if(heroActions)heroActions.hidden=true;
     const heroLink=$('heroKalshiLink');if(heroLink)heroLink.removeAttribute('href');
@@ -121,7 +125,7 @@ function renderHero(s){
   }
 
   setText('heroTitle',o.title||((o.city||'Weather')+' prediction'));
-  setText('heroSubtitle',(o.city?o.city+' · ':'')+(o.subtitle||o.ticker||'')+(qualified?' · QUALIFIED PAPER EDGE':' · watching for a better price/edge'));
+  setText('heroSubtitle',(o.city?o.city+' · ':'')+(o.subtitle||o.ticker||'')+(qualified?' · PAPER READY':' · WATCH ONLY · NOT A BET'));
   setText('heroResearch',o?.research?.rationale||'Independent research loaded.');
   setText('heroModel',pct(o.modelProbability));
   setText('heroMarket',pct(o.marketProbability));
@@ -132,14 +136,14 @@ function renderHero(s){
   setText('heroContracts',qualified?String(o.contracts||'--'):'--');
   setText('heroProfit',qualified?money(o.profitIfWin):'--');
   setText('orbProb',pct(o.modelProbability));
-  setText('orbLabel',qualified?String(o.side||'').toUpperCase()+' EDGE':'WATCH');
+  setText('orbLabel',qualified?String(o.side||'').toUpperCase()+' EDGE':'WATCH ONLY');
   const orb=$('probOrb');if(orb)orb.style.setProperty('--prob',String(Math.max(0,Math.min(100,Math.round((+o.modelProbability||0)*100)))));
   const heroActions=$('heroTradeActions');
   const heroLink=$('heroKalshiLink');
   const heroCopy=$('heroCopyTicker');
-  if(heroActions)heroActions.hidden=!o.ticker;
-  if(heroLink&&o.ticker)heroLink.href=kalshiAppUrl();
-  if(heroCopy)heroCopy.dataset.copyTicker=o.ticker||'';
+  if(heroActions)heroActions.hidden=!(qualified&&o.ticker);
+  if(heroLink&&qualified&&o.ticker)heroLink.href=kalshiAppUrl();
+  if(heroCopy)heroCopy.dataset.copyTicker=qualified?(o.ticker||''):'';
 }
 
 function opportunityCard(o){
@@ -157,7 +161,7 @@ function opportunityCard(o){
     '</div>'+
     '<div class="oppResearch">'+esc(sourceLine)+' · confidence '+pct(o.confidence)+(q?' · '+money(o.paperStake)+' paper / '+esc(o.contracts)+' contracts':'')+'</div>'+
     '<div class="oppCountdown" data-countdown="'+esc(actionTime(o)||'')+'">TIME LEFT '+timeLeft(actionTime(o))+'</div>'+
-    '<div class="tradeActions"><span class="ticker">'+esc(o.ticker||'')+'</span><button type="button" class="copyTicker" data-copy-ticker="'+esc(o.ticker||'')+'">COPY TICKER</button><a class="kalshiLink" href="'+esc(kalshiAppUrl())+'">OPEN KALSHI APP ↗</a></div>'+
+    (q?'<div class="tradeActions"><span class="ticker">'+esc(o.ticker||'')+'</span><button type="button" class="copyTicker" data-copy-ticker="'+esc(o.ticker||'')+'">COPY TICKER</button><a class="kalshiLink" href="'+esc(kalshiAppUrl())+'">OPEN KALSHI APP ↗</a></div>':'<div class="watchOnly">WATCH ONLY · DREAM PREDICT WOULD NOT ENTER THIS</div>')+
   '</article>';
 }
 
@@ -170,7 +174,7 @@ function renderOpportunities(s){
     .slice(0,12);
   const el=$('opportunities');
   const {max}=entryWindow(s);
-  if(el)el.innerHTML=rows.length?rows.map(opportunityCard).join(''):'<div class="empty">Nothing researchable is happening inside the next '+max+' hours right now. DreamPredict will not force a bet.</div>';
+  if(el)el.innerHTML=rows.length?rows.map(opportunityCard).join(''):'<div class="empty noBetEmpty"><b>NO BET NOW</b><span>Nothing currently passes the timing, confidence, and edge rules inside the next '+max+' hours.</span></div>';
   setText('scanCount',String(near.length));
   setText('qualifiedCount',String(qualified.length));
   updateCountdowns();
@@ -211,7 +215,7 @@ function categoryPickRow(o){
     '<div class="categoryPickTop"><b>'+esc(String(o.side||'').toUpperCase())+' · '+pct(o.modelProbability)+'</b><span>'+esc(q?(o.qualification||'PAPER READY'):'WATCH')+'</span></div>'+
     '<div class="categoryPickTitle">'+esc(o.title||o.subtitle||o.ticker)+'</div>'+
     '<div class="categoryPickMeta"><span>market '+pct(o.marketProbability)+'</span><span>edge '+edgePct(o.edge)+'</span><span data-countdown="'+esc(actionTime(o)||'')+'">TIME LEFT '+timeLeft(actionTime(o))+'</span></div>'+
-    '<div class="tradeActions"><span class="ticker">'+esc(o.ticker||'')+'</span><button type="button" class="copyTicker" data-copy-ticker="'+esc(o.ticker||'')+'">COPY TICKER</button><a class="kalshiLink" href="'+esc(kalshiAppUrl())+'">OPEN KALSHI APP ↗</a></div>'+
+    (q?'<div class="tradeActions"><span class="ticker">'+esc(o.ticker||'')+'</span><button type="button" class="copyTicker" data-copy-ticker="'+esc(o.ticker||'')+'">COPY TICKER</button><a class="kalshiLink" href="'+esc(kalshiAppUrl())+'">OPEN KALSHI APP ↗</a></div>':'<div class="watchOnly">WATCH ONLY · NO ENTRY</div>')+
   '</div>';
 }
 function renderCategoryDetail(s){
@@ -225,7 +229,7 @@ function renderCategoryDetail(s){
     .sort((a,b)=>(+b.qualified-+a.qualified)||(+b.modelProbability||0)-(+a.modelProbability||0)||(+b.edge||0)-(+a.edge||0))
     .slice(0,8);
   const ready=rows.filter(x=>x.qualified).length;
-  el.innerHTML='<div class="categoryDetailHead"><div><span>'+esc(activeCategory)+'</span><b>Best model calls · next '+max+' hours</b></div><em>'+ready+' PAPER READY</em></div>'+
+  el.innerHTML='<div class="categoryDetailHead"><div><span>'+esc(activeCategory)+'</span><b>Best model calls · next '+max+' hours</b></div><em>'+(ready?ready+' PAPER READY':'NO BET NOW')+'</em></div>'+
     (rows.length?'<div class="categoryPickGrid">'+rows.map(categoryPickRow).join('')+'</div>':
       '<div class="empty">No '+esc(activeCategory.toLowerCase())+' event is inside the '+Math.round(min*60)+' minute-'+max+' hour window right now. DreamPredict will not force a paper bet.</div>');
   updateCountdowns();
@@ -241,7 +245,7 @@ function renderCategories(s){
     return '<button type="button" class="category '+(activeCategory===key?'active':'')+'" data-category="'+esc(key)+'">'+
       '<div class="categoryTop"><b>'+esc(cat.name)+'</b><span class="categoryState '+esc(state)+'">'+esc(cat.status)+'</span></div>'+
       '<p>'+esc(cat.detail||'')+'</p>'+
-      '<div class="categoryCounts"><span>'+(near.length?near.length+' NEXT '+entryWindow(s).max+'H':'QUIET NOW')+'</span><span>'+(ready?ready+' PAPER READY':'NO EDGE YET')+'</span></div>'+
+      '<div class="categoryCounts"><span>'+(near.length?near.length+' RESEARCHED':'QUIET NOW')+'</span><span>'+(ready?ready+' PAPER READY':'NO BET NOW')+'</span></div>'+
     '</button>';
   }).join(''):'<div class="empty">Research universe is loading.</div>';
   renderCategoryDetail(s);
