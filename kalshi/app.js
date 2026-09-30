@@ -72,6 +72,38 @@ function nearTermOpportunities(s,category=null){
   });
 }
 
+function researchedCategoryOpportunities(s,category){
+  const all=Array.isArray(s?.scan?.opportunities)?s.scan.opportunities:[];
+  return all.filter(o=>String(o.category||'').toUpperCase()===String(category||'').toUpperCase());
+}
+function upcomingWeatherCalls(s){
+  const all=researchedCategoryOpportunities(s,'WEATHER')
+    .filter(o=>{
+      const h=hoursLeft(actionTime(o));
+      return Number.isFinite(h)&&h>0&&h<=24&&String(o.qualification||'').toUpperCase()!=='DATA CHECK';
+    });
+  const best=new Map();
+  for(const o of all){
+    const key=o.eventTicker||o.city||o.targetDate||o.ticker;
+    const yesProb=String(o.side||'').toLowerCase()==='yes'?+o.modelProbability:1-(+o.modelProbability||0);
+    const yesMarket=String(o.side||'').toLowerCase()==='yes'?+o.marketProbability:1-(+o.marketProbability||0);
+    const call={
+      ...o,
+      side:'yes',
+      modelProbability:Math.max(0,Math.min(1,yesProb)),
+      marketProbability:Math.max(0,Math.min(1,yesMarket)),
+      edge:yesProb-yesMarket,
+      qualified:false,
+      displayState:'UPCOMING'
+    };
+    const prev=best.get(key);
+    if(!prev||call.modelProbability>prev.modelProbability)best.set(key,call);
+  }
+  return [...best.values()]
+    .sort((a,b)=>(+b.modelProbability||0)-(+a.modelProbability||0))
+    .slice(0,8);
+}
+
 async function json(path,ms=45000){
   const ac=new AbortController(),timer=setTimeout(()=>ac.abort(),ms);
   try{
@@ -219,27 +251,38 @@ function renderHistory(s){
 
 function categoryPickRow(o){
   const q=!!o.qualified;
-  return '<div class="categoryPick '+(q?'qualified':'')+'">'+
-    '<div class="categoryPickTop"><b>'+esc(String(o.side||'').toUpperCase())+' · '+pct(o.modelProbability)+'</b><span>'+esc(q?(o.qualification||'PAPER READY'):'WATCH')+'</span></div>'+
+  const state=o.displayState||(q?(o.qualification||'PAPER READY'):'WATCH ONLY');
+  const upcoming=state==='UPCOMING';
+  return '<div class="categoryPick '+(q?'qualified':'')+' '+(upcoming?'upcoming':'')+'">'+
+    '<div class="categoryPickTop"><b>'+esc(String(o.side||'').toUpperCase())+' · '+pct(o.modelProbability)+'</b><span>'+esc(state)+'</span></div>'+
     '<div class="categoryPickTitle">'+esc(o.title||o.subtitle||o.ticker)+'</div>'+
     '<div class="categoryPickMeta"><span>market '+pct(o.marketProbability)+'</span><span>edge '+edgePct(o.edge)+'</span><span data-countdown="'+esc(actionTime(o)||'')+'">TIME LEFT '+timeLeft(actionTime(o))+'</span></div>'+
-    (q?'<div class="tradeActions"><span class="ticker">'+esc(o.ticker||'')+'</span><button type="button" class="copyTicker" data-copy-ticker="'+esc(o.ticker||'')+'">COPY TICKER</button><a class="kalshiLink" href="'+esc(kalshiAppUrl())+'">OPEN KALSHI APP ↗</a></div>':'<div class="watchOnly">WATCH ONLY · NO ENTRY</div>')+
+    (q?'<div class="tradeActions"><span class="ticker">'+esc(o.ticker||'')+'</span><button type="button" class="copyTicker" data-copy-ticker="'+esc(o.ticker||'')+'">COPY TICKER</button><a class="kalshiLink" href="'+esc(kalshiAppUrl())+'">OPEN KALSHI APP ↗</a></div>':upcoming?'<div class="watchOnly">UPCOMING RESEARCH · NOT IN BET WINDOW YET</div>':'<div class="watchOnly">WATCH ONLY · NO ENTRY</div>')+
   '</div>';
 }
 function renderCategoryDetail(s){
   const el=$('categoryDetail');if(!el)return;
   if(!activeCategory){
-    el.innerHTML='<div class="categoryPrompt">Tap Weather, Sports, Economics, or Fed to expand its best near-term predictions.</div>';
+    el.innerHTML='<div class="categoryPrompt">Tap Weather, Sports, Economics, or Fed to expand its predictions.</div>';
     return;
   }
   const {min,max}=entryWindow(s);
-  const rows=nearTermOpportunities(s,activeCategory)
+  let rows=nearTermOpportunities(s,activeCategory)
     .sort((a,b)=>(+b.qualified-+a.qualified)||(+b.modelProbability||0)-(+a.modelProbability||0)||(+b.edge||0)-(+a.edge||0))
     .slice(0,8);
   const ready=rows.filter(x=>x.qualified).length;
-  el.innerHTML='<div class="categoryDetailHead"><div><span>'+esc(activeCategory)+'</span><b>Best model calls · next '+max+' hours</b></div><em>'+(ready?ready+' PAPER READY':'NO BET NOW')+'</em></div>'+
+  let title='Best model calls · next '+max+' hours';
+  let state=ready?ready+' PAPER READY':'NO BET NOW';
+  if(!rows.length&&activeCategory==='WEATHER'){
+    rows=upcomingWeatherCalls(s);
+    if(rows.length){
+      title='Upcoming weather calls · next 24 hours';
+      state='RESEARCHING AHEAD';
+    }
+  }
+  el.innerHTML='<div class="categoryDetailHead"><div><span>'+esc(activeCategory)+'</span><b>'+esc(title)+'</b></div><em>'+esc(state)+'</em></div>'+
     (rows.length?'<div class="categoryPickGrid">'+rows.map(categoryPickRow).join('')+'</div>':
-      '<div class="empty">No '+esc(activeCategory.toLowerCase())+' event is inside the '+Math.round(min*60)+' minute-'+max+' hour window right now. DreamPredict will not force a paper bet.</div>');
+      '<div class="empty">No '+esc(activeCategory.toLowerCase())+' event is inside the '+Math.round(min*60)+' minute-'+max+' hour bet window right now.</div>');
   updateCountdowns();
 }
 function renderCategories(s){
@@ -249,11 +292,12 @@ function renderCategories(s){
     const state=String(cat.status||'').toLowerCase();
     const key=String(cat.name||'').toUpperCase();
     const near=nearTermOpportunities(s,key);
+    const researched=researchedCategoryOpportunities(s,key);
     const ready=near.filter(x=>x.qualified).length;
     return '<button type="button" class="category '+(activeCategory===key?'active':'')+'" data-category="'+esc(key)+'">'+
       '<div class="categoryTop"><b>'+esc(cat.name)+'</b><span class="categoryState '+esc(state)+'">'+esc(cat.status)+'</span></div>'+
       '<p>'+esc(cat.detail||'')+'</p>'+
-      '<div class="categoryCounts"><span>'+(near.length?near.length+' RESEARCHED':'QUIET NOW')+'</span><span>'+(ready?ready+' PAPER READY':'NO BET NOW')+'</span></div>'+
+      '<div class="categoryCounts"><span>'+(researched.length?researched.length+' RESEARCHED':'QUIET NOW')+'</span><span>'+(ready?ready+' PAPER READY':'NO BET NOW')+'</span></div>'+
     '</button>';
   }).join(''):'<div class="empty">Research universe is loading.</div>';
   renderCategoryDetail(s);
