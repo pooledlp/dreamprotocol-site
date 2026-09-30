@@ -39,6 +39,26 @@ function updateCountdowns(){
 
 let busy=false;
 let lastPayload=null;
+let activeCategory=null;
+
+function entryWindow(s){
+  const w=s?.scan?.entryWindowHours||{};
+  const min=Number.isFinite(+w.min)?+w.min:1;
+  const max=Number.isFinite(+w.max)?+w.max:6;
+  return{min,max};
+}
+function hoursLeft(v){
+  const t=Date.parse(v||'');
+  return Number.isFinite(t)?(t-Date.now())/3600000:NaN;
+}
+function nearTermOpportunities(s,category=null){
+  const all=Array.isArray(s?.scan?.opportunities)?s.scan.opportunities:[];
+  const {max}=entryWindow(s);
+  return all.filter(o=>{
+    const h=hoursLeft(o.closeTime);
+    return Number.isFinite(h)&&h>0&&h<=max&&(!category||String(o.category||'').toUpperCase()===String(category).toUpperCase());
+  });
+}
 
 async function json(path,ms=45000){
   const ac=new AbortController(),timer=setTimeout(()=>ac.abort(),ms);
@@ -65,7 +85,7 @@ function selectedOpportunity(s){
   const scan=s?.scan||{};
   const qualified=Array.isArray(scan.qualified)?scan.qualified:[];
   if(qualified.length)return{row:qualified[0],qualified:true};
-  const opps=Array.isArray(scan.opportunities)?scan.opportunities:[];
+  const opps=nearTermOpportunities(s);
   const tradeable=opps.find(o=>Number.isFinite(+o.marketPrice)&&+o.marketPrice>=.04&&+o.marketPrice<=.96);
   return{row:tradeable||opps[0]||null,qualified:false};
 }
@@ -80,8 +100,8 @@ function renderHero(s){
   }
   if(!o){
     setText('heroTitle','Scanning the future...');
-    setText('heroSubtitle','No researchable prediction-market opportunity is loaded yet.');
-    setText('heroResearch','Weather research is gathering fresh forecast data.');
+    setText('heroSubtitle','No researched market is closing in the next few hours.');
+    setText('heroResearch','DreamPredict is waiting for a market to enter the short-horizon window.');
     ['heroModel','heroMarket','heroEdge','heroConfidence','heroSide','heroContracts','heroProfit','orbProb'].forEach(id=>setText(id,'--'));
     setText('heroStake',money(s?.paperStakeDollars||10));
     setText('orbLabel','SCANNING');
@@ -119,18 +139,23 @@ function opportunityCard(o){
       '<div><span>EDGE</span><b class="'+((+o.edge||0)>0?'green':'red')+'">'+edgePct(o.edge)+'</b></div>'+
     '</div>'+
     '<div class="oppResearch">'+esc(sourceLine)+' · confidence '+pct(o.confidence)+(q?' · '+money(o.paperStake)+' paper / '+esc(o.contracts)+' contracts':'')+'</div>'+
+    '<div class="oppCountdown" data-countdown="'+esc(o.closeTime||'')+'">TIME LEFT '+timeLeft(o.closeTime)+'</div>'+
   '</article>';
 }
 
 function renderOpportunities(s){
-  const scan=s?.scan||{},all=Array.isArray(scan.opportunities)?scan.opportunities:[];
-  const qualified=Array.isArray(scan.qualified)?scan.qualified:[];
+  const near=nearTermOpportunities(s);
+  const qualified=Array.isArray(s?.scan?.qualified)?s.scan.qualified:[];
   const qids=new Set(qualified.map(x=>x.id||x.ticker));
-  const rows=[...qualified,...all.filter(x=>!qids.has(x.id||x.ticker))].slice(0,12);
+  const rows=[...qualified,...near.filter(x=>!qids.has(x.id||x.ticker))]
+    .sort((a,b)=>(+b.qualified-+a.qualified)||(+b.score||0)-(+a.score||0))
+    .slice(0,12);
   const el=$('opportunities');
-  if(el)el.innerHTML=rows.length?rows.map(opportunityCard).join(''):'<div class="empty">No research opportunities are available right now.</div>';
-  setText('scanCount',String(all.length));
+  const {max}=entryWindow(s);
+  if(el)el.innerHTML=rows.length?rows.map(opportunityCard).join(''):'<div class="empty">Nothing researchable is closing in the next '+max+' hours right now.</div>';
+  setText('scanCount',String(near.length));
   setText('qualifiedCount',String(qualified.length));
+  updateCountdowns();
 }
 
 function renderPositions(s){
@@ -160,13 +185,45 @@ function renderHistory(s){
   ).join(''):'<div class="empty">No settled predictions yet.</div>';
 }
 
+function categoryPickRow(o){
+  const q=!!o.qualified;
+  return '<div class="categoryPick '+(q?'qualified':'')+'">'+
+    '<div class="categoryPickTop"><b>'+esc(String(o.side||'').toUpperCase())+' · '+pct(o.modelProbability)+'</b><span>'+esc(q?(o.qualification||'PAPER READY'):'WATCH')+'</span></div>'+
+    '<div class="categoryPickTitle">'+esc(o.title||o.subtitle||o.ticker)+'</div>'+
+    '<div class="categoryPickMeta"><span>market '+pct(o.marketProbability)+'</span><span>edge '+edgePct(o.edge)+'</span><span data-countdown="'+esc(o.closeTime||'')+'">TIME LEFT '+timeLeft(o.closeTime)+'</span></div>'+
+  '</div>';
+}
+function renderCategoryDetail(s){
+  const el=$('categoryDetail');if(!el)return;
+  if(!activeCategory){
+    el.innerHTML='<div class="categoryPrompt">Tap Weather, Sports, Economics, or Fed to expand its best near-term predictions.</div>';
+    return;
+  }
+  const {min,max}=entryWindow(s);
+  const rows=nearTermOpportunities(s,activeCategory)
+    .sort((a,b)=>(+b.qualified-+a.qualified)||(+b.modelProbability||0)-(+a.modelProbability||0)||(+b.edge||0)-(+a.edge||0))
+    .slice(0,8);
+  const ready=rows.filter(x=>x.qualified).length;
+  el.innerHTML='<div class="categoryDetailHead"><div><span>'+esc(activeCategory)+'</span><b>Best model calls · next '+max+' hours</b></div><em>'+ready+' PAPER READY</em></div>'+
+    (rows.length?'<div class="categoryPickGrid">'+rows.map(categoryPickRow).join('')+'</div>':
+      '<div class="empty">No '+esc(activeCategory.toLowerCase())+' markets are closing inside the '+min+'-'+max+' hour entry window right now.</div>');
+  updateCountdowns();
+}
 function renderCategories(s){
   const rows=Array.isArray(s?.scan?.categories)?s.scan.categories:[];
   const el=$('categories');if(!el)return;
-  el.innerHTML=rows.length?rows.map(c=>{
-    const state=String(c.status||'').toLowerCase();
-    return '<div class="category"><div class="categoryTop"><b>'+esc(c.name)+'</b><span class="categoryState '+esc(state)+'">'+esc(c.status)+'</span></div><p>'+esc(c.detail||'')+'</p></div>';
+  el.innerHTML=rows.length?rows.map(cat=>{
+    const state=String(cat.status||'').toLowerCase();
+    const key=String(cat.name||'').toUpperCase();
+    const near=nearTermOpportunities(s,key);
+    const ready=near.filter(x=>x.qualified).length;
+    return '<button type="button" class="category '+(activeCategory===key?'active':'')+'" data-category="'+esc(key)+'">'+
+      '<div class="categoryTop"><b>'+esc(cat.name)+'</b><span class="categoryState '+esc(state)+'">'+esc(cat.status)+'</span></div>'+
+      '<p>'+esc(cat.detail||'')+'</p>'+
+      '<div class="categoryCounts"><span>'+near.length+' NEXT</span><span>'+ready+' READY</span></div>'+
+    '</button>';
   }).join(''):'<div class="empty">Research universe is loading.</div>';
+  renderCategoryDetail(s);
 }
 
 function renderDiagnostics(s){
@@ -189,6 +246,7 @@ function render(s){
   if(realized)realized.className=(+s?.realized||0)>0?'green':(+s?.realized||0)<0?'red':'';
   setText('record',(s?.wins||0)+'W / '+(s?.losses||0)+'L');
   setText('lastScan',s?.lastScanAt?clock(s.lastScanAt):'--');
+  const w=entryWindow(s);setText('window',w.min+'-'+w.max+' HRS');
   renderHero(s);
   renderOpportunities(s);
   renderPositions(s);
@@ -218,6 +276,13 @@ async function refresh(force=false){
   }
 }
 
+$('categories')?.addEventListener('click',event=>{
+  const button=event.target.closest('[data-category]');
+  if(!button)return;
+  const key=button.getAttribute('data-category');
+  activeCategory=activeCategory===key?null:key;
+  if(lastPayload)renderCategories(lastPayload);
+});
 $('refreshBtn')?.addEventListener('click',()=>refresh(true));
 refresh(false);
 setInterval(()=>refresh(false),25000);
