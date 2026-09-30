@@ -1,428 +1,199 @@
 const API='https://api.dreamprotocol.ai';
 const $=id=>document.getElementById(id);
-const hasNum=n=>n!==null&&n!==undefined&&n!==''&&Number.isFinite(+n);
-const cents=n=>hasNum(n)?(+n*100).toFixed(1)+'¢':'--';
-const money=n=>hasNum(n)?new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2}).format(+n):'--';
-const pct=n=>hasNum(n)?(+n*100).toFixed(0)+'%':'--';
+const num=v=>v!==null&&v!==undefined&&v!==''&&Number.isFinite(+v)?+v:NaN;
+const money=v=>Number.isFinite(num(v))?new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2}).format(num(v)):'--';
+const pct=v=>Number.isFinite(num(v))?(num(v)*100).toFixed(num(v)>=.995?1:0)+'%':'--';
+const edgePct=v=>Number.isFinite(num(v))?((num(v)*100)>=0?'+':'')+(num(v)*100).toFixed(1)+' pts':'--';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const asset=t=>String(t||'').match(/^KX([A-Z]+)15M/)?.[1]||String(t||'').split('-')[0].replace(/^KX/,'').replace(/15M$/,'')||'--';
+const clock=v=>{
+  const t=typeof v==='number'?v:Date.parse(v||'');
+  return Number.isFinite(t)?new Date(t).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}):'--';
+};
+const dateTime=v=>{
+  const t=typeof v==='number'?v:Date.parse(v||'');
+  return Number.isFinite(t)?new Date(t).toLocaleString([],{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'--';
+};
 
-let strategy={minNet:.025,minProb:.58,minEntry:.20,maxEntry:.85,maxSpread:.03,minEdge:.045,swingMinNet:.02,swingMinProb:.55,swingMinEdge:.035};
-let coreLive=false,signalMode=false,paperMode=false,paperState=null,engineHealthy=false,hasScan=false,heroExact=false,lastScan=0,lastDeep=0,lastActivity=0;
-let fastBusy=false,scanBusy=false,deepBusy=false,activityBusy=false;
+let busy=false;
+let lastPayload=null;
 
-async function json(path,ms=6000){
+async function json(path,ms=45000){
   const ac=new AbortController(),timer=setTimeout(()=>ac.abort(),ms);
   try{
     const r=await fetch(API+path,{cache:'no-store',signal:ac.signal});
-    if(!r.ok)throw new Error('HTTP '+r.status);
-    return await r.json();
+    const text=await r.text();
+    let body;
+    try{body=JSON.parse(text)}catch{throw new Error('Invalid API response')}
+    if(!r.ok)throw new Error(body?.error||('HTTP '+r.status));
+    return body;
   }finally{clearTimeout(timer)}
 }
-function remaining(min){
-  if(!Number.isFinite(+min))return'--:--';
-  const s=Math.max(0,Math.round(+min*60));
-  return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
-}
-function absTime(v){
-  const t=typeof v==='number'?v:Date.parse(v||'');
-  return Number.isFinite(t)?new Date(t).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}):'--';
-}
-function setText(id,v){const el=$(id);if(el)el.textContent=v}
-function setClass(id,c){const el=$(id);if(el)el.className=c}
-function inferSide(r){
-  if(r?.side)return r.side;
-  if(!Number.isFinite(+r?.makerEntry)||!Number.isFinite(+r?.grossEdge))return null;
-  const fair=+r.makerEntry + +r.grossEdge;
-  const up=Number.isFinite(+r.pUp)?+r.pUp:NaN,down=Number.isFinite(+r.pDown)?+r.pDown:NaN;
-  if(Number.isFinite(up)&&Number.isFinite(down))return Math.abs(down-fair)<Math.abs(up-fair)?'no':'yes';
-  return null;
-}
-function gate(r){
-  const swing=r?.signal==='DIP'||r?.signal==='PEAK';
-  const minNet=swing?strategy.swingMinNet:strategy.minNet;
-  const minEdge=swing?strategy.swingMinEdge:strategy.minEdge;
-  const minProb=swing?strategy.swingMinProb:strategy.minProb;
-  if(r?.eligible)return{label:r?.bidderMode==='TAKE'?'TAKE':'BID',cls:r?.projected?'blue':'green',why:r?.projected?'reservation price available; exact CF still decides':'price-state reservation is live'};
-  const why=[];
-  if(hasNum(r?.estimatedNetTarget)&&+r.estimatedNetTarget<minNet)why.push('net '+cents(r.estimatedNetTarget)+' < '+cents(minNet));
-  if(hasNum(r?.grossEdge)&&+r.grossEdge<minEdge)why.push('edge '+cents(r.grossEdge)+' < '+cents(minEdge));
-  if(hasNum(r?.makerEntry)&&(+r.makerEntry<strategy.minEntry||+r.makerEntry>strategy.maxEntry))why.push('entry '+cents(r.makerEntry)+' outside '+cents(strategy.minEntry)+'–'+cents(strategy.maxEntry));
-  if(hasNum(r?.spread)&&+r.spread>strategy.maxSpread)why.push('spread '+cents(r.spread)+' > '+cents(strategy.maxSpread));
-  const side=inferSide(r),p=side==='no'?+r?.pDown:+r?.pUp;
-  if(Number.isFinite(p)&&p<minProb)why.push('fair '+pct(p)+' < '+pct(minProb));
-  const sig=r?.signal&&r.signal!=='VALUE'&&r.signal!=='NONE'?r.signal+' '+(hasNum(r.signalStrength)?Number(r.signalStrength).toFixed(1)+'x':'')+' · ':'';
-  return{label:'BLOCKED',cls:'amber',why:sig+(why.slice(0,2).join(' · ')||r?.reason||'fails execution gates')};
-}
-function paintHealth(){
-  const live=(coreLive||signalMode)&&engineHealthy;
-  setText('healthText',live?'LIVE':coreLive||signalMode||engineHealthy?'SYNCING':'CONNECTING');
-  const dot=$('feedDot');if(dot)dot.className='dot '+(live?'green':coreLive||signalMode||engineHealthy?'amber':'amber');
-}
-function tick(){
-  const now=Date.now();
-  document.querySelectorAll('[data-end]').forEach(el=>{
-    const end=+el.dataset.end;if(end)el.textContent=remaining((end-now)/60000);
-  });
-  const next=Math.ceil((now+1)/(15*60*1000))*(15*60*1000);
-  setText('rolloverCountdown',remaining((next-now)/60000));
-}
-function renderStatus(s){
-  const sc=s?.strategy||{};
-  coreLive=!!sc.live;
-  signalMode=!!s?.signalLive||s?.mode==='LIVE_SIGNAL';
-  paperMode=!coreLive&&!!sc.autonomousPaper;
-  strategy={
-    minNet:Number.isFinite(+sc.minNetEdgeCents)?+sc.minNetEdgeCents/100:.025,
-    minProb:Number.isFinite(+sc.minModelProbability)?+sc.minModelProbability:.58,
-    minEntry:Array.isArray(sc.entryCostBandCents)?+sc.entryCostBandCents[0]/100:.20,
-    maxEntry:Array.isArray(sc.entryCostBandCents)?+sc.entryCostBandCents[1]/100:.85,
-    maxSpread:Number.isFinite(+sc.maxSpreadCents)?+sc.maxSpreadCents/100:.03,
-    minEdge:Number.isFinite(+sc.minGrossEdgeCents)?+sc.minGrossEdgeCents/100:.045,
-    swingMinNet:Number.isFinite(+sc.swingMinNetEdgeCents)?+sc.swingMinNetEdgeCents/100:.02,
-    swingMinProb:Number.isFinite(+sc.swingMinModelProbability)?+sc.swingMinModelProbability:.55,
-    swingMinEdge:Number.isFinite(+sc.swingMinGrossEdgeCents)?+sc.swingMinGrossEdgeCents/100:.035
-  };
-  setText('mode',coreLive?'DIR LIVE':signalMode?'LIVE SIGNAL':paperMode?'AUTO PAPER':'PAPER');
-  setClass('mode',coreLive?'green':signalMode?'blue':paperMode?'blue':'amber');
-  setText('strategyVersion',sc.strategyVersion||'--');
-  setText('strategyGate','SUPER BIDDER · price-state reservation · '+cents(strategy.minEntry)+'–'+cents(strategy.maxEntry)+' max entry · no timed confirmation · exact CF decides fair value');
-  setText('riskTrade',money(sc.maxRiskDollars));
-  setText('riskConcurrent',Number.isFinite(+sc.maxConcurrentPositions)?sc.maxConcurrentPositions:'--');
-  setText('riskSameSide',Number.isFinite(+sc.maxSameDirectionPositions)?sc.maxSameDirectionPositions:'--');
-  setText('riskLoss',money(paperMode?sc.paperDailyLossStopDollars:sc.maxDailyLossDollars));
-  setText('riskPortfolio',signalMode
-    ?'LIVE SIGNAL ONLY · no order submission · '+money(Math.min(+sc.maxRiskDollars||1,1))+' max modeled manual entry risk · autonomous paper v3 continues in background'
-    :paperMode
-      ?'Autonomous simulation · '+money(sc.maxRiskDollars)+' max modeled risk · '+money(sc.maxDailyNotionalDollars)+' daily notional · '+(Number.isFinite(+sc.paperMaxTradesPerDay)?sc.paperMaxTradesPerDay:'--')+' max paper entries'
-      :'Up to '+(Number.isFinite(+sc.maxConcurrentPositions)?sc.maxConcurrentPositions:'--')+' simultaneous positions · max '+money(sc.maxConcurrentRiskDollars)+' open risk · '+money(sc.maxDailyNotionalDollars)+' daily notional · '+(Number.isFinite(+sc.maxTradesPerDay)?sc.maxTradesPerDay:'--')+' max trades');
-  setText('refs',signalMode
-    ?'Exact CF RTI + live Kalshi quotes · read-only v24 model ticket · YOU place any real order manually'
-    :paperMode
-      ?'Real Kalshi + CF feeds · simulated executable fills · persistent v24 position management'
-      :'Exact CF RTI for entries · Kalshi live quotes/fills · settlement-aware probability · correlation-aware multi-crypto portfolio');
-}
-function renderPaperState(p){
-  paperState=p||null;
-  if(!paperMode||!p)return;
-  const recent=Array.isArray(p.recent)?p.recent:[],wins=recent.filter(t=>+t.netDollars>0).length;
-  const net=+p.realized||0,gross=recent.reduce((sum,t)=>sum+(+t.grossDollars||0),0);
-  const fees=recent.reduce((sum,t)=>sum+((+t.entryFee||0)+(+t.exitFee||0))*(+t.count||1),0);
-  setText('todayTrades',Number.isFinite(+p.trades)?p.trades:0);
-  setText('todayWL',recent.length?wins+'W / '+Math.max(0,recent.length-wins)+'L':'0W / 0L');
-  setText('todayNet',money(net));setClass('todayNet',net>0?'green':net<0?'red':'amber');
-  setText('pnl',money(net));setClass('pnl',net>0?'green':net<0?'red':'amber');
-  setText('pnlGross',money(gross));setText('pnlFees',money(fees));
 
-  const pos=p.position,pending=p.pending;
-  setText('openState',pos?'1 OPEN':'FLAT');setClass('openState',pos?'green':'amber');
-  setText('bidderState',pending?(pending.kind==='entry'?'PAPER BID':'PAPER EXIT'):pos?'MANAGING':'SCANNING');
-  setClass('bidderState',pending||pos?'blue':'amber');
-  setText('activityTag',(pos?'1 open':'flat')+' · '+(pending?pending.kind+' resting':'no resting order'));
-  setText('bidTapeTag',pending?'1 simulated order':'paper idle');
-  setClass('bidTapeTag','tag '+(pending?'blue':'amber'));
+function setText(id,value){const el=$(id);if(el)el.textContent=value}
+function setClass(id,value){const el=$(id);if(el)el.className=value}
 
-  $('bidTape').innerHTML=pending
-    ?'<div class="bidEvent"><span class="bidTime">'+absTime(pending.createdAt)+'</span><b class="bidAsset">'+esc(pending.asset)+'</b><span>'+String(pending.side||'').toUpperCase()+'</span><span class="bidPrice">'+cents(pending.price)+'</span><span class="bidAction blue">PAPER '+String(pending.kind||'').toUpperCase()+'</span><span class="bidDetail">simulated resting order against live quotes</span></div>'
-    :'<div class="empty">Autonomous paper engine is scanning live markets.</div>';
-
-  $('positions').innerHTML=pos
-    ?'<div class="rawRow"><b>'+esc(pos.ticker)+'</b><span>'+String(pos.side||'').toUpperCase()+' · '+esc(pos.count)+' contract'+(+pos.count===1?'':'s')+'</span><span>entry '+cents(pos.entryCost)+'</span><span>'+absTime(pos.enteredAt)+'</span></div>'
-    :'<div class="empty">No open simulated position.</div>';
-
-  $('orders').innerHTML=pending
-    ?'<div class="rawRow"><b>'+esc(pending.ticker)+'</b><span>SIMULATED</span><span>'+String(pending.kind||'').toUpperCase()+' '+String(pending.side||'').toUpperCase()+' '+cents(pending.price)+'</span><span>'+absTime(pending.createdAt)+'</span></div>'
-    :'<div class="empty">No simulated resting order.</div>';
-
-  $('trades').innerHTML=recent.length?recent.slice(0,10).map(t=>{
-    const move=+t.netDollars||0;
-    return '<div class="tradeRow">'+
-      '<span>'+absTime(t.exitedAt)+'</span>'+
-      '<b>'+esc(t.asset||asset(t.ticker))+'</b>'+
-      '<span>'+String(t.side||'').toUpperCase()+'</span>'+
-      '<span>'+cents(t.entryCost)+'</span>'+
-      '<span>'+cents(t.exitCost)+'</span>'+
-      '<span class="tradeMove '+(move>=0?'pos':'neg')+'">'+money(move)+'</span>'+
-    '</div>';
-  }).join(''):'<div class="empty">No completed autonomous paper trades yet.</div>';
+function health(ok,error){
+  const pill=document.querySelector('.livePill');
+  if(pill)pill.className='livePill '+(ok&&!error?'good':error?'bad':'');
+  setText('healthText',ok&&!error?'RESEARCH LIVE':error?'DEGRADED':'CONNECTING');
 }
 
-function renderEngine(e){
-  engineHealthy=!!e?.ok&&!e?.lastError;
-  const ws=e?.websocket||{},age=Number.isFinite(+ws.lastMessageAgeMs)?+ws.lastMessageAgeMs:NaN;
-  if(paperMode)renderPaperState(e?.runtime?.paper);
-  const fresh=!!ws.open&&Number.isFinite(age)&&age<2500;
-  setText('feedAge',Number.isFinite(age)?Math.round(age)+'ms':'--');
-  setClass('feedAge',fresh?'green':ws.open?'amber':'red');
-  setText('wsState',fresh?'FRESH':ws.open?'STALE':'OFFLINE');
-  setClass('wsState',fresh?'green':ws.open?'amber':'red');
-  setText('refCount',Number.isFinite(+ws.referenceCount)?ws.referenceCount:'--');
-  setText('refTargets',(Number.isFinite(+ws.targetCount)?ws.targetCount:'--')+' targets');
-  setText('quoteCount',Number.isFinite(+ws.quoteCount)?ws.quoteCount:'--');
-  setText('quoteTargets',(Number.isFinite(+ws.targetCount)?ws.targetCount:'--')+' targets');
-  setText('engineCycles',Number.isFinite(+e?.cycleCount)?Number(e.cycleCount).toLocaleString():'--');
-  setText('engineTrigger',e?.lastTrigger?String(e.lastTrigger).replaceAll('-',' '):'--');
-  setText('feedHealth',fresh?'CF HEALTHY':ws.open?'CF STALE':'CF OFFLINE');
-  setClass('feedHealth','tag '+(fresh?'green':ws.open?'amber':'red'));
-  setText('healthSub',fresh?(Math.round(age)+'ms CF / quotes'):'engine + CF feed');
-  const detail=[];
-  if(Number.isFinite(+ws.messageCount))detail.push(Number(ws.messageCount).toLocaleString()+' messages');
-  if(Number.isFinite(+ws.reconnectCount))detail.push(ws.reconnectCount+' reconnects');
-  if(Number.isFinite(+ws.referenceCount)&&Number.isFinite(+ws.targetCount))detail.push(ws.referenceCount+'/'+ws.targetCount+' refs');
-  if(Number.isFinite(+ws.quoteCount)&&Number.isFinite(+ws.targetCount))detail.push(ws.quoteCount+'/'+ws.targetCount+' quotes');
-  if(ws.lastError)detail.push('socket: '+ws.lastError);
-  setText('feedDetail',detail.join(' · ')||'No feed telemetry.');
+function selectedOpportunity(s){
+  const scan=s?.scan||{};
+  const qualified=Array.isArray(scan.qualified)?scan.qualified:[];
+  if(qualified.length)return{row:qualified[0],qualified:true};
+  const opps=Array.isArray(scan.opportunities)?scan.opportunities:[];
+  const tradeable=opps.find(o=>Number.isFinite(+o.marketPrice)&&+o.marketPrice>=.04&&+o.marketPrice<=.96);
+  return{row:tradeable||opps[0]||null,qualified:false};
+}
 
-  if(e?.lastResult?.ticker&&!signalMode){
-    const r=e.lastResult,dr=r?.directional||{},c=dr?.candidate||{},b=dr?.bidPlan||{},rem=+r?.decision?.remaining;
-    const end=Number.isFinite(rem)?Date.now()+rem*60000:NaN;
-    const action=String(dr?.action||'');
-    const state=action==='directional-take'?'TAKEN':
-      action==='directional-bid'?'BID LIVE':
-      action==='directional-bid-resting'?'BIDDING':
-      action==='directional-hold'?'HOLD':
-      action==='directional-market-complete'?'SETTLED':
-      action==='risk-stop'?'RISK STOP':
-      action==='paper-entry'?'PAPER FILLED':
-      action==='paper-maker-entry'||action==='paper-entry-resting'?'PAPER BID':
-      action==='paper-hold'?'PAPER HOLD':
-      action==='paper-maker-exit'||action==='paper-exit-resting'?'PAPER EXIT':
-      action==='paper-exit'?'PAPER CLOSED':
-      action==='paper-settled'?'PAPER SETTLED':
-      action==='paper-risk-stop'?'PAPER STOP':
-      'WAIT';
-    const cls=state==='TAKEN'||state==='BID LIVE'||state==='BIDDING'||state==='HOLD'?'green':state.startsWith('PAPER')?'blue':'amber';
-    heroExact=true;
-    setText('selectedAsset',r.asset||asset(r.ticker));
-    setText('selectedTicker',r.ticker||'--');
-    setText('selectedState',state);setClass('selectedState','state '+cls);
-    if(Number.isFinite(end))$('selectedTime').dataset.end=String(end);
-    setText('selectedTime',remaining(rem));setText('selectedEndTime',Number.isFinite(end)?'ends '+absTime(end):'--');
-    const signal=(c.signal&&c.signal!=='VALUE'&&c.signal!=='NONE')
-      ?c.signal+' '+(hasNum(c.signalStrength)?Number(c.signalStrength).toFixed(1)+'x':'')+' · '
-      :'';
-    const bidder=b?.mode&&b.mode!=='WAIT'
-      ?b.mode+' · max '+cents(b.reservationPrice)+' · market '+cents(b.marketBid)+'/'+cents(b.marketAsk)+' · '
-      :'';
-    const manager=dr?.positionPlan?.reason||dr?.reason||'';
-    setText('selectedReason',signal+bidder+(manager||b.reason||c.reason||'exact CF price-state evaluation'));
-    const px=hasNum(b.desiredPrice)?b.desiredPrice:c.cost;
-    const net=hasNum(b.expectedNetEdge)?b.expectedNetEdge:c.netEdge;
-    const gross=hasNum(c.fair)&&hasNum(px)?+c.fair-+px:c.grossEdge;
-    setText('entry',cents(px));setText('net',cents(net));
-    setText('gross',cents(gross));setText('spread',cents(c.spread));setText('target',hasNum(b.reservationPrice)?cents(b.reservationPrice):'100.0¢');
-    setText('prob',c.side?(c.side==='yes'?'YES ':'NO ')+pct(c.fair):'--');
+function renderHero(s){
+  const pick=selectedOpportunity(s),o=pick.row;
+  const qualified=pick.qualified&&!!o?.qualified;
+  const status=$('heroStatus');
+  if(status){
+    status.textContent=qualified?'PAPER PICK READY':'HUNTING';
+    status.className='heroStatus '+(qualified?'found':'hunting');
   }
-  paintHealth();
-}
-function renderLiveSignal(j){
-  if(!signalMode||!j?.ok)return;
-  const c=j?.candidate||null;
-  heroExact=true;
-  if(!c){
-    setText('selectedAsset','--');setText('selectedTicker','--');
-    setText('selectedState','WAIT');setClass('selectedState','state amber');
-    setText('selectedReason','LIVE SIGNAL · NO ORDER SENT · no exact-CF candidate available');
-    setText('prob','--');setText('entry','--');setText('net','--');setText('gross','--');setText('spread','--');setText('target','--');
+  if(!o){
+    setText('heroTitle','Scanning the future...');
+    setText('heroSubtitle','No researchable prediction-market opportunity is loaded yet.');
+    setText('heroResearch','Weather research is gathering fresh forecast data.');
+    ['heroModel','heroMarket','heroEdge','heroConfidence','heroSide','heroContracts','heroProfit','orbProb'].forEach(id=>setText(id,'--'));
+    setText('heroStake',money(s?.paperStakeDollars||10));
+    setText('orbLabel','SCANNING');
+    const orb=$('probOrb');if(orb)orb.style.setProperty('--prob','0');
     return;
   }
-  const rem=+c.remainingMinutes,end=Number.isFinite(rem)?Date.now()+rem*60000:NaN;
-  setText('selectedAsset',c.asset||asset(c.ticker));
-  setText('selectedTicker',c.ticker||'--');
-  setText('selectedState',c.eligible?'LIVE SIGNAL':'WAIT');
-  setClass('selectedState','state '+(c.eligible?'blue':'amber'));
-  if(Number.isFinite(end))$('selectedTime').dataset.end=String(end);
-  setText('selectedTime',remaining(rem));
-  setText('selectedEndTime',Number.isFinite(end)?'ends '+absTime(end):'--');
-  const exec=c.executionMode&&c.executionMode!=='WAIT'
-    ?String(c.executionMode)+' · market '+cents(c.marketBid)+'/'+cents(c.marketAsk)+' · max '+cents(c.reservationPrice)+' · '
-    :'';
-  setText('selectedReason','NO ORDER SENT · '+exec+(c.reason||'v24 exact-CF live signal'));
-  setText('prob',c.side?String(c.side).toUpperCase()+' '+pct(c.modelFair):'--');
-  setText('entry',cents(c.entryPrice));
-  setText('net',cents(c.expectedNetEdge));
-  setText('gross',cents(c.grossEdge));
-  setText('spread',cents(c.spread));
-  setText('target',hasNum(c.reservationPrice)?cents(c.reservationPrice):'--');
+
+  setText('heroTitle',o.title||((o.city||'Weather')+' prediction'));
+  setText('heroSubtitle',(o.city?o.city+' · ':'')+(o.subtitle||o.ticker||'')+(qualified?' · QUALIFIED PAPER EDGE':' · watching for a better price/edge'));
+  setText('heroResearch',o?.research?.rationale||'Independent research loaded.');
+  setText('heroModel',pct(o.modelProbability));
+  setText('heroMarket',pct(o.marketProbability));
+  setText('heroEdge',edgePct(o.edge));
+  setText('heroConfidence',pct(o.confidence));
+  setText('heroSide',qualified?String(o.side||'').toUpperCase():'WAIT');
+  setText('heroStake',qualified?money(o.paperStake||s?.paperStakeDollars||10):money(s?.paperStakeDollars||10));
+  setText('heroContracts',qualified?String(o.contracts||'--'):'--');
+  setText('heroProfit',qualified?money(o.profitIfWin):'--');
+  setText('orbProb',pct(o.modelProbability));
+  setText('orbLabel',qualified?String(o.side||'').toUpperCase()+' EDGE':'WATCH');
+  const orb=$('probOrb');if(orb)orb.style.setProperty('--prob',String(Math.max(0,Math.min(100,Math.round((+o.modelProbability||0)*100)))));
 }
 
-function renderScan(j){
-  const rows=Array.isArray(j?.markets)?j.markets:[];
-  hasScan=true;lastScan=Date.now();
-  setText('scanStamp',absTime(lastScan));setText('scanCount',rows.length+' live');
-  const ranked=[...rows].sort((a,b)=>(b.eligible?1:0)-(a.eligible?1:0)+(+(b.score||0)-+(a.score||0)));
-  const top=ranked[0]||null;
-  if(top&&!heroExact){
-    const g=gate(top),side=inferSide(top),p=side==='no'?top.pDown:top.pUp;
-    const end=Number.isFinite(+top.remainingMinutes)?Date.now()+ +top.remainingMinutes*60000:NaN;
-    setText('selectedAsset',top.asset||j.asset||'--');setText('selectedTicker',top.ticker||'--');
-    const scanState=top.eligible?(top.bidderMode==='TAKE'?'TAKE':'BID'):'WAIT';
-    setText('selectedState',scanState);setClass('selectedState','state '+(top.eligible?'blue':'amber'));
-    if(Number.isFinite(end))$('selectedTime').dataset.end=String(end);
-    setText('selectedTime',remaining(top.remainingMinutes));setText('selectedEndTime',Number.isFinite(end)?'ends '+absTime(end):'--');
-    const priceState=top.eligible&&hasNum(top.reservationPrice)
-      ?'PROJECTED '+String(top.bidderMode||'BID')+' · max '+cents(top.reservationPrice)+' · '
-      :'PROJECTED · ';
-    setText('selectedReason',priceState+g.why);
-    setText('prob',side?(side==='yes'?'YES ':'NO ')+pct(p):'--');
-    setText('entry',cents(top.makerEntry));setText('net',cents(top.estimatedNetTarget));setText('gross',cents(top.grossEdge));setText('spread',cents(top.spread));setText('target','100.0¢');
-  }
-  $('markets').innerHTML=ranked.map((r,i)=>{
-    const g=gate(r),side=inferSide(r),p=side==='no'?r.pDown:r.pUp;
-    return '<div class="scanRow '+(r.eligible?'hot ':i===0?'active ':'')+'">'+
-      '<span class="scanAsset">'+esc(r.asset)+'</span>'+
-      '<span class="scanState '+g.cls+'">'+g.label+'</span>'+
-      '<span>'+(side?(side==='yes'?'YES ':'NO ')+pct(p):'--')+'</span>'+
-      '<span>'+cents(r.makerEntry)+'</span>'+
-      '<span class="'+(hasNum(r.estimatedNetTarget)&&Number(r.estimatedNetTarget)>=strategy.minNet?'green':'')+'">'+cents(r.estimatedNetTarget)+'</span>'+
-      '<span>'+cents(r.spread)+'</span>'+
-      '<span class="scanWhy">'+esc(g.why)+'</span>'+
-    '</div>';
-  }).join('')||'<div class="empty">No active supported markets.</div>';
+function opportunityCard(o){
+  const q=!!o.qualified;
+  const research=o?.research||{};
+  const sourceLine=Array.isArray(research.sources)&&research.sources.length?research.sources.join(' + '):'independent research';
+  return '<article class="opp '+(q?'qualified':'')+'">'+
+    '<div class="oppTop"><span class="oppCategory">'+esc(o.category||'MARKET')+' · '+esc(o.city||'')+'</span><span class="oppBadge">'+esc(q?(o.qualification||'QUALIFIED'):'WATCH')+'</span></div>'+
+    '<h3>'+esc(o.title||o.ticker||'Opportunity')+'</h3>'+
+    '<div class="oppSub">'+esc(o.subtitle||'')+' · '+esc(String(o.side||'').toUpperCase())+'</div>'+
+    '<div class="oppOdds">'+
+      '<div><span>MODEL</span><b>'+pct(o.modelProbability)+'</b></div>'+
+      '<div><span>MARKET</span><b>'+pct(o.marketProbability)+'</b></div>'+
+      '<div><span>EDGE</span><b class="'+((+o.edge||0)>0?'green':'red')+'">'+edgePct(o.edge)+'</b></div>'+
+    '</div>'+
+    '<div class="oppResearch">'+esc(sourceLine)+' · confidence '+pct(o.confidence)+(q?' · '+money(o.paperStake)+' paper / '+esc(o.contracts)+' contracts':'')+'</div>'+
+  '</article>';
 }
-function renderPnl(j){
-  if(paperMode)return;
-  const t=j?.today;if(!j?.ok||!t)return;
-  const net=+t.realizedNetDollars||0,completed=+t.completed||0,wins=+t.wins||0;
-  setText('todayTrades',completed);setText('todayWL',wins+'W / '+Math.max(0,completed-wins)+'L');
-  setText('todayNet',money(net));setClass('todayNet',net>0?'green':net<0?'red':'amber');
-  setText('pnl',money(net));setClass('pnl',net>0?'green':net<0?'red':'amber');
-  setText('pnlGross',money(t.realizedGrossDollars));setText('pnlFees',money(t.realizedFeesDollars));
 
-  const trades=Array.isArray(j?.recentTrades)?j.recentTrades:[];
-  $('trades').innerHTML=trades.length?trades.slice(0,10).map(t=>{
-    const move=Number.isFinite(+t.netDollars)?+t.netDollars:NaN;
-    return '<div class="tradeRow">'+
-      '<span>'+absTime(t.closedAt)+'</span>'+
-      '<b>'+esc(t.asset||asset(t.ticker))+'</b>'+
-      '<span>'+String(t.side||'').toUpperCase()+'</span>'+
-      '<span>'+cents(t.entryPrice)+'</span>'+
-      '<span>'+cents(t.exitPrice)+'</span>'+
-      '<span class="tradeMove '+(move>=0?'pos':'neg')+'">'+money(move)+'</span>'+
-    '</div>';
-  }).join(''):'<div class="empty">No reconciled completed trades yet.</div>';
+function renderOpportunities(s){
+  const scan=s?.scan||{},all=Array.isArray(scan.opportunities)?scan.opportunities:[];
+  const qualified=Array.isArray(scan.qualified)?scan.qualified:[];
+  const qids=new Set(qualified.map(x=>x.id||x.ticker));
+  const rows=[...qualified,...all.filter(x=>!qids.has(x.id||x.ticker))].slice(0,12);
+  const el=$('opportunities');
+  if(el)el.innerHTML=rows.length?rows.map(opportunityCard).join(''):'<div class="empty">No research opportunities are available right now.</div>';
+  setText('scanCount',String(all.length));
+  setText('qualifiedCount',String(qualified.length));
 }
-function orderTime(o){return Date.parse(o?.lastUpdateTime||o?.createdTime||'')||0}
-function orderSide(o){
-  const id=String(o?.clientOrderId||''),m=id.match(/-(yes|no)-/i);
-  if(m)return m[1].toLowerCase();
-  return String(o?.bookSide||'').toLowerCase()==='ask'?'no':'yes';
-}
-function orderCost(o){
-  const y=+o?.yesPrice;if(!Number.isFinite(y))return NaN;
-  return orderSide(o)==='no'?1-y:y;
-}
-function pairTrades(orders){
-  const rows=[...(orders||[])].sort((a,b)=>orderTime(a)-orderTime(b)),out=[];
-  const entries=[];
-  for(const o of rows){
-    const id=String(o.clientOrderId||'');
-    if(!id.includes('-entry-')||!(+(o.filled||0)>0))continue;
-    entries.push(o);
-  }
-  for(const exit of rows){
-    const id=String(exit.clientOrderId||'');
-    if(!id.includes('-exit-')||String(exit.status||'').toLowerCase()!=='executed'||!(+(exit.filled||0)>0))continue;
-    const candidates=entries.filter(e=>e.ticker===exit.ticker&&orderTime(e)<=orderTime(exit)&&orderSide(e)===orderSide(exit));
-    const entry=candidates.sort((a,b)=>orderTime(b)-orderTime(a))[0];if(!entry)continue;
-    const ec=orderCost(entry),xc=orderCost(exit),move=Number.isFinite(ec)&&Number.isFinite(xc)?xc-ec:NaN;
-    out.push({time:orderTime(exit),asset:asset(exit.ticker),side:orderSide(entry),entry:ec,exit:xc,move});
-  }
-  return out.sort((a,b)=>b.time-a.time).slice(0,6);
-}
-function bidderEventRows(orders){
-  const entries=[...(orders||[])]
-    .filter(o=>String(o?.clientOrderId||'').includes('-entry-'))
-    .sort((a,b)=>orderTime(b)-orderTime(a));
-  return entries.slice(0,14).map((o,i)=>{
-    const status=String(o.status||'').toLowerCase();
-    const side=orderSide(o),price=orderCost(o),time=orderTime(o);
-    const filled=+(o.filled||0),remaining=+(o.remaining||0);
-    const newer=entries.slice(0,i).find(n=>
-      n.ticker===o.ticker&&orderSide(n)===side&&orderTime(n)>time&&orderTime(n)-time<25000
-    );
-    let action='ORDER',cls='amber',detail=status||'unknown';
-    if((status==='resting'||status==='open'||status==='pending')&&remaining>0){
-      action='LIVE BID';cls='green';detail='resting on book · '+remaining+' remaining';
-    }else if(filled>0&&(status==='executed'||remaining===0)){
-      action='FILLED';cls='blue';detail=filled+' filled';
-    }else if(status==='canceled'){
-      if(newer){
-        action='REPRICED';cls='amber';
-        const np=orderCost(newer);
-        detail='replaced '+cents(price)+' → '+cents(np);
-      }else{
-        action='CANCELED';cls='amber';detail='stale reservation removed';
-      }
-    }
-    return{o,time,side,price,action,cls,detail};
-  });
-}
-function renderActivity(j){
-  if(paperMode)return;
-  const ps=Array.isArray(j?.positions)?j.positions:[],os=Array.isArray(j?.orders)?j.orders:[];
-  const events=bidderEventRows(os);
-  const liveBids=events.filter(x=>x.action==='LIVE BID');
-  const reprices=events.filter(x=>x.action==='REPRICED').length;
-  setText('openState',ps.length?ps.length+' OPEN':'FLAT');setClass('openState',ps.length?'green':'amber');
-  setText('bidderState',liveBids.length?liveBids.length+' LIVE':events.length?'WORKING':'IDLE');
-  setClass('bidderState',liveBids.length?'green':events.length?'blue':'amber');
-  setText('activityTag',ps.length+' open · '+liveBids.length+' live bid'+(liveBids.length===1?'':'s'));
-  setText('bidTapeTag',liveBids.length+' live · '+reprices+' repriced');
-  setClass('bidTapeTag','tag '+(liveBids.length?'green':'amber'));
-  $('bidTape').innerHTML=events.length?events.map(x=>
-    '<div class="bidEvent">'+
-      '<span class="bidTime">'+absTime(x.time)+'</span>'+
-      '<b class="bidAsset">'+esc(asset(x.o.ticker))+'</b>'+
-      '<span>'+String(x.side||'').toUpperCase()+'</span>'+
-      '<span class="bidPrice">'+cents(x.price)+'</span>'+
-      '<span class="bidAction '+x.cls+'">'+x.action+'</span>'+
-      '<span class="bidDetail">'+esc(x.detail)+'</span>'+
+
+function renderPositions(s){
+  const rows=Array.isArray(s?.positions)?s.positions:[];
+  setText('openCount',rows.length+' OPEN');
+  const el=$('positions');
+  if(!el)return;
+  el.innerHTML=rows.length?rows.map(p=>
+    '<div class="position">'+
+      '<div class="rowTop"><b>'+esc(p.city||p.category||'Prediction')+' · '+esc(String(p.side||'').toUpperCase())+'</b><span>'+money(p.stake)+' paper</span></div>'+
+      '<div class="rowMeta"><span>'+esc(p.subtitle||p.title||p.ticker)+'</span><span>model '+pct(p.modelProbability)+'</span><span>market '+pct(p.marketProbability)+'</span><span>edge '+edgePct(p.edge)+'</span><span>'+esc(p.contracts)+' contracts</span><span>settles '+dateTime(p.closeTime)+'</span></div>'+
     '</div>'
-  ).join(''):'<div class="empty">No recent bidder activity. Waiting for a qualified reservation price.</div>';
-  $('positions').innerHTML=ps.length?ps.map(p=>'<div class="rawRow"><b>'+esc(p.ticker)+'</b><span>'+String(p.side||'').toUpperCase()+' · position '+esc(p.position)+'</span><span>'+money(p.exposure)+'</span><span>'+absTime(p.lastUpdated)+'</span></div>').join(''):'<div class="empty">No open bot-owned position.</div>';
-  $('orders').innerHTML=os.slice(0,12).map(o=>'<div class="rawRow"><b>'+esc(o.ticker)+'</b><span>'+esc(o.status)+'</span><span>'+ (String(o.clientOrderId||'').includes('-entry-')?'ENTRY '+String(orderSide(o)).toUpperCase()+' '+cents(orderCost(o)):'EXIT')+'</span><span>'+absTime(orderTime(o))+'</span></div>').join('');
+  ).join(''):'<div class="empty">No open paper predictions yet.</div>';
 }
-async function refreshFast(){
-  if(fastBusy)return;fastBusy=true;
+
+function renderHistory(s){
+  const rows=Array.isArray(s?.recent)?s.recent:[];
+  setText('settledCount',rows.length+' SETTLED');
+  const el=$('history');
+  if(!el)return;
+  el.innerHTML=rows.length?rows.slice(0,12).map(t=>
+    '<div class="historyRow">'+
+      '<div class="rowTop"><b>'+esc(t.city||t.category||'Prediction')+' · '+esc(String(t.side||'').toUpperCase())+'</b><span class="'+(t.won?'win':'loss')+'">'+(t.won?'WIN ':'LOSS ')+money(t.netDollars)+'</span></div>'+
+      '<div class="rowMeta"><span>'+esc(t.subtitle||t.title||t.ticker)+'</span><span>model '+pct(t.modelProbability)+'</span><span>result '+esc(String(t.result||'').toUpperCase())+'</span><span>'+dateTime(t.settledAt)+'</span></div>'+
+    '</div>'
+  ).join(''):'<div class="empty">No settled predictions yet.</div>';
+}
+
+function renderCategories(s){
+  const rows=Array.isArray(s?.scan?.categories)?s.scan.categories:[];
+  const el=$('categories');if(!el)return;
+  el.innerHTML=rows.length?rows.map(c=>{
+    const state=String(c.status||'').toLowerCase();
+    return '<div class="category"><div class="categoryTop"><b>'+esc(c.name)+'</b><span class="categoryState '+esc(state)+'">'+esc(c.status)+'</span></div><p>'+esc(c.detail||'')+'</p></div>';
+  }).join(''):'<div class="empty">Research universe is loading.</div>';
+}
+
+function renderDiagnostics(s){
+  setText('engineVersion',s?.version||'--');
+  setText('entries',String(s?.entries??0));
+  const errors=[];
+  if(s?.lastError)errors.push(s.lastError);
+  if(Array.isArray(s?.scan?.errors))errors.push(...s.scan.errors.map(x=>(x.series?x.series+': ':'')+(x.error||'error')));
+  setText('errors',errors.length?errors.join('\n'):'No errors.');
+}
+
+function render(s){
+  lastPayload=s;
+  health(!!s?.ok,s?.lastError);
+  setText('mode',s?.mode||'AUTO PAPER');
+  setText('stake',money(s?.paperStakeDollars||10));
+  setText('openRisk',money(s?.openRisk||0));
+  setText('realized',money(s?.realized||0));
+  const realized=$('realized');
+  if(realized)realized.className=(+s?.realized||0)>0?'green':(+s?.realized||0)<0?'red':'';
+  setText('record',(s?.wins||0)+'W / '+(s?.losses||0)+'L');
+  setText('lastScan',s?.lastScanAt?clock(s.lastScanAt):'--');
+  renderHero(s);
+  renderOpportunities(s);
+  renderPositions(s);
+  renderHistory(s);
+  renderCategories(s);
+  renderDiagnostics(s);
+}
+
+async function refresh(force=false){
+  if(busy)return;
+  busy=true;
+  const btn=$('refreshBtn');
+  if(btn){btn.disabled=true;btn.textContent=force?'Researching...':'Refreshing...'}
   try{
-    const [s,e]=await Promise.allSettled([json('/kalshi-bot/status',4000),json('/kalshi-bot/engine-status',4000)]);
-    if(s.status==='fulfilled')renderStatus(s.value);
-    if(e.status==='fulfilled')renderEngine(e.value);
-    paintHealth();
-  }finally{fastBusy=false}
+    const data=await json(force?'/dream-predict/scan':'/dream-predict/status');
+    render(data);
+  }catch(error){
+    health(false,error instanceof Error?error.message:String(error));
+    setText('healthText','RETRYING');
+    if(!lastPayload){
+      setText('heroTitle','Research feed reconnecting...');
+      setText('heroSubtitle',error instanceof Error?error.message:String(error));
+    }
+  }finally{
+    busy=false;
+    if(btn){btn.disabled=false;btn.textContent='Refresh research'}
+  }
 }
-async function refreshScan(force=false){
-  if(scanBusy)return;if(!force&&Date.now()-lastScan<5000)return;
-  scanBusy=true;
-  try{
-    const jobs=[json('/kalshi-bot/scalp-shadow',12000)];
-    if(signalMode)jobs.push(json('/kalshi-bot/live-signal',12000));
-    const out=await Promise.allSettled(jobs);
-    if(out[0]?.status==='fulfilled'&&out[0].value?.ok)renderScan(out[0].value);
-    if(signalMode&&out[1]?.status==='fulfilled'&&out[1].value?.ok)renderLiveSignal(out[1].value);
-  }catch{if(!hasScan)setText('selectedReason','ENGINE LIVE · market scan retrying')}
-  finally{scanBusy=false}
-}
-async function refreshActivity(force=false){
-  if(activityBusy)return;if(!force&&Date.now()-lastActivity<2200)return;
-  lastActivity=Date.now();activityBusy=true;
-  try{
-    const a=await json('/kalshi-bot/activity',6000);
-    if(a?.ok)renderActivity(a);
-  }catch{
-    setText('bidTapeTag','activity retrying');
-    setClass('bidTapeTag','tag amber');
-  }finally{activityBusy=false}
-}
-async function refreshDeep(force=false){
-  if(deepBusy)return;if(!force&&Date.now()-lastDeep<8000)return;
-  lastDeep=Date.now();deepBusy=true;
-  try{
-    const p=await json('/kalshi-bot/pnl',12000);
-    if(p?.ok)renderPnl(p);
-  }finally{deepBusy=false}
-}
-async function refresh(){await refreshFast();void refreshScan();void refreshActivity();void refreshDeep()}
-refresh();void refreshScan(true);void refreshActivity(true);void refreshDeep(true);tick();
-setInterval(refresh,2500);setInterval(tick,1000);
+
+$('refreshBtn')?.addEventListener('click',()=>refresh(true));
+refresh(false);
+setInterval(()=>refresh(false),25000);
