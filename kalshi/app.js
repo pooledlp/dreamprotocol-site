@@ -114,7 +114,9 @@ function renderHero(s){
     setText('heroStake',money(s?.paperStakeDollars||10));
     setText('orbLabel','SCANNING');
     const orb=$('probOrb');if(orb)orb.style.setProperty('--prob','0');
-    const heroLink=$('heroKalshiLink');if(heroLink){heroLink.hidden=true;heroLink.removeAttribute('href')}
+    const heroActions=$('heroTradeActions');if(heroActions)heroActions.hidden=true;
+    const heroLink=$('heroKalshiLink');if(heroLink)heroLink.removeAttribute('href');
+    const heroCopy=$('heroCopyTicker');if(heroCopy)heroCopy.dataset.copyTicker='';
     return;
   }
 
@@ -132,8 +134,12 @@ function renderHero(s){
   setText('orbProb',pct(o.modelProbability));
   setText('orbLabel',qualified?String(o.side||'').toUpperCase()+' EDGE':'WATCH');
   const orb=$('probOrb');if(orb)orb.style.setProperty('--prob',String(Math.max(0,Math.min(100,Math.round((+o.modelProbability||0)*100)))));
+  const heroActions=$('heroTradeActions');
   const heroLink=$('heroKalshiLink');
-  if(heroLink){heroLink.hidden=!o.ticker;if(o.ticker){heroLink.href=kalshiAppUrl();heroLink.dataset.ticker=o.ticker}}
+  const heroCopy=$('heroCopyTicker');
+  if(heroActions)heroActions.hidden=!o.ticker;
+  if(heroLink&&o.ticker)heroLink.href=kalshiAppUrl();
+  if(heroCopy)heroCopy.dataset.copyTicker=o.ticker||'';
 }
 
 function opportunityCard(o){
