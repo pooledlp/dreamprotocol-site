@@ -13,6 +13,29 @@ const dateTime=v=>{
   const t=typeof v==='number'?v:Date.parse(v||'');
   return Number.isFinite(t)?new Date(t).toLocaleString([],{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'--';
 };
+const timeLeft=v=>{
+  const t=Date.parse(v||'');
+  if(!Number.isFinite(t))return '--';
+  const diff=t-Date.now();
+  if(diff<=0)return 'CLOSED · awaiting result';
+  const total=Math.floor(diff/1000);
+  const days=Math.floor(total/86400);
+  const hours=Math.floor((total%86400)/3600);
+  const mins=Math.floor((total%3600)/60);
+  const secs=total%60;
+  if(days>0)return days+'d '+String(hours).padStart(2,'0')+'h '+String(mins).padStart(2,'0')+'m';
+  if(hours>0)return hours+'h '+String(mins).padStart(2,'0')+'m '+String(secs).padStart(2,'0')+'s';
+  return mins+'m '+String(secs).padStart(2,'0')+'s';
+};
+function updateCountdowns(){
+  document.querySelectorAll('[data-countdown]').forEach(el=>{
+    const value=el.getAttribute('data-countdown')||'';
+    const t=Date.parse(value);
+    el.textContent='TIME LEFT '+timeLeft(value);
+    el.classList.toggle('red',Number.isFinite(t)&&t<=Date.now());
+    el.classList.toggle('green',Number.isFinite(t)&&t>Date.now());
+  });
+}
 
 let busy=false;
 let lastPayload=null;
@@ -118,9 +141,10 @@ function renderPositions(s){
   el.innerHTML=rows.length?rows.map(p=>
     '<div class="position">'+
       '<div class="rowTop"><b>'+esc(p.city||p.category||'Prediction')+' · '+esc(String(p.side||'').toUpperCase())+'</b><span>'+money(p.stake)+' paper</span></div>'+
-      '<div class="rowMeta"><span>'+esc(p.subtitle||p.title||p.ticker)+'</span><span>model '+pct(p.modelProbability)+'</span><span>market '+pct(p.marketProbability)+'</span><span>edge '+edgePct(p.edge)+'</span><span>'+esc(p.contracts)+' contracts</span><span>settles '+dateTime(p.closeTime)+'</span></div>'+
+      '<div class="rowMeta"><span>'+esc(p.subtitle||p.title||p.ticker)+'</span><span>model '+pct(p.modelProbability)+'</span><span>market '+pct(p.marketProbability)+'</span><span>edge '+edgePct(p.edge)+'</span><span>'+esc(p.contracts)+' contracts</span><span data-countdown="'+esc(p.closeTime||'')+'">TIME LEFT '+timeLeft(p.closeTime)+'</span><span>closes '+dateTime(p.closeTime)+'</span></div>'+
     '</div>'
   ).join(''):'<div class="empty">No open paper predictions yet.</div>';
+  updateCountdowns();
 }
 
 function renderHistory(s){
@@ -197,3 +221,4 @@ async function refresh(force=false){
 $('refreshBtn')?.addEventListener('click',()=>refresh(true));
 refresh(false);
 setInterval(()=>refresh(false),25000);
+setInterval(updateCountdowns,1000);
