@@ -59,7 +59,7 @@ function hoursLeft(v){
   const t=Date.parse(v||'');
   return Number.isFinite(t)?(t-Date.now())/3600000:NaN;
 }
-const blockedQualifications=new Set(['LATE DAY','TOO SOON','TOO FAR','NO ACTION TIME','NO CLOSE TIME']);
+const blockedQualifications=new Set(['LATE DAY','PAST HEATING WINDOW','TOO SOON','TOO FAR','NO ACTION TIME','NO CLOSE TIME']);
 function isBlockedOpportunity(o){
   return blockedQualifications.has(String(o?.qualification||'').toUpperCase());
 }
@@ -130,10 +130,14 @@ function selectedOpportunity(s){
   const qualified=Array.isArray(scan.qualified)?scan.qualified:[];
   if(qualified.length)return{row:qualified[0],qualified:true,test:false};
   const open=Array.isArray(s?.positions)?s.positions:[];
-  if(open.length){
-    const strong=open.find(p=>p.paperTier==="STRONG");
+  const activeOpen=open.filter(p=>{
+    const t=Date.parse(actionTime(p)||"");
+    return !Number.isFinite(t)||t>Date.now();
+  });
+  if(activeOpen.length){
+    const strong=activeOpen.find(p=>p.paperTier==="STRONG");
     if(strong)return{row:strong,qualified:true,test:false,position:true};
-    return{row:open[0],qualified:false,test:true,position:true};
+    return{row:activeOpen[0],qualified:false,test:true,position:true};
   }
   const opps=nearTermOpportunities(s);
   const tradeable=opps.find(o=>Number.isFinite(+o.marketPrice)&&+o.marketPrice>=.04&&+o.marketPrice<=.96);
@@ -226,10 +230,15 @@ function renderPositions(s){
   if(!el)return;
   el.innerHTML=rows.length?rows.map(p=>{
     const test=p.paperTier==="TEST";
-    return '<div class="position '+(test?'testPosition':'')+'">'+
-      '<div class="rowTop"><b>'+esc(p.city||p.category||'Prediction')+' · '+esc(String(p.side||'').toUpperCase())+'</b><span class="'+(test?'testTag':'strongTag')+'">'+(test?'TEST PAPER PICK':'STRONG PAPER PICK')+'</span></div>'+
-      '<div class="rowMeta"><span>'+esc(p.subtitle||p.title||p.ticker)+'</span><span>'+money(p.stake)+' paper</span><span>model '+pct(p.modelProbability)+'</span><span>entry '+pct(p.marketProbability||p.entryPrice)+'</span><span>edge '+edgePct(p.edge)+'</span><span>'+esc(p.contracts)+' contracts</span><span data-countdown="'+esc(actionTime(p)||'')+'">TIME LEFT '+timeLeft(actionTime(p))+'</span></div>'+
-      (test?'<div class="watchOnly">PAPER TEST ONLY · LOWER THRESHOLD · NO REAL-MONEY LINK</div>':'<div class="tradeActions"><span class="ticker">'+esc(p.ticker||'')+'</span><button type="button" class="copyTicker" data-copy-ticker="'+esc(p.ticker||'')+'">COPY TICKER</button><a class="kalshiLink" href="'+esc(kalshiAppUrl())+'">OPEN KALSHI APP ↗</a></div>')+
+    const actionAt=Date.parse(actionTime(p)||"");
+    const weatherPending=String(p.category||'').toUpperCase()==='WEATHER'&&Number.isFinite(actionAt)&&actionAt<=Date.now();
+    const stateLabel=weatherPending?'AWAITING NWS SETTLEMENT':(test?'TEST PAPER PICK':'STRONG PAPER PICK');
+    return '<div class="position '+(test?'testPosition ':'')+(weatherPending?'weatherPending':'')+'">'+
+      '<div class="rowTop"><b>'+esc(p.city||p.category||'Prediction')+' · '+esc(String(p.side||'').toUpperCase())+'</b><span class="'+(weatherPending?'pendingTag':test?'testTag':'strongTag')+'">'+stateLabel+'</span></div>'+
+      '<div class="rowMeta"><span>'+esc(p.subtitle||p.title||p.ticker)+'</span><span>'+money(p.stake)+' paper</span><span>model '+pct(p.modelProbability)+'</span><span>entry '+pct(p.marketProbability||p.entryPrice)+'</span><span>edge '+edgePct(p.edge)+'</span><span>'+esc(p.contracts)+' contracts</span>'+
+        (weatherPending?'<span>HEATING WINDOW CLOSED</span><span>official settlement '+dateTime(p.closeTime)+'</span>':'<span data-countdown="'+esc(actionTime(p)||'')+'">TIME LEFT '+timeLeft(actionTime(p))+'</span>')+
+      '</div>'+
+      (weatherPending?'<div class="watchOnly">NO MORE WEATHER ENTRY · WAITING FOR FINAL NWS DAILY CLIMATE REPORT</div>':test?'<div class="watchOnly">PAPER TEST ONLY · LOWER THRESHOLD · NO REAL-MONEY LINK</div>':'<div class="tradeActions"><span class="ticker">'+esc(p.ticker||'')+'</span><button type="button" class="copyTicker" data-copy-ticker="'+esc(p.ticker||'')+'">COPY TICKER</button><a class="kalshiLink" href="'+esc(kalshiAppUrl())+'">OPEN KALSHI APP ↗</a></div>')+
     '</div>';
   }).join(''):'<div class="empty">No open paper predictions yet.</div>';
   updateCountdowns();
