@@ -7037,3 +7037,9 @@ body[data-home="true"] .demo-float-cta{display:none}
   /* The hero retains the primary action; keep the narrow header navigable. */
   .site-header .nav-wrap>.button{display:none}
 }
+@media(max-width:680px){
+  .lead-form{grid-template-columns:minmax(0,1fr)}
+  .lead-form>*{min-width:0}
+  .lead-form :is(input,textarea){min-width:0;max-width:100%}
+  .lead-form .button{white-space:normal;overflow-wrap:anywhere;gap:12px}
+}

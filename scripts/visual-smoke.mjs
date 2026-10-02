@@ -52,6 +52,7 @@ try {
     await page.goto(origin+'/contact/?service=AI%20receptionist',{waitUntil:'networkidle'});
     assert((await page.locator('[name="workflow"]').inputValue()).includes('AI receptionist'));
     await page.screenshot({path:`${output}/contact-${width}.png`});
+    assert(await page.locator('#lead-form').evaluate(form=>form.scrollWidth<=form.clientWidth+1),`Form content clips at ${width}px`);
     await page.locator('#lead-form').screenshot({path:`${output}/form-${width}.png`});
     assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`Contact overflows at ${width}px`);
     assert.deepEqual(errors,[],`Uncaught browser errors at ${width}px`);
