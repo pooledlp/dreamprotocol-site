@@ -23,7 +23,11 @@ test('Scheduled publishing excludes future content, updates discovery, and is re
   assert(!read('resources/index.html').includes('/resources/first-ai-workshop/'));
   const before=read('index.html')+read('resources/feed.xml')+read('sitemap.xml');
   build('2026-09-13');assert.equal(read('index.html')+read('resources/feed.xml')+read('sitemap.xml'),before);
+  assert(read('index.html').includes('home-insights-title'),'Homepage must surface the published resource library');
+  assert(!read('index.html').includes('/resources/first-ai-workshop/'),'Homepage must not expose future guides');
+  assert(read('index.html').includes('ILLUSTRATIVE WORKFLOW'),'Hero example must not imply live customer telemetry');
   build('2026-09-21');
+  assert(read('index.html').includes('/resources/first-ai-workshop/'),'Homepage must refresh when a guide publishes');
   assert.equal(JSON.parse(read('content/published.json')).length,3);
   for(const f of ['sitemap.xml','resources/feed.xml','resources/index.html','ai-training/index.html'])assert(read(f).includes('/resources/first-ai-workshop/'),f+' missing published guide');
   build('2026-09-13');assert(!fs.existsSync(path.join(temp,'resources/first-ai-workshop/index.html')),'A future guide leaked into an earlier build');
