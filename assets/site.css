@@ -7033,3 +7033,7 @@ body[data-home="true"] .demo-float-cta{display:none}
 @media(prefers-reduced-motion:reduce){
   @view-transition{navigation:none}
 }
+@media(max-width:365px){
+  /* The hero retains the primary action; keep the narrow header navigable. */
+  .site-header .nav-wrap>.button{display:none}
+}

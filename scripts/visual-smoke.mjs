@@ -26,10 +26,11 @@ try {
     await page.screenshot({path:`${output}/home-${width}.png`});
     const geometry=await page.evaluate(()=>({
       overflow:document.documentElement.scrollWidth>innerWidth+1,
+      overflowing:[...document.querySelectorAll('body *')].map(el=>({tag:el.tagName,cls:el.className,left:el.getBoundingClientRect().left,right:el.getBoundingClientRect().right})).filter(el=>el.left< -1||el.right>innerWidth+1).slice(0,30),
       cta:document.querySelector('.hero-primary').getBoundingClientRect().toJSON(),
       guides:document.querySelectorAll('.home-insights .guide-card').length
     }));
-    assert(!geometry.overflow,`Homepage overflows at ${width}px`);
+    assert(!geometry.overflow,`Homepage overflows at ${width}px: ${JSON.stringify(geometry.overflowing)}`);
     assert(geometry.cta.bottom<=height,`Primary CTA is below first viewport at ${width}px`);
     assert.equal(geometry.guides,3);
     const menu=page.locator('.menu-button');
