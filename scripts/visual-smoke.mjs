@@ -47,9 +47,11 @@ try {
     await page.locator('.hero-primary').click();
     await page.waitForURL('**/#demo');
     assert(await page.locator('#demo').isVisible());
+    await page.locator('.home-insights').screenshot({path:`${output}/guides-${width}.png`});
     await page.goto(origin+'/contact/?service=AI%20receptionist',{waitUntil:'networkidle'});
     assert((await page.locator('[name="workflow"]').inputValue()).includes('AI receptionist'));
     await page.screenshot({path:`${output}/contact-${width}.png`});
+    await page.locator('#lead-form').screenshot({path:`${output}/form-${width}.png`});
     assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`Contact overflows at ${width}px`);
     assert.deepEqual(errors,[],`Uncaught browser errors at ${width}px`);
     await page.close();

@@ -7029,3 +7029,7 @@ body[data-home="true"] .demo-float-cta{display:none}
   .site-header .nav-wrap nav.open{display:flex}
   .site-header .nav-wrap nav a{min-height:44px;color:#d0dfc8;font-size:.9rem}
 }
+/* Reduced motion also opts out of cross-document transition snapshots. */
+@media(prefers-reduced-motion:reduce){
+  @view-transition{navigation:none}
+}
