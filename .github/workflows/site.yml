@@ -104,6 +104,20 @@ jobs:
         run: npm run check
       - name: Test publishing dates and repeatability
         run: npm test
+      - name: Install pinned browser test tooling
+        run: |
+          npm install --no-save --package-lock=false --no-audit --no-fund playwright@1.62.1
+          npx playwright install --with-deps chromium
+      - name: Check desktop and mobile layouts
+        run: node scripts/visual-smoke.mjs
+      - name: Retain responsive screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: responsive-screenshots
+          path: _visual
+          if-no-files-found: ignore
+          retention-days: 7
       - name: Package only public website files
         run: node scripts/package-site.mjs
       - name: Report the editorial queue
