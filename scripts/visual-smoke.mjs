@@ -49,6 +49,13 @@ try {
     await page.waitForURL('**/#demo');
     assert(await page.locator('#demo').isVisible());
     await page.locator('.home-insights').screenshot({path:`${output}/guides-${width}.png`});
+    await page.goto(origin+'/dreamboard/',{waitUntil:'networkidle'});
+    await page.evaluate(()=>document.fonts.ready);
+    assert((await page.locator('h1').innerText()).includes('Your board is in session.'));
+    assert(await page.locator('.dreamboard-console').isVisible());
+    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`DreamBoard overflows at ${width}px`);
+    assert(await page.locator('.dreamboard-console').evaluate(el=>el.scrollWidth<=el.clientWidth+1),`DreamBoard console clips at ${width}px`);
+    await page.screenshot({path:`${output}/dreamboard-${width}.png`});
     await page.goto(origin+'/contact/?service=AI%20receptionist',{waitUntil:'networkidle'});
     assert((await page.locator('[name="workflow"]').inputValue()).includes('AI receptionist'));
     await page.screenshot({path:`${output}/contact-${width}.png`});
