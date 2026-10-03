@@ -112,6 +112,13 @@ try {
     assert(founderGeometry.imageWidth>0 && founderGeometry.imageHeight>0,`Founder image failed to render at ${width}px`);
     assert.equal(founderGeometry.imageSrc,'/public/dustin-poole-founder.webp');
     await page.locator('.founder-proof-section').screenshot({path:`${output}/founder-${width}.png`});
+    await page.goto(origin+'/dreamperio/',{waitUntil:'networkidle'});
+    await page.evaluate(()=>document.fonts.ready);
+    const dreamPerioText=await page.locator('main').innerText();
+    assert(dreamPerioText.includes('LIVE CLIENT DEPLOYMENT'),'DreamPerio must state live client deployment');
+    assert(dreamPerioText.includes('Book a DreamPerio demo'),'DreamPerio must use production demo CTA');
+    assert(!/early access/i.test(dreamPerioText),'DreamPerio must not advertise early access');
+    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`DreamPerio overflows at ${width}px`);
     await page.goto(origin+'/dreamboard/',{waitUntil:'networkidle'});
     await page.evaluate(()=>document.fonts.ready);
     assert((await page.locator('h1').innerText()).includes('Your board is in session.'));
