@@ -69,7 +69,7 @@ try {
     assert(await page.locator('[data-proof-panel="perio"]').isVisible());
     assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`Cinematic homepage overflows at ${width}px`);
     await page.locator('.cinematic-reel').screenshot({path:`${output}/cinematic-hero-${width}.png`});
-    await page.locator('.product-theater').screenshot({path:`${output}/product-proof-${width}.png`});
+    await page.locator('.proof-stories').screenshot({path:`${output}/product-proof-${width}.png`});
     await page.locator('.presence-thesis').screenshot({path:`${output}/presence-thesis-${width}.png`});
     await page.locator('[data-product-jump="board"]').click();
     assert(await page.locator('[data-proof-panel="board"]').isVisible());
