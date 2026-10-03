@@ -23,6 +23,15 @@ try {
     await page.route(/api\.dreamprotocol\.ai|formsubmit\.co|api\.vapi\.ai/,route=>route.abort());
     await page.goto(origin,{waitUntil:'networkidle'});
     await page.evaluate(()=>document.fonts.ready);
+    const fontState=await page.evaluate(()=>({
+      body:getComputedStyle(document.body).fontFamily,
+      heading:getComputedStyle(document.querySelector('h1')).fontFamily,
+      loaded:[...document.fonts].filter(face=>face.status==='loaded').map(face=>face.family.replace(/["']/g,''))
+    }));
+    assert(fontState.body.includes('DM Sans'),`Body font stack lost DM Sans at ${width}px`);
+    assert(fontState.heading.includes('Manrope'),`Heading font stack lost Manrope at ${width}px`);
+    assert(fontState.loaded.includes('DM Sans'),`DM Sans webfont did not load at ${width}px: ${JSON.stringify(fontState.loaded)}`);
+    assert(fontState.loaded.includes('Manrope'),`Manrope webfont did not load at ${width}px: ${JSON.stringify(fontState.loaded)}`);
     await page.screenshot({path:`${output}/home-${width}.png`});
     const geometry=await page.evaluate(()=>({
       overflow:document.documentElement.scrollWidth>innerWidth+1,
@@ -56,6 +65,32 @@ try {
     assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`DreamBoard overflows at ${width}px`);
     assert(await page.locator('.dreamboard-console').evaluate(el=>el.scrollWidth<=el.clientWidth+1),`DreamBoard console clips at ${width}px`);
     await page.screenshot({path:`${output}/dreamboard-${width}.png`});
+    await page.goto(origin+'/client-login/',{waitUntil:'networkidle'});
+    await page.evaluate(()=>document.fonts.ready);
+    assert((await page.locator('h1').innerText()).includes('One secure place.'));
+    assert(await page.locator('.client-login-console').isVisible());
+    const portalGeometry=await page.evaluate(()=>({
+      overflow:document.documentElement.scrollWidth>innerWidth+1,
+      console:document.querySelector('.client-login-console').getBoundingClientRect().toJSON(),
+      rail:document.querySelector('.client-login-status-rail').getBoundingClientRect().toJSON(),
+      bodyFont:getComputedStyle(document.body).fontFamily,
+      headingFont:getComputedStyle(document.querySelector('h1')).fontFamily,
+      loaded:[...document.fonts].filter(face=>face.status==='loaded').map(face=>face.family.replace(/["']/g,''))
+    }));
+    assert(!portalGeometry.overflow,`Client portal overflows at ${width}px`);
+    assert(portalGeometry.console.left>=-1 && portalGeometry.console.right<=width+1,`Client login console is mispositioned at ${width}px`);
+    assert(portalGeometry.rail.left>=-1 && portalGeometry.rail.right<=width+1,`Client portal status rail is mispositioned at ${width}px`);
+    assert(portalGeometry.bodyFont.includes('DM Sans'),`Client portal body font mismatch at ${width}px`);
+    assert(portalGeometry.headingFont.includes('Manrope'),`Client portal heading font mismatch at ${width}px`);
+    assert(portalGeometry.loaded.includes('DM Sans') && portalGeometry.loaded.includes('Manrope'),`Client portal webfonts did not load at ${width}px`);
+    await page.evaluate(()=>scrollTo(0,0));
+    await page.screenshot({path:`${output}/client-login-${width}.png`});
+    await page.locator('#client-login-email').fill('client@example.com');
+    await page.locator('#client-login-password').fill('not-transmitted');
+    await page.locator('#client-login-button').click();
+    assert.equal(await page.locator('#client-login-password').inputValue(),'');
+    assert((await page.locator('#client-login-status').innerText()).includes('Private workspace access required.'));
+    await page.screenshot({path:`${output}/client-login-access-${width}.png`});
     await page.goto(origin+'/contact/?service=AI%20receptionist',{waitUntil:'networkidle'});
     assert((await page.locator('[name="workflow"]').inputValue()).includes('AI receptionist'));
     await page.screenshot({path:`${output}/contact-${width}.png`});

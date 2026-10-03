@@ -48,7 +48,7 @@ function layout(slug,title,description,body,{active='',schema=[],crumbs=[],home=
  const breadcrumb=crumbs.length?[{'@type':'BreadcrumbList',itemListElement:[{name:'Home',item:origin+'/'},...crumbs.map(([s,n])=>({name:n,item:origin+href(s)}))].map((x,i)=>({'@type':'ListItem',position:i+1,...x}))}]:[];
  const graph=[org,{'@type':'WebSite','@id':origin+'/#website',name:'Dream Protocol',url:origin+'/'},{'@type':'WebPage','@id':url+'#webpage',url,name:title,description,isPartOf:{'@id':origin+'/#website'},about:{'@id':origin+'/#organization'}},...breadcrumb,...schema];
  const html=`<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)} | Dream Protocol</title><meta name="description" content="${esc(description)}"><link rel="canonical" href="${url}">${noindex?'<meta name="robots" content="noindex">':''}<meta name="theme-color" content="#101717"><meta property="og:type" content="${article?'article':'website'}"><meta property="og:title" content="${esc(title)} | Dream Protocol"><meta property="og:description" content="${esc(description)}"><meta property="og:url" content="${url}"><meta property="og:image" content="${origin}/public/dream-protocol-abstract.webp"><meta name="twitter:card" content="summary_large_image"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="alternate" type="application/rss+xml" title="Dream Protocol guides" href="/resources/feed.xml"><link rel="stylesheet" href="/assets/site.css?v=${version}"><script defer src="/attribution.js"></script><script defer src="/assets/site.js?v=${uiVersion}"></script>${home?`<script>window.DREAMPROTOCOL_CONFIG={businessAnalysisEndpoint:"https://api.dreamprotocol.ai/analyze-business",vapiPublicKey:"ec40770e-0ff1-482c-929e-5288315e24b1",vapiAssistantId:"30ccf544-cd70-4ba6-8b23-fcd9ff5a4fec"};</script><script defer src="/app.js?v=${appVersion}"></script>`:''}<script type="application/ld+json">${json({'@context':'https://schema.org','@graph':graph})}</script></head>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)} | Dream Protocol</title><meta name="description" content="${esc(description)}"><link rel="canonical" href="${url}">${noindex?'<meta name="robots" content="noindex">':''}<meta name="theme-color" content="#101717"><meta property="og:type" content="${article?'article':'website'}"><meta property="og:title" content="${esc(title)} | Dream Protocol"><meta property="og:description" content="${esc(description)}"><meta property="og:url" content="${url}"><meta property="og:image" content="${origin}/public/dream-protocol-abstract.webp"><meta name="twitter:card" content="summary_large_image"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="alternate" type="application/rss+xml" title="Dream Protocol guides" href="/resources/feed.xml"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="/assets/site.css?v=${version}"><script defer src="/attribution.js"></script><script defer src="/assets/site.js?v=${uiVersion}"></script>${home?`<script>window.DREAMPROTOCOL_CONFIG={businessAnalysisEndpoint:"https://api.dreamprotocol.ai/analyze-business",vapiPublicKey:"ec40770e-0ff1-482c-929e-5288315e24b1",vapiAssistantId:"30ccf544-cd70-4ba6-8b23-fcd9ff5a4fec"};</script><script defer src="/app.js?v=${appVersion}"></script>`:''}<script type="application/ld+json">${json({'@context':'https://schema.org','@graph':graph})}</script></head>
 <body data-page="${esc(slug||'home')}"${home?' data-home="true"':''}>${nav(active)}${home?'':protocolBar()}<main id="main">${body}</main>${footer()}</body></html>\n`;
  if(!noindex)pages.push({slug,url});
  write(slug?slug+'/index.html':'index.html',html);
@@ -129,35 +129,73 @@ layout('about','About Dream Protocol','Meet Dream Protocol, a founder-led AI aut
 
 layout('security','AI Security & Data Handling','How Dream Protocol approaches AI data boundaries, access, human review, vendor transparency, and regulated workflows for business automation.',`${crumbs([['security','Security & data']])}<section class="page-hero shell">${eyebrow('TRUST IS PART OF THE BUILD')}<h1>Useful AI.<br><em>Controlled access.</em></h1><p>AI automation only works when the business knows what information the system can use, what it can do, and where a person takes over. We design those boundaries before launch.</p></section><section class="section shell"><div class="three-grid"><article class="feature"><span class="step-number">01</span><h2>Use the minimum data needed</h2><p>Start from the information required to perform the approved task. The public website demo uses public website information only. Production data access is scoped separately.</p></article><article class="feature"><span class="step-number">02</span><h2>Control identity and permissions</h2><p>Review accounts, roles, credentials, source permissions, and the principle of least access. Integration scope depends on the controls available in the systems involved.</p></article><article class="feature"><span class="step-number">03</span><h2>Keep sensitive decisions human</h2><p>Define the situations where AI can draft, classify, route, or recommend versus the situations where a qualified person must review or decide.</p></article></div></section><section class="section pale-section"><div class="shell">${heading('REGULATED OR SENSITIVE WORK','Assess first.<br><em>Then automate.</em>','Healthcare, financial, legal, employee, and other sensitive-data workflows require an explicit review of systems, contracts, access, retention, and operational requirements before implementation.')}<div class="three-grid"><article class="feature"><span class="step-number">04</span><h3>Vendor transparency</h3><p>Identify the model, voice, messaging, hosting, and integration providers used in the proposed workflow and review the relevant data-handling settings before launch.</p></article><article class="feature"><span class="step-number">05</span><h3>Testing and exception paths</h3><p>Test routine cases, missing information, low-confidence output, connection failure, escalation, and human fallback before production use.</p></article><article class="feature"><span class="step-number">06</span><h3>Changes stay controlled</h3><p>Document the agreed workflow and test material changes before they go live. Managed AI operations is available when the system needs ongoing review and tuning.</p></article></div></div></section>${faq([['Do you claim every Dream Protocol workflow is HIPAA, SOC 2, or otherwise compliant?','No. Compliance depends on the complete architecture, vendors, contracts, data, configuration, and client responsibilities. Regulated workflows are assessed separately before implementation.'],['Does the website AI demo use private company data?','No. The public demo is designed around public information found on the website you provide. Do not enter private customer, patient, employee, financial, or confidential information into the public demo.'],['Can we require human approval before an AI action?','Yes. Approval, escalation, and exception steps can be built into a workflow when the business process requires them.']])}${cta()}`,{crumbs:[['security','Security & data']]});
 
-layout('client-login','Client Login','Dream Protocol client access for active customers.',`
+layout('client-login','Client Portal','Secure Dream Protocol client access for projects, AI systems, requests, documents, and support.',`
 <section class="client-login-page">
   <div class="client-login-grid-bg" aria-hidden="true"></div>
   <div class="shell client-login-shell">
+    <div class="client-login-status-rail" aria-label="Client portal status">
+      <span><i></i> PORTAL ONLINE</span>
+      <span>SECURE CLIENT ACCESS</span>
+      <span>PROJECTS · SYSTEMS · REQUESTS · DOCUMENTS</span>
+    </div>
     <div class="client-login-copy">
-      ${eyebrow('DREAMPROTOCOL / CLIENT ACCESS')}
-      <h1>Your AI operation.<br><em>One place to see it.</em></h1>
-      <p>Client access is being rolled out for active Dream Protocol customers. The workspace is designed to bring AI agents, workflows, activity, requests, and project information into one place.</p>
-      <div class="client-login-features" aria-label="Planned client workspace">
-        <div><span>01</span><strong>AI agents</strong><small>Voice agents, knowledge, status, and configuration</small></div>
-        <div><span>02</span><strong>Workflows</strong><small>Automations, connected actions, and health</small></div>
-        <div><span>03</span><strong>Activity</strong><small>Recent AI work and human handoffs</small></div>
-        <div><span>04</span><strong>Requests</strong><small>Changes, support, documents, and next steps</small></div>
+      ${eyebrow('DREAMPROTOCOL / CLIENT PORTAL')}
+      <h1>Your DreamProtocol work.<br><em>One secure place.</em></h1>
+      <p>Active Dream Protocol clients get one workspace for project status, AI systems, shared deliverables, support requests, approvals, and the next thing that needs attention.</p><a class="client-login-jump" href="#client-access">Sign in to client workspace <span>↓</span></a>
+      <div class="client-login-features" aria-label="Client portal capabilities">
+        <div><span>01</span><strong>Projects</strong><small>Current phase, milestones, decisions, deliverables, and what happens next.</small></div>
+        <div><span>02</span><strong>AI systems</strong><small>Agent status, workflow health, connected systems, and operational notes.</small></div>
+        <div><span>03</span><strong>Requests</strong><small>Support, changes, approvals, questions, and a clear owner for every next step.</small></div>
+        <div><span>04</span><strong>Documents</strong><small>Proposals, reports, handoff material, meeting notes, and shared files in one place.</small></div>
+      </div>
+      <div class="client-workspace-preview" aria-label="Illustrative client workspace preview">
+        <div class="client-workspace-head"><span><i></i> EXAMPLE CLIENT WORKSPACE</span><b>ILLUSTRATIVE PREVIEW</b></div>
+        <div class="client-workspace-kpis">
+          <div><small>PROJECTS</small><strong>03</strong><span>active</span></div>
+          <div><small>REQUESTS</small><strong>02</strong><span>open</span></div>
+          <div><small>DOCUMENTS</small><strong>14</strong><span>shared</span></div>
+          <div><small>AI SYSTEMS</small><strong>04</strong><span>online</span></div>
+        </div>
+        <div class="client-workspace-stream">
+          <div><span class="client-workspace-icon">AI</span><p><strong>AI Front Desk</strong><small>Testing · latest call flow ready for review</small></p><b>REVIEW</b></div>
+          <div><span class="client-workspace-icon">WF</span><p><strong>Lead follow-up workflow</strong><small>Live · monitoring response and handoff quality</small></p><b>LIVE</b></div>
+          <div><span class="client-workspace-icon">RQ</span><p><strong>Change request</strong><small>Business-hours update · queued for next revision</small></p><b>OPEN</b></div>
+        </div>
       </div>
     </div>
-    <div class="client-login-console">
-      <div class="client-login-console-head"><span><i></i>DREAMPROTOCOL / CLIENT</span><b>ACCESS</b></div>
+    <div class="client-login-console" id="client-access">
+      <div class="client-login-console-head"><span><i></i>DREAMPROTOCOL / CLIENT</span><b>SECURE ACCESS</b></div>
       <div class="client-login-card" role="group" aria-labelledby="client-login-title">
         <div class="client-login-mark" aria-hidden="true"><span>DP</span><i></i><i></i></div>
+        <div class="client-login-card-status"><span><i></i> PORTAL ONLINE</span><b>CLIENT ACCESS</b></div>
         <p class="eyebrow">CLIENT WORKSPACE</p>
-        <h2 id="client-login-title">Sign in</h2>
-        <p class="client-login-intro">Access is provisioned directly by Dream Protocol for active clients.</p>
+        <h2 id="client-login-title">Welcome back.</h2>
+        <p class="client-login-intro">Sign in using the client access provided by Dream Protocol. This public page never stores or transmits passwords.</p>
         <label>Email address<input id="client-login-email" type="email" autocomplete="username" placeholder="name@company.com"></label>
         <label>Password<input id="client-login-password" type="password" autocomplete="current-password" placeholder="••••••••••••"></label>
         <button id="client-login-button" class="button" type="button">Sign in <span>→</span></button>
         <p class="client-login-status" id="client-login-status" role="status" aria-live="polite"></p>
-        <div class="client-login-help"><span>Need access?</span><a href="mailto:hello@dreamprotocol.ai">hello@dreamprotocol.ai ↗</a></div>
+        <div class="client-login-links">
+          <a href="/contact/?service=Client%20Portal%20Access">Request access ↗</a>
+          <a href="mailto:hello@dreamprotocol.ai?subject=Client%20portal%20access">Need help signing in? ↗</a>
+        </div>
+        <div class="client-login-security">
+          <span>SECURE CLIENT ACCESS</span>
+          <span>NO PUBLIC CREDENTIAL STORAGE</span>
+        </div>
       </div>
-      <div class="client-login-foot"><span><i></i> CLIENT ACCESS</span><span>Provisioned directly by Dream Protocol</span></div>
+      <div class="client-login-foot"><span><i></i> SUPPORT ACTIVE</span><span>hello@dreamprotocol.ai</span></div>
+    </div>
+  </div>
+</section>
+<section class="client-portal-explainer">
+  <div class="shell">
+    <div class="section-heading split"><div>${eyebrow('INSIDE THE PORTAL')}<h2>Less chasing.<br><em>More visibility.</em></h2></div><p>The portal is designed around the questions clients actually have: What is happening? What do you need from me? What changed? Where is the document? What is next?</p></div>
+    <div class="client-portal-grid">
+      <article><span>01</span><h3>Project pulse</h3><p>See current stage, milestones, owners, blockers, decisions, and upcoming work without digging through email.</p></article>
+      <article><span>02</span><h3>System health</h3><p>Keep active AI agents and workflows visible with status, operational notes, and the human handoff path.</p></article>
+      <article><span>03</span><h3>Request center</h3><p>Submit changes or support needs with the context attached, then see exactly where the request stands.</p></article>
+      <article><span>04</span><h3>Shared knowledge</h3><p>Keep proposals, reports, diagrams, meeting notes, approvals, and final deliverables attached to the work they belong to.</p></article>
     </div>
   </div>
 </section>`,{active:'client-login',noindex:true});
