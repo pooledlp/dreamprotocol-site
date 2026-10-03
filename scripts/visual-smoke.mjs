@@ -64,6 +64,7 @@ try {
     assert(await page.locator('[data-reel-scene="1"]').evaluate(el=>el.classList.contains('is-active')));
     const boardFilmGeometry=await page.evaluate(()=>({
       stage:document.querySelector('.film-board-stage').getBoundingClientRect().toJSON(),
+      viewport:document.querySelector('.reel-viewport').getBoundingClientRect().toJSON(),
       chair:document.querySelector('.film-chair').getBoundingClientRect().toJSON(),
       chairScrollWidth:document.querySelector('.film-chair').scrollWidth,
       chairClientWidth:document.querySelector('.film-chair').clientWidth,
@@ -71,7 +72,7 @@ try {
     }));
     assert(boardFilmGeometry.chair.left>=boardFilmGeometry.stage.left-1 && boardFilmGeometry.chair.right<=boardFilmGeometry.stage.right+1,`DreamBoard chair escapes stage at ${width}px`);
     assert(boardFilmGeometry.chairScrollWidth<=boardFilmGeometry.chairClientWidth+1,`DreamBoard chair text clips at ${width}px`);
-    assert(boardFilmGeometry.link.right<=width+1,`DreamBoard product link clips at ${width}px`);
+    assert(boardFilmGeometry.link.left>=boardFilmGeometry.viewport.left-1 && boardFilmGeometry.link.right<=boardFilmGeometry.viewport.right+1,`DreamBoard product link clips at ${width}px`);
     assert.equal(await page.locator('[data-proof-target]').count(),3);
     await page.locator('[data-proof-target="board"]').click();
     assert(await page.locator('[data-proof-panel="board"]').isVisible());
