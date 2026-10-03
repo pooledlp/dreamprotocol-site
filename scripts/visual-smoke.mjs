@@ -20,7 +20,7 @@ try {
     const errors=[];
     page.on('pageerror',error=>errors.push(error.message));
     // Visual checks must never initiate a voice session or submit a lead.
-    await page.route(/api\.dreamprotocol\.ai|formsubmit\.co|api\.vapi\.ai/,route=>route.abort());
+    await page.route(/api\.dreamprotocol\.ai|formsubmit\.co|api\.vapi\.ai|cdn\.coverr\.co/,route=>route.abort());
     await page.goto(origin,{waitUntil:'networkidle'});
     await page.evaluate(()=>document.fonts.ready);
     const fontState=await page.evaluate(()=>({
@@ -37,11 +37,11 @@ try {
       overflow:document.documentElement.scrollWidth>innerWidth+1,
       overflowing:[...document.querySelectorAll('body *')].map(el=>({tag:el.tagName,cls:el.className,left:el.getBoundingClientRect().left,right:el.getBoundingClientRect().right})).filter(el=>el.left< -1||el.right>innerWidth+1).slice(0,30),
       cta:document.querySelector('.hero-primary').getBoundingClientRect().toJSON(),
-      productIndex:document.querySelector('.cinematic-reel').getBoundingClientRect().toJSON()
+      productIndex:document.querySelector('.hero-film').getBoundingClientRect().toJSON()
     }));
     assert(!geometry.overflow,`Homepage overflows at ${width}px: ${JSON.stringify(geometry.overflowing)}`);
     assert(geometry.cta.bottom<=height,`Primary CTA is below first viewport at ${width}px`);
-    assert(geometry.productIndex.left>=-1 && geometry.productIndex.right<=width+1,`Homepage cinematic reel mispositioned at ${width}px`);
+    assert(geometry.productIndex.left<width && geometry.productIndex.right>width*.55,`Homepage hero film mispositioned at ${width}px`);
     const menu=page.locator('.menu-button');
     if(await menu.isVisible()){
       await menu.click();
@@ -58,20 +58,18 @@ try {
     await page.waitForURL('**/#product-proof');
     assert(await page.locator('#product-proof').isVisible());
     assert(await page.locator('.presence-thesis').isVisible());
-    assert(await page.locator('.cinematic-reel').isVisible());
-    assert.equal(await page.locator('[data-reel-button]').count(),3);
-    await page.locator('[data-reel-button="1"]').click();
-    assert(await page.locator('[data-reel-scene="1"]').evaluate(el=>el.classList.contains('is-active')));
+    assert(await page.locator('.hero-film').isVisible());
+    assert.equal(await page.locator('[data-film-event]').count(),4);
     assert.equal(await page.locator('[data-proof-target]').count(),3);
     await page.locator('[data-proof-target="board"]').click();
     assert(await page.locator('[data-proof-panel="board"]').isVisible());
     await page.locator('[data-proof-target="perio"]').click();
     assert(await page.locator('[data-proof-panel="perio"]').isVisible());
     assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`Cinematic homepage overflows at ${width}px`);
-    await page.locator('.cinematic-reel').screenshot({path:`${output}/cinematic-hero-${width}.png`});
+    await page.locator('.hero-film').screenshot({path:`${output}/cinematic-hero-${width}.png`});
     await page.locator('.proof-stories').screenshot({path:`${output}/product-proof-${width}.png`});
     await page.locator('.presence-thesis').screenshot({path:`${output}/presence-thesis-${width}.png`});
-    await page.locator('[data-product-jump="board"]').click();
+    await page.locator('[data-proof-target="board"]').click();
     assert(await page.locator('[data-proof-panel="board"]').isVisible());
     await page.goto(origin+'/about/',{waitUntil:'networkidle'});
     await page.evaluate(()=>document.fonts.ready);
