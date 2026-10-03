@@ -60,6 +60,20 @@ try {
     assert(await page.locator('#product-proof').isVisible());
     assert(await page.locator('.presence-thesis').isVisible());
     assert(await page.locator('.hero-film').isVisible());
+    await page.waitForFunction(() => {
+      const video=document.querySelector('.hero-film video');
+      return Boolean(video && video.readyState>=2 && video.videoWidth>0 && video.videoHeight>0 && video.currentTime>0.15);
+    }, null, {timeout:15000});
+    const playbackState=await page.locator('.hero-film video').evaluate(video=>({
+      paused:video.paused,
+      currentTime:video.currentTime,
+      readyState:video.readyState,
+      videoWidth:video.videoWidth,
+      videoHeight:video.videoHeight,
+      currentSrc:video.currentSrc
+    }));
+    assert(playbackState.readyState>=2 && playbackState.videoWidth===1080 && playbackState.videoHeight===1920 && playbackState.currentTime>0.15,
+      `Hero video is not actually playing at ${width}px: ${JSON.stringify(playbackState)}`);
     const heroVideoState=await page.locator('.hero-film video').evaluate(video=>({
       readyState:video.readyState,
       currentSrc:video.currentSrc,
@@ -67,10 +81,10 @@ try {
       width:video.videoWidth,
       height:video.videoHeight
     }));
-    assert(heroVideoState.currentSrc.includes('videos.pexels.com'),`Hero video source mismatch at ${width}px: ${JSON.stringify(heroVideoState)}`);
-    assert(heroVideoState.poster.includes('images.pexels.com'),`Hero video poster missing at ${width}px`);
+    assert(heroVideoState.currentSrc.includes('7989667-hd_1080_1920_25fps.mp4'),`Hero video source mismatch at ${width}px: ${JSON.stringify(heroVideoState)}`);
+    assert(heroVideoState.poster.includes('pexels-photo-7989667.jpeg'),`Hero video poster missing at ${width}px`);
     const heroFilmBackground=await page.locator('.hero-film').evaluate(el=>getComputedStyle(el).backgroundImage);
-    assert(heroFilmBackground.includes('images.pexels.com'),`Hero film poster fallback missing at ${width}px`);
+    assert(heroFilmBackground.includes('pexels-photo-7989667.jpeg'),`Hero film poster fallback missing at ${width}px`);
     assert.equal(await page.locator('[data-film-event]').count(),4);
     assert.equal(await page.locator('[data-proof-target]').count(),3);
     await page.locator('[data-proof-target="board"]').click();
