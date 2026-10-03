@@ -279,27 +279,40 @@
     }
   });
 
-  // Client access preview. This page intentionally does not authenticate,
-  // submit, store, or transmit entered credentials until the real portal ships.
+  // Client portal entrance. The public marketing site never transmits credentials.
+  // Provisioned clients use a private workspace access path issued during onboarding.
   const clientLoginButton=document.querySelector('#client-login-button');
   if(clientLoginButton){
     const email=document.querySelector('#client-login-email');
     const password=document.querySelector('#client-login-password');
     const status=document.querySelector('#client-login-status');
-    const showProvisioning=()=>{
-      if(password)password.value='';
+    const showSecureAccess=()=>{
+      const emailValue=email?.value.trim()||'';
+      const passwordValue=password?.value||'';
+      if(!emailValue || !email?.checkValidity()){
+        status?.classList.remove('is-visible');
+        email?.reportValidity();
+        email?.focus();
+        return;
+      }
+      if(!passwordValue){
+        status?.classList.remove('is-visible');
+        password?.focus();
+        return;
+      }
+      password.value='';
       if(status){
         status.classList.add('is-visible');
-        status.innerHTML='<strong>Client access is being provisioned.</strong><span>Active clients receive access directly from Dream Protocol. Email <a href="mailto:hello@dreamprotocol.ai">hello@dreamprotocol.ai</a> if you need access.</span>';
+        status.innerHTML='<strong>Private workspace access required.</strong><span>This public page does not transmit credentials. Active clients sign in through the secure workspace access issued during onboarding. <a href="/contact/?service=Client%20Portal%20Access">Request or recover access ↗</a></span>';
       }
       clientLoginButton.classList.add('is-acknowledged');
-      clientLoginButton.innerHTML='Access provisioning <span aria-hidden="true">✓</span>';
+      clientLoginButton.innerHTML='Secure client access <span aria-hidden="true">✓</span>';
     };
-    clientLoginButton.addEventListener('click',showProvisioning);
+    clientLoginButton.addEventListener('click',showSecureAccess);
     [email,password].forEach(input=>input?.addEventListener('keydown',event=>{
       if(event.key!=='Enter')return;
       event.preventDefault();
-      showProvisioning();
+      showSecureAccess();
     }));
   }
 
