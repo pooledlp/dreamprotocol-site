@@ -9246,3 +9246,9 @@ body[data-home="true"] .presence-hero-grid{
   .kinetic-hero,.kinetic-grid,.kinetic-lines,.kinetic-core,.kinetic-node{transform:none!important}
   .kinetic-core{transform:translate(-50%,-50%) rotate(45deg)!important}
 }
+
+/* Final kinetic core treatment: quiet, precise, not neon-logo loud. */
+.kinetic-core{border-radius:50%;background:#0d1913;color:#e8f5e1;box-shadow:0 0 0 12px rgba(207,255,112,.018),0 0 70px rgba(207,255,112,.08);transform:translate(calc(-50% + var(--mx) * .08),calc(-50% + var(--my) * .08))}
+.kinetic-core span,.kinetic-core small{transform:none}.kinetic-core i{transform:none}
+@media(max-width:680px){.kinetic-core{border-radius:50%}}
+@media(prefers-reduced-motion:reduce){.kinetic-core{transform:translate(-50%,-50%)!important}}
