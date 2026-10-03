@@ -62,6 +62,17 @@ try {
     assert.equal(await page.locator('[data-reel-button]').count(),3);
     await page.locator('[data-reel-button="1"]').click();
     assert(await page.locator('[data-reel-scene="1"]').evaluate(el=>el.classList.contains('is-active')));
+    const boardFilmGeometry=await page.evaluate(()=>({
+      stage:document.querySelector('.film-board-stage').getBoundingClientRect().toJSON(),
+      viewport:document.querySelector('.reel-viewport').getBoundingClientRect().toJSON(),
+      chair:document.querySelector('.film-chair').getBoundingClientRect().toJSON(),
+      chairScrollWidth:document.querySelector('.film-chair').scrollWidth,
+      chairClientWidth:document.querySelector('.film-chair').clientWidth,
+      link:document.querySelector('.scene-board .reel-product-link').getBoundingClientRect().toJSON()
+    }));
+    assert(boardFilmGeometry.chair.left>=boardFilmGeometry.stage.left-1 && boardFilmGeometry.chair.right<=boardFilmGeometry.stage.right+1,`DreamBoard chair escapes stage at ${width}px`);
+    assert(boardFilmGeometry.chairScrollWidth<=boardFilmGeometry.chairClientWidth+1,`DreamBoard chair text clips at ${width}px`);
+    assert(boardFilmGeometry.link.left>=boardFilmGeometry.viewport.left-1 && boardFilmGeometry.link.right<=boardFilmGeometry.viewport.right+1,`DreamBoard product link clips at ${width}px`);
     assert.equal(await page.locator('[data-proof-target]').count(),3);
     await page.locator('[data-proof-target="board"]').click();
     assert(await page.locator('[data-proof-panel="board"]').isVisible());
@@ -81,11 +92,12 @@ try {
       photo:document.querySelector('.founder-proof-photo').getBoundingClientRect().toJSON(),
       imageWidth:document.querySelector('.founder-proof-photo img').clientWidth,
       imageHeight:document.querySelector('.founder-proof-photo img').clientHeight,
+      naturalWidth:document.querySelector('.founder-proof-photo img').naturalWidth,
       imageSrc:document.querySelector('.founder-proof-photo img').getAttribute('src')
     }));
     assert(!founderGeometry.overflow,`About page overflows at ${width}px`);
     assert(founderGeometry.photo.left>=-1 && founderGeometry.photo.right<=width+1,`Founder photo mispositioned at ${width}px`);
-    assert(founderGeometry.imageWidth>0 && founderGeometry.imageHeight>0,`Founder image failed to render at ${width}px`);
+    assert(founderGeometry.imageWidth>0 && founderGeometry.imageHeight>0 && founderGeometry.naturalWidth>0,`Founder image failed to render at ${width}px`);
     assert.equal(founderGeometry.imageSrc,'/public/dustin-poole-founder.webp');
     await page.locator('.founder-proof-section').screenshot({path:`${output}/founder-${width}.png`});
     await page.goto(origin+'/dreamboard/',{waitUntil:'networkidle'});
