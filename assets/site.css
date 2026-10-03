@@ -10723,3 +10723,24 @@ body[data-home="true"] .video-hero-copy .presence-actions{margin-top:38px}
   .hero-film video,.hero-film-meta i,.hero-film.film-pulse .hero-film-now strong{animation:none!important}
   .hero-film video{transform:none}
 }
+
+
+/* Hero media visibility + resilient poster fallback */
+.hero-film{
+  background:
+    linear-gradient(135deg,rgba(9,15,10,.25),rgba(9,15,10,.08)),
+    url("https://images.pexels.com/videos/10040738/pexels-photo-10040738.jpeg?auto=compress&dpr=1&h=1080&w=1920") center/cover no-repeat,
+    #0a0d0b;
+}
+.hero-film video{filter:saturate(.78) contrast(1.03) brightness(.88)}
+@media(max-width:900px){
+  .hero-film video{filter:saturate(.76) contrast(1.04) brightness(.82)}
+  .hero-film-grade{
+    background:
+      linear-gradient(180deg,rgba(7,11,8,.58) 0%,rgba(7,11,8,.38) 38%,rgba(7,11,8,.06) 67%,rgba(7,11,8,.60) 100%),
+      linear-gradient(90deg,rgba(7,11,8,.66),rgba(7,11,8,.24) 65%,rgba(7,11,8,.06))
+  }
+}
+@media(max-width:680px){
+  .hero-film video{filter:saturate(.74) contrast(1.04) brightness(.80)}
+}
