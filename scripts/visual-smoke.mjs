@@ -41,7 +41,7 @@ try {
     }));
     assert(!geometry.overflow,`Homepage overflows at ${width}px: ${JSON.stringify(geometry.overflowing)}`);
     assert(geometry.cta.bottom<=height,`Primary CTA is below first viewport at ${width}px`);
-    assert(geometry.productIndex.left>=-1 && geometry.productIndex.right<=width+1,`Homepage hero film mispositioned at ${width}px`);
+    assert(geometry.productIndex.left<width && geometry.productIndex.right>width*.55,`Homepage hero film mispositioned at ${width}px`);
     const menu=page.locator('.menu-button');
     if(await menu.isVisible()){
       await menu.click();
