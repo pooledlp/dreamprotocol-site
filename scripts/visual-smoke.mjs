@@ -58,6 +58,16 @@ try {
     await page.waitForURL('**/#demo');
     assert(await page.locator('#demo').isVisible());
     await page.locator('.home-insights').screenshot({path:`${output}/guides-${width}.png`});
+    assert(await page.locator('.founder-proof-section').isVisible());
+    const founderGeometry=await page.evaluate(()=>({
+      section:document.querySelector('.founder-proof-section').getBoundingClientRect().toJSON(),
+      photo:document.querySelector('.founder-proof-photo').getBoundingClientRect().toJSON(),
+      imageWidth:document.querySelector('.founder-proof-photo img').clientWidth,
+      imageHeight:document.querySelector('.founder-proof-photo img').clientHeight
+    }));
+    assert(founderGeometry.photo.left>=-1 && founderGeometry.photo.right<=width+1,`Founder photo mispositioned at ${width}px`);
+    assert(founderGeometry.imageWidth>0 && founderGeometry.imageHeight>0,`Founder image failed to render at ${width}px`);
+    await page.locator('.founder-proof-section').screenshot({path:`${output}/founder-${width}.png`});
     await page.goto(origin+'/dreamboard/',{waitUntil:'networkidle'});
     await page.evaluate(()=>document.fonts.ready);
     assert((await page.locator('h1').innerText()).includes('Your board is in session.'));
