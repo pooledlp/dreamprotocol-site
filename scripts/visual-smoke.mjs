@@ -55,8 +55,8 @@ try {
       await page.waitForURL(origin+'/');
     }
     await page.locator('.hero-primary').click();
-    await page.waitForURL('**/#demo');
-    assert(await page.locator('#demo').isVisible());
+    await page.waitForURL('**/#product-proof');
+    assert(await page.locator('#product-proof').isVisible());
     assert(await page.locator('.presence-thesis').isVisible());
     assert(await page.locator('.kinetic-hero').isVisible());
     assert.equal(await page.locator('[data-proof-target]').count(),3);
@@ -68,15 +68,22 @@ try {
     await page.locator('.kinetic-hero').screenshot({path:`${output}/kinetic-hero-${width}.png`});
     await page.locator('.product-theater').screenshot({path:`${output}/product-proof-${width}.png`});
     await page.locator('.presence-thesis').screenshot({path:`${output}/presence-thesis-${width}.png`});
+    await page.locator('[data-product-jump="board"]').click();
+    assert(await page.locator('[data-proof-panel="board"]').isVisible());
+    await page.goto(origin+'/about/',{waitUntil:'networkidle'});
+    await page.evaluate(()=>document.fonts.ready);
     assert(await page.locator('.founder-proof-section').isVisible());
     const founderGeometry=await page.evaluate(()=>({
-      section:document.querySelector('.founder-proof-section').getBoundingClientRect().toJSON(),
+      overflow:document.documentElement.scrollWidth>innerWidth+1,
       photo:document.querySelector('.founder-proof-photo').getBoundingClientRect().toJSON(),
       imageWidth:document.querySelector('.founder-proof-photo img').clientWidth,
-      imageHeight:document.querySelector('.founder-proof-photo img').clientHeight
+      imageHeight:document.querySelector('.founder-proof-photo img').clientHeight,
+      imageSrc:document.querySelector('.founder-proof-photo img').getAttribute('src')
     }));
+    assert(!founderGeometry.overflow,`About page overflows at ${width}px`);
     assert(founderGeometry.photo.left>=-1 && founderGeometry.photo.right<=width+1,`Founder photo mispositioned at ${width}px`);
     assert(founderGeometry.imageWidth>0 && founderGeometry.imageHeight>0,`Founder image failed to render at ${width}px`);
+    assert.equal(founderGeometry.imageSrc,'/public/dustin-poole-founder.webp');
     await page.locator('.founder-proof-section').screenshot({path:`${output}/founder-${width}.png`});
     await page.goto(origin+'/dreamboard/',{waitUntil:'networkidle'});
     await page.evaluate(()=>document.fonts.ready);
