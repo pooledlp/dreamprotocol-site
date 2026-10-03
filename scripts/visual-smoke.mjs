@@ -20,8 +20,9 @@ try {
     const errors=[];
     page.on('pageerror',error=>errors.push(error.message));
     // Visual checks must never initiate a voice session or submit a lead.
-    await page.route(/api\.dreamprotocol\.ai|formsubmit\.co|api\.vapi\.ai|cdn\.coverr\.co/,route=>route.abort());
-    await page.goto(origin,{waitUntil:'networkidle'});
+    await page.route(/api\.dreamprotocol\.ai|formsubmit\.co|api\.vapi\.ai/,route=>route.abort());
+    await page.goto(origin,{waitUntil:'domcontentloaded'});
+    await page.waitForTimeout(900);
     await page.evaluate(()=>document.fonts.ready);
     const fontState=await page.evaluate(()=>({
       body:getComputedStyle(document.body).fontFamily,
@@ -59,6 +60,17 @@ try {
     assert(await page.locator('#product-proof').isVisible());
     assert(await page.locator('.presence-thesis').isVisible());
     assert(await page.locator('.hero-film').isVisible());
+    const heroVideoState=await page.locator('.hero-film video').evaluate(video=>({
+      readyState:video.readyState,
+      currentSrc:video.currentSrc,
+      poster:video.poster,
+      width:video.videoWidth,
+      height:video.videoHeight
+    }));
+    assert(heroVideoState.currentSrc.includes('videos.pexels.com'),`Hero video source mismatch at ${width}px: ${JSON.stringify(heroVideoState)}`);
+    assert(heroVideoState.poster.includes('images.pexels.com'),`Hero video poster missing at ${width}px`);
+    const heroFilmBackground=await page.locator('.hero-film').evaluate(el=>getComputedStyle(el).backgroundImage);
+    assert(heroFilmBackground.includes('images.pexels.com'),`Hero film poster fallback missing at ${width}px`);
     assert.equal(await page.locator('[data-film-event]').count(),4);
     assert.equal(await page.locator('[data-proof-target]').count(),3);
     await page.locator('[data-proof-target="board"]').click();
