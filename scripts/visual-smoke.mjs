@@ -105,13 +105,48 @@ try {
       photo:document.querySelector('.founder-proof-photo').getBoundingClientRect().toJSON(),
       imageWidth:document.querySelector('.founder-proof-photo img').clientWidth,
       imageHeight:document.querySelector('.founder-proof-photo img').clientHeight,
+      naturalWidth:document.querySelector('.founder-proof-photo img').naturalWidth,
+      naturalHeight:document.querySelector('.founder-proof-photo img').naturalHeight,
+      imageComplete:document.querySelector('.founder-proof-photo img').complete,
       imageSrc:document.querySelector('.founder-proof-photo img').getAttribute('src')
     }));
     assert(!founderGeometry.overflow,`About page overflows at ${width}px`);
     assert(founderGeometry.photo.left>=-1 && founderGeometry.photo.right<=width+1,`Founder photo mispositioned at ${width}px`);
-    assert(founderGeometry.imageWidth>0 && founderGeometry.imageHeight>0,`Founder image failed to render at ${width}px`);
+    assert(founderGeometry.imageWidth>0 && founderGeometry.imageHeight>0,`Founder image box failed to render at ${width}px`);
+    assert(founderGeometry.imageComplete && founderGeometry.naturalWidth>0 && founderGeometry.naturalHeight>0,`Founder image asset failed to decode at ${width}px: ${JSON.stringify(founderGeometry)}`);
     assert.equal(founderGeometry.imageSrc,'/public/dustin-poole-founder.webp');
     await page.locator('.founder-proof-section').screenshot({path:`${output}/founder-${width}.png`});
+
+    await page.goto(origin+'/services/',{waitUntil:'networkidle'});
+    await page.evaluate(()=>document.fonts.ready);
+    const serviceCardState=await page.locator('.pale-section .service-card').first().evaluate(card=>{
+      const rgb=value=>{
+        const nums=(value.match(/[\d.]+/g)||[]).slice(0,3).map(Number);
+        return nums.length===3?nums:null;
+      };
+      const luminance=value=>{
+        const v=rgb(value);
+        if(!v)return null;
+        const c=v.map(x=>{x/=255;return x<=.04045?x/12.92:Math.pow((x+.055)/1.055,2.4)});
+        return .2126*c[0]+.7152*c[1]+.0722*c[2];
+      };
+      const ratio=(a,b)=>{
+        const x=luminance(a),y=luminance(b);
+        if(x==null||y==null)return 0;
+        return (Math.max(x,y)+.05)/(Math.min(x,y)+.05);
+      };
+      const bg=getComputedStyle(card).backgroundColor;
+      const title=getComputedStyle(card.querySelector('h3')).color;
+      const copy=getComputedStyle(card.querySelector('.service-card-body>p:not(.eyebrow)')).color;
+      const price=getComputedStyle(card.querySelector('.card-price')).color;
+      return {bg,title,copy,price,titleContrast:ratio(title,bg),copyContrast:ratio(copy,bg),priceContrast:ratio(price,bg)};
+    });
+    assert(serviceCardState.titleContrast>=4.5,`Service card heading contrast failed at ${width}px: ${JSON.stringify(serviceCardState)}`);
+    assert(serviceCardState.copyContrast>=4.5,`Service card body contrast failed at ${width}px: ${JSON.stringify(serviceCardState)}`);
+    assert(serviceCardState.priceContrast>=4.5,`Service card price contrast failed at ${width}px: ${JSON.stringify(serviceCardState)}`);
+    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`Services page overflows at ${width}px`);
+    await page.screenshot({path:`${output}/services-${width}.png`});
+
     await page.goto(origin+'/dreamperio/',{waitUntil:'networkidle'});
     await page.evaluate(()=>document.fonts.ready);
     const dreamPerioText=await page.locator('main').innerText();
