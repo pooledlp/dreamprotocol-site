@@ -9252,3 +9252,647 @@ body[data-home="true"] .presence-hero-grid{
 .kinetic-core span,.kinetic-core small{transform:none}.kinetic-core i{transform:none}
 @media(max-width:680px){.kinetic-core{border-radius:50%}}
 @media(prefers-reduced-motion:reduce){.kinetic-core{transform:translate(-50%,-50%)!important}}
+
+
+/* =========================================================
+   CINEMATIC PRODUCT FILM HERO
+   Replaces the orbital/sci-fi hero with a restrained moving
+   product reel: interface footage, slow camera motion, cuts.
+   ========================================================= */
+body[data-home="true"] .presence-hero-grid{
+  grid-template-columns:minmax(0,.88fr) minmax(500px,.98fr);
+  gap:6%;
+}
+body[data-home="true"] .presence-hero-copy h1{
+  font-size:clamp(4.9rem,7.9vw,9.2rem);
+}
+.cinematic-reel{
+  position:relative;
+  width:min(100%,720px);
+  justify-self:end;
+  overflow:hidden;
+  border:1px solid rgba(231,239,226,.12);
+  border-radius:18px;
+  background:#0a0d0b;
+  box-shadow:
+    0 46px 110px rgba(0,0,0,.34),
+    0 1px 0 rgba(255,255,255,.025) inset;
+}
+.reel-top{
+  height:43px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+  padding:0 15px;
+  border-bottom:1px solid rgba(231,239,226,.09);
+  background:#0c100d;
+  color:#69746b;
+  font-family:var(--dp-mono);
+  font-size:.4rem;
+  letter-spacing:.1em
+}
+.reel-top b{
+  color:#a7b7a1;
+  font-size:.39rem;
+  font-weight:500
+}
+.reel-viewport{
+  position:relative;
+  aspect-ratio:16/10;
+  min-height:450px;
+  overflow:hidden;
+  background:#0b100d
+}
+.reel-scene{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  opacity:0;
+  overflow:hidden;
+  pointer-events:none;
+  transform:scale(1.035) translate3d(8px,3px,0);
+  transition:opacity .78s ease;
+  will-change:transform,opacity
+}
+.reel-scene.is-active{
+  z-index:2;
+  opacity:1;
+  pointer-events:auto;
+  animation:reelCamera 5.6s cubic-bezier(.2,.72,.2,1) both
+}
+@keyframes reelCamera{
+  from{transform:scale(1.045) translate3d(12px,6px,0)}
+  to{transform:scale(1) translate3d(0,0,0)}
+}
+.film-scene-label{
+  position:absolute;
+  z-index:6;
+  top:18px;
+  left:20px;
+  display:flex;
+  align-items:baseline;
+  gap:10px;
+  color:#e8efe5;
+  font-family:var(--dp-mono)
+}
+.film-scene-label span{
+  font-size:.53rem;
+  font-weight:800;
+  letter-spacing:.08em
+}
+.film-scene-label small{
+  color:#7d8b7a;
+  font-size:.37rem;
+  letter-spacing:.09em
+}
+.reel-product-link{
+  position:absolute;
+  z-index:7;
+  right:18px;
+  bottom:16px;
+  min-height:34px;
+  padding:0;
+  border:0;
+  border-bottom:1px solid rgba(220,232,214,.34);
+  background:transparent;
+  color:#e2e9de;
+  font-size:.56rem;
+  font-weight:600;
+  cursor:pointer
+}
+.reel-product-link span{
+  margin-left:9px;
+  color:#cfff70
+}
+.reel-vignette,
+.reel-grain{
+  position:absolute;
+  inset:0;
+  z-index:5;
+  pointer-events:none
+}
+.reel-vignette{
+  box-shadow:
+    inset 0 0 100px rgba(0,0,0,.24),
+    inset 0 -90px 100px rgba(0,0,0,.16)
+}
+.reel-grain{
+  opacity:.11;
+  background-image:
+    repeating-linear-gradient(0deg,rgba(255,255,255,.028) 0,rgba(255,255,255,.028) 1px,transparent 1px,transparent 3px);
+  mix-blend-mode:soft-light
+}
+.reel-controls{
+  position:relative;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  min-height:66px;
+  border-top:1px solid rgba(231,239,226,.09);
+  background:#0b0f0c
+}
+.reel-controls>button{
+  position:relative;
+  border:0;
+  border-right:1px solid rgba(231,239,226,.07);
+  background:transparent;
+  color:#6d796d;
+  text-align:left;
+  padding:14px 15px 15px;
+  font-size:.54rem;
+  cursor:pointer;
+  transition:color .2s ease,background .2s ease
+}
+.reel-controls>button:nth-child(3){border-right:0}
+.reel-controls>button span{
+  display:block;
+  margin-bottom:2px;
+  color:#4f5c51;
+  font-family:var(--dp-mono);
+  font-size:.36rem
+}
+.reel-controls>button.is-active{
+  color:#edf4e9;
+  background:rgba(255,255,255,.018)
+}
+.reel-controls>button.is-active span{color:#a9bc9e}
+.reel-progress{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  height:2px;
+  overflow:hidden;
+  background:rgba(255,255,255,.035)
+}
+.reel-progress i{
+  display:block;
+  width:100%;
+  height:100%;
+  background:#cfff70;
+  transform:scaleX(0);
+  transform-origin:left
+}
+.cinematic-reel.is-playing .reel-progress i{
+  animation:reelProgress 5.6s linear forwards
+}
+@keyframes reelProgress{to{transform:scaleX(1)}}
+
+/* Scene 01: DreamWorkforce */
+.scene-workforce{
+  background:
+    radial-gradient(circle at 72% 27%,rgba(182,225,114,.14),transparent 25%),
+    linear-gradient(135deg,#131914 0%,#0a0e0b 58%,#111711 100%)
+}
+.film-workforce-stage{
+  position:absolute;
+  inset:68px 34px 48px;
+  display:grid;
+  grid-template-columns:minmax(0,1.05fr) minmax(185px,.62fr);
+  gap:16px;
+  align-items:center
+}
+.film-call-card{
+  align-self:center;
+  min-height:245px;
+  padding:24px;
+  border:1px solid rgba(220,232,214,.13);
+  border-radius:13px;
+  background:rgba(17,25,18,.88);
+  box-shadow:0 24px 65px rgba(0,0,0,.22)
+}
+.film-call-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding-bottom:16px;
+  border-bottom:1px solid rgba(220,232,214,.08);
+  color:#70806c;
+  font-family:var(--dp-mono);
+  font-size:.4rem;
+  letter-spacing:.08em
+}
+.film-call-head span{display:flex;align-items:center;gap:7px}
+.film-call-head i{
+  width:7px;height:7px;border-radius:50%;
+  background:#cfff70;
+  box-shadow:0 0 14px rgba(207,255,112,.7)
+}
+.film-call-head b{color:#9caf95;font-size:.42rem}
+.film-call-card>p{
+  margin:27px 0 34px;
+  color:#f0f5ec;
+  font-family:Manrope,Arial,sans-serif;
+  font-size:clamp(1.15rem,1.7vw,1.55rem);
+  line-height:1.38;
+  letter-spacing:-.035em
+}
+.film-understood{
+  padding-top:15px;
+  border-top:1px solid rgba(220,232,214,.08)
+}
+.film-understood small{
+  display:block;
+  color:#647563;
+  font-family:var(--dp-mono);
+  font-size:.38rem;
+  letter-spacing:.09em
+}
+.film-understood strong{
+  display:block;
+  margin-top:6px;
+  color:#a9b9a4;
+  font-size:.62rem;
+  line-height:1.45
+}
+.film-action-stack{
+  display:grid;
+  gap:8px
+}
+.film-action-stack>div{
+  display:grid;
+  grid-template-columns:28px 1fr;
+  gap:9px;
+  min-height:72px;
+  padding:13px;
+  border:1px solid rgba(220,232,214,.1);
+  border-radius:9px;
+  background:rgba(255,255,255,.024);
+  transform:translateX(14px);
+  opacity:.62
+}
+.scene-workforce.is-active .film-action-stack>div{
+  animation:filmActionIn .6s ease forwards
+}
+.scene-workforce.is-active .film-action-stack>div:nth-child(2){animation-delay:.45s}
+.scene-workforce.is-active .film-action-stack>div:nth-child(3){animation-delay:.9s}
+@keyframes filmActionIn{to{transform:none;opacity:1}}
+.film-action-stack span{
+  color:#657664;
+  font-family:var(--dp-mono);
+  font-size:.38rem
+}
+.film-action-stack strong{
+  display:block;
+  color:#d9e4d4;
+  font-size:.59rem;
+  font-weight:600
+}
+.film-action-stack em{
+  display:block;
+  grid-column:2;
+  margin-top:-17px;
+  color:#8da184;
+  font-style:normal;
+  font-family:var(--dp-mono);
+  font-size:.39rem
+}
+
+/* Scene 02: DreamBoard */
+.scene-board{
+  background:
+    linear-gradient(125deg,rgba(174,209,132,.07),transparent 46%),
+    #0b0e0c
+}
+.film-board-stage{
+  position:absolute;
+  inset:67px 31px 47px;
+  display:grid;
+  grid-template-columns:1.05fr .95fr;
+  gap:12px
+}
+.film-board-question{
+  grid-column:1/-1;
+  align-self:start;
+  padding:20px 21px;
+  border:1px solid rgba(226,235,220,.11);
+  border-radius:10px;
+  background:rgba(255,255,255,.019)
+}
+.film-board-question small,
+.film-chair small{
+  display:block;
+  color:#72806f;
+  font-family:var(--dp-mono);
+  font-size:.38rem;
+  letter-spacing:.09em
+}
+.film-board-question h3{
+  max-width:550px;
+  margin:8px 0 0;
+  color:#f0f3ee;
+  font-size:clamp(1.3rem,2vw,1.8rem);
+  line-height:1.18
+}
+.film-board-voices{
+  display:grid;
+  gap:7px
+}
+.film-board-voices>div{
+  display:grid;
+  grid-template-columns:38px 1fr;
+  gap:10px;
+  align-items:center;
+  min-height:62px;
+  padding:10px 12px;
+  border:1px solid rgba(226,235,220,.09);
+  border-radius:8px;
+  background:rgba(255,255,255,.017)
+}
+.film-board-voices>div>span{
+  width:38px;height:38px;
+  display:grid;place-items:center;
+  border-radius:7px;
+  border:1px solid rgba(207,255,112,.16);
+  color:#cfff70;
+  font-family:var(--dp-mono);
+  font-size:.43rem
+}
+.film-board-voices p{margin:0}
+.film-board-voices strong{
+  display:block;
+  color:#d7dfd3;
+  font-size:.55rem
+}
+.film-board-voices small{
+  display:block;
+  margin-top:2px;
+  color:#788775;
+  font-size:.45rem
+}
+.film-chair{
+  padding:20px;
+  border:1px solid rgba(207,255,112,.15);
+  border-radius:10px;
+  background:
+    linear-gradient(150deg,rgba(207,255,112,.055),transparent 62%),
+    #111713
+}
+.film-chair small{color:#9caf92}
+.film-chair strong{
+  display:block;
+  margin-top:17px;
+  color:#e6ede2;
+  font-family:Manrope,Arial,sans-serif;
+  font-size:clamp(.9rem,1.35vw,1.17rem);
+  line-height:1.45;
+  font-weight:500
+}
+
+/* Scene 03: DreamPerio */
+.scene-perio{
+  color:#172019;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.58),transparent 20%),
+    #e8ece4
+}
+.scene-perio .film-scene-label span{color:#1f2921}
+.scene-perio .film-scene-label small{color:#6f7d6b}
+.scene-perio .reel-product-link{
+  color:#263128;
+  border-bottom-color:#7f907a
+}
+.scene-perio .reel-product-link span{color:#5c793e}
+.film-perio-stage{
+  position:absolute;
+  inset:68px 30px 48px;
+  display:grid;
+  grid-template-columns:.82fr 1.18fr;
+  gap:12px;
+  align-items:stretch
+}
+.film-perio-transcript,
+.film-tooth-card{
+  padding:22px;
+  border:1px solid #cbd3c7;
+  border-radius:11px;
+  background:rgba(248,249,244,.9);
+  box-shadow:0 18px 45px rgba(33,46,35,.07)
+}
+.film-perio-transcript>small{
+  color:#71806d;
+  font-family:var(--dp-mono);
+  font-size:.38rem;
+  letter-spacing:.09em
+}
+.film-perio-transcript h3{
+  margin:17px 0 27px;
+  color:#202b22;
+  font-size:clamp(1.2rem,1.7vw,1.55rem);
+  line-height:1.3
+}
+.film-perio-transcript>div{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding-top:14px;
+  border-top:1px solid #d7ddd3;
+  color:#74806f;
+  font-family:var(--dp-mono);
+  font-size:.38rem
+}
+.film-perio-transcript>div i{
+  width:7px;height:7px;border-radius:50%;
+  background:#718f4e;
+  box-shadow:0 0 0 4px rgba(113,143,78,.09)
+}
+.film-perio-transcript>div b{
+  margin-left:auto;
+  color:#526848;
+  font-size:.39rem
+}
+.film-tooth-head{
+  display:flex;
+  justify-content:space-between;
+  color:#687765;
+  font-family:var(--dp-mono);
+  font-size:.41rem
+}
+.film-tooth-head b{color:#2d3a30;font-size:.41rem}
+.film-sites{
+  display:grid;
+  grid-template-columns:repeat(3,1fr) 54px repeat(3,1fr);
+  gap:6px;
+  align-items:center;
+  margin:36px 0 28px
+}
+.film-sites span,
+.film-sites i{
+  height:46px;
+  display:grid;
+  place-items:center;
+  border:1px solid #cdd5c8;
+  border-radius:7px;
+  background:#f5f6f1;
+  color:#344036;
+  font-family:Manrope,Arial,sans-serif;
+  font-size:.76rem;
+  font-style:normal
+}
+.film-sites i{
+  height:58px;
+  border-radius:50%;
+  background:#26342a;
+  color:#d9efac
+}
+.film-flags{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:6px
+}
+.film-flags span{
+  padding:11px;
+  border-top:1px solid #d0d7cc;
+  color:#758071;
+  font-family:var(--dp-mono);
+  font-size:.36rem
+}
+.film-flags b{
+  display:block;
+  margin-top:4px;
+  color:#334238;
+  font-size:.48rem
+}
+
+@media(max-width:1100px){
+  body[data-home="true"] .presence-hero-grid{
+    grid-template-columns:minmax(0,.8fr) minmax(460px,1fr);
+    gap:4%
+  }
+  .reel-viewport{min-height:420px}
+  .film-workforce-stage{inset-inline:24px}
+}
+@media(max-width:980px){
+  body[data-home="true"] .presence-hero-grid{
+    grid-template-columns:1fr;
+    gap:58px
+  }
+  .cinematic-reel{
+    width:min(100%,780px);
+    justify-self:start
+  }
+  .reel-viewport{min-height:440px}
+}
+@media(max-width:680px){
+  body[data-home="true"] .presence-hero-copy h1{
+    font-size:clamp(3.8rem,16.5vw,5.9rem)
+  }
+  .cinematic-reel{
+    border-radius:13px
+  }
+  .reel-top{
+    height:39px;
+    padding-inline:11px;
+    font-size:.35rem
+  }
+  .reel-top b{font-size:.33rem}
+  .reel-viewport{
+    aspect-ratio:auto;
+    min-height:500px
+  }
+  .film-scene-label{
+    top:14px;
+    left:14px;
+    display:block
+  }
+  .film-scene-label small{
+    display:block;
+    margin-top:3px
+  }
+  .film-workforce-stage,
+  .film-board-stage,
+  .film-perio-stage{
+    inset:65px 14px 54px;
+    grid-template-columns:1fr;
+    gap:9px
+  }
+  .film-call-card{
+    min-height:205px;
+    padding:18px
+  }
+  .film-call-card>p{
+    margin:20px 0 22px;
+    font-size:1.05rem
+  }
+  .film-action-stack{
+    grid-template-columns:1fr 1fr 1fr;
+    gap:5px
+  }
+  .film-action-stack>div{
+    display:block;
+    min-height:83px;
+    padding:10px
+  }
+  .film-action-stack strong{
+    margin-top:7px;
+    font-size:.49rem;
+    line-height:1.25
+  }
+  .film-action-stack em{
+    display:block;
+    margin:4px 0 0
+  }
+  .film-board-question{
+    grid-column:auto;
+    padding:15px
+  }
+  .film-board-question h3{font-size:1.1rem}
+  .film-board-voices{
+    grid-template-columns:1fr 1fr 1fr
+  }
+  .film-board-voices>div{
+    display:block;
+    min-height:92px;
+    padding:9px
+  }
+  .film-board-voices>div>span{
+    width:30px;height:30px;
+    margin-bottom:7px
+  }
+  .film-board-voices small{font-size:.37rem;line-height:1.3}
+  .film-chair{
+    padding:15px
+  }
+  .film-chair strong{
+    margin-top:10px;
+    font-size:.8rem
+  }
+  .film-perio-transcript,
+  .film-tooth-card{padding:16px}
+  .film-perio-transcript h3{
+    margin:10px 0 15px;
+    font-size:1rem
+  }
+  .film-sites{
+    grid-template-columns:repeat(3,1fr);
+    margin:18px 0 15px
+  }
+  .film-sites i{
+    grid-column:1/-1;
+    width:52px;
+    height:52px;
+    justify-self:center
+  }
+  .film-flags span{padding:8px 4px}
+  .reel-controls{
+    min-height:61px
+  }
+  .reel-controls>button{
+    padding:12px 10px;
+    font-size:.48rem
+  }
+  .reel-product-link{
+    right:14px;
+    bottom:13px;
+    font-size:.5rem
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .reel-scene,
+  .reel-scene.is-active,
+  .scene-workforce.is-active .film-action-stack>div,
+  .cinematic-reel.is-playing .reel-progress i{
+    animation:none!important;
+    transform:none!important
+  }
+}
