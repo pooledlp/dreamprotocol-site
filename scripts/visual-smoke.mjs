@@ -78,11 +78,12 @@ try {
       photo:document.querySelector('.founder-proof-photo').getBoundingClientRect().toJSON(),
       imageWidth:document.querySelector('.founder-proof-photo img').clientWidth,
       imageHeight:document.querySelector('.founder-proof-photo img').clientHeight,
+      naturalWidth:document.querySelector('.founder-proof-photo img').naturalWidth,
       imageSrc:document.querySelector('.founder-proof-photo img').getAttribute('src')
     }));
     assert(!founderGeometry.overflow,`About page overflows at ${width}px`);
     assert(founderGeometry.photo.left>=-1 && founderGeometry.photo.right<=width+1,`Founder photo mispositioned at ${width}px`);
-    assert(founderGeometry.imageWidth>0 && founderGeometry.imageHeight>0,`Founder image failed to render at ${width}px`);
+    assert(founderGeometry.imageWidth>0 && founderGeometry.imageHeight>0 && founderGeometry.naturalWidth>0,`Founder image failed to render at ${width}px`);
     assert.equal(founderGeometry.imageSrc,'/public/dustin-poole-founder.webp');
     await page.locator('.founder-proof-section').screenshot({path:`${output}/founder-${width}.png`});
     await page.goto(origin+'/dreamboard/',{waitUntil:'networkidle'});
