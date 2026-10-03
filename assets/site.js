@@ -368,4 +368,25 @@
       if(!sent)button.disabled=false;
     }
   });
+  const kinetic=document.querySelector('[data-kinetic-hero]');
+  if(kinetic && !matchMedia('(prefers-reduced-motion: reduce)').matches){
+    kinetic.addEventListener('pointermove',event=>{
+      const r=kinetic.getBoundingClientRect();
+      kinetic.style.setProperty('--mx',((((event.clientX-r.left)/r.width)-.5)*8).toFixed(2)+'px');
+      kinetic.style.setProperty('--my',((((event.clientY-r.top)/r.height)-.5)*8).toFixed(2)+'px');
+    });
+    kinetic.addEventListener('pointerleave',()=>{kinetic.style.setProperty('--mx','0px');kinetic.style.setProperty('--my','0px')});
+  }
+  const proofTabs=[...document.querySelectorAll('[data-proof-target]')];
+  const proofPanels=[...document.querySelectorAll('[data-proof-panel]')];
+  const activateProof=name=>{
+    proofTabs.forEach(tab=>tab.setAttribute('aria-selected',String(tab.dataset.proofTarget===name)));
+    proofPanels.forEach(panel=>{const active=panel.dataset.proofPanel===name;panel.hidden=!active;panel.classList.toggle('is-active',active)});
+  };
+  proofTabs.forEach(tab=>tab.addEventListener('click',()=>activateProof(tab.dataset.proofTarget)));
+  document.querySelectorAll('[data-product-jump]').forEach(node=>node.addEventListener('click',()=>{
+    activateProof(node.dataset.productJump);
+    document.querySelector('#product-proof')?.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+  }));
+
 })();

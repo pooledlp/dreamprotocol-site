@@ -582,6 +582,91 @@
     ['pause', 'ended'].forEach((event) => audio.addEventListener(event, () => audio.closest('.audio-card').classList.remove('is-playing')));
   }
 
+  // Kinetic homepage product field + proof theater.
+  const proofTabs = [...document.querySelectorAll('[data-proof-target]')];
+  const proofPanels = [...document.querySelectorAll('[data-proof-panel]')];
+  const kineticNodes = [...document.querySelectorAll('[data-product-jump]')];
+  const productProof = $('#product-proof');
+
+  const activateProductProof = (key, options = {}) => {
+    if (!key || !proofTabs.length || !proofPanels.length) return;
+    proofTabs.forEach((tab) => {
+      const active = tab.dataset.proofTarget === key;
+      tab.setAttribute('aria-selected', String(active));
+      tab.tabIndex = active ? 0 : -1;
+    });
+    proofPanels.forEach((panel) => {
+      const active = panel.dataset.proofPanel === key;
+      panel.hidden = !active;
+      panel.classList.toggle('is-active', active);
+      if (active) {
+        panel.classList.remove('proof-reveal');
+        requestAnimationFrame(() => panel.classList.add('proof-reveal'));
+      }
+    });
+    kineticNodes.forEach((node) => node.classList.toggle('is-signal', node.dataset.productJump === key));
+    if (options.scroll && productProof) {
+      productProof.scrollIntoView({behavior: reducedMotion ? 'auto' : 'smooth', block: 'start'});
+    }
+  };
+
+  proofTabs.forEach((tab, index) => {
+    tab.tabIndex = tab.getAttribute('aria-selected') === 'true' ? 0 : -1;
+    tab.addEventListener('click', () => activateProductProof(tab.dataset.proofTarget));
+    tab.addEventListener('keydown', (event) => {
+      if (!['ArrowRight','ArrowLeft','ArrowDown','ArrowUp','Home','End'].includes(event.key)) return;
+      event.preventDefault();
+      const forward = ['ArrowRight','ArrowDown'].includes(event.key);
+      const nextIndex = event.key === 'Home'
+        ? 0
+        : event.key === 'End'
+          ? proofTabs.length - 1
+          : (index + (forward ? 1 : -1) + proofTabs.length) % proofTabs.length;
+      proofTabs[nextIndex].focus();
+      activateProductProof(proofTabs[nextIndex].dataset.proofTarget);
+    });
+  });
+
+  kineticNodes.forEach((node) => {
+    node.addEventListener('click', () => activateProductProof(node.dataset.productJump, {scroll:true}));
+  });
+
+  const kineticHero = $('[data-kinetic-hero]');
+  if (kineticHero && !reducedMotion) {
+    let raf = 0;
+    kineticHero.addEventListener('pointermove', (event) => {
+      if (!window.matchMedia('(pointer:fine)').matches) return;
+      const rect = kineticHero.getBoundingClientRect();
+      const nx = Math.max(-1, Math.min(1, ((event.clientX - rect.left) / rect.width - .5) * 2));
+      const ny = Math.max(-1, Math.min(1, ((event.clientY - rect.top) / rect.height - .5) * 2));
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        kineticHero.style.setProperty('--mx', (nx * 14).toFixed(2) + 'px');
+        kineticHero.style.setProperty('--my', (ny * 14).toFixed(2) + 'px');
+        kineticHero.style.setProperty('--gx', ((nx + 1) * 50).toFixed(1) + '%');
+        kineticHero.style.setProperty('--gy', ((ny + 1) * 50).toFixed(1) + '%');
+      });
+    }, {passive:true});
+    kineticHero.addEventListener('pointerleave', () => {
+      kineticHero.style.setProperty('--mx', '0px');
+      kineticHero.style.setProperty('--my', '0px');
+      kineticHero.style.setProperty('--gx', '50%');
+      kineticHero.style.setProperty('--gy', '50%');
+    }, {passive:true});
+
+    let pulseIndex = 0;
+    const pulseNodes = () => {
+      kineticNodes.forEach((node, index) => node.classList.toggle('is-signal', index === pulseIndex));
+      pulseIndex = (pulseIndex + 1) % Math.max(kineticNodes.length, 1);
+    };
+    pulseNodes();
+    const pulseTimer = kineticNodes.length > 1 ? setInterval(pulseNodes, 2600) : null;
+    window.addEventListener('pagehide', () => {
+      if (pulseTimer) clearInterval(pulseTimer);
+      cancelAnimationFrame(raf);
+    }, {once:true});
+  }
+
   const industryExamples = {
     home: ['Emergency service intake', '“There’s water around the heater and I need help.”', 'Urgency, location, contact details', 'Route complete context to dispatch'],
     medical: ['New patient request', '“I’d like to schedule my first appointment.”', 'Appointment need and contact details', 'Send the request for office review'],

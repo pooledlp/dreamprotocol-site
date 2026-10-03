@@ -37,11 +37,11 @@ try {
       overflow:document.documentElement.scrollWidth>innerWidth+1,
       overflowing:[...document.querySelectorAll('body *')].map(el=>({tag:el.tagName,cls:el.className,left:el.getBoundingClientRect().left,right:el.getBoundingClientRect().right})).filter(el=>el.left< -1||el.right>innerWidth+1).slice(0,30),
       cta:document.querySelector('.hero-primary').getBoundingClientRect().toJSON(),
-      productIndex:document.querySelector('.presence-product-index').getBoundingClientRect().toJSON()
+      productIndex:document.querySelector('.kinetic-hero').getBoundingClientRect().toJSON()
     }));
     assert(!geometry.overflow,`Homepage overflows at ${width}px: ${JSON.stringify(geometry.overflowing)}`);
     assert(geometry.cta.bottom<=height,`Primary CTA is below first viewport at ${width}px`);
-    assert(geometry.productIndex.left>=-1 && geometry.productIndex.right<=width+1,`Homepage product index mispositioned at ${width}px`);
+    assert(geometry.productIndex.left>=-1 && geometry.productIndex.right<=width+1,`Homepage kinetic field mispositioned at ${width}px`);
     const menu=page.locator('.menu-button');
     if(await menu.isVisible()){
       await menu.click();
@@ -55,19 +55,35 @@ try {
       await page.waitForURL(origin+'/');
     }
     await page.locator('.hero-primary').click();
-    await page.waitForURL('**/#demo');
-    assert(await page.locator('#demo').isVisible());
+    await page.waitForURL('**/#product-proof');
+    assert(await page.locator('#product-proof').isVisible());
     assert(await page.locator('.presence-thesis').isVisible());
+    assert(await page.locator('.kinetic-hero').isVisible());
+    assert.equal(await page.locator('[data-proof-target]').count(),3);
+    await page.locator('[data-proof-target="board"]').click();
+    assert(await page.locator('[data-proof-panel="board"]').isVisible());
+    await page.locator('[data-proof-target="perio"]').click();
+    assert(await page.locator('[data-proof-panel="perio"]').isVisible());
+    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`Kinetic homepage overflows at ${width}px`);
+    await page.locator('.kinetic-hero').screenshot({path:`${output}/kinetic-hero-${width}.png`});
+    await page.locator('.product-theater').screenshot({path:`${output}/product-proof-${width}.png`});
     await page.locator('.presence-thesis').screenshot({path:`${output}/presence-thesis-${width}.png`});
+    await page.locator('[data-product-jump="board"]').click();
+    assert(await page.locator('[data-proof-panel="board"]').isVisible());
+    await page.goto(origin+'/about/',{waitUntil:'networkidle'});
+    await page.evaluate(()=>document.fonts.ready);
     assert(await page.locator('.founder-proof-section').isVisible());
     const founderGeometry=await page.evaluate(()=>({
-      section:document.querySelector('.founder-proof-section').getBoundingClientRect().toJSON(),
+      overflow:document.documentElement.scrollWidth>innerWidth+1,
       photo:document.querySelector('.founder-proof-photo').getBoundingClientRect().toJSON(),
       imageWidth:document.querySelector('.founder-proof-photo img').clientWidth,
-      imageHeight:document.querySelector('.founder-proof-photo img').clientHeight
+      imageHeight:document.querySelector('.founder-proof-photo img').clientHeight,
+      imageSrc:document.querySelector('.founder-proof-photo img').getAttribute('src')
     }));
+    assert(!founderGeometry.overflow,`About page overflows at ${width}px`);
     assert(founderGeometry.photo.left>=-1 && founderGeometry.photo.right<=width+1,`Founder photo mispositioned at ${width}px`);
     assert(founderGeometry.imageWidth>0 && founderGeometry.imageHeight>0,`Founder image failed to render at ${width}px`);
+    assert.equal(founderGeometry.imageSrc,'/public/dustin-poole-founder.webp');
     await page.locator('.founder-proof-section').screenshot({path:`${output}/founder-${width}.png`});
     await page.goto(origin+'/dreamboard/',{waitUntil:'networkidle'});
     await page.evaluate(()=>document.fonts.ready);
