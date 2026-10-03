@@ -59,9 +59,51 @@ function hoursLeft(v){
   const t=Date.parse(v||'');
   return Number.isFinite(t)?(t-Date.now())/3600000:NaN;
 }
-const blockedQualifications=new Set(['LATE DAY','PAST HEATING WINDOW','TOO SOON','TOO FAR','NO ACTION TIME','NO CLOSE TIME']);
+const blockedQualifications=new Set(['LATE DAY','PAST HEATING WINDOW','TOO SOON','TOO FAR','NO ACTION TIME','NO CLOSE TIME','DATA CHECK','STALE DATA']);
 function isBlockedOpportunity(o){
   return blockedQualifications.has(String(o?.qualification||'').toUpperCase());
+}
+
+// Edge-first fallback qualification. The backend remains authoritative when it marks
+// an opportunity qualified, but a large, well-supported pricing disagreement should
+// not be reduced to WATCH ONLY merely because the chosen side is below an absolute
+// model-probability threshold. This catches cases such as 31% model vs 4% market.
+function edgeQualifyOpportunity(s,o){
+  if(!o||o.qualified||isBlockedOpportunity(o))return o;
+  const {min,max}=entryWindow(s);
+  const h=hoursLeft(actionTime(o));
+  const model=num(o.modelProbability);
+  const market=num(o.marketPrice??o.marketProbability??o.entryPrice);
+  const edge=num(o.edge);
+  const confidence=num(o.confidence);
+  if(!Number.isFinite(h)||h<min||h>max)return o;
+  if(!Number.isFinite(model)||!Number.isFinite(market)||!Number.isFinite(edge)||!Number.isFinite(confidence))return o;
+  if(market<.03||market>.97||edge<=0)return o;
+
+  // Normal mispricing: >=10 points of edge at >=72% research confidence.
+  // Very cheap contracts (<=5c) get a stricter edge/confidence gate to avoid
+  // promoting every long shot while still allowing genuinely huge discrepancies.
+  const lowPrice=market<=.05;
+  const minEdge=lowPrice?.15:.10;
+  const minConfidence=lowPrice?.75:.72;
+  if(edge<minEdge||confidence<minConfidence)return o;
+
+  const requestedStake=Math.max(1,num(s?.paperStakeDollars)||10);
+  const contracts=Math.max(1,Math.floor(requestedStake/market));
+  const stake=contracts*market;
+  const profitIfWin=contracts-stake;
+  return{
+    ...o,
+    qualified:true,
+    derivedQualification:true,
+    qualification:lowPrice?'EDGE QUALIFIED · LONGSHOT VALUE':'EDGE QUALIFIED',
+    paperTier:'STRONG',
+    paperStake:stake,
+    stake,
+    contracts,
+    profitIfWin,
+    score:Math.max(num(o.score)||0,(edge*100)+(confidence*10))
+  };
 }
 function nearTermOpportunities(s,category=null){
   const all=Array.isArray(s?.scan?.opportunities)?s.scan.opportunities:[];
@@ -69,7 +111,7 @@ function nearTermOpportunities(s,category=null){
   return all.filter(o=>{
     const h=hoursLeft(actionTime(o));
     return Number.isFinite(h)&&h>0&&h<=max&&!isBlockedOpportunity(o)&&(!category||String(o.category||'').toUpperCase()===String(category).toUpperCase());
-  });
+  }).map(o=>edgeQualifyOpportunity(s,o));
 }
 
 function researchedCategoryOpportunities(s,category){
@@ -140,8 +182,9 @@ function selectedOpportunity(s){
     return{row:activeOpen[0],qualified:false,test:true,position:true};
   }
   const opps=nearTermOpportunities(s);
-  const tradeable=opps.find(o=>Number.isFinite(+o.marketPrice)&&+o.marketPrice>=.04&&+o.marketPrice<=.96);
-  return{row:tradeable||opps[0]||null,qualified:false,test:false};
+  const tradeable=opps.find(o=>Number.isFinite(+(o.marketPrice??o.marketProbability))&&+(o.marketPrice??o.marketProbability)>=.03&&+(o.marketPrice??o.marketProbability)<=.97);
+  const row=tradeable||opps[0]||null;
+  return{row,qualified:!!row?.qualified,test:false};
 }
 
 function renderHero(s){
@@ -210,16 +253,16 @@ function opportunityCard(o){
 
 function renderOpportunities(s){
   const near=nearTermOpportunities(s);
-  const qualified=Array.isArray(s?.scan?.qualified)?s.scan.qualified:[];
-  const qids=new Set(qualified.map(x=>x.id||x.ticker));
-  const rows=[...qualified,...near.filter(x=>!qids.has(x.id||x.ticker))]
+  const backendQualified=(Array.isArray(s?.scan?.qualified)?s.scan.qualified:[]).map(o=>edgeQualifyOpportunity(s,o));
+  const qids=new Set(backendQualified.map(x=>x.id||x.ticker));
+  const rows=[...backendQualified,...near.filter(x=>!qids.has(x.id||x.ticker))]
     .sort((a,b)=>(+b.qualified-+a.qualified)||(+b.score||0)-(+a.score||0))
     .slice(0,12);
   const el=$('opportunities');
   const {max}=entryWindow(s);
   if(el)el.innerHTML=rows.length?rows.map(opportunityCard).join(''):'<div class="empty noBetEmpty"><b>NO BET NOW</b><span>Nothing currently passes the timing, confidence, and edge rules inside the next '+max+' hours.</span></div>';
   setText('scanCount',String(near.length));
-  setText('qualifiedCount',String(qualified.length));
+  setText('qualifiedCount',String(rows.filter(x=>x.qualified).length));
   updateCountdowns();
 }
 
