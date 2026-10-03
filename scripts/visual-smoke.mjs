@@ -37,11 +37,11 @@ try {
       overflow:document.documentElement.scrollWidth>innerWidth+1,
       overflowing:[...document.querySelectorAll('body *')].map(el=>({tag:el.tagName,cls:el.className,left:el.getBoundingClientRect().left,right:el.getBoundingClientRect().right})).filter(el=>el.left< -1||el.right>innerWidth+1).slice(0,30),
       cta:document.querySelector('.hero-primary').getBoundingClientRect().toJSON(),
-      guides:document.querySelectorAll('.home-insights .guide-card').length
+      productIndex:document.querySelector('.presence-product-index').getBoundingClientRect().toJSON()
     }));
     assert(!geometry.overflow,`Homepage overflows at ${width}px: ${JSON.stringify(geometry.overflowing)}`);
     assert(geometry.cta.bottom<=height,`Primary CTA is below first viewport at ${width}px`);
-    assert.equal(geometry.guides,3);
+    assert(geometry.productIndex.left>=-1 && geometry.productIndex.right<=width+1,`Homepage product index mispositioned at ${width}px`);
     const menu=page.locator('.menu-button');
     if(await menu.isVisible()){
       await menu.click();
@@ -57,7 +57,8 @@ try {
     await page.locator('.hero-primary').click();
     await page.waitForURL('**/#demo');
     assert(await page.locator('#demo').isVisible());
-    await page.locator('.home-insights').screenshot({path:`${output}/guides-${width}.png`});
+    assert(await page.locator('.presence-thesis').isVisible());
+    await page.locator('.presence-thesis').screenshot({path:`${output}/presence-thesis-${width}.png`});
     assert(await page.locator('.founder-proof-section').isVisible());
     const founderGeometry=await page.evaluate(()=>({
       section:document.querySelector('.founder-proof-section').getBoundingClientRect().toJSON(),
