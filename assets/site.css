@@ -9350,9 +9350,10 @@ body[data-home="true"] .presence-hero-copy h1{
 .reel-product-link{
   position:absolute;
   z-index:7;
-  right:18px;
+  left:20px;
+  right:auto;
   bottom:16px;
-  max-width:calc(100% - 36px);
+  max-width:calc(100% - 40px);
   min-height:34px;
   white-space:nowrap;
   padding:0;
@@ -9566,6 +9567,7 @@ body[data-home="true"] .presence-hero-copy h1{
 }
 .film-board-question{
   grid-column:1/-1;
+  min-width:0;
   align-self:start;
   padding:20px 21px;
   border:1px solid rgba(226,235,220,.11);
@@ -9585,7 +9587,8 @@ body[data-home="true"] .presence-hero-copy h1{
   margin:8px 0 0;
   color:#f0f3ee;
   font-size:clamp(1.3rem,2vw,1.8rem);
-  line-height:1.18
+  line-height:1.18;
+  overflow-wrap:anywhere
 }
 .film-board-voices{
   display:grid;
@@ -9889,8 +9892,10 @@ body[data-home="true"] .presence-hero-copy h1{
     font-size:.48rem
   }
   .reel-product-link{
+    left:auto;
     right:14px;
     bottom:13px;
+    max-width:calc(100% - 28px);
     font-size:.5rem
   }
 }
