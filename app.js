@@ -630,81 +630,63 @@
     control.addEventListener('click', () => activateProductProof(control.dataset.productJump, {scroll:true}));
   });
 
-  const cinematicHero = $('[data-cinematic-hero]');
-  if (cinematicHero) {
-    const scenes = [...cinematicHero.querySelectorAll('[data-reel-scene]')];
-    const sceneButtons = [...cinematicHero.querySelectorAll('[data-reel-button]')];
-    const status = cinematicHero.querySelector('[data-reel-status]');
-    const labels = ['SCENE 01 / OPERATIONS','SCENE 02 / STRATEGY','SCENE 03 / CLINICAL'];
-    let currentScene = 0;
-    let sceneTimer = null;
-    let paused = false;
+  const heroFilm = $('[data-hero-film]');
+  if (heroFilm) {
+    const events = [...heroFilm.querySelectorAll('[data-film-event]')];
+    const headline = heroFilm.querySelector('[data-film-headline]');
+    const detail = heroFilm.querySelector('[data-film-detail]');
+    const kicker = heroFilm.querySelector('[data-film-kicker]');
+    const video = heroFilm.querySelector('video');
+    const moments = [
+      ['INBOUND / 08:42:11','Customer call answered.','No hold queue. No interruption.'],
+      ['INTENT / 08:42:16','Request understood.','Existing customer · reschedule · Friday PM.'],
+      ['ACTION / 08:42:19','Calendar checked.','Two openings found without touching the front desk.'],
+      ['COMPLETE / 08:42:23','Confirmation sent.','Appointment moved. Customer notified. Work keeps moving.']
+    ];
+    let filmIndex = 0;
+    let filmTimer = null;
 
-    const restartProgress = () => {
-      cinematicHero.classList.remove('is-playing');
-      if (reducedMotion) return;
-      requestAnimationFrame(() => requestAnimationFrame(() => cinematicHero.classList.add('is-playing')));
-    };
-
-    const showScene = (index) => {
-      if (!scenes.length) return;
-      currentScene = (index + scenes.length) % scenes.length;
-      scenes.forEach((scene, sceneIndex) => {
-        const active = sceneIndex === currentScene;
-        scene.classList.toggle('is-active', active);
-        scene.setAttribute('aria-hidden', String(!active));
-      });
-      sceneButtons.forEach((button, buttonIndex) => {
-        const active = buttonIndex === currentScene;
-        button.classList.toggle('is-active', active);
-        button.setAttribute('aria-selected', String(active));
-      });
-      if (status) status.textContent = labels[currentScene] || `SCENE ${String(currentScene + 1).padStart(2,'0')}`;
-      restartProgress();
-    };
-
-    const stopFilm = () => {
-      if (sceneTimer) clearInterval(sceneTimer);
-      sceneTimer = null;
-      cinematicHero.classList.remove('is-playing');
-    };
-
-    const startFilm = () => {
-      stopFilm();
-      if (reducedMotion || paused || scenes.length < 2) return;
-      restartProgress();
-      sceneTimer = setInterval(() => showScene(currentScene + 1), 5600);
-    };
-
-    sceneButtons.forEach((button, index) => {
-      button.addEventListener('click', () => {
-        showScene(index);
-        startFilm();
-      });
-    });
-
-    cinematicHero.addEventListener('pointerenter', () => {
-      paused = true;
-      stopFilm();
-    }, {passive:true});
-    cinematicHero.addEventListener('pointerleave', () => {
-      paused = false;
-      startFilm();
-    }, {passive:true});
-    cinematicHero.addEventListener('focusin', () => {
-      paused = true;
-      stopFilm();
-    });
-    cinematicHero.addEventListener('focusout', () => {
-      if (!cinematicHero.contains(document.activeElement)) {
-        paused = false;
-        startFilm();
+    const showFilmMoment = (index) => {
+      if (!events.length) return;
+      filmIndex = (index + events.length) % events.length;
+      events.forEach((event, eventIndex) => event.classList.toggle('is-active', eventIndex === filmIndex));
+      const moment = moments[filmIndex];
+      if (moment) {
+        if (kicker) kicker.textContent = moment[0];
+        if (headline) headline.textContent = moment[1];
+        if (detail) detail.textContent = moment[2];
       }
-    });
+      heroFilm.classList.remove('film-pulse');
+      requestAnimationFrame(() => heroFilm.classList.add('film-pulse'));
+    };
 
-    showScene(0);
-    startFilm();
-    window.addEventListener('pagehide', stopFilm, {once:true});
+    const stopHeroFilm = () => {
+      if (filmTimer) clearInterval(filmTimer);
+      filmTimer = null;
+    };
+
+    const startHeroFilm = () => {
+      stopHeroFilm();
+      if (reducedMotion || events.length < 2) return;
+      filmTimer = setInterval(() => showFilmMoment(filmIndex + 1), 2300);
+    };
+
+    if (video) {
+      const play = () => video.play().catch(() => {});
+      video.muted = true;
+      video.defaultMuted = true;
+      video.setAttribute('muted','');
+      video.addEventListener('canplay', play, {once:true});
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) video.pause();
+        else play();
+      });
+      play();
+    }
+
+    showFilmMoment(0);
+    startHeroFilm();
+    window.addEventListener('pagehide', stopHeroFilm, {once:true});
   }
 
     const industryExamples = {
