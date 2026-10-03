@@ -141,7 +141,7 @@ layout('client-login','Client Portal','Secure Dream Protocol client access for p
     <div class="client-login-copy">
       ${eyebrow('DREAMPROTOCOL / CLIENT PORTAL')}
       <h1>Your DreamProtocol work.<br><em>One secure place.</em></h1>
-      <p>Active Dream Protocol clients get one workspace for project status, AI systems, shared deliverables, support requests, approvals, and the next thing that needs attention.</p>
+      <p>Active Dream Protocol clients get one workspace for project status, AI systems, shared deliverables, support requests, approvals, and the next thing that needs attention.</p><a class="client-login-jump" href="#client-access">Sign in to client workspace <span>↓</span></a>
       <div class="client-login-features" aria-label="Client portal capabilities">
         <div><span>01</span><strong>Projects</strong><small>Current phase, milestones, decisions, deliverables, and what happens next.</small></div>
         <div><span>02</span><strong>AI systems</strong><small>Agent status, workflow health, connected systems, and operational notes.</small></div>
@@ -163,7 +163,7 @@ layout('client-login','Client Portal','Secure Dream Protocol client access for p
         </div>
       </div>
     </div>
-    <div class="client-login-console">
+    <div class="client-login-console" id="client-access">
       <div class="client-login-console-head"><span><i></i>DREAMPROTOCOL / CLIENT</span><b>SECURE ACCESS</b></div>
       <div class="client-login-card" role="group" aria-labelledby="client-login-title">
         <div class="client-login-mark" aria-hidden="true"><span>DP</span><i></i><i></i></div>
