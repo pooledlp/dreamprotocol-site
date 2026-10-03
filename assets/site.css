@@ -8619,6 +8619,7 @@ body[data-home="true"] .presence-hero-grid{
 .kinetic-caption b{color:#82917f;font-size:.38rem}
 
 .product-theater{
+  scroll-margin-top:96px;
   padding:clamp(110px,11vw,170px) 0;
   color:#edf5e9;
   background:#070d0a;
@@ -9351,7 +9352,9 @@ body[data-home="true"] .presence-hero-copy h1{
   z-index:7;
   right:18px;
   bottom:16px;
+  max-width:calc(100% - 36px);
   min-height:34px;
+  white-space:nowrap;
   padding:0;
   border:0;
   border-bottom:1px solid rgba(220,232,214,.34);
@@ -9558,7 +9561,7 @@ body[data-home="true"] .presence-hero-copy h1{
   position:absolute;
   inset:67px 31px 47px;
   display:grid;
-  grid-template-columns:1.05fr .95fr;
+  grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);
   gap:12px
 }
 .film-board-question{
@@ -9620,6 +9623,8 @@ body[data-home="true"] .presence-hero-copy h1{
   color:#788775;
   font-size:.45rem
 }
+.film-board-voices,
+.film-chair{min-width:0}
 .film-chair{
   padding:20px;
   border:1px solid rgba(207,255,112,.15);
@@ -9631,12 +9636,14 @@ body[data-home="true"] .presence-hero-copy h1{
 .film-chair small{color:#9caf92}
 .film-chair strong{
   display:block;
+  max-width:100%;
   margin-top:17px;
   color:#e6ede2;
   font-family:Manrope,Arial,sans-serif;
   font-size:clamp(.9rem,1.35vw,1.17rem);
   line-height:1.45;
-  font-weight:500
+  font-weight:500;
+  overflow-wrap:anywhere
 }
 
 /* Scene 03: DreamPerio */
