@@ -10934,3 +10934,25 @@ body[data-home="true"] .video-hero-copy .presence-actions{margin-top:38px}
   .audio-card-bottom span:nth-child(2){border-right:0}
   .audio-card-bottom span:nth-child(-n+2){border-bottom:1px solid rgba(224,236,218,.06)}
 }
+
+
+/* FINAL RELEASE GUARDS: keep light cards readable inside dark section wrappers. */
+body:not([data-home="true"]) .service-card{
+  color:var(--ink)
+}
+body:not([data-home="true"]) .service-card .service-card-body h3{
+  color:var(--ink)
+}
+body:not([data-home="true"]) .service-card .service-card-body>p:not(.eyebrow){
+  color:#526055
+}
+body:not([data-home="true"]) .service-card .service-card-body>.eyebrow{
+  color:#708466
+}
+body:not([data-home="true"]) .service-card .card-price{
+  color:#2c392e;
+  border-color:#d0d8ca
+}
+body:not([data-home="true"]) .service-card .card-price span{
+  color:#697468
+}
