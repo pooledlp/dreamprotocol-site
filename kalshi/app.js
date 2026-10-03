@@ -59,7 +59,7 @@ function hoursLeft(v){
   const t=Date.parse(v||'');
   return Number.isFinite(t)?(t-Date.now())/3600000:NaN;
 }
-const blockedQualifications=new Set(['LATE DAY','PAST HEATING WINDOW','TOO SOON','TOO FAR','NO ACTION TIME','NO CLOSE TIME','DATA CHECK','STALE DATA']);
+const blockedQualifications=new Set(['LATE DAY','PAST HEATING WINDOW','TOO SOON','TOO FAR','NO ACTION TIME','NO CLOSE TIME','DATA CHECK','STALE DATA','NO PAYOUT TIME','NOT SAME-DAY PAYOUT','MORNING WINDOW CLOSED']);
 function isBlockedOpportunity(o){
   return blockedQualifications.has(String(o?.qualification||'').toUpperCase());
 }
