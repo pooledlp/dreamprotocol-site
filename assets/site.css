@@ -7837,3 +7837,134 @@ body[data-page="ai-workforce"]{background:#f4f4ed}
   .workforce-close h2{font-size:clamp(3rem,13.5vw,5.2rem)}
   .workforce-close>div>p:not(.eyebrow){font-size:.88rem}
 }
+
+
+/* =========================================================
+   HUMAN PRESENCE
+   Real founder proof without breaking the quiet product feel.
+   ========================================================= */
+.founder-proof-section{
+  position:relative;
+  overflow:hidden;
+  color:#18231d;
+  background:#e7e8df;
+  border-block:1px solid #cfd5c9
+}
+.founder-proof-section:before{display:none}
+.founder-proof-grid{
+  position:relative;
+  display:grid;
+  grid-template-columns:minmax(300px,.78fr) minmax(0,1.22fr);
+  gap:clamp(55px,8vw,120px);
+  align-items:center
+}
+.founder-proof-photo{
+  position:relative;
+  overflow:hidden;
+  border:0;
+  border-radius:2px;
+  background:#d8ddd3;
+  box-shadow:none
+}
+.founder-proof-photo:after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(180deg,transparent 60%,rgba(9,15,11,.72))
+}
+.founder-proof-photo img{
+  width:100%;
+  aspect-ratio:4/5;
+  object-fit:cover;
+  object-position:50% 27%;
+  filter:saturate(.82) contrast(1.02)
+}
+.founder-photo-label{
+  left:18px;right:18px;bottom:16px;
+  color:#d6dfd2;
+  font-size:.45rem
+}
+.founder-photo-label b{color:#f1f7ed;font-size:.53rem}
+.founder-proof-copy .eyebrow{color:#697565}
+.founder-proof-copy h2{
+  max-width:830px;
+  color:#172019;
+  font-size:clamp(3.3rem,5.4vw,6rem);
+  line-height:.95;
+  letter-spacing:-.062em
+}
+.founder-proof-copy h2 em{color:#697b5e}
+.founder-proof-copy p{
+  max-width:710px;
+  color:#657064;
+  font-size:.96rem;
+  line-height:1.82
+}
+.founder-proof-copy .founder-lead{
+  color:#2d392f;
+  font-family:Manrope,Arial,sans-serif;
+  font-size:1.14rem;
+  line-height:1.62
+}
+.founder-note{
+  max-width:720px;
+  margin:32px 0 34px;
+  padding:22px 0 4px;
+  border-top:1px solid #b9c2b2
+}
+.founder-note small{
+  display:block;
+  margin-bottom:14px;
+  color:#7b8675;
+  font-family:var(--dp-mono);
+  font-size:.46rem;
+  letter-spacing:.1em
+}
+.founder-note p{
+  margin:0;
+  color:#172019;
+  font-family:Manrope,Arial,sans-serif;
+  font-size:clamp(1.35rem,2.1vw,2.2rem);
+  line-height:1.35;
+  letter-spacing:-.035em
+}
+.founder-principles{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+  margin:31px 0
+}
+.founder-principles span{
+  min-height:0;
+  padding:7px 10px;
+  border:1px solid #bfc7b8;
+  border-radius:999px;
+  background:transparent;
+  color:#6d7869;
+  font-size:.45rem
+}
+.founder-proof-copy .text-link{color:#283329}
+
+@media(max-width:900px){
+  .founder-proof-grid{grid-template-columns:1fr;gap:45px}
+  .founder-proof-photo{max-width:560px}
+}
+@media(max-width:680px){
+  .founder-proof-section{padding-block:88px}
+  .founder-proof-grid{gap:34px}
+  .founder-proof-photo{
+    width:calc(100% - 24px);
+    margin-left:0
+  }
+  .founder-proof-photo img{aspect-ratio:4/4.7}
+  .founder-proof-copy h2{
+    font-size:clamp(3rem,13vw,4.8rem)
+  }
+  .founder-proof-copy .founder-lead{
+    font-size:1rem
+  }
+  .founder-note{margin-top:27px}
+  .founder-note p{font-size:1.45rem}
+  .founder-principles{gap:6px}
+}
