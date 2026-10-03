@@ -10938,7 +10938,8 @@ body[data-home="true"] .video-hero-copy .presence-actions{margin-top:38px}
 
 /* FINAL RELEASE GUARDS: keep light cards readable inside dark section wrappers. */
 body:not([data-home="true"]) .service-card{
-  color:var(--ink)
+  color:var(--ink);
+  background-color:#f2f3ec!important
 }
 body:not([data-home="true"]) .service-card .service-card-body h3{
   color:var(--ink)
