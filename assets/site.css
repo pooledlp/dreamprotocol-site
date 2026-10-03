@@ -10372,3 +10372,7 @@ body[data-home="true"] .presence-hero-copy h1{
 @media(prefers-reduced-motion:reduce){
   .story-wave i,.motion-line i,.perio-listening i,.proof-story{animation:none!important}
 }
+
+
+/* Proof anchor lands below the persistent navigation. */
+.proof-stories{scroll-margin-top:96px}
