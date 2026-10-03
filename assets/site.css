@@ -8500,6 +8500,8 @@ body[data-home="true"] .presence-hero-grid{
   height:62px;
   border:1px solid rgba(207,255,112,.18);
   border-radius:50%;
+  background:transparent;
+  box-shadow:none;
   transform:rotate(-45deg);
   animation:kineticOrbit 15s linear infinite
 }
