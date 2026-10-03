@@ -86,7 +86,7 @@ function edgeQualifyOpportunity(s,o){
   const lowPrice=market<=.05;
   const minEdge=lowPrice?.15:.10;
   const minConfidence=lowPrice?.75:.72;
-  if(edge<minEdge||confidence<minConfidence)return o;
+  if(edge<minEdge||confidence<minConfidence||edge>.30)return o;
 
   const requestedStake=Math.max(1,num(s?.paperStakeDollars)||10);
   const contracts=Math.max(1,Math.floor(requestedStake/market));
