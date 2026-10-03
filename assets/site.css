@@ -8619,6 +8619,7 @@ body[data-home="true"] .presence-hero-grid{
 .kinetic-caption b{color:#82917f;font-size:.38rem}
 
 .product-theater{
+  scroll-margin-top:96px;
   padding:clamp(110px,11vw,170px) 0;
   color:#edf5e9;
   background:#070d0a;
