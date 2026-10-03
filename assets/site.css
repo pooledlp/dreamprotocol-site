@@ -10744,3 +10744,28 @@ body[data-home="true"] .video-hero-copy .presence-actions{margin-top:38px}
 @media(max-width:680px){
   .hero-film video{filter:saturate(.74) contrast(1.04) brightness(.80)}
 }
+
+
+/* Real operator film: vertical source, deliberate mobile-first crop. */
+.hero-film{
+  background:
+    linear-gradient(135deg,rgba(9,15,10,.16),rgba(9,15,10,.04)),
+    url("https://images.pexels.com/videos/7989667/pexels-photo-7989667.jpeg?auto=compress&dpr=1&h=1920&w=1080") center/cover no-repeat,
+    #0a0d0b;
+}
+.hero-film video{
+  object-position:50% 50%;
+  filter:saturate(.74) contrast(1.04) brightness(.82);
+}
+@media(max-width:900px){
+  .hero-film video{
+    object-position:52% 50%;
+    filter:saturate(.76) contrast(1.03) brightness(.84);
+  }
+}
+@media(max-width:680px){
+  .hero-film video{
+    object-position:54% 50%;
+    filter:saturate(.78) contrast(1.03) brightness(.86);
+  }
+}
