@@ -58,6 +58,15 @@ try {
     await page.waitForURL('**/#demo');
     assert(await page.locator('#demo').isVisible());
     assert(await page.locator('.presence-thesis').isVisible());
+    assert(await page.locator('.kinetic-hero').isVisible());
+    assert.equal(await page.locator('[data-proof-target]').count(),3);
+    await page.locator('[data-proof-target="board"]').click();
+    assert(await page.locator('[data-proof-panel="board"]').isVisible());
+    await page.locator('[data-proof-target="perio"]').click();
+    assert(await page.locator('[data-proof-panel="perio"]').isVisible());
+    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`Kinetic homepage overflows at ${width}px`);
+    await page.locator('.kinetic-hero').screenshot({path:`${output}/kinetic-hero-${width}.png`});
+    await page.locator('.product-theater').screenshot({path:`${output}/product-proof-${width}.png`});
     await page.locator('.presence-thesis').screenshot({path:`${output}/presence-thesis-${width}.png`});
     assert(await page.locator('.founder-proof-section').isVisible());
     const founderGeometry=await page.evaluate(()=>({
