@@ -8775,8 +8775,8 @@ body[data-home="true"] .presence-hero-grid{
 }
 .proof-wave i{
   width:3px;
-  height:calc(13px + (var(--n) * 11px) % 51px);
-  max-height:58px;
+  height:calc(22px + var(--n) * 1px);
+  max-height:48px;
   border-radius:3px;
   background:#cfff70;
   opacity:.62;
