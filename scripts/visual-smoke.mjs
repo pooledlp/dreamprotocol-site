@@ -65,6 +65,21 @@ try {
     assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`DreamBoard overflows at ${width}px`);
     assert(await page.locator('.dreamboard-console').evaluate(el=>el.scrollWidth<=el.clientWidth+1),`DreamBoard console clips at ${width}px`);
     await page.screenshot({path:`${output}/dreamboard-${width}.png`});
+    await page.goto(origin+'/ai-workforce/',{waitUntil:'networkidle'});
+    await page.evaluate(()=>document.fonts.ready);
+    assert((await page.locator('h1').innerText()).includes('Let it earn the next one.'));
+    assert(await page.locator('.workforce-signature-list').isVisible());
+    const workforceGeometry=await page.evaluate(()=>({
+      overflow:document.documentElement.scrollWidth>innerWidth+1,
+      signature:document.querySelector('.workforce-signature-list').getBoundingClientRect().toJSON(),
+      firstRole:document.querySelector('.workforce-signature-list article').getBoundingClientRect().toJSON(),
+      bench:document.querySelector('.workforce-bench-list').getBoundingClientRect().toJSON()
+    }));
+    assert(!workforceGeometry.overflow,`DreamWorkforce overflows at ${width}px`);
+    assert(workforceGeometry.signature.left>=-1 && workforceGeometry.signature.right<=width+1,`DreamWorkforce signature roles mispositioned at ${width}px`);
+    assert(workforceGeometry.firstRole.width>Math.min(250,width*.72),`DreamWorkforce first role collapsed at ${width}px`);
+    assert(workforceGeometry.bench.left>=-1 && workforceGeometry.bench.right<=width+1,`DreamWorkforce role index mispositioned at ${width}px`);
+    await page.screenshot({path:`${output}/dreamworkforce-${width}.png`});
     await page.goto(origin+'/client-login/',{waitUntil:'networkidle'});
     await page.evaluate(()=>document.fonts.ready);
     assert((await page.locator('h1').innerText()).includes('One secure place.'));
