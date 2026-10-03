@@ -582,10 +582,10 @@
     ['pause', 'ended'].forEach((event) => audio.addEventListener(event, () => audio.closest('.audio-card').classList.remove('is-playing')));
   }
 
-  // Kinetic homepage product field + proof theater.
+  // Cinematic homepage product film + proof theater.
   const proofTabs = [...document.querySelectorAll('[data-proof-target]')];
   const proofPanels = [...document.querySelectorAll('[data-proof-panel]')];
-  const kineticNodes = [...document.querySelectorAll('[data-product-jump]')];
+  const productJumps = [...document.querySelectorAll('[data-product-jump]')];
   const productProof = $('#product-proof');
 
   const activateProductProof = (key, options = {}) => {
@@ -604,7 +604,6 @@
         requestAnimationFrame(() => panel.classList.add('proof-reveal'));
       }
     });
-    kineticNodes.forEach((node) => node.classList.toggle('is-signal', node.dataset.productJump === key));
     if (options.scroll && productProof) {
       productProof.scrollIntoView({behavior: reducedMotion ? 'auto' : 'smooth', block: 'start'});
     }
@@ -627,47 +626,88 @@
     });
   });
 
-  kineticNodes.forEach((node) => {
-    node.addEventListener('click', () => activateProductProof(node.dataset.productJump, {scroll:true}));
+  productJumps.forEach((control) => {
+    control.addEventListener('click', () => activateProductProof(control.dataset.productJump, {scroll:true}));
   });
 
-  const kineticHero = $('[data-kinetic-hero]');
-  if (kineticHero && !reducedMotion) {
-    let raf = 0;
-    kineticHero.addEventListener('pointermove', (event) => {
-      if (!window.matchMedia('(pointer:fine)').matches) return;
-      const rect = kineticHero.getBoundingClientRect();
-      const nx = Math.max(-1, Math.min(1, ((event.clientX - rect.left) / rect.width - .5) * 2));
-      const ny = Math.max(-1, Math.min(1, ((event.clientY - rect.top) / rect.height - .5) * 2));
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        kineticHero.style.setProperty('--mx', (nx * 14).toFixed(2) + 'px');
-        kineticHero.style.setProperty('--my', (ny * 14).toFixed(2) + 'px');
-        kineticHero.style.setProperty('--gx', ((nx + 1) * 50).toFixed(1) + '%');
-        kineticHero.style.setProperty('--gy', ((ny + 1) * 50).toFixed(1) + '%');
-      });
-    }, {passive:true});
-    kineticHero.addEventListener('pointerleave', () => {
-      kineticHero.style.setProperty('--mx', '0px');
-      kineticHero.style.setProperty('--my', '0px');
-      kineticHero.style.setProperty('--gx', '50%');
-      kineticHero.style.setProperty('--gy', '50%');
-    }, {passive:true});
+  const cinematicHero = $('[data-cinematic-hero]');
+  if (cinematicHero) {
+    const scenes = [...cinematicHero.querySelectorAll('[data-reel-scene]')];
+    const sceneButtons = [...cinematicHero.querySelectorAll('[data-reel-button]')];
+    const status = cinematicHero.querySelector('[data-reel-status]');
+    const labels = ['SCENE 01 / OPERATIONS','SCENE 02 / STRATEGY','SCENE 03 / CLINICAL'];
+    let currentScene = 0;
+    let sceneTimer = null;
+    let paused = false;
 
-    let pulseIndex = 0;
-    const pulseNodes = () => {
-      kineticNodes.forEach((node, index) => node.classList.toggle('is-signal', index === pulseIndex));
-      pulseIndex = (pulseIndex + 1) % Math.max(kineticNodes.length, 1);
+    const restartProgress = () => {
+      cinematicHero.classList.remove('is-playing');
+      if (reducedMotion) return;
+      requestAnimationFrame(() => requestAnimationFrame(() => cinematicHero.classList.add('is-playing')));
     };
-    pulseNodes();
-    const pulseTimer = kineticNodes.length > 1 ? setInterval(pulseNodes, 2600) : null;
-    window.addEventListener('pagehide', () => {
-      if (pulseTimer) clearInterval(pulseTimer);
-      cancelAnimationFrame(raf);
-    }, {once:true});
+
+    const showScene = (index) => {
+      if (!scenes.length) return;
+      currentScene = (index + scenes.length) % scenes.length;
+      scenes.forEach((scene, sceneIndex) => {
+        const active = sceneIndex === currentScene;
+        scene.classList.toggle('is-active', active);
+        scene.setAttribute('aria-hidden', String(!active));
+      });
+      sceneButtons.forEach((button, buttonIndex) => {
+        const active = buttonIndex === currentScene;
+        button.classList.toggle('is-active', active);
+        button.setAttribute('aria-selected', String(active));
+      });
+      if (status) status.textContent = labels[currentScene] || `SCENE ${String(currentScene + 1).padStart(2,'0')}`;
+      restartProgress();
+    };
+
+    const stopFilm = () => {
+      if (sceneTimer) clearInterval(sceneTimer);
+      sceneTimer = null;
+      cinematicHero.classList.remove('is-playing');
+    };
+
+    const startFilm = () => {
+      stopFilm();
+      if (reducedMotion || paused || scenes.length < 2) return;
+      restartProgress();
+      sceneTimer = setInterval(() => showScene(currentScene + 1), 5600);
+    };
+
+    sceneButtons.forEach((button, index) => {
+      button.addEventListener('click', () => {
+        showScene(index);
+        startFilm();
+      });
+    });
+
+    cinematicHero.addEventListener('pointerenter', () => {
+      paused = true;
+      stopFilm();
+    }, {passive:true});
+    cinematicHero.addEventListener('pointerleave', () => {
+      paused = false;
+      startFilm();
+    }, {passive:true});
+    cinematicHero.addEventListener('focusin', () => {
+      paused = true;
+      stopFilm();
+    });
+    cinematicHero.addEventListener('focusout', () => {
+      if (!cinematicHero.contains(document.activeElement)) {
+        paused = false;
+        startFilm();
+      }
+    });
+
+    showScene(0);
+    startFilm();
+    window.addEventListener('pagehide', stopFilm, {once:true});
   }
 
-  const industryExamples = {
+    const industryExamples = {
     home: ['Emergency service intake', '“There’s water around the heater and I need help.”', 'Urgency, location, contact details', 'Route complete context to dispatch'],
     medical: ['New patient request', '“I’d like to schedule my first appointment.”', 'Appointment need and contact details', 'Send the request for office review'],
     professional: ['New client inquiry', '“I need help with my company’s accounting.”', 'Service need, business context, contact details', 'Prepare a consultation handoff'],
