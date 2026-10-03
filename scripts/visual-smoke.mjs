@@ -83,12 +83,14 @@ try {
     assert(portalGeometry.bodyFont.includes('DM Sans'),`Client portal body font mismatch at ${width}px`);
     assert(portalGeometry.headingFont.includes('Manrope'),`Client portal heading font mismatch at ${width}px`);
     assert(portalGeometry.loaded.includes('DM Sans') && portalGeometry.loaded.includes('Manrope'),`Client portal webfonts did not load at ${width}px`);
+    await page.evaluate(()=>scrollTo(0,0));
+    await page.screenshot({path:`${output}/client-login-${width}.png`});
     await page.locator('#client-login-email').fill('client@example.com');
     await page.locator('#client-login-password').fill('not-transmitted');
     await page.locator('#client-login-button').click();
     assert.equal(await page.locator('#client-login-password').inputValue(),'');
     assert((await page.locator('#client-login-status').innerText()).includes('Private workspace access required.'));
-    await page.screenshot({path:`${output}/client-login-${width}.png`});
+    await page.screenshot({path:`${output}/client-login-access-${width}.png`});
     await page.goto(origin+'/contact/?service=AI%20receptionist',{waitUntil:'networkidle'});
     assert((await page.locator('[name="workflow"]').inputValue()).includes('AI receptionist'));
     await page.screenshot({path:`${output}/contact-${width}.png`});
