@@ -96,7 +96,7 @@ layout('','Applied AI Systems for Business | Dream Protocol','Dream Protocol bui
 
   <div class="proof-story-stage">
     <article class="proof-panel proof-story is-active story-workforce" role="tabpanel" data-proof-panel="workforce">
-      <div class="story-kicker"><span>DreamWorkforce</span><b>ILLUSTRATIVE PRODUCT MOMENT</b></div>
+      <div class="story-kicker"><span>DreamWorkforce</span><b>ILLUSTRATIVE WORKFLOW</b></div>
       <div class="story-grid workforce-story-grid">
         <div class="story-statement">
           <small>LIVE CALL / 00:18</small>
