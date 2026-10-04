@@ -64,47 +64,12 @@ function isBlockedOpportunity(o){
   return blockedQualifications.has(String(o?.qualification||'').toUpperCase());
 }
 
-// Edge-first fallback qualification. The backend remains authoritative when it marks
-// an opportunity qualified, but a large, well-supported pricing disagreement should
-// not be reduced to WATCH ONLY merely because the chosen side is below an absolute
-// model-probability threshold. This catches cases such as 31% model vs 4% market.
+// The backend is the only authority for bet qualification. The browser must never
+// promote WATCH opportunities into paper picks on its own.
 function edgeQualifyOpportunity(s,o){
-  if(!o||o.qualified||isBlockedOpportunity(o))return o;
-  const {min,max}=entryWindow(s);
-  const h=hoursLeft(actionTime(o));
-  const model=num(o.modelProbability);
-  const market=num(o.marketPrice??o.marketProbability??o.entryPrice);
-  const edge=num(o.edge);
-  const confidence=num(o.confidence);
-  if(!Number.isFinite(h)||h<min||h>max)return o;
-  if(!Number.isFinite(model)||!Number.isFinite(market)||!Number.isFinite(edge)||!Number.isFinite(confidence))return o;
-  if(market<.03||market>.97||edge<=0)return o;
-
-  // Normal mispricing: >=10 points of edge at >=72% research confidence.
-  // Very cheap contracts (<=5c) get a stricter edge/confidence gate to avoid
-  // promoting every long shot while still allowing genuinely huge discrepancies.
-  const lowPrice=market<=.05;
-  const minEdge=lowPrice?.15:.10;
-  const minConfidence=lowPrice?.75:.72;
-  if(edge<minEdge||confidence<minConfidence||edge>.30)return o;
-
-  const requestedStake=Math.max(1,num(s?.paperStakeDollars)||10);
-  const contracts=Math.max(1,Math.floor(requestedStake/market));
-  const stake=contracts*market;
-  const profitIfWin=contracts-stake;
-  return{
-    ...o,
-    qualified:true,
-    derivedQualification:true,
-    qualification:lowPrice?'EDGE QUALIFIED · LONGSHOT VALUE':'EDGE QUALIFIED',
-    paperTier:'STRONG',
-    paperStake:stake,
-    stake,
-    contracts,
-    profitIfWin,
-    score:Math.max(num(o.score)||0,(edge*100)+(confidence*10))
-  };
+  return o;
 }
+
 function nearTermOpportunities(s,category=null){
   const all=Array.isArray(s?.scan?.opportunities)?s.scan.opportunities:[];
   const {max}=entryWindow(s);
