@@ -114,7 +114,7 @@ try {
     assert(founderGeometry.photo.left>=-1 && founderGeometry.photo.right<=width+1,`Founder photo mispositioned at ${width}px`);
     assert(founderGeometry.imageWidth>0 && founderGeometry.imageHeight>0,`Founder image box failed to render at ${width}px`);
     assert(founderGeometry.imageComplete && founderGeometry.naturalWidth>0 && founderGeometry.naturalHeight>0,`Founder image asset failed to decode at ${width}px: ${JSON.stringify(founderGeometry)}`);
-    assert.equal(founderGeometry.imageSrc,'/public/dustin-poole-founder.webp');
+    assert.equal(founderGeometry.imageSrc,'/public/logos/customers/dustin-poole-about.png');
     await page.locator('.founder-proof-section').screenshot({path:`${output}/founder-${width}.png`});
 
     await page.goto(origin+'/services/',{waitUntil:'networkidle'});
