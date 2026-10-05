@@ -1,6 +1,8 @@
 {
   "week": "2026-10-05",
   "date": "2026-10-05",
-  "status": "reserved",
-  "runId": "37383493133"
+  "status": "held",
+  "runId": "37383493133",
+  "calls": 2,
+  "reason": "Repeated article topic"
 }
