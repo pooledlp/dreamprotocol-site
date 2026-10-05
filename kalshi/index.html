@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#05070d">
 <meta name="robots" content="noindex,nofollow">
 <title>DreamPredict | Arb + Crypto</title>
-<link rel="stylesheet" href="styles.css?v=stack1">
+<link rel="stylesheet" href="styles.css?v=stack2">
 </head>
 <body>
 <div class="aurora a1"></div><div class="aurora a2"></div><div class="noise"></div>
@@ -87,14 +87,19 @@
         <div>
           <div class="eyebrow">CRYPTO MEAN-REVERSION SCALPER</div>
           <h2>Buy the dip only after it starts coming back</h2>
-          <p>Taker entry at the displayed ask, taker exit at the displayed bid. It must clear modeled fees, confirm CF momentum, and exit on profit, stop, timeout, or the final-window guard.</p>
+          <p>Maker-only entry at the displayed bid, then taker exit at the displayed bid when the rebound pays. It must clear modeled fees, confirm CF momentum, and respect a hard net-loss cap.</p>
         </div>
         <span id="cryptoSocketTag" class="tag">CONNECTING</span>
       </div>
       <div class="cryptoMetrics">
         <div><span>TOTAL P&L</span><b id="cryptoTotalPnl">$0.00</b></div>
-        <div><span>TODAY</span><b id="cryptoTodayPnl">$0.00</b></div>
         <div><span>RECORD</span><b id="cryptoWinLoss">0W / 0L</b></div>
+        <div><span>AVG WIN</span><b id="cryptoAvgWin">$0.00</b></div>
+        <div><span>AVG LOSS</span><b id="cryptoAvgLoss">$0.00</b></div>
+        <div><span>PROFIT FACTOR</span><b id="cryptoProfitFactor">--</b></div>
+        <div><span>EXPECTANCY / TRADE</span><b id="cryptoExpectancy">$0.00</b></div>
+        <div><span>PAYOFF RATIO</span><b id="cryptoPayoff">--</b></div>
+        <div><span>TODAY</span><b id="cryptoTodayPnl">$0.00</b></div>
         <div><span>OPEN RISK</span><b id="cryptoOpenRisk">$0.00</b></div>
         <div><span>LAST ACTION</span><b id="cryptoLastAction">--</b></div>
       </div>
@@ -228,6 +233,6 @@
 
   <footer>Dream Arb is an experimental live-market shadow scanner. The current build does not submit real-money orders.</footer>
 </div>
-<script src="app.js?v=stack1"></script>
+<script src="app.js?v=stack2"></script>
 </body>
 </html>
