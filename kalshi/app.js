@@ -143,42 +143,121 @@ function isToday(ts){
   const d=new Date(+ts||0),n=new Date();
   return d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth()&&d.getDate()===n.getDate();
 }
-function paperStats(s){
+function arbPaperStats(s){
   const rows=Array.isArray(s?.shadow?.recent)?s.shadow.recent:[];
   const total=+s?.shadow?.theoreticalLockedProfit||0;
-  const recentProfit=rows.reduce((sum,x)=>sum+(+x.lockedProfit||0),0);
   const capital=rows.reduce((sum,x)=>sum+(+x.capital||0),0);
   const today=rows.filter(x=>isToday(x.capturedAt));
-  const todayProfit=today.reduce((sum,x)=>sum+(+x.lockedProfit||0),0);
-  return{rows,total,recentProfit,capital,today,todayProfit,roi:capital>0?recentProfit/capital:NaN};
+  return{rows,total,capital,today,todayProfit:today.reduce((sum,x)=>sum+(+x.lockedProfit||0),0)};
+}
+function cryptoPaperStats(s){
+  const rows=Array.isArray(s?.crypto?.recent)?s.crypto.recent:[];
+  return{
+    rows,
+    total:+s?.crypto?.totalPnl||0,
+    today:+s?.crypto?.todayPnl||0,
+    capital:+s?.crypto?.modeledCapital||0,
+    completed:+s?.crypto?.completed||0,
+    wins:+s?.crypto?.wins||0,
+    losses:+s?.crypto?.losses||0,
+    open:Array.isArray(s?.crypto?.openPositions)?s.crypto.openPositions:[],
+    openRisk:+s?.crypto?.openRisk||0
+  };
+}
+function combinedPaperStats(s){
+  const a=arbPaperStats(s),c=cryptoPaperStats(s);
+  const total=a.total+c.total;
+  const capital=a.capital+c.capital;
+  return{arb:a,crypto:c,total,capital,roi:capital>0?total/capital:NaN,trades:(+s?.shadow?.captures||0)+c.completed};
 }
 function renderPaperPnl(s){
-  const p=paperStats(s);
+  const p=combinedPaperStats(s);
   setText('paperTotal',money(p.total));
-  setText('paperToday',money(p.todayProfit));
-  setText('paperTodayTrades',p.today.length+' fake trade'+(p.today.length===1?'':'s')+' today');
-  setText('paperCapital',money(p.capital));
+  setText('paperCrypto',money(p.crypto.total));
+  setText('cryptoRecord',p.crypto.wins+'W / '+p.crypto.losses+'L');
+  setText('paperArb',money(p.arb.total));
+  setText('arbCaptureCount',(s?.shadow?.captures||0)+' capture'+((s?.shadow?.captures||0)===1?'':'s'));
   setText('paperRoi',Number.isFinite(p.roi)?pct(p.roi):'--');
-  setText('paperTrades',integer(s?.shadow?.captures||0));
+  setText('paperTrades',integer(p.trades));
+  setText('totalPaperPnl',money(p.total));
+  setText('cryptoPnl',money(p.crypto.total));
+  setText('arbPnl',money(p.arb.total));
   setText('realProfit',money(0));
   setText('realTotal',money(0));
   setText('realPnlNote',s?.execution?.live?'Live P&L feed not connected':'Trading not armed');
+  for(const id of ['paperTotal','totalPaperPnl']){
+    const el=$(id);if(el)el.className=p.total>0?'green':p.total<0?'red':'';
+  }
+  for(const [id,value] of [['paperCrypto',p.crypto.total],['cryptoPnl',p.crypto.total],['paperArb',p.arb.total],['arbPnl',p.arb.total]]){
+    const el=$(id);if(el)el.className=value>0?'green':value<0?'red':'';
+  }
   const verdict=$('paperVerdict');
   if(verdict){
     if(p.total>0){
       verdict.className='paperVerdict positive';
-      verdict.innerHTML='<b>PAPER STRATEGY IS SHOWING A PROFIT</b><span>'+money(p.total)+' simulated locked profit across '+integer(s?.shadow?.captures||0)+' fake trade'+((s?.shadow?.captures||0)===1?'':'s')+'. This is not real cash.</span>';
+      verdict.innerHTML='<b>COMBINED PAPER STACK IS PROFITABLE</b><span>Total '+money(p.total)+' · Crypto '+money(p.crypto.total)+' · ARB '+money(p.arb.total)+'. Still fake money.</span>';
+    }else if(p.total<0){
+      verdict.className='paperVerdict negative';
+      verdict.innerHTML='<b>COMBINED PAPER STACK IS LOSING</b><span>Total '+money(p.total)+' · Crypto '+money(p.crypto.total)+' · ARB '+money(p.arb.total)+'. Do not arm real money.</span>';
     }else{
       verdict.className='paperVerdict neutral';
-      verdict.innerHTML='<b>NO PAPER PROFIT YET</b><span>The bot has not captured a fee-safe arb yet, so fake P&L correctly remains $0.00.</span>';
+      verdict.innerHTML='<b>NO PAPER PROFIT YET</b><span>Crypto is hunting mean-reversion scalps while ARB waits for locked math. Liquidity is watch-only.</span>';
     }
   }
 }
 function renderCaptures(s){
-  const p=paperStats(s);
-  setText('captureCount',(s?.shadow?.captures||0)+' FAKE TRADES');
+  const p=arbPaperStats(s);
+  setText('captureCount',(s?.shadow?.captures||0)+' ARB CAPTURES');
   const el=$('captures');if(el)el.innerHTML=p.rows.length?p.rows.slice(0,20).map(captureRow).join(''):
-    '<div class="empty">No fake trade yet. Paper P&L stays $0.00 until a qualified arb is actually captured.</div>';
+    '<div class="empty">No ARB fake trade yet. That engine is allowed to stay empty.</div>';
+}
+
+function cryptoOpenRow(p){
+  const stake=(+p.entryCost||0)*(+p.count||0);
+  return '<div class="cryptoTrade openTrade">'+
+    '<div class="cryptoTradeTop"><div><span>'+esc(p.asset||'CRYPTO')+' · '+esc(String(p.side||'').toUpperCase())+'</span><b>'+esc(p.ticker||'')+'</b></div><strong class="amber">OPEN</strong></div>'+
+    '<div class="cryptoTradeMeta"><span>Entry '+cents(p.entryCost)+'</span><span>'+integer(p.count)+' contracts</span><span>'+money(stake)+' fake risk</span><span>'+dateTime(p.enteredAt)+'</span></div>'+
+  '</div>';
+}
+function cryptoTradeRow(t){
+  const net=+t.netDollars||0;
+  const fees=((+t.entryFee||0)+(+t.exitFee||0))*(+t.count||0);
+  return '<div class="cryptoTrade">'+
+    '<div class="cryptoTradeTop"><div><span>'+esc(t.asset||'CRYPTO')+' · '+esc(String(t.side||'').toUpperCase())+'</span><b>'+esc(t.ticker||'')+'</b></div><strong class="'+(net>0?'green':net<0?'red':'')+'">'+(net>0?'+':'')+money(net)+'</strong></div>'+
+    '<div class="cryptoTradeMeta"><span>'+cents(t.entryCost)+' → '+cents(t.exitCost)+'</span><span>'+integer(t.count)+' contracts</span><span>'+money(fees)+' fees</span><span>'+esc(t.reason||'exit')+'</span><span>'+dateTime(t.exitedAt)+'</span></div>'+
+  '</div>';
+}
+function renderCrypto(s){
+  const c=cryptoPaperStats(s);
+  setText('cryptoTotalPnl',money(c.total));
+  setText('cryptoTodayPnl',money(c.today));
+  setText('cryptoWinLoss',c.wins+'W / '+c.losses+'L');
+  setText('cryptoOpenRisk',money(c.openRisk));
+  setText('cryptoLastAction',String(s?.crypto?.lastAction||'WAIT').replace(/^paper-scalp-/,'').toUpperCase());
+  setText('cryptoOpenCount',integer(c.open.length));
+  setText('cryptoTradeCount',integer(c.completed));
+  const socket=$('cryptoSocketTag');
+  if(socket){
+    const open=!!s?.crypto?.socket?.open;
+    socket.textContent=open?'5 FEEDS LIVE':'FEED RECONNECTING';
+    socket.className='tag '+(open?'safe':'amber');
+  }
+  const state=$('cryptoEngineState');
+  if(state)state.textContent=s?.crypto?.socket?.open?'PAPER LIVE':'RECONNECTING';
+  setText('cryptoEnginePnl',money(c.total));
+  setText('cryptoEngineDetail',(s?.crypto?.socket?.targets||0)+' feeds · '+c.completed+' completed · '+c.open.length+' open');
+  const openEl=$('cryptoOpenPositions');if(openEl)openEl.innerHTML=c.open.length?c.open.map(cryptoOpenRow).join(''):'<div class="empty">No open crypto paper position.</div>';
+  const tradeEl=$('cryptoTrades');if(tradeEl)tradeEl.innerHTML=c.rows.length?c.rows.slice(0,20).map(cryptoTradeRow).join(''):'<div class="empty">No completed crypto paper scalp yet.</div>';
+}
+function renderEngineStack(s){
+  const a=arbPaperStats(s);
+  const qualified=+s?.scan?.qualifiedArbs||0;
+  setText('arbEnginePnl',money(a.total));
+  setText('arbEngineState',qualified>0?'ARB FOUND':'HUNTING');
+  setText('arbEngineDetail',qualified+' qualified now · '+(s?.shadow?.captures||0)+' captured historically');
+  setText('liquidityEngineCount',integer(s?.scan?.liquidityPrograms||0));
+  const arbP=$('arbEnginePnl');if(arbP)arbP.className=a.total>0?'green':'';
+  const cryptoP=$('cryptoEnginePnl');if(cryptoP)cryptoP.className=(+s?.crypto?.totalPnl||0)>0?'green':(+s?.crypto?.totalPnl||0)<0?'red':'';
 }
 
 function renderGuardrails(s){
@@ -205,13 +284,11 @@ function renderDiagnostics(s){
 function render(s){
   lastPayload=s;
   health(!!s?.ok,s?.lastError);
-  setText('mode',s?.mode||'SHADOW');
+  setText('mode','PAPER STACK');
   setText('arbCount',integer(s?.scan?.qualifiedArbs||0));
-  setText('shadowProfit',money(s?.shadow?.theoreticalLockedProfit||0));
-  setText('marketCount',integer(s?.scan?.scannedMarkets||0));
-  setText('lastScan',s?.lastScanAt?clock(s.lastScanAt):'--');
-  const sp=$('shadowProfit');if(sp)sp.className=(+s?.shadow?.theoreticalLockedProfit||0)>0?'green':'';
   renderPaperPnl(s);
+  renderEngineStack(s);
+  renderCrypto(s);
   renderHero(s);
   renderArbs(s);
   renderLiquidity(s);

@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#05070d">
 <meta name="robots" content="noindex,nofollow">
-<title>DreamPredict | Arb Engine</title>
-<link rel="stylesheet" href="styles.css?v=arb2">
+<title>DreamPredict | Arb + Crypto</title>
+<link rel="stylesheet" href="styles.css?v=stack1">
 </head>
 <body>
 <div class="aurora a1"></div><div class="aurora a2"></div><div class="noise"></div>
@@ -16,19 +16,19 @@
       <div class="brandMark">D</div>
       <div>
         <div class="brand">DreamPredict</div>
-        <div class="sub">ARB ENGINE · STRUCTURAL MISPRICING + LIQUIDITY REWARDS</div>
+        <div class="sub">ARB + CRYPTO SCALP · LIQUIDITY WATCH</div>
       </div>
     </div>
     <div class="livePill"><i id="statusDot"></i><span id="healthText">CONNECTING</span></div>
   </header>
 
   <section class="statusRail">
-    <div><span>MODE</span><b id="mode">SHADOW</b></div>
-    <div><span>PAPER P&L</span><b id="shadowProfit">$0.00</b></div>
-    <div><span>REAL P&L</span><b id="realProfit">$0.00</b></div>
+    <div><span>MODE</span><b id="mode">PAPER</b></div>
+    <div><span>TOTAL PAPER P&L</span><b id="totalPaperPnl">$0.00</b></div>
+    <div><span>CRYPTO P&L</span><b id="cryptoPnl">$0.00</b></div>
+    <div><span>ARB P&L</span><b id="arbPnl">$0.00</b></div>
     <div><span>PAPER TRADES</span><b id="paperTrades">0</b></div>
-    <div><span>ARB NOW</span><b id="arbCount">0</b></div>
-    <div><span>LAST SCAN</span><b id="lastScan">--</b></div>
+    <div><span>REAL P&L</span><b id="realProfit">$0.00</b></div>
   </section>
 
   <main>
@@ -36,20 +36,80 @@
       <div class="pnlHead">
         <div>
           <div class="eyebrow">PROFIT TRACKER</div>
-          <h2>Fake money first. Real money stays separate.</h2>
-          <p>Every shadow capture below is a simulated trade using live Kalshi prices and visible order-book depth. It does not count as real profit.</p>
+          <h2>One paper account. Separate engines.</h2>
+          <p>ARB and CRYPTO each keep their own paper P&L. Liquidity is watch-only and never counts as profit. Real money remains separate at $0 until live execution is explicitly armed.</p>
         </div>
         <span id="paperModeTag" class="tag paperTag">PAPER / FAKE MONEY</span>
       </div>
       <div class="pnlGrid">
-        <div class="pnlPrimary"><span>TOTAL PAPER P&L</span><b id="paperTotal">$0.00</b><small>All shadow captures</small></div>
-        <div><span>TODAY PAPER P&L</span><b id="paperToday">$0.00</b><small id="paperTodayTrades">0 fake trades today</small></div>
-        <div><span>MODELED CAPITAL</span><b id="paperCapital">$0.00</b><small>Recent captured trades</small></div>
-        <div><span>PAPER ROI</span><b id="paperRoi">--</b><small>Recent profit ÷ modeled capital</small></div>
+        <div class="pnlPrimary"><span>TOTAL PAPER P&L</span><b id="paperTotal">$0.00</b><small>ARB + crypto paper only</small></div>
+        <div><span>CRYPTO P&L</span><b id="paperCrypto">$0.00</b><small id="cryptoRecord">0W / 0L</small></div>
+        <div><span>ARB P&L</span><b id="paperArb">$0.00</b><small id="arbCaptureCount">0 captures</small></div>
+        <div><span>PAPER ROI</span><b id="paperRoi">--</b><small>combined P&L ÷ modeled capital</small></div>
         <div class="realPnl"><span>REAL MONEY P&L</span><b id="realTotal">$0.00</b><small id="realPnlNote">Trading not armed</small></div>
       </div>
-      <div id="paperVerdict" class="paperVerdict neutral"><b>NO PAPER PROFIT YET</b><span>The bot has not found a fee-safe arb to fake-trade yet.</span></div>
+      <div id="paperVerdict" class="paperVerdict neutral"><b>NO PAPER PROFIT YET</b><span>ARB and crypto are both being measured separately.</span></div>
     </section>
+
+    <section class="panel engineStackPanel">
+      <div class="panelHead">
+        <div>
+          <div class="eyebrow">THREE-ENGINE STACK</div>
+          <h2>Different jobs. Different risk.</h2>
+          <p>ARB waits for locked math. Crypto actively hunts short mean-reversion scalps. Liquidity stays informational unless its economics become exceptional.</p>
+        </div>
+        <span class="tag paperTag">REAL ORDERS OFF</span>
+      </div>
+      <div class="engineGrid">
+        <article class="engineCard arbEngine">
+          <div class="engineTop"><span>01 · ARB</span><em id="arbEngineState">HUNTING</em></div>
+          <b id="arbEnginePnl">$0.00</b>
+          <small>PAPER LOCKED PROFIT</small>
+          <p id="arbEngineDetail">Rare structural mispricing. Zero trades is acceptable.</p>
+        </article>
+        <article class="engineCard cryptoEngine">
+          <div class="engineTop"><span>02 · CRYPTO SCALP</span><em id="cryptoEngineState">WARMING UP</em></div>
+          <b id="cryptoEnginePnl">$0.00</b>
+          <small>PAPER REALIZED P&L</small>
+          <p id="cryptoEngineDetail">BTC · ETH · SOL · XRP · DOGE</p>
+        </article>
+        <article class="engineCard liquidityEngine">
+          <div class="engineTop"><span>03 · LIQUIDITY</span><em>WATCH ONLY</em></div>
+          <b id="liquidityEngineCount">0</b>
+          <small>ACTIVE REWARD PROGRAMS</small>
+          <p>No liquidity orders. Pools are not counted as profit.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel cryptoPanel">
+      <div class="panelHead">
+        <div>
+          <div class="eyebrow">CRYPTO MEAN-REVERSION SCALPER</div>
+          <h2>Buy the dip only after it starts coming back</h2>
+          <p>Taker entry at the displayed ask, taker exit at the displayed bid. It must clear modeled fees, confirm CF momentum, and exit on profit, stop, timeout, or the final-window guard.</p>
+        </div>
+        <span id="cryptoSocketTag" class="tag">CONNECTING</span>
+      </div>
+      <div class="cryptoMetrics">
+        <div><span>TOTAL P&L</span><b id="cryptoTotalPnl">$0.00</b></div>
+        <div><span>TODAY</span><b id="cryptoTodayPnl">$0.00</b></div>
+        <div><span>RECORD</span><b id="cryptoWinLoss">0W / 0L</b></div>
+        <div><span>OPEN RISK</span><b id="cryptoOpenRisk">$0.00</b></div>
+        <div><span>LAST ACTION</span><b id="cryptoLastAction">--</b></div>
+      </div>
+      <div class="twoCol cryptoBooks">
+        <div>
+          <div class="bookHead"><span>OPEN PAPER POSITIONS</span><b id="cryptoOpenCount">0</b></div>
+          <div id="cryptoOpenPositions" class="stack"><div class="empty">No open crypto paper position.</div></div>
+        </div>
+        <div>
+          <div class="bookHead"><span>RECENT CRYPTO SCALPS</span><b id="cryptoTradeCount">0</b></div>
+          <div id="cryptoTrades" class="stack"><div class="empty">No completed crypto paper scalp yet.</div></div>
+        </div>
+      </div>
+    </section>
+
     <section class="hero panel">
       <div class="heroGrid">
         <div class="heroCopy">
@@ -98,11 +158,11 @@
     <section class="panel">
       <div class="panelHead">
         <div>
-          <div class="eyebrow">LIQUIDITY REWARDS</div>
-          <h2>Places Kalshi is paying for market liquidity</h2>
+          <div class="eyebrow">LIQUIDITY REWARDS · WATCH ONLY</div>
+          <h2>Interesting pools, but no orders</h2>
           <p>Ranked separately from arbitrage. Rewards are opportunities, not guaranteed profit, because fills and adverse selection still matter.</p>
         </div>
-        <span class="tag">RANKED WATCHLIST</span>
+        <span class="tag amber">NO CAPITAL DEPLOYED</span>
       </div>
       <div id="liquidity" class="rewardGrid">
         <div class="empty">Loading active liquidity programs...</div>
@@ -113,8 +173,8 @@
       <section class="panel">
         <div class="panelHead compactHead">
           <div>
-            <div class="eyebrow">PAPER TRADES · FAKE MONEY</div>
-            <h2>Exactly what the bot pretended to buy</h2>
+            <div class="eyebrow">ARB PAPER CAPTURES</div>
+            <h2>Locked-math fake trades only</h2>
           </div>
           <span id="captureCount" class="tag">0 CAPTURES</span>
         </div>
@@ -168,6 +228,6 @@
 
   <footer>Dream Arb is an experimental live-market shadow scanner. The current build does not submit real-money orders.</footer>
 </div>
-<script src="app.js?v=arb2"></script>
+<script src="app.js?v=stack1"></script>
 </body>
 </html>
