@@ -116,9 +116,9 @@ function rewardCard(r){
     '<h3>'+esc(r.ticker||'Kalshi market')+'</h3>'+
     '<p>'+esc(r.description||'Active liquidity incentive')+'</p>'+
     '<div class="miniMetrics rewardMetrics">'+
-      '<div><span>REWARD / PERIOD</span><b>'+money(r.reward)+'</b></div>'+
+      '<div><span>POOL / PERIOD</span><b>'+money(r.reward)+'</b></div>'+
+      '<div><span>POOL / DAY</span><b>'+perDay+'</b></div>'+
       '<div><span>TARGET SIZE</span><b>'+integer(r.targetSize)+'</b></div>'+
-      '<div><span>REWARD / TARGET</span><b>'+ratio+'</b></div>'+
       '<div><span>ENDS</span><b>'+esc(ends)+'</b></div>'+
     '</div>'+
     '<div class="tradeBar"><span>'+esc(r.ticker||'')+'</span><button type="button" class="copyTicker" data-copy-ticker="'+esc(r.ticker||'')+'">COPY TICKER</button><a href="'+esc(appUrl())+'">OPEN KALSHI ↗</a></div>'+
@@ -132,17 +132,53 @@ function renderLiquidity(s){
 }
 
 function captureRow(x){
-  return '<div class="capture">'+
-    '<div class="captureTop"><b>'+esc(x.eventTitle||x.eventTicker||'Structural pair')+'</b><strong class="green">'+money(x.lockedProfit)+'</strong></div>'+
-    '<div class="captureMeta"><span>'+integer(x.contracts)+' pairs</span><span>'+money(x.capital)+' modeled capital</span><span>'+edge(x.netEdge)+' / pair</span><span>'+dateTime(x.capturedAt)+'</span></div>'+
+  const payout=(+x.capital||0)+(+x.lockedProfit||0);
+  return '<div class="capture paperTrade">'+
+    '<div class="captureTop"><div><span class="paperLabel">FAKE TRADE · LOCKED MODEL</span><b>'+esc(x.eventTitle||x.eventTicker||'Structural pair')+'</b></div><strong class="green">+'+money(Math.max(0,+x.lockedProfit||0))+'</strong></div>'+
+    '<div class="captureMeta"><span>'+integer(x.contracts)+' pairs</span><span>'+money(x.capital)+' fake capital</span><span>'+money(payout)+' modeled minimum payout</span><span>'+edge(x.netEdge)+' / pair</span><span>'+dateTime(x.capturedAt)+'</span></div>'+
     '<div class="captureLegs">'+esc(pairKey(x))+'</div>'+
   '</div>';
 }
-function renderCaptures(s){
+function isToday(ts){
+  const d=new Date(+ts||0),n=new Date();
+  return d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth()&&d.getDate()===n.getDate();
+}
+function paperStats(s){
   const rows=Array.isArray(s?.shadow?.recent)?s.shadow.recent:[];
-  setText('captureCount',(s?.shadow?.captures||0)+' CAPTURES');
-  const el=$('captures');if(el)el.innerHTML=rows.length?rows.slice(0,20).map(captureRow).join(''):
-    '<div class="empty">No qualified structural arb captured yet.</div>';
+  const total=+s?.shadow?.theoreticalLockedProfit||0;
+  const recentProfit=rows.reduce((sum,x)=>sum+(+x.lockedProfit||0),0);
+  const capital=rows.reduce((sum,x)=>sum+(+x.capital||0),0);
+  const today=rows.filter(x=>isToday(x.capturedAt));
+  const todayProfit=today.reduce((sum,x)=>sum+(+x.lockedProfit||0),0);
+  return{rows,total,recentProfit,capital,today,todayProfit,roi:capital>0?recentProfit/capital:NaN};
+}
+function renderPaperPnl(s){
+  const p=paperStats(s);
+  setText('paperTotal',money(p.total));
+  setText('paperToday',money(p.todayProfit));
+  setText('paperTodayTrades',p.today.length+' fake trade'+(p.today.length===1?'':'s')+' today');
+  setText('paperCapital',money(p.capital));
+  setText('paperRoi',Number.isFinite(p.roi)?pct(p.roi):'--');
+  setText('paperTrades',integer(s?.shadow?.captures||0));
+  setText('realProfit',money(0));
+  setText('realTotal',money(0));
+  setText('realPnlNote',s?.execution?.live?'Live P&L feed not connected':'Trading not armed');
+  const verdict=$('paperVerdict');
+  if(verdict){
+    if(p.total>0){
+      verdict.className='paperVerdict positive';
+      verdict.innerHTML='<b>PAPER STRATEGY IS SHOWING A PROFIT</b><span>'+money(p.total)+' simulated locked profit across '+integer(s?.shadow?.captures||0)+' fake trade'+((s?.shadow?.captures||0)===1?'':'s')+'. This is not real cash.</span>';
+    }else{
+      verdict.className='paperVerdict neutral';
+      verdict.innerHTML='<b>NO PAPER PROFIT YET</b><span>The bot has not captured a fee-safe arb yet, so fake P&L correctly remains $0.00.</span>';
+    }
+  }
+}
+function renderCaptures(s){
+  const p=paperStats(s);
+  setText('captureCount',(s?.shadow?.captures||0)+' FAKE TRADES');
+  const el=$('captures');if(el)el.innerHTML=p.rows.length?p.rows.slice(0,20).map(captureRow).join(''):
+    '<div class="empty">No fake trade yet. Paper P&L stays $0.00 until a qualified arb is actually captured.</div>';
 }
 
 function renderGuardrails(s){
@@ -171,11 +207,11 @@ function render(s){
   health(!!s?.ok,s?.lastError);
   setText('mode',s?.mode||'SHADOW');
   setText('arbCount',integer(s?.scan?.qualifiedArbs||0));
-  setText('rewardCount',integer(s?.scan?.liquidityPrograms||0));
   setText('shadowProfit',money(s?.shadow?.theoreticalLockedProfit||0));
   setText('marketCount',integer(s?.scan?.scannedMarkets||0));
   setText('lastScan',s?.lastScanAt?clock(s.lastScanAt):'--');
   const sp=$('shadowProfit');if(sp)sp.className=(+s?.shadow?.theoreticalLockedProfit||0)>0?'green':'';
+  renderPaperPnl(s);
   renderHero(s);
   renderArbs(s);
   renderLiquidity(s);

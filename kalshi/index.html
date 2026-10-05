@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#05070d">
 <meta name="robots" content="noindex,nofollow">
 <title>DreamPredict | Arb Engine</title>
-<link rel="stylesheet" href="styles.css?v=arb1">
+<link rel="stylesheet" href="styles.css?v=arb2">
 </head>
 <body>
 <div class="aurora a1"></div><div class="aurora a2"></div><div class="noise"></div>
@@ -24,14 +24,32 @@
 
   <section class="statusRail">
     <div><span>MODE</span><b id="mode">SHADOW</b></div>
+    <div><span>PAPER P&L</span><b id="shadowProfit">$0.00</b></div>
+    <div><span>REAL P&L</span><b id="realProfit">$0.00</b></div>
+    <div><span>PAPER TRADES</span><b id="paperTrades">0</b></div>
     <div><span>ARB NOW</span><b id="arbCount">0</b></div>
-    <div><span>REWARD PROGRAMS</span><b id="rewardCount">0</b></div>
-    <div><span>SHADOW LOCKED</span><b id="shadowProfit">$0.00</b></div>
-    <div><span>MARKETS SCANNED</span><b id="marketCount">0</b></div>
     <div><span>LAST SCAN</span><b id="lastScan">--</b></div>
   </section>
 
   <main>
+    <section class="pnlPanel panel">
+      <div class="pnlHead">
+        <div>
+          <div class="eyebrow">PROFIT TRACKER</div>
+          <h2>Fake money first. Real money stays separate.</h2>
+          <p>Every shadow capture below is a simulated trade using live Kalshi prices and visible order-book depth. It does not count as real profit.</p>
+        </div>
+        <span id="paperModeTag" class="tag paperTag">PAPER / FAKE MONEY</span>
+      </div>
+      <div class="pnlGrid">
+        <div class="pnlPrimary"><span>TOTAL PAPER P&L</span><b id="paperTotal">$0.00</b><small>All shadow captures</small></div>
+        <div><span>TODAY PAPER P&L</span><b id="paperToday">$0.00</b><small id="paperTodayTrades">0 fake trades today</small></div>
+        <div><span>MODELED CAPITAL</span><b id="paperCapital">$0.00</b><small>Recent captured trades</small></div>
+        <div><span>PAPER ROI</span><b id="paperRoi">--</b><small>Recent profit ÷ modeled capital</small></div>
+        <div class="realPnl"><span>REAL MONEY P&L</span><b id="realTotal">$0.00</b><small id="realPnlNote">Trading not armed</small></div>
+      </div>
+      <div id="paperVerdict" class="paperVerdict neutral"><b>NO PAPER PROFIT YET</b><span>The bot has not found a fee-safe arb to fake-trade yet.</span></div>
+    </section>
     <section class="hero panel">
       <div class="heroGrid">
         <div class="heroCopy">
@@ -95,12 +113,12 @@
       <section class="panel">
         <div class="panelHead compactHead">
           <div>
-            <div class="eyebrow">SHADOW CAPTURES</div>
-            <h2>What the bot would have locked</h2>
+            <div class="eyebrow">PAPER TRADES · FAKE MONEY</div>
+            <h2>Exactly what the bot pretended to buy</h2>
           </div>
           <span id="captureCount" class="tag">0 CAPTURES</span>
         </div>
-        <div id="captures" class="stack"><div class="empty">No qualified structural arb captured yet.</div></div>
+        <div id="captures" class="stack"><div class="empty">No fake trade yet. Paper P&L stays $0.00 until a qualified arb is actually captured.</div></div>
       </section>
 
       <section class="panel">
@@ -150,6 +168,6 @@
 
   <footer>Dream Arb is an experimental live-market shadow scanner. The current build does not submit real-money orders.</footer>
 </div>
-<script src="app.js?v=arb1"></script>
+<script src="app.js?v=arb2"></script>
 </body>
 </html>
