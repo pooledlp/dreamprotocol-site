@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#05070d">
 <meta name="robots" content="noindex,nofollow">
-<title>DreamPredict | Fortune Teller</title>
-<link rel="stylesheet" href="styles.css?v=fortune9">
+<title>DreamPredict | Arb Engine</title>
+<link rel="stylesheet" href="styles.css?v=arb1">
 </head>
 <body>
 <div class="aurora a1"></div><div class="aurora a2"></div><div class="noise"></div>
@@ -16,57 +16,49 @@
       <div class="brandMark">D</div>
       <div>
         <div class="brand">DreamPredict</div>
-        <div class="sub">FORTUNE TELLER · RESEARCH-DRIVEN PAPER PREDICTIONS</div>
+        <div class="sub">ARB ENGINE · STRUCTURAL MISPRICING + LIQUIDITY REWARDS</div>
       </div>
     </div>
     <div class="livePill"><i id="statusDot"></i><span id="healthText">CONNECTING</span></div>
   </header>
 
   <section class="statusRail">
-    <div><span>MODE</span><b id="mode">AUTO PAPER</b></div>
-    <div><span>STAKE</span><b id="stake">$10</b></div>
-    <div><span>OPEN RISK</span><b id="openRisk">$0.00</b></div>
-    <div><span>REALIZED</span><b id="realized">$0.00</b></div>
-    <div><span>RECORD</span><b id="record">0W / 0L</b></div>
-    <div><span>LAST RESEARCH</span><b id="lastScan">--</b></div>
-    <div><span>BET WINDOW</span><b id="window">15 MIN-12 HRS</b></div>
+    <div><span>MODE</span><b id="mode">SHADOW</b></div>
+    <div><span>ARB NOW</span><b id="arbCount">0</b></div>
+    <div><span>REWARD PROGRAMS</span><b id="rewardCount">0</b></div>
+    <div><span>SHADOW LOCKED</span><b id="shadowProfit">$0.00</b></div>
+    <div><span>MARKETS SCANNED</span><b id="marketCount">0</b></div>
+    <div><span>LAST SCAN</span><b id="lastScan">--</b></div>
   </section>
 
   <main>
     <section class="hero panel">
       <div class="heroGrid">
         <div class="heroCopy">
-          <div class="eyebrow">BEST CALL IN THE NEXT FEW HOURS</div>
-          <div id="heroStatus" class="heroStatus hunting">HUNTING</div>
-          <h1 id="heroTitle">Scanning the future...</h1>
-          <p id="heroSubtitle">DreamPredict is hunting only near-term markets, then comparing independent research against live prediction-market prices.</p>
-          <div id="heroResearch" class="researchLine">Independent research engines are warming up.</div>
+          <div class="eyebrow">BEST STRUCTURAL EDGE RIGHT NOW</div>
+          <div id="heroStatus" class="heroStatus hunting">SCANNING</div>
+          <h1 id="heroTitle">Hunting broken math.</h1>
+          <p id="heroSubtitle">Dream Arb scans live Kalshi markets for contract relationships that must obey the same underlying outcome, then subtracts fees and a safety margin before calling anything an arbitrage.</p>
+          <div id="heroRule" class="researchLine">No prediction required. If the payoff relationship cannot be proven, it does not get the ARB label.</div>
           <div class="heroMetrics">
-            <div><span>OUR ODDS</span><b id="heroModel">--</b></div>
-            <div><span>MARKET PRICE</span><b id="heroMarket">--</b></div>
-            <div><span>EDGE</span><b id="heroEdge">--</b></div>
-            <div><span>CONFIDENCE</span><b id="heroConfidence">--</b></div>
+            <div><span>NET EDGE</span><b id="heroEdge">--</b></div>
+            <div><span>PAIR COST</span><b id="heroCost">--</b></div>
+            <div><span>FEES + BUFFER</span><b id="heroFees">--</b></div>
+            <div><span>VISIBLE DEPTH</span><b id="heroDepth">--</b></div>
           </div>
-          <div class="paperTicket">
-            <div><span>PAPER PICK</span><b id="heroSide">--</b></div>
-            <div><span>SIMULATED STAKE</span><b id="heroStake">$10</b></div>
-            <div><span>CONTRACTS</span><b id="heroContracts">--</b></div>
-            <div><span>PROFIT IF RIGHT</span><b id="heroProfit">--</b></div>
-          </div>
-          <div id="heroTradeActions" class="heroTradeActions" hidden>
-            <button id="heroCopyTicker" type="button" class="copyTicker" data-copy-ticker="">COPY TICKER</button>
-            <a id="heroKalshiLink" class="heroKalshiLink" href="#">OPEN KALSHI APP ↗</a>
+          <div id="heroLegs" class="legs">
+            <div class="empty compact">Waiting for a provable price mismatch.</div>
           </div>
         </div>
-        <div class="orbWrap">
-          <div id="probOrb" class="orb" style="--prob:0">
-            <div class="orbCore">
-              <small>MODEL</small>
-              <b id="orbProb">--</b>
-              <span id="orbLabel">SCANNING</span>
+        <div class="lockWrap">
+          <div class="lockOrb">
+            <div class="lockCore">
+              <small>MIN PAYOUT</small>
+              <b id="heroPayout">$1.00</b>
+              <span id="lockLabel">PROVEN RELATION</span>
             </div>
           </div>
-          <div class="orbCaption">Independent probability, not market consensus</div>
+          <div class="lockCaption">Qualified only after estimated fees and safety margin</div>
         </div>
       </div>
     </section>
@@ -74,67 +66,73 @@
     <section class="panel">
       <div class="panelHead">
         <div>
-          <div class="eyebrow">FORTUNE BOARD</div>
-          <h2>What looks strongest in the next few hours</h2>
-          <p>Only markets closing soon are shown here. Ranked by independent probability, confidence, and price advantage.</p>
+          <div class="eyebrow">STRUCTURAL ARBITRAGE</div>
+          <h2>Provable mispricing, not a prediction</h2>
+          <p>V1 only trusts nested threshold relationships with matching settlement rules and times.</p>
         </div>
-        <button id="refreshBtn" class="refreshBtn" type="button">Refresh research</button>
+        <button id="refreshBtn" class="refreshBtn" type="button">Scan now</button>
       </div>
-      <div id="opportunities" class="opportunityGrid">
-        <div class="empty">Scanning Weather, Economics, Fed, and Sports markets...</div>
+      <div id="arbs" class="arbGrid">
+        <div class="empty">Scanning live Kalshi events...</div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panelHead">
+        <div>
+          <div class="eyebrow">LIQUIDITY REWARDS</div>
+          <h2>Places Kalshi is paying for market liquidity</h2>
+          <p>Ranked separately from arbitrage. Rewards are opportunities, not guaranteed profit, because fills and adverse selection still matter.</p>
+        </div>
+        <span class="tag">RANKED WATCHLIST</span>
+      </div>
+      <div id="liquidity" class="rewardGrid">
+        <div class="empty">Loading active liquidity programs...</div>
       </div>
     </section>
 
     <section class="twoCol">
       <section class="panel">
-        <div class="panelHead compact">
+        <div class="panelHead compactHead">
           <div>
-            <div class="eyebrow">OPEN PAPER PREDICTIONS</div>
-            <h2>Money on the table</h2>
+            <div class="eyebrow">SHADOW CAPTURES</div>
+            <h2>What the bot would have locked</h2>
           </div>
-          <span id="openCount" class="tag">0 OPEN</span>
+          <span id="captureCount" class="tag">0 CAPTURES</span>
         </div>
-        <div id="positions" class="stack"><div class="empty">No open paper predictions yet.</div></div>
+        <div id="captures" class="stack"><div class="empty">No qualified structural arb captured yet.</div></div>
       </section>
 
       <section class="panel">
-        <div class="panelHead compact">
+        <div class="panelHead compactHead">
           <div>
-            <div class="eyebrow">SETTLED</div>
-            <h2>Did the oracle call it?</h2>
+            <div class="eyebrow">EXECUTION LOCK</div>
+            <h2>Real money stays gated</h2>
           </div>
-          <span id="settledCount" class="tag">0 SETTLED</span>
+          <span id="executionTag" class="tag safe">SHADOW ONLY</span>
         </div>
-        <div id="history" class="stack"><div class="empty">No settled predictions yet.</div></div>
+        <div class="guardrailGrid">
+          <div><span>MIN NET EDGE</span><b id="minEdge">--</b></div>
+          <div><span>SAFETY BUFFER</span><b id="safetyMargin">--</b></div>
+          <div><span>MAX CONTRACTS</span><b id="maxContracts">--</b></div>
+          <div><span>MEC BASKET ASSUMPTION</span><b id="mecRule">OFF</b></div>
+        </div>
+        <p id="executionReason" class="executionReason">The engine is proving its edge against live prices before real-money order submission is armed.</p>
       </section>
     </section>
 
-    <section class="panel">
-      <div class="panelHead">
-        <div>
-          <div class="eyebrow">RESEARCH UNIVERSE</div>
-          <h2>DreamPredict research engines</h2>
-        </div>
-        <span class="tag paper">PAPER ONLY</span>
-      </div>
-      <div id="categories" class="categoryGrid"></div>
-      <div id="categoryDetail" class="categoryDetail">
-        <div class="categoryPrompt">Tap Weather, Sports, Economics, or Fed to expand its best near-term predictions.</div>
-      </div>
-    </section>
-
     <section class="method panel">
-      <div class="eyebrow">HOW THE FORTUNE TELLER THINKS</div>
+      <div class="eyebrow">HOW DREAM ARB THINKS</div>
       <div class="methodFlow">
-        <div><b>01</b><span>Gather independent internet data</span></div>
+        <div><b>01</b><span>Scan live open events</span></div>
         <i>→</i>
-        <div><b>02</b><span>Build our own probability</span></div>
+        <div><b>02</b><span>Prove a monotonic contract relationship</span></div>
         <i>→</i>
-        <div><b>03</b><span>Compare against market price</span></div>
+        <div><b>03</b><span>Price both legs at executable asks</span></div>
         <i>→</i>
-        <div><b>04</b><span>Paper-pick only real edge</span></div>
+        <div><b>04</b><span>Subtract conservative fees + buffer</span></div>
         <i>→</i>
-        <div><b>05</b><span>Hold to settlement & learn</span></div>
+        <div><b>05</b><span>Shadow-capture only positive locked edge</span></div>
       </div>
     </section>
 
@@ -142,16 +140,16 @@
       <summary>System diagnostics</summary>
       <div class="diagGrid">
         <div><span>ENGINE</span><b id="engineVersion">--</b></div>
-        <div><span>ENTRIES</span><b id="entries">0</b></div>
-        <div><span>OPPORTUNITIES</span><b id="scanCount">0</b></div>
-        <div><span>QUALIFIED</span><b id="qualifiedCount">0</b></div>
+        <div><span>EVENTS</span><b id="eventCount">0</b></div>
+        <div><span>ARB CANDIDATES</span><b id="arbCandidates">0</b></div>
+        <div><span>LIQUIDITY PROGRAMS</span><b id="liquidityPrograms">0</b></div>
       </div>
       <pre id="errors">No errors.</pre>
     </details>
   </main>
 
-  <footer>DreamPredict Fortune Teller is an experimental paper-research system. No real-money orders are submitted.</footer>
+  <footer>Dream Arb is an experimental live-market shadow scanner. The current build does not submit real-money orders.</footer>
 </div>
-<script src="app.js?v=fortune13"></script>
+<script src="app.js?v=arb1"></script>
 </body>
 </html>
