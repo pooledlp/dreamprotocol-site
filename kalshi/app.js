@@ -2,350 +2,185 @@ const API='https://api.dreamprotocol.ai';
 const $=id=>document.getElementById(id);
 const num=v=>v!==null&&v!==undefined&&v!==''&&Number.isFinite(+v)?+v:NaN;
 const money=v=>Number.isFinite(num(v))?new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2}).format(num(v)):'--';
-const pct=v=>Number.isFinite(num(v))?(num(v)*100).toFixed(num(v)>=.995?1:0)+'%':'--';
-const edgePct=v=>Number.isFinite(num(v))?((num(v)*100)>=0?'+':'')+(num(v)*100).toFixed(1)+' pts':'--';
+const cents=v=>Number.isFinite(num(v))?(num(v)*100).toFixed(1).replace(/\.0$/,'')+'¢':'--';
+const edge=v=>Number.isFinite(num(v))?((num(v)>=0?'+':'')+(num(v)*100).toFixed(2)+'¢'):'--';
+const pct=v=>Number.isFinite(num(v))?(num(v)*100).toFixed(2)+'%':'--';
+const integer=v=>Number.isFinite(num(v))?Math.round(num(v)).toLocaleString():'--';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const clock=v=>{
   const t=typeof v==='number'?v:Date.parse(v||'');
-  return Number.isFinite(t)?new Date(t).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}):'--';
+  return Number.isFinite(t)?new Date(t).toLocaleTimeString([],{hour:'numeric',minute:'2-digit',second:'2-digit'}):'--';
 };
 const dateTime=v=>{
   const t=typeof v==='number'?v:Date.parse(v||'');
   return Number.isFinite(t)?new Date(t).toLocaleString([],{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'--';
 };
-const actionTime=o=>o?.actionTime||o?.closeTime||null;
-const kalshiAppUrl=()=>{
-  const fallback='https://kalshi.com/f/install';
-  if(/Android/i.test(navigator.userAgent)){
-    return 'intent://kalshi.com/f/install#Intent;scheme=https;package=com.kalshi.mobile;S.browser_fallback_url='+encodeURIComponent(fallback)+';end';
-  }
-  return fallback;
-};
-const timeLeft=v=>{
-  const t=Date.parse(v||'');
-  if(!Number.isFinite(t))return '--';
-  const diff=t-Date.now();
-  if(diff<=0)return 'CLOSED · awaiting result';
-  const total=Math.floor(diff/1000);
-  const days=Math.floor(total/86400);
-  const hours=Math.floor((total%86400)/3600);
-  const mins=Math.floor((total%3600)/60);
-  const secs=total%60;
-  if(days>0)return days+'d '+String(hours).padStart(2,'0')+'h '+String(mins).padStart(2,'0')+'m';
-  if(hours>0)return hours+'h '+String(mins).padStart(2,'0')+'m '+String(secs).padStart(2,'0')+'s';
-  return mins+'m '+String(secs).padStart(2,'0')+'s';
-};
-function updateCountdowns(){
-  document.querySelectorAll('[data-countdown]').forEach(el=>{
-    const value=el.getAttribute('data-countdown')||'';
-    const t=Date.parse(value);
-    el.textContent='TIME LEFT '+timeLeft(value);
-    el.classList.toggle('red',Number.isFinite(t)&&t<=Date.now());
-    el.classList.toggle('green',Number.isFinite(t)&&t>Date.now());
-  });
-}
+const appUrl=()=>/Android/i.test(navigator.userAgent)
+  ?'intent://kalshi.com/f/install#Intent;scheme=https;package=com.kalshi.mobile;S.browser_fallback_url='+encodeURIComponent('https://kalshi.com/f/install')+';end'
+  :'https://kalshi.com/f/install';
 
 let busy=false;
 let lastPayload=null;
-let activeCategory=null;
 
-function entryWindow(s){
-  const w=s?.scan?.entryWindowHours||{};
-  const min=Number.isFinite(+w.min)?+w.min:.25;
-  const max=Number.isFinite(+w.max)?+w.max:6;
-  return{min,max};
+function setText(id,value){
+  const el=$(id);if(el)el.textContent=value;
 }
-function hoursLeft(v){
-  const t=Date.parse(v||'');
-  return Number.isFinite(t)?(t-Date.now())/3600000:NaN;
-}
-const blockedQualifications=new Set(['LATE DAY','PAST HEATING WINDOW','TOO SOON','TOO FAR','NO ACTION TIME','NO CLOSE TIME','DATA CHECK','STALE DATA','NO PAYOUT TIME','NOT SAME-DAY PAYOUT','MORNING WINDOW CLOSED']);
-function isBlockedOpportunity(o){
-  return blockedQualifications.has(String(o?.qualification||'').toUpperCase());
-}
-
-// The backend is the only authority for bet qualification. The browser must never
-// promote WATCH opportunities into paper picks on its own.
-function edgeQualifyOpportunity(s,o){
-  return o;
-}
-
-function nearTermOpportunities(s,category=null){
-  const all=Array.isArray(s?.scan?.opportunities)?s.scan.opportunities:[];
-  const {max}=entryWindow(s);
-  return all.filter(o=>{
-    const h=hoursLeft(actionTime(o));
-    return Number.isFinite(h)&&h>0&&h<=max&&!isBlockedOpportunity(o)&&(!category||String(o.category||'').toUpperCase()===String(category).toUpperCase());
-  }).map(o=>edgeQualifyOpportunity(s,o));
-}
-
-function researchedCategoryOpportunities(s,category){
-  const all=Array.isArray(s?.scan?.opportunities)?s.scan.opportunities:[];
-  return all.filter(o=>String(o.category||'').toUpperCase()===String(category||'').toUpperCase());
-}
-function upcomingWeatherCalls(s){
-  const all=researchedCategoryOpportunities(s,'WEATHER')
-    .filter(o=>{
-      const h=hoursLeft(actionTime(o));
-      return Number.isFinite(h)&&h>0&&h<=24&&String(o.qualification||'').toUpperCase()!=='DATA CHECK';
-    });
-  const best=new Map();
-  for(const o of all){
-    const key=o.eventTicker||o.city||o.targetDate||o.ticker;
-    const yesProb=String(o.side||'').toLowerCase()==='yes'?+o.modelProbability:1-(+o.modelProbability||0);
-    const yesMarket=String(o.side||'').toLowerCase()==='yes'?+o.marketProbability:1-(+o.marketProbability||0);
-    const call={
-      ...o,
-      side:'yes',
-      modelProbability:Math.max(0,Math.min(1,yesProb)),
-      marketProbability:Math.max(0,Math.min(1,yesMarket)),
-      edge:yesProb-yesMarket,
-      qualified:false,
-      displayState:'UPCOMING'
-    };
-    const prev=best.get(key);
-    if(!prev||call.modelProbability>prev.modelProbability)best.set(key,call);
-  }
-  return [...best.values()]
-    .sort((a,b)=>(+b.modelProbability||0)-(+a.modelProbability||0))
-    .slice(0,8);
-}
-
-async function json(path,ms=45000){
-  const ac=new AbortController(),timer=setTimeout(()=>ac.abort(),ms);
-  try{
-    const r=await fetch(API+path,{cache:'no-store',signal:ac.signal});
-    const text=await r.text();
-    let body;
-    try{body=JSON.parse(text)}catch{throw new Error('Invalid API response')}
-    if(!r.ok)throw new Error(body?.error||('HTTP '+r.status));
-    return body;
-  }finally{clearTimeout(timer)}
-}
-
-function setText(id,value){const el=$(id);if(el)el.textContent=value}
-function setClass(id,value){const el=$(id);if(el)el.className=value}
-
-function health(ok,error){
+function health(ok,message){
   const pill=document.querySelector('.livePill');
-  if(pill)pill.className='livePill '+(ok&&!error?'good':error?'bad':'');
-  setText('healthText',ok&&!error?'RESEARCH LIVE':error?'DEGRADED':'CONNECTING');
+  if(pill)pill.className='livePill '+(ok?'good':'bad');
+  setText('healthText',ok?'LIVE SCANNER':message?'DEGRADED':'RETRYING');
 }
-
-function selectedOpportunity(s){
-  const scan=s?.scan||{};
-  const qualified=Array.isArray(scan.qualified)?scan.qualified:[];
-  if(qualified.length)return{row:qualified[0],qualified:true,test:false};
-  const open=Array.isArray(s?.positions)?s.positions:[];
-  const activeOpen=open.filter(p=>{
-    const t=Date.parse(actionTime(p)||"");
-    return !Number.isFinite(t)||t>Date.now();
-  });
-  if(activeOpen.length){
-    const strong=activeOpen.find(p=>p.paperTier==="STRONG");
-    if(strong)return{row:strong,qualified:true,test:false,position:true};
-    return{row:activeOpen[0],qualified:false,test:true,position:true};
-  }
-  const opps=nearTermOpportunities(s);
-  const tradeable=opps.find(o=>Number.isFinite(+(o.marketPrice??o.marketProbability))&&+(o.marketPrice??o.marketProbability)>=.03&&+(o.marketPrice??o.marketProbability)<=.97);
-  const row=tradeable||opps[0]||null;
-  return{row,qualified:!!row?.qualified,test:false};
+async function json(path){
+  const r=await fetch(API+path,{cache:'no-store'});
+  const data=await r.json().catch(()=>({}));
+  if(!r.ok||data?.ok===false)throw new Error(data?.error||'HTTP '+r.status);
+  return data;
+}
+function pairKey(o){
+  return (o?.legs||[]).map(x=>(x.side||'').toUpperCase()+' '+(x.ticker||'')).join(' + ');
+}
+function legHtml(leg){
+  return '<div class="leg">'+
+    '<div><span>'+esc(String(leg.side||'').toUpperCase())+'</span><b>'+esc(leg.ticker||'')+'</b></div>'+
+    '<div class="legPrice"><small>ASK</small><strong>'+cents(leg.ask)+'</strong></div>'+
+    '<button type="button" class="copyTicker" data-copy-ticker="'+esc(leg.ticker||'')+'">COPY</button>'+
+  '</div>';
 }
 
 function renderHero(s){
-  const pick=selectedOpportunity(s),o=pick.row;
-  const qualified=!!pick.qualified&&(pick.position||!!o?.qualified);
-  const test=!!pick.test;
+  const rows=Array.isArray(s?.scan?.arbOpportunities)?s.scan.arbOpportunities:[];
+  const qualified=rows.filter(x=>x.qualified);
+  const best=qualified[0]||rows[0]||null;
   const status=$('heroStatus');
-  if(status){
-    status.textContent=qualified?'STRONG PAPER PICK':test?'TEST PAPER PICK':o?'WATCH ONLY':'NO BET NOW';
-    status.className='heroStatus '+(qualified?'found':'hunting');
-  }
-  if(!o){
-    setText('heroTitle','No bet right now');
-    setText('heroSubtitle','Nothing currently passes DreamPredict’s timing, confidence, and edge rules.');
-    setText('heroResearch','The engine is still researching, but it will not surface blocked or stale contracts as a bet.');
-    ['heroModel','heroMarket','heroEdge','heroConfidence','heroSide','heroContracts','heroProfit','orbProb'].forEach(id=>setText(id,'--'));
-    setText('heroStake',money(s?.paperStakeDollars||10));
-    setText('orbLabel','NO BET');
-    const orb=$('probOrb');if(orb)orb.style.setProperty('--prob','0');
-    const heroActions=$('heroTradeActions');if(heroActions)heroActions.hidden=true;
-    const heroLink=$('heroKalshiLink');if(heroLink)heroLink.removeAttribute('href');
-    const heroCopy=$('heroCopyTicker');if(heroCopy)heroCopy.dataset.copyTicker='';
+  if(!best){
+    if(status){status.className='heroStatus hunting';status.textContent='HUNTING'}
+    setText('heroTitle','No structural pair priced yet.');
+    setText('heroSubtitle','Dream Arb is scanning open Kalshi threshold ladders and refusing to invent a trade when the relationship or price is not provable.');
+    setText('heroRule','No prediction required. If the payoff relationship cannot be proven, it does not get the ARB label.');
+    setText('heroEdge','--');setText('heroCost','--');setText('heroFees','--');setText('heroDepth','--');
+    $('heroLegs').innerHTML='<div class="empty compact">Waiting for a provable price mismatch.</div>';
     return;
   }
-
-  setText('heroTitle',o.title||((o.city||'Weather')+' prediction'));
-  setText('heroSubtitle',(o.city?o.city+' · ':'')+(o.subtitle||o.ticker||'')+(qualified?' · STRONG PAPER PICK':test?' · TEST PAPER PICK · LOWER THRESHOLD':' · WATCH ONLY · NOT A BET'));
-  setText('heroResearch',o?.research?.rationale||'Independent research loaded.');
-  setText('heroModel',pct(o.modelProbability));
-  setText('heroMarket',pct(o.marketProbability??o.entryPrice));
-  setText('heroEdge',edgePct(o.edge));
-  setText('heroConfidence',pct(o.confidence));
-  setText('heroSide',(qualified||test)?String(o.side||'').toUpperCase():'WAIT');
-  setText('heroStake',(qualified||test)?money(o.paperStake||o.stake||s?.paperStakeDollars||10):money(s?.paperStakeDollars||10));
-  setText('heroContracts',(qualified||test)?String(o.contracts||'--'):'--');
-  setText('heroProfit',(qualified||test)?money(Number.isFinite(+o.profitIfWin)?+o.profitIfWin:(+o.contracts||0)-(+o.stake||0)):'--');
-  setText('orbProb',pct(o.modelProbability));
-  setText('orbLabel',qualified?String(o.side||'').toUpperCase()+' STRONG':test?String(o.side||'').toUpperCase()+' TEST':'WATCH ONLY');
-  const orb=$('probOrb');if(orb)orb.style.setProperty('--prob',String(Math.max(0,Math.min(100,Math.round((+o.modelProbability||0)*100)))));
-  const heroActions=$('heroTradeActions');
-  const heroLink=$('heroKalshiLink');
-  const heroCopy=$('heroCopyTicker');
-  if(heroActions)heroActions.hidden=!(qualified&&o.ticker);
-  if(heroLink&&qualified&&o.ticker)heroLink.href=kalshiAppUrl();
-  if(heroCopy)heroCopy.dataset.copyTicker=qualified?(o.ticker||''):'';
+  if(best.qualified){
+    status.className='heroStatus found';status.textContent='LOCKED EDGE FOUND';
+    setText('heroTitle',best.eventTitle||'Structural arbitrage detected');
+    setText('heroSubtitle','Both legs are priced below their guaranteed minimum combined payout after conservative estimated fees and the configured safety margin.');
+  }else{
+    status.className='heroStatus near';status.textContent='NO ARB · CLOSEST PAIR';
+    setText('heroTitle','No guaranteed edge right now.');
+    setText('heroSubtitle','This is the closest structural pair currently visible, shown so you can see what the scanner is rejecting instead of a blank screen.');
+  }
+  setText('heroRule',(best.strikeType||'threshold').toUpperCase()+' ladder · '+String(best.lowerStrike)+' → '+String(best.upperStrike)+' · '+(best.qualification||''));
+  setText('heroEdge',edge(best.netEdge));
+  setText('heroCost',cents(best.grossCost));
+  setText('heroFees',cents((+best.estimatedFees||0)+(+best.safetyMargin||0)));
+  setText('heroDepth',best.depth===null||best.depth===undefined?'UNKNOWN':integer(best.depth)+' pairs');
+  setText('heroPayout',money(best.guaranteedMinimumPayout||1));
+  $('heroLegs').innerHTML=(best.legs||[]).map(legHtml).join('');
 }
 
-function opportunityCard(o){
+function arbCard(o){
   const q=!!o.qualified;
-  const research=o?.research||{};
-  const sourceLine=Array.isArray(research.sources)&&research.sources.length?research.sources.join(' + '):'independent research';
-  return '<article class="opp '+(q?'qualified':'')+'">'+
-    '<div class="oppTop"><span class="oppCategory">'+esc(o.category||'MARKET')+' · '+esc(o.city||'')+'</span><span class="oppBadge">'+esc(q?(o.qualification||'QUALIFIED'):'WATCH')+'</span></div>'+
-    '<h3>'+esc(o.title||o.ticker||'Opportunity')+'</h3>'+
-    '<div class="oppSub">'+esc(o.subtitle||'')+' · '+esc(String(o.side||'').toUpperCase())+'</div>'+
-    '<div class="oppOdds">'+
-      '<div><span>MODEL</span><b>'+pct(o.modelProbability)+'</b></div>'+
-      '<div><span>MARKET</span><b>'+pct(o.marketProbability)+'</b></div>'+
-      '<div><span>EDGE</span><b class="'+((+o.edge||0)>0?'green':'red')+'">'+edgePct(o.edge)+'</b></div>'+
+  return '<article class="arbCard '+(q?'qualified':'rejected')+'">'+
+    '<div class="cardTop"><span class="category">'+esc(o.category||'MARKET')+'</span><em>'+(q?'ARB':'REJECTED')+'</em></div>'+
+    '<h3>'+esc(o.eventTitle||o.eventTicker||'Kalshi event')+'</h3>'+
+    '<div class="threshold">'+esc(String(o.strikeType||'').toUpperCase())+' · '+esc(String(o.lowerStrike))+' → '+esc(String(o.upperStrike))+'</div>'+
+    '<div class="miniMetrics">'+
+      '<div><span>NET EDGE</span><b class="'+(q?'green':(+o.netEdge<0?'red':'amber'))+'">'+edge(o.netEdge)+'</b></div>'+
+      '<div><span>PAIR COST</span><b>'+cents(o.grossCost)+'</b></div>'+
+      '<div><span>FEES + BUFFER</span><b>'+cents((+o.estimatedFees||0)+(+o.safetyMargin||0))+'</b></div>'+
+      '<div><span>DEPTH</span><b>'+(o.depth==null?'--':integer(o.depth))+'</b></div>'+
     '</div>'+
-    '<div class="oppResearch">'+esc(sourceLine)+' · confidence '+pct(o.confidence)+(q?' · '+money(o.paperStake)+' paper / '+esc(o.contracts)+' contracts':'')+'</div>'+
-    '<div class="oppCountdown" data-countdown="'+esc(actionTime(o)||'')+'">TIME LEFT '+timeLeft(actionTime(o))+'</div>'+
-    (q?'<div class="tradeActions"><span class="ticker">'+esc(o.ticker||'')+'</span><button type="button" class="copyTicker" data-copy-ticker="'+esc(o.ticker||'')+'">COPY TICKER</button><a class="kalshiLink" href="'+esc(kalshiAppUrl())+'">OPEN KALSHI APP ↗</a></div>':'<div class="watchOnly">WATCH ONLY · DREAM PREDICT WOULD NOT ENTER THIS</div>')+
+    '<div class="cardLegs">'+(o.legs||[]).map(legHtml).join('')+'</div>'+
+    '<div class="qualification">'+esc(o.qualification||'')+'</div>'+
   '</article>';
 }
-
-function renderOpportunities(s){
-  const near=nearTermOpportunities(s);
-  const backendQualified=(Array.isArray(s?.scan?.qualified)?s.scan.qualified:[]).map(o=>edgeQualifyOpportunity(s,o));
-  const qids=new Set(backendQualified.map(x=>x.id||x.ticker));
-  const rows=[...backendQualified,...near.filter(x=>!qids.has(x.id||x.ticker))]
-    .sort((a,b)=>(+b.qualified-+a.qualified)||(+b.score||0)-(+a.score||0))
-    .slice(0,12);
-  const el=$('opportunities');
-  const {max}=entryWindow(s);
-  if(el)el.innerHTML=rows.length?rows.map(opportunityCard).join(''):'<div class="empty noBetEmpty"><b>NO BET NOW</b><span>Nothing currently passes the timing, confidence, and edge rules inside the next '+max+' hours.</span></div>';
-  setText('scanCount',String(near.length));
-  setText('qualifiedCount',String(rows.filter(x=>x.qualified).length));
-  updateCountdowns();
-}
-
-function renderPositions(s){
-  const rows=Array.isArray(s?.positions)?s.positions:[];
-  setText('openCount',rows.length+' OPEN');
-  const el=$('positions');
-  if(!el)return;
-  el.innerHTML=rows.length?rows.map(p=>{
-    const test=p.paperTier==="TEST";
-    const actionAt=Date.parse(actionTime(p)||"");
-    const weatherPending=String(p.category||'').toUpperCase()==='WEATHER'&&Number.isFinite(actionAt)&&actionAt<=Date.now();
-    const stateLabel=weatherPending?'AWAITING NWS SETTLEMENT':(test?'TEST PAPER PICK':'STRONG PAPER PICK');
-    return '<div class="position '+(test?'testPosition ':'')+(weatherPending?'weatherPending':'')+'">'+
-      '<div class="rowTop"><b>'+esc(p.city||p.category||'Prediction')+' · '+esc(String(p.side||'').toUpperCase())+'</b><span class="'+(weatherPending?'pendingTag':test?'testTag':'strongTag')+'">'+stateLabel+'</span></div>'+
-      '<div class="rowMeta"><span>'+esc(p.subtitle||p.title||p.ticker)+'</span><span>'+money(p.stake)+' paper</span><span>model '+pct(p.modelProbability)+'</span><span>entry '+pct(p.marketProbability||p.entryPrice)+'</span><span>edge '+edgePct(p.edge)+'</span><span>'+esc(p.contracts)+' contracts</span>'+
-        (weatherPending?'<span>HEATING WINDOW CLOSED</span><span>official settlement '+dateTime(p.closeTime)+'</span>':'<span data-countdown="'+esc(actionTime(p)||'')+'">TIME LEFT '+timeLeft(actionTime(p))+'</span>')+
-      '</div>'+
-      (weatherPending?'<div class="watchOnly">NO MORE WEATHER ENTRY · WAITING FOR FINAL NWS DAILY CLIMATE REPORT</div>':test?'<div class="watchOnly">PAPER TEST ONLY · LOWER THRESHOLD · NO REAL-MONEY LINK</div>':'<div class="tradeActions"><span class="ticker">'+esc(p.ticker||'')+'</span><button type="button" class="copyTicker" data-copy-ticker="'+esc(p.ticker||'')+'">COPY TICKER</button><a class="kalshiLink" href="'+esc(kalshiAppUrl())+'">OPEN KALSHI APP ↗</a></div>')+
-    '</div>';
-  }).join(''):'<div class="empty">No open paper predictions yet.</div>';
-  updateCountdowns();
-}
-
-function renderHistory(s){
-  const rows=Array.isArray(s?.recent)?s.recent:[];
-  setText('settledCount',rows.length+' SETTLED');
-  const el=$('history');
-  if(!el)return;
-  el.innerHTML=rows.length?rows.slice(0,12).map(t=>
-    '<div class="historyRow">'+
-      '<div class="rowTop"><b>'+esc(t.city||t.category||'Prediction')+' · '+esc(String(t.side||'').toUpperCase())+'</b><span class="'+(t.won?'win':'loss')+'">'+(t.won?'WIN ':'LOSS ')+money(t.netDollars)+'</span></div>'+
-      '<div class="rowMeta"><span>'+esc(t.subtitle||t.title||t.ticker)+'</span><span>model '+pct(t.modelProbability)+'</span><span>result '+esc(String(t.result||'').toUpperCase())+'</span><span>'+dateTime(t.settledAt)+'</span></div>'+
-      '<div class="tradeActions"><span class="ticker">'+esc(t.ticker||'')+'</span><button type="button" class="copyTicker" data-copy-ticker="'+esc(t.ticker||'')+'">COPY TICKER</button><a class="kalshiLink" href="'+esc(kalshiAppUrl())+'">OPEN KALSHI APP ↗</a></div>'+
-    '</div>'
-  ).join(''):'<div class="empty">No settled predictions yet.</div>';
-}
-
-function categoryPickRow(o){
-  const q=!!o.qualified;
-  const state=o.displayState||(q?(o.qualification||'PAPER READY'):'WATCH ONLY');
-  const upcoming=state==='UPCOMING';
-  return '<div class="categoryPick '+(q?'qualified':'')+' '+(upcoming?'upcoming':'')+'">'+
-    '<div class="categoryPickTop"><b>'+esc(String(o.side||'').toUpperCase())+' · '+pct(o.modelProbability)+'</b><span>'+esc(state)+'</span></div>'+
-    '<div class="categoryPickTitle">'+esc(o.title||o.subtitle||o.ticker)+'</div>'+
-    '<div class="categoryPickMeta"><span>market '+pct(o.marketProbability)+'</span><span>edge '+edgePct(o.edge)+'</span><span data-countdown="'+esc(actionTime(o)||'')+'">TIME LEFT '+timeLeft(actionTime(o))+'</span></div>'+
-    (q?'<div class="tradeActions"><span class="ticker">'+esc(o.ticker||'')+'</span><button type="button" class="copyTicker" data-copy-ticker="'+esc(o.ticker||'')+'">COPY TICKER</button><a class="kalshiLink" href="'+esc(kalshiAppUrl())+'">OPEN KALSHI APP ↗</a></div>':upcoming?'<div class="watchOnly">UPCOMING RESEARCH · NOT IN BET WINDOW YET</div>':'<div class="watchOnly">WATCH ONLY · NO ENTRY</div>')+
-  '</div>';
-}
-function renderCategoryDetail(s){
-  const el=$('categoryDetail');if(!el)return;
-  if(!activeCategory){
-    el.innerHTML='<div class="categoryPrompt">Tap Weather, Sports, Economics, or Fed to expand its predictions.</div>';
+function renderArbs(s){
+  const rows=Array.isArray(s?.scan?.arbOpportunities)?s.scan.arbOpportunities:[];
+  const el=$('arbs');if(!el)return;
+  if(!rows.length){
+    el.innerHTML='<div class="noEdge"><b>NO STRUCTURAL PAIRS PRICED YET</b><span>The bot is still scanning. Empty is better than manufacturing a bet.</span></div>';
     return;
   }
-  const {min,max}=entryWindow(s);
-  let rows=nearTermOpportunities(s,activeCategory)
-    .sort((a,b)=>(+b.qualified-+a.qualified)||(+b.modelProbability||0)-(+a.modelProbability||0)||(+b.edge||0)-(+a.edge||0))
-    .slice(0,8);
-  const ready=rows.filter(x=>x.qualified).length;
-  let title='Best model calls · next '+max+' hours';
-  let state=ready?ready+' PAPER READY':'NO BET NOW';
-  if(!rows.length&&activeCategory==='WEATHER'){
-    rows=upcomingWeatherCalls(s);
-    if(rows.length){
-      title='Upcoming weather calls · next 24 hours';
-      state='RESEARCHING AHEAD';
-    }
-  }
-  el.innerHTML='<div class="categoryDetailHead"><div><span>'+esc(activeCategory)+'</span><b>'+esc(title)+'</b></div><em>'+esc(state)+'</em></div>'+
-    (rows.length?'<div class="categoryPickGrid">'+rows.map(categoryPickRow).join('')+'</div>':
-      '<div class="empty">No '+esc(activeCategory.toLowerCase())+' event is inside the '+Math.round(min*60)+' minute-'+max+' hour bet window right now.</div>');
-  updateCountdowns();
+  const qualified=rows.filter(x=>x.qualified);
+  const near=rows.filter(x=>!x.qualified).slice(0,6);
+  const shown=[...qualified.slice(0,8),...near].slice(0,12);
+  el.innerHTML=shown.map(arbCard).join('');
 }
-function renderCategories(s){
-  const rows=Array.isArray(s?.scan?.categories)?s.scan.categories:[];
-  const el=$('categories');if(!el)return;
-  el.innerHTML=rows.length?rows.map(cat=>{
-    const state=String(cat.status||'').toLowerCase();
-    const key=String(cat.name||'').toUpperCase();
-    const near=nearTermOpportunities(s,key);
-    const researched=researchedCategoryOpportunities(s,key);
-    const ready=near.filter(x=>x.qualified).length;
-    return '<button type="button" class="category '+(activeCategory===key?'active':'')+'" data-category="'+esc(key)+'">'+
-      '<div class="categoryTop"><b>'+esc(cat.name)+'</b><span class="categoryState '+esc(state)+'">'+esc(cat.status)+'</span></div>'+
-      '<p>'+esc(cat.detail||'')+'</p>'+
-      '<div class="categoryCounts"><span>'+(researched.length?researched.length+' RESEARCHED':'QUIET NOW')+'</span><span>'+(ready?ready+' PAPER READY':'NO BET NOW')+'</span></div>'+
-    '</button>';
-  }).join(''):'<div class="empty">Research universe is loading.</div>';
-  renderCategoryDetail(s);
+
+function rewardCard(r){
+  const perDay=Number.isFinite(num(r.rewardPerDay))?money(r.rewardPerDay):'--';
+  const ends=r.endDate?dateTime(r.endDate):'--';
+  return '<article class="rewardCard">'+
+    '<div class="cardTop"><span class="category">LIQUIDITY</span><em class="cyan">'+esc(r.qualification||'WATCH')+'</em></div>'+
+    '<h3>'+esc(r.ticker||'Kalshi market')+'</h3>'+
+    '<p>'+esc(r.description||'Active liquidity incentive')+'</p>'+
+    '<div class="miniMetrics rewardMetrics">'+
+      '<div><span>REWARD / PERIOD</span><b>'+money(r.reward)+'</b></div>'+
+      '<div><span>TARGET SIZE</span><b>'+integer(r.targetSize)+'</b></div>'+
+      '<div><span>REWARD / TARGET</span><b>'+ratio+'</b></div>'+
+      '<div><span>ENDS</span><b>'+esc(ends)+'</b></div>'+
+    '</div>'+
+    '<div class="tradeBar"><span>'+esc(r.ticker||'')+'</span><button type="button" class="copyTicker" data-copy-ticker="'+esc(r.ticker||'')+'">COPY TICKER</button><a href="'+esc(appUrl())+'">OPEN KALSHI ↗</a></div>'+
+  '</article>';
+}
+function renderLiquidity(s){
+  const rows=Array.isArray(s?.scan?.liquidityOpportunities)?s.scan.liquidityOpportunities:[];
+  const el=$('liquidity');if(!el)return;
+  el.innerHTML=rows.length?rows.slice(0,12).map(rewardCard).join(''):
+    '<div class="noEdge"><b>NO ACTIVE LIQUIDITY PROGRAMS RETURNED</b><span>The scanner will keep checking automatically.</span></div>';
+}
+
+function captureRow(x){
+  return '<div class="capture">'+
+    '<div class="captureTop"><b>'+esc(x.eventTitle||x.eventTicker||'Structural pair')+'</b><strong class="green">'+money(x.lockedProfit)+'</strong></div>'+
+    '<div class="captureMeta"><span>'+integer(x.contracts)+' pairs</span><span>'+money(x.capital)+' modeled capital</span><span>'+edge(x.netEdge)+' / pair</span><span>'+dateTime(x.capturedAt)+'</span></div>'+
+    '<div class="captureLegs">'+esc(pairKey(x))+'</div>'+
+  '</div>';
+}
+function renderCaptures(s){
+  const rows=Array.isArray(s?.shadow?.recent)?s.shadow.recent:[];
+  setText('captureCount',(s?.shadow?.captures||0)+' CAPTURES');
+  const el=$('captures');if(el)el.innerHTML=rows.length?rows.slice(0,20).map(captureRow).join(''):
+    '<div class="empty">No qualified structural arb captured yet.</div>';
+}
+
+function renderGuardrails(s){
+  setText('minEdge',edge(s?.guardrails?.minNetEdge));
+  setText('safetyMargin',cents(s?.guardrails?.safetyMargin));
+  setText('maxContracts',integer(s?.guardrails?.maxContracts));
+  setText('mecRule',s?.guardrails?.mutuallyExclusiveBasketAssumption===false?'OFF':'CHECK');
+  setText('executionReason',s?.execution?.reason||'Real-money execution is locked.');
+  const tag=$('executionTag');
+  if(tag)tag.textContent=s?.execution?.live?'LIVE':'SHADOW ONLY';
 }
 
 function renderDiagnostics(s){
   setText('engineVersion',s?.version||'--');
-  setText('entries',String(s?.entries??0));
+  setText('eventCount',integer(s?.scan?.scannedEvents||0));
+  setText('arbCandidates',integer((s?.scan?.arbOpportunities||[]).length));
+  setText('liquidityPrograms',integer(s?.scan?.liquidityPrograms||0));
   const errors=[];
   if(s?.lastError)errors.push(s.lastError);
-  if(Array.isArray(s?.scan?.errors))errors.push(...s.scan.errors.map(x=>(x.series?x.series+': ':'')+(x.error||'error')));
+  if(Array.isArray(s?.scan?.errors))errors.push(...s.scan.errors);
   setText('errors',errors.length?errors.join('\n'):'No errors.');
 }
 
 function render(s){
   lastPayload=s;
   health(!!s?.ok,s?.lastError);
-  setText('mode',s?.mode||'AUTO PAPER');
-  setText('stake',money(s?.paperStakeDollars||10));
-  setText('openRisk',money(s?.openRisk||0));
-  setText('realized',money(s?.realized||0));
-  const realized=$('realized');
-  if(realized)realized.className=(+s?.realized||0)>0?'green':(+s?.realized||0)<0?'red':'';
-  setText('record',(s?.wins||0)+'W / '+(s?.losses||0)+'L');
+  setText('mode',s?.mode||'SHADOW');
+  setText('arbCount',integer(s?.scan?.qualifiedArbs||0));
+  setText('rewardCount',integer(s?.scan?.liquidityPrograms||0));
+  setText('shadowProfit',money(s?.shadow?.theoreticalLockedProfit||0));
+  setText('marketCount',integer(s?.scan?.scannedMarkets||0));
   setText('lastScan',s?.lastScanAt?clock(s.lastScanAt):'--');
-  const w=entryWindow(s);setText('window',Math.round(w.min*60)+' MIN-'+w.max+' HRS');
+  const sp=$('shadowProfit');if(sp)sp.className=(+s?.shadow?.theoreticalLockedProfit||0)>0?'green':'';
   renderHero(s);
-  renderOpportunities(s);
-  renderPositions(s);
-  renderHistory(s);
-  renderCategories(s);
+  renderArbs(s);
+  renderLiquidity(s);
+  renderCaptures(s);
+  renderGuardrails(s);
   renderDiagnostics(s);
 }
 
@@ -353,20 +188,21 @@ async function refresh(force=false){
   if(busy)return;
   busy=true;
   const btn=$('refreshBtn');
-  if(btn){btn.disabled=true;btn.textContent=force?'Researching...':'Refreshing...'}
+  if(btn){btn.disabled=true;btn.textContent=force?'Scanning...':'Refreshing...'}
   try{
     const data=await json(force?'/dream-predict/scan':'/dream-predict/status');
     render(data);
   }catch(error){
-    health(false,error instanceof Error?error.message:String(error));
+    const message=error instanceof Error?error.message:String(error);
+    health(false,message);
     setText('healthText','RETRYING');
     if(!lastPayload){
-      setText('heroTitle','Research feed reconnecting...');
-      setText('heroSubtitle',error instanceof Error?error.message:String(error));
+      setText('heroTitle','Scanner reconnecting...');
+      setText('heroSubtitle',message);
     }
   }finally{
     busy=false;
-    if(btn){btn.disabled=false;btn.textContent='Refresh research'}
+    if(btn){btn.disabled=false;btn.textContent='Scan now'}
   }
 }
 
@@ -379,20 +215,11 @@ document.addEventListener('click',async event=>{
     await navigator.clipboard.writeText(ticker);
     const old=button.textContent;
     button.textContent='COPIED';
-    setTimeout(()=>button.textContent=old,1200);
+    setTimeout(()=>button.textContent=old,1100);
   }catch{
     window.prompt('Copy this Kalshi ticker:',ticker);
   }
 });
-
-$('categories')?.addEventListener('click',event=>{
-  const button=event.target.closest('[data-category]');
-  if(!button)return;
-  const key=button.getAttribute('data-category');
-  activeCategory=activeCategory===key?null:key;
-  if(lastPayload)renderCategories(lastPayload);
-});
 $('refreshBtn')?.addEventListener('click',()=>refresh(true));
 refresh(false);
-setInterval(()=>refresh(false),25000);
-setInterval(updateCountdowns,1000);
+setInterval(()=>refresh(false),20000);
