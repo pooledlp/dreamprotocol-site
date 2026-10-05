@@ -109,7 +109,7 @@ function renderArbs(s){
 }
 
 function rewardCard(r){
-  const ratio=Number.isFinite(num(r.rewardPerTargetContract))?money(r.rewardPerTargetContract):'--';
+  const perDay=Number.isFinite(num(r.rewardPerDay))?money(r.rewardPerDay):'--';
   const ends=r.endDate?dateTime(r.endDate):'--';
   return '<article class="rewardCard">'+
     '<div class="cardTop"><span class="category">LIQUIDITY</span><em class="cyan">'+esc(r.qualification||'WATCH')+'</em></div>'+
@@ -171,7 +171,7 @@ function render(s){
   health(!!s?.ok,s?.lastError);
   setText('mode',s?.mode||'SHADOW');
   setText('arbCount',integer(s?.scan?.qualifiedArbs||0));
-  setText('rewardCount',integer(s?.scan?.qualifiedLiquidity||0));
+  setText('rewardCount',integer(s?.scan?.liquidityPrograms||0));
   setText('shadowProfit',money(s?.shadow?.theoreticalLockedProfit||0));
   setText('marketCount',integer(s?.scan?.scannedMarkets||0));
   setText('lastScan',s?.lastScanAt?clock(s.lastScanAt):'--');
