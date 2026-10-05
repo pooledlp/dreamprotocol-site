@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#05070d">
 <meta name="robots" content="noindex,nofollow">
-<title>DreamPredict | Arb + Crypto</title>
-<link rel="stylesheet" href="styles.css?v=stack2">
+<title>DreamPredict | Dream Arb</title>
+<link rel="stylesheet" href="styles.css?v=arbfirst1">
 </head>
 <body>
 <div class="aurora a1"></div><div class="aurora a2"></div><div class="noise"></div>
@@ -16,118 +16,35 @@
       <div class="brandMark">D</div>
       <div>
         <div class="brand">DreamPredict</div>
-        <div class="sub">ARB + CRYPTO SCALP · LIQUIDITY WATCH</div>
+        <div class="sub">DREAM ARB · LIVE ORDERBOOKS · SHADOW ONLY</div>
       </div>
     </div>
-    <div class="livePill"><i id="statusDot"></i><span id="healthText">CONNECTING</span></div>
+    <div class="livePill"><i></i><span id="healthText">CONNECTING</span></div>
   </header>
 
   <section class="statusRail">
-    <div><span>MODE</span><b id="mode">PAPER</b></div>
-    <div><span>TOTAL PAPER P&L</span><b id="totalPaperPnl">$0.00</b></div>
-    <div><span>CRYPTO P&L</span><b id="cryptoPnl">$0.00</b></div>
-    <div><span>ARB P&L</span><b id="arbPnl">$0.00</b></div>
-    <div><span>PAPER TRADES</span><b id="paperTrades">0</b></div>
+    <div><span>MODE</span><b id="mode">ARB-FIRST</b></div>
+    <div><span>QUALIFIED NOW</span><b id="arbCount">0</b></div>
+    <div><span>BEST NET EDGE</span><b id="bestNetEdgeTop">--</b></div>
+    <div><span>ARB PAPER P&L</span><b id="arbPnl">$0.00</b></div>
+    <div><span>CAPTURES</span><b id="captureTopCount">0</b></div>
     <div><span>REAL P&L</span><b id="realProfit">$0.00</b></div>
   </section>
 
   <main>
-    <section class="pnlPanel panel">
-      <div class="pnlHead">
-        <div>
-          <div class="eyebrow">PROFIT TRACKER</div>
-          <h2>One paper account. Separate engines.</h2>
-          <p>ARB and CRYPTO each keep their own paper P&L. Liquidity is watch-only and never counts as profit. Real money remains separate at $0 until live execution is explicitly armed.</p>
-        </div>
-        <span id="paperModeTag" class="tag paperTag">PAPER / FAKE MONEY</span>
-      </div>
-      <div class="pnlGrid">
-        <div class="pnlPrimary"><span>TOTAL PAPER P&L</span><b id="paperTotal">$0.00</b><small>ARB + crypto paper only</small></div>
-        <div><span>CRYPTO P&L</span><b id="paperCrypto">$0.00</b><small id="cryptoRecord">0W / 0L</small></div>
-        <div><span>ARB P&L</span><b id="paperArb">$0.00</b><small id="arbCaptureCount">0 captures</small></div>
-        <div><span>PAPER ROI</span><b id="paperRoi">--</b><small>combined P&L ÷ modeled capital</small></div>
-        <div class="realPnl"><span>REAL MONEY P&L</span><b id="realTotal">$0.00</b><small id="realPnlNote">Trading not armed</small></div>
-      </div>
-      <div id="paperVerdict" class="paperVerdict neutral"><b>NO PAPER PROFIT YET</b><span>ARB and crypto are both being measured separately.</span></div>
-    </section>
-
-    <section class="panel engineStackPanel">
-      <div class="panelHead">
-        <div>
-          <div class="eyebrow">THREE-ENGINE STACK</div>
-          <h2>Different jobs. Different risk.</h2>
-          <p>ARB waits for locked math. Crypto actively hunts short mean-reversion scalps. Liquidity stays informational unless its economics become exceptional.</p>
-        </div>
-        <span class="tag paperTag">REAL ORDERS OFF</span>
-      </div>
-      <div class="engineGrid">
-        <article class="engineCard arbEngine">
-          <div class="engineTop"><span>01 · ARB</span><em id="arbEngineState">HUNTING</em></div>
-          <b id="arbEnginePnl">$0.00</b>
-          <small>PAPER LOCKED PROFIT</small>
-          <p id="arbEngineDetail">Rare structural mispricing. Zero trades is acceptable.</p>
-        </article>
-        <article class="engineCard cryptoEngine">
-          <div class="engineTop"><span>02 · CRYPTO SCALP</span><em id="cryptoEngineState">WARMING UP</em></div>
-          <b id="cryptoEnginePnl">$0.00</b>
-          <small>PAPER REALIZED P&L</small>
-          <p id="cryptoEngineDetail">BTC · ETH · SOL · XRP · DOGE</p>
-        </article>
-        <article class="engineCard liquidityEngine">
-          <div class="engineTop"><span>03 · LIQUIDITY</span><em>WATCH ONLY</em></div>
-          <b id="liquidityEngineCount">0</b>
-          <small>ACTIVE REWARD PROGRAMS</small>
-          <p>No liquidity orders. Pools are not counted as profit.</p>
-        </article>
-      </div>
-    </section>
-
-    <section class="panel cryptoPanel">
-      <div class="panelHead">
-        <div>
-          <div class="eyebrow">CRYPTO MEAN-REVERSION SCALPER</div>
-          <h2>Buy the dip only after it starts coming back</h2>
-          <p>Maker-only entry at the displayed bid, then taker exit at the displayed bid when the rebound pays. It must clear modeled fees, confirm CF momentum, and respect a hard net-loss cap.</p>
-        </div>
-        <span id="cryptoSocketTag" class="tag">CONNECTING</span>
-      </div>
-      <div class="cryptoMetrics">
-        <div><span>TOTAL P&L</span><b id="cryptoTotalPnl">$0.00</b></div>
-        <div><span>RECORD</span><b id="cryptoWinLoss">0W / 0L</b></div>
-        <div><span>AVG WIN</span><b id="cryptoAvgWin">$0.00</b></div>
-        <div><span>AVG LOSS</span><b id="cryptoAvgLoss">$0.00</b></div>
-        <div><span>PROFIT FACTOR</span><b id="cryptoProfitFactor">--</b></div>
-        <div><span>EXPECTANCY / TRADE</span><b id="cryptoExpectancy">$0.00</b></div>
-        <div><span>PAYOFF RATIO</span><b id="cryptoPayoff">--</b></div>
-        <div><span>TODAY</span><b id="cryptoTodayPnl">$0.00</b></div>
-        <div><span>OPEN RISK</span><b id="cryptoOpenRisk">$0.00</b></div>
-        <div><span>LAST ACTION</span><b id="cryptoLastAction">--</b></div>
-      </div>
-      <div class="twoCol cryptoBooks">
-        <div>
-          <div class="bookHead"><span>OPEN PAPER POSITIONS</span><b id="cryptoOpenCount">0</b></div>
-          <div id="cryptoOpenPositions" class="stack"><div class="empty">No open crypto paper position.</div></div>
-        </div>
-        <div>
-          <div class="bookHead"><span>RECENT CRYPTO SCALPS</span><b id="cryptoTradeCount">0</b></div>
-          <div id="cryptoTrades" class="stack"><div class="empty">No completed crypto paper scalp yet.</div></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="hero panel">
+    <section class="hero panel arbHero">
       <div class="heroGrid">
         <div class="heroCopy">
-          <div class="eyebrow">BEST STRUCTURAL EDGE RIGHT NOW</div>
+          <div class="eyebrow">BEST BOOK-VERIFIED STRUCTURAL EDGE</div>
           <div id="heroStatus" class="heroStatus hunting">SCANNING</div>
           <h1 id="heroTitle">Hunting broken math.</h1>
-          <p id="heroSubtitle">Dream Arb scans live Kalshi markets for contract relationships that must obey the same underlying outcome, then subtracts fees and a safety margin before calling anything an arbitrage.</p>
-          <div id="heroRule" class="researchLine">No prediction required. If the payoff relationship cannot be proven, it does not get the ARB label.</div>
+          <p id="heroSubtitle">Dream Arb looks for two contracts whose settlement relationship guarantees at least $1.00 of combined payout, then checks the live orderbook before calling it an arb.</p>
+          <div id="heroRule" class="researchLine">Same rules. Same settlement time. Live asks. Visible size. Fees and safety buffer already deducted.</div>
           <div class="heroMetrics">
-            <div><span>NET EDGE</span><b id="heroEdge">--</b></div>
-            <div><span>PAIR COST</span><b id="heroCost">--</b></div>
-            <div><span>FEES + BUFFER</span><b id="heroFees">--</b></div>
-            <div><span>VISIBLE DEPTH</span><b id="heroDepth">--</b></div>
+            <div><span>NET EDGE / PAIR</span><b id="heroEdge">--</b></div>
+            <div><span>CONSERVATIVE ROI</span><b id="heroRoi">--</b></div>
+            <div><span>MODELED ALL-IN COST</span><b id="heroCost">--</b></div>
+            <div><span>LOCKED $ AT CAP</span><b id="heroLockedProfit">--</b></div>
           </div>
           <div id="heroLegs" class="legs">
             <div class="empty compact">Waiting for a provable price mismatch.</div>
@@ -141,17 +58,36 @@
               <span id="lockLabel">PROVEN RELATION</span>
             </div>
           </div>
-          <div class="lockCaption">Qualified only after estimated fees and safety margin</div>
+          <div class="lockCaption">Book-verified means both legs and visible size were repriced from Kalshi's live orderbook. Live order submission remains off.</div>
         </div>
       </div>
+    </section>
+
+    <section class="pnlPanel panel">
+      <div class="pnlHead">
+        <div>
+          <div class="eyebrow">ARB PAPER SCOREBOARD</div>
+          <h2>Prove the edge before trusting the money.</h2>
+          <p>Only qualified structural arbs count here. The crypto scalper is paused and its old results no longer contaminate the headline P&L.</p>
+        </div>
+        <span class="tag paperTag">FAKE MONEY · LOCKED MATH</span>
+      </div>
+      <div class="pnlGrid">
+        <div class="pnlPrimary"><span>ARB PAPER P&L</span><b id="paperArb">$0.00</b><small>theoretical locked profit</small></div>
+        <div><span>CAPTURES</span><b id="arbCaptureCount">0</b><small>unique qualified pairs</small></div>
+        <div><span>MODELED CAPITAL</span><b id="paperCapital">$0.00</b><small>capital used by captures</small></div>
+        <div><span>PAPER ROI</span><b id="paperRoi">--</b><small>locked P&L ÷ modeled capital</small></div>
+        <div><span>LAST 24 HOURS</span><b id="paper24h">$0.00</b><small id="paper24hCount">0 captures</small></div>
+      </div>
+      <div id="paperVerdict" class="paperVerdict neutral"><b>WAITING FOR A QUALIFIED ARB</b><span>No forced trades. Zero is better than fake edge.</span></div>
     </section>
 
     <section class="panel">
       <div class="panelHead">
         <div>
-          <div class="eyebrow">STRUCTURAL ARBITRAGE</div>
-          <h2>Provable mispricing, not a prediction</h2>
-          <p>V1 only trusts nested threshold relationships with matching settlement rules and times.</p>
+          <div class="eyebrow">STRUCTURAL ARBITRAGE · NEXT 24 HOURS</div>
+          <h2>Real quotes, visible depth, provable payout relationship.</h2>
+          <p>Qualified cards survive the rule match, live orderbook repricing, modeled taker fees, safety buffer, and minimum visible depth. Rejected cards are shown only as near misses.</p>
         </div>
         <button id="refreshBtn" class="refreshBtn" type="button">Scan now</button>
       </div>
@@ -160,17 +96,18 @@
       </div>
     </section>
 
-    <section class="panel">
-      <div class="panelHead">
-        <div>
-          <div class="eyebrow">LIQUIDITY REWARDS · WATCH ONLY</div>
-          <h2>Interesting pools, but no orders</h2>
-          <p>Ranked separately from arbitrage. Rewards are opportunities, not guaranteed profit, because fills and adverse selection still matter.</p>
-        </div>
-        <span class="tag amber">NO CAPITAL DEPLOYED</span>
-      </div>
-      <div id="liquidity" class="rewardGrid">
-        <div class="empty">Loading active liquidity programs...</div>
+    <section class="method panel">
+      <div class="eyebrow">WHAT EARNS THE ARB LABEL</div>
+      <div class="methodFlow">
+        <div><b>01</b><span>Match contracts with the same rules and settlement time</span></div>
+        <i>→</i>
+        <div><b>02</b><span>Prove the nested threshold payout relationship</span></div>
+        <i>→</i>
+        <div><b>03</b><span>Reprice both legs from live orderbook depth</span></div>
+        <i>→</i>
+        <div><b>04</b><span>Subtract modeled fees plus safety buffer</span></div>
+        <i>→</i>
+        <div><b>05</b><span>Shadow-capture only positive edge with actual size</span></div>
       </div>
     </section>
 
@@ -179,60 +116,89 @@
         <div class="panelHead compactHead">
           <div>
             <div class="eyebrow">ARB PAPER CAPTURES</div>
-            <h2>Locked-math fake trades only</h2>
+            <h2>What the scanner would have locked.</h2>
           </div>
           <span id="captureCount" class="tag">0 CAPTURES</span>
         </div>
-        <div id="captures" class="stack"><div class="empty">No fake trade yet. Paper P&L stays $0.00 until a qualified arb is actually captured.</div></div>
+        <div id="captures" class="stack"><div class="empty">No qualified arb capture yet.</div></div>
       </section>
 
       <section class="panel">
         <div class="panelHead compactHead">
           <div>
             <div class="eyebrow">EXECUTION LOCK</div>
-            <h2>Real money stays gated</h2>
+            <h2>Real money stays gated.</h2>
           </div>
           <span id="executionTag" class="tag safe">SHADOW ONLY</span>
         </div>
         <div class="guardrailGrid">
           <div><span>MIN NET EDGE</span><b id="minEdge">--</b></div>
           <div><span>SAFETY BUFFER</span><b id="safetyMargin">--</b></div>
-          <div><span>MAX CONTRACTS</span><b id="maxContracts">--</b></div>
-          <div><span>MEC BASKET ASSUMPTION</span><b id="mecRule">OFF</b></div>
+          <div><span>MAX PAIRS / CAPTURE</span><b id="maxContracts">--</b></div>
+          <div><span>SCAN HORIZON</span><b id="horizonHours">--</b></div>
         </div>
-        <p id="executionReason" class="executionReason">The engine is proving its edge against live prices before real-money order submission is armed.</p>
+        <p id="executionReason" class="executionReason">Validating live orderbook behavior before real-money execution is armed.</p>
       </section>
     </section>
 
-    <section class="method panel">
-      <div class="eyebrow">HOW DREAM ARB THINKS</div>
-      <div class="methodFlow">
-        <div><b>01</b><span>Scan live open events</span></div>
-        <i>→</i>
-        <div><b>02</b><span>Prove a monotonic contract relationship</span></div>
-        <i>→</i>
-        <div><b>03</b><span>Price both legs at executable asks</span></div>
-        <i>→</i>
-        <div><b>04</b><span>Subtract conservative fees + buffer</span></div>
-        <i>→</i>
-        <div><b>05</b><span>Shadow-capture only positive locked edge</span></div>
+    <section class="panel">
+      <div class="panelHead">
+        <div>
+          <div class="eyebrow">LIQUIDITY REWARDS · WATCH ONLY</div>
+          <h2>Interesting, but not arbitrage.</h2>
+          <p>Reward pools stay separate because fills, quoting obligations, and adverse selection can turn an attractive headline pool into a loss.</p>
+        </div>
+        <span class="tag amber">NO CAPITAL DEPLOYED</span>
+      </div>
+      <div id="liquidity" class="rewardGrid">
+        <div class="empty">Loading active liquidity programs...</div>
       </div>
     </section>
+
+    <details class="panel cryptoPanel labPanel">
+      <summary>
+        <span><b>PAUSED CRYPTO LAB</b><small>History only · no new crypto paper entries</small></span>
+        <em id="cryptoEngineState">PAUSED</em>
+      </summary>
+      <div class="labBody">
+        <p class="labNote">The old 15-minute crypto mean-reversion experiment is retained for comparison, but it is no longer part of DreamPredict's headline strategy or combined P&L.</p>
+        <div class="cryptoMetrics">
+          <div><span>HISTORICAL P&L</span><b id="cryptoTotalPnl">$0.00</b></div>
+          <div><span>RECORD</span><b id="cryptoWinLoss">0W / 0L</b></div>
+          <div><span>AVG WIN</span><b id="cryptoAvgWin">$0.00</b></div>
+          <div><span>AVG LOSS</span><b id="cryptoAvgLoss">$0.00</b></div>
+          <div><span>PROFIT FACTOR</span><b id="cryptoProfitFactor">--</b></div>
+          <div><span>EXPECTANCY</span><b id="cryptoExpectancy">$0.00</b></div>
+          <div><span>OPEN RISK</span><b id="cryptoOpenRisk">$0.00</b></div>
+          <div><span>LAST ACTION</span><b id="cryptoLastAction">--</b></div>
+        </div>
+        <div class="twoCol cryptoBooks">
+          <div>
+            <div class="bookHead"><span>OPEN LEGACY POSITIONS</span><b id="cryptoOpenCount">0</b></div>
+            <div id="cryptoOpenPositions" class="stack"><div class="empty">No open crypto paper position.</div></div>
+          </div>
+          <div>
+            <div class="bookHead"><span>RECENT LEGACY SCALPS</span><b id="cryptoTradeCount">0</b></div>
+            <div id="cryptoTrades" class="stack"><div class="empty">No completed crypto paper scalp.</div></div>
+          </div>
+        </div>
+      </div>
+    </details>
 
     <details class="panel diagnostics">
       <summary>System diagnostics</summary>
       <div class="diagGrid">
         <div><span>ENGINE</span><b id="engineVersion">--</b></div>
         <div><span>EVENTS</span><b id="eventCount">0</b></div>
+        <div><span>MARKETS</span><b id="marketCount">0</b></div>
         <div><span>ARB CANDIDATES</span><b id="arbCandidates">0</b></div>
-        <div><span>LIQUIDITY PROGRAMS</span><b id="liquidityPrograms">0</b></div>
       </div>
       <pre id="errors">No errors.</pre>
     </details>
   </main>
 
-  <footer>Dream Arb is an experimental live-market shadow scanner. The current build does not submit real-money orders.</footer>
+  <footer>Dream Arb is an experimental shadow scanner. Quotes can move between legs, special fee schedules can differ by market, and the current build does not submit real-money orders.</footer>
 </div>
-<script src="app.js?v=stack2"></script>
+<script src="app.js?v=arbfirst1"></script>
 </body>
 </html>
