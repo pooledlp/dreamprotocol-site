@@ -232,10 +232,27 @@ function renderCrypto(s){
   setText('cryptoTotalPnl',money(c.total));
   setText('cryptoTodayPnl',money(c.today));
   setText('cryptoWinLoss',c.wins+'W / '+c.losses+'L');
+  setText('cryptoAvgWin',money(s?.crypto?.avgWin||0));
+  setText('cryptoAvgLoss',money(-(s?.crypto?.avgLoss||0)));
+  setText('cryptoProfitFactor',Number.isFinite(num(s?.crypto?.profitFactor))?num(s.crypto.profitFactor).toFixed(2):'--');
+  setText('cryptoExpectancy',money(s?.crypto?.expectancyPerTrade||0));
+  setText('cryptoPayoff',Number.isFinite(num(s?.crypto?.payoffRatio))?num(s.crypto.payoffRatio).toFixed(2)+'×':'--');
   setText('cryptoOpenRisk',money(c.openRisk));
   setText('cryptoLastAction',String(s?.crypto?.lastAction||'WAIT').replace(/^paper-scalp-/,'').toUpperCase());
   setText('cryptoOpenCount',integer(c.open.length));
   setText('cryptoTradeCount',integer(c.completed));
+  for(const [id,value] of [
+    ['cryptoTotalPnl',c.total],
+    ['cryptoAvgWin',+(s?.crypto?.avgWin||0)],
+    ['cryptoExpectancy',+(s?.crypto?.expectancyPerTrade||0)]
+  ]){
+    const el=$(id);if(el)el.className=value>0?'green':value<0?'red':'';
+  }
+  const lossEl=$('cryptoAvgLoss');if(lossEl&&+(s?.crypto?.avgLoss||0)>0)lossEl.className='red';
+  const pfEl=$('cryptoProfitFactor');if(pfEl){
+    const pf=+s?.crypto?.profitFactor||0;
+    pfEl.className=pf>=1.5?'green':pf>0&&pf<1?'red':'';
+  }
   const socket=$('cryptoSocketTag');
   if(socket){
     const open=!!s?.crypto?.socket?.open;
