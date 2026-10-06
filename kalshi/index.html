@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#05070d">
 <meta name="robots" content="noindex,nofollow">
-<title>DreamPredict | Dream Arb</title>
-<link rel="stylesheet" href="styles.css?v=arbfirst1">
+<title>DreamPredict | Dream Arb v3</title>
+<link rel="stylesheet" href="styles.css?v=arbv3">
 </head>
 <body>
 <div class="aurora a1"></div><div class="aurora a2"></div><div class="noise"></div>
@@ -93,6 +93,26 @@
       </div>
       <div id="arbs" class="arbGrid">
         <div class="empty">Scanning live Kalshi events...</div>
+      </div>
+    </section>
+
+    <section class="panel crossVenuePanel">
+      <div class="panelHead">
+        <div>
+          <div class="eyebrow">CROSS-VENUE ARBITRAGE · KALSHI + POLYMARKET</div>
+          <h2>Same contract. Two books. Only strict matches count.</h2>
+          <p>Dream Arb compares public Polymarket data against the same 24-hour Kalshi universe. A price gap does not earn the ARB label unless question sequence, cutoff, resolution source, live depth, fees, and safety buffer all survive verification.</p>
+        </div>
+        <span id="crossVenueTag" class="tag">SCANNING</span>
+      </div>
+      <div class="crossSummary">
+        <div><span>POLY MARKETS SCANNED</span><b id="polyMarketCount">0</b></div>
+        <div><span>STRICT CONTRACT MATCHES</span><b id="strictMatchCount">0</b></div>
+        <div><span>QUALIFIED CROSS ARBS</span><b id="crossArbCount">0</b></div>
+        <div><span>CATALOG</span><b id="polyCacheState">--</b></div>
+      </div>
+      <div id="crossVenue" class="arbGrid">
+        <div class="empty">Building strict Kalshi ↔ Polymarket matches...</div>
       </div>
     </section>
 
@@ -192,6 +212,8 @@
         <div><span>EVENTS</span><b id="eventCount">0</b></div>
         <div><span>MARKETS</span><b id="marketCount">0</b></div>
         <div><span>ARB CANDIDATES</span><b id="arbCandidates">0</b></div>
+        <div><span>POLY MARKETS</span><b id="diagPolyMarkets">0</b></div>
+        <div><span>STRICT CROSS MATCHES</span><b id="diagStrictMatches">0</b></div>
       </div>
       <pre id="errors">No errors.</pre>
     </details>
@@ -199,6 +221,6 @@
 
   <footer>Dream Arb is an experimental shadow scanner. Quotes can move between legs, special fee schedules can differ by market, and the current build does not submit real-money orders.</footer>
 </div>
-<script src="app.js?v=arbfirst1"></script>
+<script src="app.js?v=arbv3"></script>
 </body>
 </html>
