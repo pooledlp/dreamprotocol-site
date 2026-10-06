@@ -42,10 +42,12 @@ function cappedPairs(o,s){const depth=Math.max(0,Math.floor(+o?.depth||0));const
 function lockedProfit(o,s){return Math.max(0,+o?.netEdge||0)*cappedPairs(o,s);}
 
 function legHtml(leg){
+  const label=(leg.venue?String(leg.venue)+' · ':'')+String(leg.side||'').toUpperCase();
+  const open=leg.url?'<a class="legOpen" href="'+esc(leg.url)+'" target="_blank" rel="noopener">OPEN ↗</a>':'';
   return '<div class="leg">'+
-    '<div><span>'+esc(String(leg.side||'').toUpperCase())+'</span><b>'+esc(leg.ticker||'')+'</b></div>'+
+    '<div><span>'+esc(label)+'</span><b>'+esc(leg.ticker||'')+'</b></div>'+
     '<div class="legPrice"><small>LIVE ASK</small><strong>'+cents(leg.ask)+'</strong><small>'+integer(leg.size)+' shown</small></div>'+
-    '<button type="button" class="copyTicker" data-copy-ticker="'+esc(leg.ticker||'')+'">COPY</button>'+
+    '<button type="button" class="copyTicker" data-copy-ticker="'+esc(leg.ticker||'')+'">COPY</button>'+open+
   '</div>';
 }
 
@@ -117,6 +119,57 @@ function renderArbs(s){
   const near=rows.filter(x=>!x.qualified).slice(0,4);
   const shown=[...qualified.slice(0,10),...near].slice(0,14);
   el.innerHTML=shown.map(o=>arbCard(o,s)).join('');
+}
+
+function crossVenueCard(o,s){
+  const q=!!o.qualified;
+  const pairs=cappedPairs(o,s);
+  const roi=conservativeRoi(o);
+  const proof=[
+    o.matchMethod==='EXACT_SEQUENCE'?'QUESTION ✓':'QUESTION ?',
+    o.timeVerified?'TIME ✓':'TIME ?',
+    o.ruleVerified?'RULES ✓':'RULES ?'
+  ].join(' · ');
+  return '<article class="arbCard crossCard '+(q?'qualified':'rejected')+'">'+
+    '<div class="cardTop"><span class="category">KALSHI ↔ POLYMARKET</span><em>'+(q?'CROSS ARB':'WATCH')+'</em></div>'+
+    '<h3>'+esc(o.eventTitle||'Cross-venue market')+'</h3>'+
+    '<div class="threshold">'+esc(proof)+' · match '+pct(o.matchConfidence||0)+'</div>'+
+    '<div class="miniMetrics">'+
+      '<div><span>NET EDGE</span><b class="'+(q?'green':(+o.netEdge<0?'red':'amber'))+'">'+edge(o.netEdge)+'</b></div>'+
+      '<div><span>CONSERVATIVE ROI</span><b>'+pct(roi)+'</b></div>'+
+      '<div><span>VISIBLE DEPTH</span><b>'+(o.depth==null?'--':integer(o.depth)+' pairs')+'</b></div>'+
+      '<div><span>LOCKED $ @ CAP</span><b>'+(q?money((+o.netEdge||0)*pairs):'$0.00')+'</b></div>'+
+    '</div>'+
+    '<div class="cardLegs">'+(o.legs||[]).map(legHtml).join('')+'</div>'+
+    '<div class="qualification">'+esc(o.qualification||'')+' · pair '+cents(o.grossCost)+' · modeled fees '+cents(o.estimatedFees)+' · cross-venue buffer '+cents(o.safetyMargin)+'</div>'+
+  '</article>';
+}
+function renderCrossVenue(s){
+  const x=s?.scan?.crossVenue||{};
+  const rows=Array.isArray(x.opportunities)?x.opportunities:[];
+  setText('polyMarketCount',integer(x.scannedPolymarketMarkets||0));
+  setText('strictMatchCount',integer(x.strictMatches||0));
+  setText('crossArbCount',integer(x.qualifiedArbs||0));
+  setText('polyCacheState',x.catalogCached?'CACHED':'FRESH');
+  setText('diagPolyMarkets',integer(x.scannedPolymarketMarkets||0));
+  setText('diagStrictMatches',integer(x.strictMatches||0));
+  const tag=$('crossVenueTag');
+  if(tag){
+    tag.textContent=x.qualifiedArbs>0?'ARB FOUND':x.enabled===false?'OFF':'HUNTING';
+    tag.className='tag '+(x.qualifiedArbs>0?'safe':x.enabled===false?'amber':'');
+  }
+  const el=$('crossVenue');if(!el)return;
+  if(!x.enabled){
+    el.innerHTML='<div class="noEdge"><b>CROSS-VENUE SCANNER OFF</b><span>Polymarket comparison is disabled.</span></div>';
+    return;
+  }
+  if(!rows.length){
+    el.innerHTML='<div class="noEdge"><b>NO STRICT CROSS-VENUE MATCH PRICED YET</b><span>'+integer(x.scannedPolymarketMarkets||0)+' Polymarket markets checked. A similar headline alone is not enough to call an arb.</span></div>';
+    return;
+  }
+  const qualified=rows.filter(o=>o.qualified);
+  const near=rows.filter(o=>!o.qualified).slice(0,6);
+  el.innerHTML=[...qualified.slice(0,10),...near].slice(0,14).map(o=>crossVenueCard(o,s)).join('');
 }
 
 function arbPaperStats(s){
@@ -248,6 +301,7 @@ function render(s){
   renderHero(s);
   renderPaper(s);
   renderArbs(s);
+  renderCrossVenue(s);
   renderCaptures(s);
   renderLiquidity(s);
   renderCrypto(s);
