@@ -55,34 +55,62 @@ function orderedArbs(s){
   const rows=Array.isArray(s?.scan?.arbOpportunities)?[...s.scan.arbOpportunities]:[];
   return rows.sort((a,b)=>Number(!!b.qualified)-Number(!!a.qualified)||(+b.netEdge||0)-(+a.netEdge||0)||(+b.depth||0)-(+a.depth||0));
 }
+function orderedAllArbs(s){
+  const structural=orderedArbs(s);
+  const cross=Array.isArray(s?.scan?.crossVenue?.opportunities)?[...s.scan.crossVenue.opportunities]:[];
+  return [...structural,...cross].sort((a,b)=>
+    Number(!!b.qualified)-Number(!!a.qualified)||
+    (+b.netEdge||0)-(+a.netEdge||0)||
+    (+b.depth||0)-(+a.depth||0)
+  );
+}
+function shortClock(v){
+  const t=typeof v==='number'?v:Date.parse(v||'');
+  return Number.isFinite(t)?new Date(t).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}):'--';
+}
 function renderHero(s){
-  const rows=orderedArbs(s);
+  const rows=orderedAllArbs(s);
   const qualified=rows.filter(x=>x.qualified);
   const best=qualified[0]||rows[0]||null;
   const status=$('heroStatus');
+  const qualifiedCount=+s?.scan?.qualifiedArbs||0;
+  const radar=$('arbRadar');
+
+  setText('radarState',qualifiedCount>0?'LOCKED EDGE':'HUNTING');
+  setText('radarEdge',integer(qualifiedCount));
+  setText('radarMarkets',integer((+s?.scan?.scannedMarkets||0)+(+s?.scan?.crossVenue?.scannedPolymarketMarkets||0)));
+  setText('radarCrossMatches',integer(s?.scan?.crossVenue?.strictMatches||0));
+  setText('radarUpdated',shortClock(s?.lastScanAt||s?.scan?.asOf));
+  if(radar)radar.className='arbRadar '+(qualifiedCount>0?'found':'hunting');
+
   setText('bestNetEdgeTop',best?edge(best.netEdge):'--');
 
   if(!best){
     if(status){status.className='heroStatus hunting';status.textContent='HUNTING';}
-    setText('heroTitle','No structural pair priced yet.');
-    setText('heroSubtitle','Dream Arb is scanning the next 24 hours and refusing to invent a trade when the payout relationship, live price, or visible depth is not provable.');
-    setText('heroRule','No prediction required. No forced trades.');
+    setText('heroTitle','We wait for math to break.');
+    setText('heroSubtitle','Dream Arb is scanning Kalshi and Polymarket in the next 24 hours and refusing to manufacture a trade when payout logic, live price, or visible depth is not provable.');
+    setText('heroRule','No prediction. No forced trades. No fake edge.');
     setText('heroEdge','--');setText('heroRoi','--');setText('heroCost','--');setText('heroLockedProfit','--');setText('heroPayout','$1.00');
-    $('heroLegs').innerHTML='<div class="empty compact">Waiting for a provable price mismatch.</div>';
+    $('heroLegs').innerHTML='<div class="empty compact">Markets are live. Waiting for a provable price mismatch.</div>';
     return;
   }
 
   const pairs=cappedPairs(best,s);
+  const cross=best.kind==='CROSS_VENUE';
   if(best.qualified){
-    if(status){status.className='heroStatus found';status.textContent='BOOK-VERIFIED ARB';}
-    setText('heroTitle',best.eventTitle||'Structural arbitrage detected');
-    setText('heroSubtitle','Both legs are available at the modeled top-of-book prices with visible size, and the minimum combined payout still beats cost after modeled fees and the safety buffer.');
+    if(status){status.className='heroStatus found';status.textContent=cross?'CROSS-VENUE ARB FOUND':'BOOK-VERIFIED ARB';}
+    setText('heroTitle',best.eventTitle||'Locked edge detected');
+    setText('heroSubtitle',cross
+      ?'Kalshi and Polymarket disagree on the same verified outcome, and the gap still survives both books, modeled fees, visible depth, and the cross-venue execution buffer.'
+      :'Both legs are available at modeled top-of-book prices with visible size, and the guaranteed minimum payout still beats cost after modeled fees and the safety buffer.');
   }else{
-    if(status){status.className='heroStatus near';status.textContent='NO ARB · CLOSEST PAIR';}
-    setText('heroTitle','No guaranteed edge right now.');
-    setText('heroSubtitle','This is the closest structural pair the scanner sees. It is displayed as a near miss, not a trade.');
+    if(status){status.className='heroStatus near';status.textContent='NO ARB · CLOSEST EDGE';}
+    setText('heroTitle','We wait for math to break.');
+    setText('heroSubtitle','The scanner is live. This is the closest verified relationship currently visible, but it does not clear the qualification threshold.');
   }
-  setText('heroRule',(best.strikeType||'threshold').toUpperCase()+' ladder · '+String(best.lowerStrike)+' → '+String(best.upperStrike)+' · closes in '+hoursLeft(best.closeTime)+' · '+(best.qualification||''));
+  setText('heroRule',cross
+    ?'KALSHI ↔ POLYMARKET · '+(best.timeVerified?'TIME ✓':'TIME ?')+' · '+(best.ruleVerified?'RULES ✓':'RULES ?')+' · closes in '+hoursLeft(best.closeTime)+' · '+(best.qualification||'')
+    :(best.strikeType||'threshold').toUpperCase()+' LADDER · '+String(best.lowerStrike)+' → '+String(best.upperStrike)+' · closes in '+hoursLeft(best.closeTime)+' · '+(best.qualification||''));
   setText('heroEdge',edge(best.netEdge));
   setText('heroRoi',pct(conservativeRoi(best)));
   setText('heroCost',cents(modeledCost(best)));
@@ -312,7 +340,7 @@ async function refresh(force=false){
   if(busy)return;
   busy=true;
   const btn=$('refreshBtn');
-  if(btn){btn.disabled=true;btn.textContent=force?'Scanning...':'Refreshing...';}
+  if(btn){btn.disabled=true;btn.innerHTML='<span>'+(force?'SCANNING...':'REFRESHING...')+'</span>';}
   try{
     const data=await json(force?'/dream-predict/scan':'/dream-predict/status');
     render(data);
@@ -325,7 +353,7 @@ async function refresh(force=false){
     }
   }finally{
     busy=false;
-    if(btn){btn.disabled=false;btn.textContent='Scan now';}
+    if(btn){btn.disabled=false;btn.innerHTML='<span>SCAN NOW</span>';}
   }
 }
 document.addEventListener('click',async event=>{
