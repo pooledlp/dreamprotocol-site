@@ -3,27 +3,31 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#05070d">
+<meta name="theme-color" content="#020409">
 <meta name="robots" content="noindex,nofollow">
 <title>DreamPredict | Dream Arb v3</title>
-<link rel="stylesheet" href="styles.css?v=arbv3">
+<link rel="stylesheet" href="styles.css?v=command1">
 </head>
 <body>
+<div class="gridGlow"></div>
 <div class="aurora a1"></div><div class="aurora a2"></div><div class="noise"></div>
 <div class="app">
   <header class="topbar">
     <div class="brandBlock">
-      <div class="brandMark">D</div>
+      <div class="brandMark"><span>D</span></div>
       <div>
         <div class="brand">DreamPredict</div>
-        <div class="sub">DREAM ARB · LIVE ORDERBOOKS · SHADOW ONLY</div>
+        <div class="sub">ARB ENGINE V3 · KALSHI + POLYMARKET</div>
       </div>
     </div>
-    <div class="livePill"><i></i><span id="healthText">CONNECTING</span></div>
+    <div class="topActions">
+      <span class="shadowBadge">SHADOW EXECUTION</span>
+      <div class="livePill"><i></i><span id="healthText">CONNECTING</span></div>
+    </div>
   </header>
 
   <section class="statusRail">
-    <div><span>MODE</span><b id="mode">ARB-FIRST</b></div>
+    <div><span>ENGINE</span><b id="mode">ARB-FIRST</b></div>
     <div><span>QUALIFIED NOW</span><b id="arbCount">0</b></div>
     <div><span>BEST NET EDGE</span><b id="bestNetEdgeTop">--</b></div>
     <div><span>ARB PAPER P&L</span><b id="arbPnl">$0.00</b></div>
@@ -35,11 +39,12 @@
     <section class="hero panel arbHero">
       <div class="heroGrid">
         <div class="heroCopy">
-          <div class="eyebrow">BEST BOOK-VERIFIED STRUCTURAL EDGE</div>
+          <div class="eyebrow">AUTONOMOUS ARBITRAGE COMMAND CENTER</div>
           <div id="heroStatus" class="heroStatus hunting">SCANNING</div>
-          <h1 id="heroTitle">Hunting broken math.</h1>
-          <p id="heroSubtitle">Dream Arb looks for two contracts whose settlement relationship guarantees at least $1.00 of combined payout, then checks the live orderbook before calling it an arb.</p>
-          <div id="heroRule" class="researchLine">Same rules. Same settlement time. Live asks. Visible size. Fees and safety buffer already deducted.</div>
+          <h1 id="heroTitle">We wait for math to break.</h1>
+          <p id="heroSubtitle">Dream Arb continuously scans Kalshi and Polymarket, proves the payout relationship, reprices both books, and ignores anything that cannot survive fees, depth, and execution buffers.</p>
+          <div id="heroRule" class="researchLine">No prediction. No forced trades. No fake edge.</div>
+
           <div class="heroMetrics">
             <div><span>NET EDGE / PAIR</span><b id="heroEdge">--</b></div>
             <div><span>CONSERVATIVE ROI</span><b id="heroRoi">--</b></div>
@@ -50,27 +55,85 @@
             <div class="empty compact">Waiting for a provable price mismatch.</div>
           </div>
         </div>
-        <div class="lockWrap">
-          <div class="lockOrb">
-            <div class="lockCore">
-              <small>MIN PAYOUT</small>
-              <b id="heroPayout">$1.00</b>
-              <span id="lockLabel">PROVEN RELATION</span>
+
+        <div class="radarWrap">
+          <div id="arbRadar" class="arbRadar hunting">
+            <div class="radarGrid"></div>
+            <div class="radarRing r1"></div>
+            <div class="radarRing r2"></div>
+            <div class="radarRing r3"></div>
+            <div class="radarSweep"></div>
+            <div class="radarBlip b1"></div>
+            <div class="radarBlip b2"></div>
+            <div class="radarBlip b3"></div>
+            <div class="radarCore">
+              <small id="radarState">HUNTING</small>
+              <b id="radarEdge">0</b>
+              <span>QUALIFIED ARBS</span>
             </div>
           </div>
-          <div class="lockCaption">Book-verified means both legs and visible size were repriced from Kalshi's live orderbook. Live order submission remains off.</div>
+          <div class="radarStats">
+            <div><span>MARKETS IN PLAY</span><b id="radarMarkets">--</b></div>
+            <div><span>STRICT CROSS MATCHES</span><b id="radarCrossMatches">--</b></div>
+            <div><span>MIN PAYOUT</span><b id="heroPayout">$1.00</b></div>
+            <div><span>LAST SCAN</span><b id="radarUpdated">--</b></div>
+          </div>
         </div>
+      </div>
+      <div class="heroFooter">
+        <span><i></i> LIVE ORDERBOOKS</span>
+        <span>24H OPPORTUNITY WINDOW</span>
+        <span>STRICT CONTRACT EQUIVALENCE</span>
+        <span>REAL ORDERS OFF</span>
+      </div>
+    </section>
+
+    <section class="panel crossVenuePanel priorityPanel">
+      <div class="sectionIndex">01</div>
+      <div class="panelHead">
+        <div>
+          <div class="eyebrow">CROSS-VENUE ARBITRAGE · KALSHI ↔ POLYMARKET</div>
+          <h2>Same outcome. Two books. Broken price.</h2>
+          <p>A headline match is not enough. Dream Arb verifies the question, cutoff, resolution source, live orderbook depth, modeled fees, and cross-venue execution buffer before the ARB badge ever turns green.</p>
+        </div>
+        <span id="crossVenueTag" class="tag scannerTag">SCANNING</span>
+      </div>
+
+      <div class="crossSummary">
+        <div><span>POLYMARKET UNIVERSE</span><b id="polyMarketCount">0</b><small>public markets scanned</small></div>
+        <div><span>STRICT CONTRACT MATCHES</span><b id="strictMatchCount">0</b><small>equivalence candidates</small></div>
+        <div class="accentMetric"><span>QUALIFIED CROSS ARBS</span><b id="crossArbCount">0</b><small>after books + buffers</small></div>
+        <div><span>CATALOG STATE</span><b id="polyCacheState">--</b><small>cached for efficiency</small></div>
+      </div>
+      <div id="crossVenue" class="arbGrid">
+        <div class="empty">Building strict Kalshi ↔ Polymarket matches...</div>
+      </div>
+    </section>
+
+    <section class="panel structuralPanel">
+      <div class="sectionIndex">02</div>
+      <div class="panelHead">
+        <div>
+          <div class="eyebrow">STRUCTURAL ARBITRAGE · KALSHI</div>
+          <h2>Same market. Same subject. Impossible pricing.</h2>
+          <p>Nested threshold relationships are repriced from the live book. Only the same underlying subject with matching settlement logic can qualify.</p>
+        </div>
+        <button id="refreshBtn" class="refreshBtn" type="button"><span>SCAN NOW</span></button>
+      </div>
+      <div id="arbs" class="arbGrid">
+        <div class="empty">Scanning live Kalshi events...</div>
       </div>
     </section>
 
     <section class="pnlPanel panel">
+      <div class="sectionIndex">03</div>
       <div class="pnlHead">
         <div>
-          <div class="eyebrow">ARB PAPER SCOREBOARD</div>
-          <h2>Prove the edge before trusting the money.</h2>
-          <p>Only qualified structural arbs count here. The crypto scalper is paused and its old results no longer contaminate the headline P&L.</p>
+          <div class="eyebrow">SHADOW PERFORMANCE</div>
+          <h2>Proof before capital.</h2>
+          <p>Only qualified, book-verified opportunities enter the shadow ledger. Crypto is paused and excluded from the headline result.</p>
         </div>
-        <span class="tag paperTag">FAKE MONEY · LOCKED MATH</span>
+        <span class="tag paperTag">FAKE MONEY · REAL BOOKS</span>
       </div>
       <div class="pnlGrid">
         <div class="pnlPrimary"><span>ARB PAPER P&L</span><b id="paperArb">$0.00</b><small>theoretical locked profit</small></div>
@@ -82,68 +145,19 @@
       <div id="paperVerdict" class="paperVerdict neutral"><b>WAITING FOR A QUALIFIED ARB</b><span>No forced trades. Zero is better than fake edge.</span></div>
     </section>
 
-    <section class="panel">
-      <div class="panelHead">
-        <div>
-          <div class="eyebrow">STRUCTURAL ARBITRAGE · NEXT 24 HOURS</div>
-          <h2>Real quotes, visible depth, provable payout relationship.</h2>
-          <p>Qualified cards survive the rule match, live orderbook repricing, modeled taker fees, safety buffer, and minimum visible depth. Rejected cards are shown only as near misses.</p>
-        </div>
-        <button id="refreshBtn" class="refreshBtn" type="button">Scan now</button>
-      </div>
-      <div id="arbs" class="arbGrid">
-        <div class="empty">Scanning live Kalshi events...</div>
-      </div>
-    </section>
-
-    <section class="panel crossVenuePanel">
-      <div class="panelHead">
-        <div>
-          <div class="eyebrow">CROSS-VENUE ARBITRAGE · KALSHI + POLYMARKET</div>
-          <h2>Same contract. Two books. Only strict matches count.</h2>
-          <p>Dream Arb compares public Polymarket data against the same 24-hour Kalshi universe. A price gap does not earn the ARB label unless question sequence, cutoff, resolution source, live depth, fees, and safety buffer all survive verification.</p>
-        </div>
-        <span id="crossVenueTag" class="tag">SCANNING</span>
-      </div>
-      <div class="crossSummary">
-        <div><span>POLY MARKETS SCANNED</span><b id="polyMarketCount">0</b></div>
-        <div><span>STRICT CONTRACT MATCHES</span><b id="strictMatchCount">0</b></div>
-        <div><span>QUALIFIED CROSS ARBS</span><b id="crossArbCount">0</b></div>
-        <div><span>CATALOG</span><b id="polyCacheState">--</b></div>
-      </div>
-      <div id="crossVenue" class="arbGrid">
-        <div class="empty">Building strict Kalshi ↔ Polymarket matches...</div>
-      </div>
-    </section>
-
-    <section class="method panel">
-      <div class="eyebrow">WHAT EARNS THE ARB LABEL</div>
-      <div class="methodFlow">
-        <div><b>01</b><span>Match contracts with the same rules and settlement time</span></div>
-        <i>→</i>
-        <div><b>02</b><span>Prove the nested threshold payout relationship</span></div>
-        <i>→</i>
-        <div><b>03</b><span>Reprice both legs from live orderbook depth</span></div>
-        <i>→</i>
-        <div><b>04</b><span>Subtract modeled fees plus safety buffer</span></div>
-        <i>→</i>
-        <div><b>05</b><span>Shadow-capture only positive edge with actual size</span></div>
-      </div>
-    </section>
-
     <section class="twoCol">
-      <section class="panel">
+      <section class="panel capturesPanel">
         <div class="panelHead compactHead">
           <div>
-            <div class="eyebrow">ARB PAPER CAPTURES</div>
-            <h2>What the scanner would have locked.</h2>
+            <div class="eyebrow">CAPTURE LEDGER</div>
+            <h2>What the engine would have locked.</h2>
           </div>
           <span id="captureCount" class="tag">0 CAPTURES</span>
         </div>
         <div id="captures" class="stack"><div class="empty">No qualified arb capture yet.</div></div>
       </section>
 
-      <section class="panel">
+      <section class="panel executionPanel">
         <div class="panelHead compactHead">
           <div>
             <div class="eyebrow">EXECUTION LOCK</div>
@@ -161,12 +175,23 @@
       </section>
     </section>
 
-    <section class="panel">
+    <section class="method panel">
+      <div class="eyebrow">THE QUALIFICATION PIPELINE</div>
+      <div class="methodFlow">
+        <div><b>01</b><span>Prove contract identity</span></div><i>→</i>
+        <div><b>02</b><span>Verify settlement logic</span></div><i>→</i>
+        <div><b>03</b><span>Reprice live books</span></div><i>→</i>
+        <div><b>04</b><span>Subtract fees + buffers</span></div><i>→</i>
+        <div><b>05</b><span>Capture only real depth</span></div>
+      </div>
+    </section>
+
+    <section class="panel liquidityPanel">
       <div class="panelHead">
         <div>
           <div class="eyebrow">LIQUIDITY REWARDS · WATCH ONLY</div>
-          <h2>Interesting, but not arbitrage.</h2>
-          <p>Reward pools stay separate because fills, quoting obligations, and adverse selection can turn an attractive headline pool into a loss.</p>
+          <h2>Interesting. Not arbitrage.</h2>
+          <p>Reward pools stay separate because fills, quoting obligations, and adverse selection can turn a large headline pool into a loss.</p>
         </div>
         <span class="tag amber">NO CAPITAL DEPLOYED</span>
       </div>
@@ -177,11 +202,11 @@
 
     <details class="panel cryptoPanel labPanel">
       <summary>
-        <span><b>PAUSED CRYPTO LAB</b><small>History only · no new crypto paper entries</small></span>
+        <span><b>PAUSED CRYPTO LAB</b><small>History retained for comparison · no new entries</small></span>
         <em id="cryptoEngineState">PAUSED</em>
       </summary>
       <div class="labBody">
-        <p class="labNote">The old 15-minute crypto mean-reversion experiment is retained for comparison, but it is no longer part of DreamPredict's headline strategy or combined P&L.</p>
+        <p class="labNote">The old 15-minute crypto mean-reversion experiment remains visible for comparison, but it is no longer part of DreamPredict's headline strategy or combined P&L.</p>
         <div class="cryptoMetrics">
           <div><span>HISTORICAL P&L</span><b id="cryptoTotalPnl">$0.00</b></div>
           <div><span>RECORD</span><b id="cryptoWinLoss">0W / 0L</b></div>
@@ -219,8 +244,11 @@
     </details>
   </main>
 
-  <footer>Dream Arb is an experimental shadow scanner. Quotes can move between legs, special fee schedules can differ by market, and the current build does not submit real-money orders.</footer>
+  <footer>
+    <span>Dream Arb v3</span>
+    <span>Experimental shadow scanner · real-money order submission disabled</span>
+  </footer>
 </div>
-<script src="app.js?v=arbv3"></script>
+<script src="app.js?v=command1"></script>
 </body>
 </html>
