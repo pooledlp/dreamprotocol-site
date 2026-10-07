@@ -60,8 +60,8 @@ async function runScan(env, trigger = 'cron') {
 }
 
 export default {
-  async scheduled(controller, env, ctx) {
-    ctx.waitUntil(runScan(env, `cron:${controller.cron}`));
+  async scheduled(controller, env) {
+    await runScan(env, `cron:${controller.cron}`);
   },
 
   async fetch(request) {
