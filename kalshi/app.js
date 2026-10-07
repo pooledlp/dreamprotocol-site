@@ -1,412 +1,364 @@
 const API='https://api.dreamprotocol.ai';
-const STATUS_REFRESH_MS=20_000;
-const AUTO_SCAN_MS=60_000;
-const SCAN_DEBOUNCE_MS=10_000;
-const $=id=>document.getElementById(id);
-const num=v=>v!==null&&v!==undefined&&v!==''&&Number.isFinite(+v)?+v:NaN;
-const money=v=>Number.isFinite(num(v))?new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2}).format(num(v)):'--';
-const cents=v=>Number.isFinite(num(v))?(num(v)*100).toFixed(1).replace(/\.0$/,'')+'¢':'--';
-const edge=v=>Number.isFinite(num(v))?((num(v)>=0?'+':'')+(num(v)*100).toFixed(2)+'¢'):'--';
-const pct=v=>Number.isFinite(num(v))?(num(v)*100).toFixed(2)+'%':'--';
-const integer=v=>Number.isFinite(num(v))?Math.round(num(v)).toLocaleString():'--';
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const dateTime=v=>{const t=typeof v==='number'?v:Date.parse(v||'');return Number.isFinite(t)?new Date(t).toLocaleString([],{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'--';};
-const appUrl=()=>/Android/i.test(navigator.userAgent)?'intent://kalshi.com/f/install#Intent;scheme=https;package=com.kalshi.mobile;S.browser_fallback_url='+encodeURIComponent('https://kalshi.com/f/install')+';end':'https://kalshi.com/f/install';
-
-let busy=false;
+const STATUS_PATH='/dream-predict/status';
+const POLL_MS=8000;
 let lastPayload=null;
-let lastScanRequestAt=0;
+let lastFetchedAt=0;
+let busy=false;
 
-function setText(id,value){const el=$(id);if(el)el.textContent=value;}
-function setClassByValue(id,value){const el=$(id);if(el)el.className=value>0?'green':value<0?'red':'';}
-function health(ok,message){
-  const pill=document.querySelector('.livePill');
-  if(pill)pill.className='livePill '+(ok?'good':'bad');
-  setText('healthText',ok?'LIVE ARB SCANNER · AUTO 60s':message?'DEGRADED':'RETRYING');
+const $=id=>document.getElementById(id);
+const n=v=>{const x=Number(v);return Number.isFinite(x)?x:NaN};
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money=v=>{const x=n(v);return Number.isFinite(x)?new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2}).format(x):'--'};
+const cents=v=>{const x=n(v);return Number.isFinite(x)?(x*100).toFixed(x*100<10?2:1)+'¢':'--'};
+const pct=v=>{const x=n(v);return Number.isFinite(x)?(x*100).toFixed(Math.abs(x)<.1?2:1)+'%':'--'};
+const integer=v=>{const x=n(v);return Number.isFinite(x)?Math.round(x).toLocaleString():'0'};
+const dateTime=v=>{
+  const x=typeof v==='number'?v:Date.parse(v);
+  if(!Number.isFinite(x))return'--';
+  return new Intl.DateTimeFormat('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}).format(new Date(x));
+};
+const ageText=ms=>{
+  if(!Number.isFinite(ms)||ms<0)return'--';
+  const s=Math.floor(ms/1000);
+  if(s<60)return s+'s ago';
+  const m=Math.floor(s/60);
+  if(m<60)return m+'m ago';
+  return Math.floor(m/60)+'h ago';
+};
+function setText(id,value){const el=$(id);if(el)el.textContent=value}
+function valueClass(value){
+  const x=n(value);return !Number.isFinite(x)?'':x>0?'goodText':x<0?'badText':'';
 }
-async function json(path){
-  const r=await fetch(API+path,{cache:'no-store'});
-  const data=await r.json().catch(()=>({}));
-  if(!r.ok||data?.ok===false)throw new Error(data?.error||'HTTP '+r.status);
-  return data;
+function copyText(value){
+  if(!value)return;
+  if(navigator.clipboard?.writeText)return navigator.clipboard.writeText(value);
+  return Promise.reject(new Error('clipboard unavailable'));
 }
-function pairKey(o){return (o?.legs||[]).map(x=>(x.side||'').toUpperCase()+' '+(x.ticker||'')).join(' + ');}
-function hoursLeft(v){
-  const t=Date.parse(v||'');
-  if(!Number.isFinite(t))return '--';
-  const ms=t-Date.now();
-  if(ms<=0)return 'CLOSING';
-  const mins=Math.floor(ms/60000);
-  const h=Math.floor(mins/60),m=mins%60;
-  return h? h+'h '+m+'m' : m+'m';
-}
-function modeledCost(o){return (+o?.grossCost||0)+(+o?.estimatedFees||0);}
-function conservativeRoi(o){const cost=modeledCost(o);return cost>0?(+o?.netEdge||0)/cost:NaN;}
-function cappedPairs(o,s){const depth=Math.max(0,Math.floor(+o?.depth||0));const cap=Math.max(0,Math.floor(+s?.guardrails?.maxContracts||0));return cap?Math.min(depth,cap):depth;}
-function lockedProfit(o,s){return Math.max(0,+o?.netEdge||0)*cappedPairs(o,s);}
-
-function legHtml(leg){
-  const label=(leg.venue?String(leg.venue)+' · ':'')+String(leg.side||'').toUpperCase();
-  const open=leg.url?'<a class="legOpen" href="'+esc(leg.url)+'" target="_blank" rel="noopener">OPEN ↗</a>':'';
-  return '<div class="leg">'+
-    '<div><span>'+esc(label)+'</span><b>'+esc(leg.ticker||'')+'</b></div>'+
-    '<div class="legPrice"><small>LIVE ASK</small><strong>'+cents(leg.ask)+'</strong><small>'+integer(leg.size)+' shown</small></div>'+
-    '<button type="button" class="copyTicker" data-copy-ticker="'+esc(leg.ticker||'')+'">COPY</button>'+open+
-  '</div>';
-}
-
-function orderedArbs(s){
-  const rows=Array.isArray(s?.scan?.arbOpportunities)?[...s.scan.arbOpportunities]:[];
-  return rows.sort((a,b)=>Number(!!b.qualified)-Number(!!a.qualified)||(+b.netEdge||0)-(+a.netEdge||0)||(+b.depth||0)-(+a.depth||0));
-}
-function orderedAllArbs(s){
-  const structural=orderedArbs(s);
-  const cross=Array.isArray(s?.scan?.crossVenue?.opportunities)?[...s.scan.crossVenue.opportunities]:[];
-  return [...structural,...cross].sort((a,b)=>
-    Number(!!b.qualified)-Number(!!a.qualified)||
-    (+b.netEdge||0)-(+a.netEdge||0)||
-    (+b.depth||0)-(+a.depth||0)
+function legVenue(leg){return String(leg?.venue||'KALSHI').toUpperCase()}
+function opSource(o){return o?.kind==='CROSS_VENUE'?'CROSS-VENUE':'STRUCTURAL'}
+function allOpportunities(s){
+  const structural=Array.isArray(s?.scan?.arbOpportunities)?s.scan.arbOpportunities.map(x=>({...x,_source:'STRUCTURAL'})):[];
+  const cross=Array.isArray(s?.scan?.crossVenue?.opportunities)?s.scan.crossVenue.opportunities.map(x=>({...x,_source:'CROSS'})):[];
+  return [...cross,...structural].sort((a,b)=>
+    Number(Boolean(b.qualified))-Number(Boolean(a.qualified))||
+    (n(b.netEdge)||0)-(n(a.netEdge)||0)||
+    (n(b.depth)||0)-(n(a.depth)||0)
   );
 }
-function shortClock(v){
-  const t=typeof v==='number'?v:Date.parse(v||'');
-  return Number.isFinite(t)?new Date(t).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}):'--';
+function pairCapacity(o,s){
+  const cap=Math.max(1,Math.floor(n(s?.guardrails?.maxContracts)||10));
+  const depth=n(o?.depth);
+  return Number.isFinite(depth)?Math.max(0,Math.min(cap,Math.floor(depth))):cap;
 }
-function renderHero(s){
-  const rows=orderedAllArbs(s);
-  const qualified=rows.filter(x=>x.qualified);
-  const best=qualified[0]||rows[0]||null;
-  const status=$('heroStatus');
-  const qualifiedCount=+s?.scan?.qualifiedArbs||0;
-  const radar=$('arbRadar');
+function allInCost(o){
+  const payout=n(o?.guaranteedMinimumPayout);
+  const edge=n(o?.netEdge);
+  if(Number.isFinite(payout)&&Number.isFinite(edge))return payout-edge;
+  const cost=n(o?.grossCost),fees=n(o?.estimatedFees),buffer=n(o?.safetyMargin);
+  return [cost,fees,buffer].every(Number.isFinite)?cost+fees+buffer:NaN;
+}
+function qualifiedRows(s){return allOpportunities(s).filter(x=>x?.qualified)}
+function strongestNearMiss(s){return allOpportunities(s).find(x=>!x?.qualified)||null}
 
-  setText('radarState',qualifiedCount>0?'LOCKED EDGE':'HUNTING');
-  setText('radarEdge',integer(qualifiedCount));
-  setText('radarMarkets',integer((+s?.scan?.scannedMarkets||0)+(+s?.scan?.crossVenue?.scannedPolymarketMarkets||0)));
-  setText('radarCrossMatches',integer(s?.scan?.crossVenue?.strictMatches||0));
-  setText('radarUpdated',shortClock(s?.lastScanAt||s?.scan?.asOf));
-  if(radar)radar.className='arbRadar '+(qualifiedCount>0?'found':'hunting');
-
-  setText('bestNetEdgeTop',best?edge(best.netEdge):'--');
-
-  if(!best){
-    if(status){status.className='heroStatus hunting';status.textContent='HUNTING';}
-    setText('heroTitle','We wait for math to break.');
-    setText('heroSubtitle','Dream Arb is scanning Kalshi and Polymarket in the next 24 hours and refusing to manufacture a trade when payout logic, live price, or visible depth is not provable.');
-    setText('heroRule','No prediction. No forced trades. No fake edge.');
-    setText('heroEdge','--');setText('heroRoi','--');setText('heroCost','--');setText('heroLockedProfit','--');setText('heroPayout','$1.00');
-    $('heroLegs').innerHTML='<div class="empty compact">Markets are live. Waiting for a provable price mismatch.</div>';
-    return;
-  }
-
-  const pairs=cappedPairs(best,s);
-  const cross=best.kind==='CROSS_VENUE';
-  if(best.qualified){
-    if(status){status.className='heroStatus found';status.textContent=cross?'CROSS-VENUE ARB FOUND':'BOOK-VERIFIED ARB';}
-    setText('heroTitle',best.eventTitle||'Locked edge detected');
-    setText('heroSubtitle',cross
-      ?'Kalshi and Polymarket disagree on the same verified outcome, and the gap still survives both books, modeled fees, visible depth, and the cross-venue execution buffer.'
-      :'Both legs are available at modeled top-of-book prices with visible size, and the guaranteed minimum payout still beats cost after modeled fees and the safety buffer.');
-  }else{
-    if(status){status.className='heroStatus near';status.textContent='NO ARB · CLOSEST EDGE';}
-    setText('heroTitle','We wait for math to break.');
-    setText('heroSubtitle','The scanner is live. This is the closest verified relationship currently visible, but it does not clear the qualification threshold.');
-  }
-  setText('heroRule',cross
-    ?'KALSHI ↔ POLYMARKET · '+(best.timeVerified?'TIME ✓':'TIME ?')+' · '+(best.ruleVerified?'RULES ✓':'RULES ?')+' · closes in '+hoursLeft(best.closeTime)+' · '+(best.qualification||'')
-    :(best.strikeType||'threshold').toUpperCase()+' LADDER · '+String(best.lowerStrike)+' → '+String(best.upperStrike)+' · closes in '+hoursLeft(best.closeTime)+' · '+(best.qualification||''));
-  setText('heroEdge',edge(best.netEdge));
-  setText('heroRoi',pct(conservativeRoi(best)));
-  setText('heroCost',cents(modeledCost(best)));
-  setText('heroLockedProfit',best.qualified?money(lockedProfit(best,s)):'$0.00');
-  setText('heroPayout',money(best.guaranteedMinimumPayout||1));
-  $('heroLegs').innerHTML=(best.legs||[]).map(legHtml).join('');
+async function getStatus(){
+  const response=await fetch(API+STATUS_PATH,{headers:{accept:'application/json'},cache:'no-store'});
+  let data={};
+  try{data=await response.json()}catch{}
+  if(!response.ok)throw new Error(data?.error||'DreamPredict HTTP '+response.status);
+  if(data?.ok!==true)throw new Error(data?.error||'DreamPredict returned ok=false');
+  return data;
 }
 
-function arbCard(o,s){
-  const q=!!o.qualified;
-  const pairs=cappedPairs(o,s);
-  return '<article class="arbCard '+(q?'qualified':'rejected')+'">'+
-    '<div class="cardTop"><span class="category">'+esc(o.category||'MARKET')+'</span><em>'+(q?'BOOK-VERIFIED':'REJECTED')+'</em></div>'+
-    '<h3>'+esc(o.eventTitle||o.eventTicker||'Kalshi event')+'</h3>'+
-    '<div class="threshold">'+esc(String(o.strikeType||'').toUpperCase())+' · '+esc(String(o.lowerStrike))+' → '+esc(String(o.upperStrike))+' · closes '+esc(hoursLeft(o.closeTime))+'</div>'+
-    '<div class="miniMetrics">'+
-      '<div><span>NET EDGE</span><b class="'+(q?'green':(+o.netEdge<0?'red':'amber'))+'">'+edge(o.netEdge)+'</b></div>'+
-      '<div><span>CONSERVATIVE ROI</span><b>'+pct(conservativeRoi(o))+'</b></div>'+
-      '<div><span>VISIBLE DEPTH</span><b>'+(o.depth==null?'--':integer(o.depth)+' pairs')+'</b></div>'+
-      '<div><span>LOCKED $ @ CAP</span><b>'+(q?money((+o.netEdge||0)*pairs):'$0.00')+'</b></div>'+
-    '</div>'+
-    '<div class="cardLegs">'+(o.legs||[]).map(legHtml).join('')+'</div>'+
-    '<div class="qualification">'+esc(o.qualification||'')+' · pair '+cents(o.grossCost)+' · modeled fees '+cents(o.estimatedFees)+' · buffer '+cents(o.safetyMargin)+'</div>'+
-  '</article>';
-}
-function renderArbs(s){
-  const rows=orderedArbs(s);
-  const el=$('arbs');if(!el)return;
-  if(!rows.length){
-    el.innerHTML='<div class="noEdge"><b>NO STRUCTURAL PAIRS PRICED YET</b><span>The scanner is still checking. Empty is better than manufacturing a bet.</span></div>';
-    return;
-  }
-  const qualified=rows.filter(x=>x.qualified);
-  const near=rows.filter(x=>!x.qualified).slice(0,4);
-  const shown=[...qualified.slice(0,10),...near].slice(0,14);
-  el.innerHTML=shown.map(o=>arbCard(o,s)).join('');
+function renderHealth(s){
+  const last=n(s?.lastScanAt);
+  const age=Number.isFinite(last)?Date.now()-last:Infinity;
+  const pill=$('healthPill');
+  const healthy=s?.ok===true&&age<120000&&!s?.lastError;
+  const stale=s?.ok===true&&age>=120000;
+  if(pill)pill.className='healthPill '+(healthy?'good':stale?'bad':'connecting');
+  setText('healthText',healthy?'LIVE':stale?'STALE':s?.lastError?'DEGRADED':'CONNECTING');
+  setText('railAge',Number.isFinite(age)?ageText(age):'--');
+  setText('autoState',healthy||s?.scanner?.automated?'ACTIVE':'CHECKING');
+  const arch=$('architectureTag');
+  if(arch){arch.textContent=s?.scanner?.automated?'AUTONOMOUS':'CHECK ENGINE';arch.className='tag '+(s?.scanner?.automated?'green':'amber')}
 }
 
-function crossVenueCard(o,s){
-  const q=!!o.qualified;
-  const pairs=cappedPairs(o,s);
-  const roi=conservativeRoi(o);
-  const proof=[
-    o.matchMethod==='EXACT_SEQUENCE'?'QUESTION ✓':'QUESTION ?',
-    o.timeVerified?'TIME ✓':'TIME ?',
-    o.ruleVerified?'RULES ✓':'RULES ?'
-  ].join(' · ');
-  return '<article class="arbCard crossCard '+(q?'qualified':'rejected')+'">'+
-    '<div class="cardTop"><span class="category">KALSHI ↔ POLYMARKET</span><em>'+(q?'CROSS ARB':'WATCH')+'</em></div>'+
-    '<h3>'+esc(o.eventTitle||'Cross-venue market')+'</h3>'+
-    '<div class="threshold">'+esc(proof)+' · match '+pct(o.matchConfidence||0)+'</div>'+
-    '<div class="miniMetrics">'+
-      '<div><span>NET EDGE</span><b class="'+(q?'green':(+o.netEdge<0?'red':'amber'))+'">'+edge(o.netEdge)+'</b></div>'+
-      '<div><span>CONSERVATIVE ROI</span><b>'+pct(roi)+'</b></div>'+
-      '<div><span>VISIBLE DEPTH</span><b>'+(o.depth==null?'--':integer(o.depth)+' pairs')+'</b></div>'+
-      '<div><span>LOCKED $ @ CAP</span><b>'+(q?money((+o.netEdge||0)*pairs):'$0.00')+'</b></div>'+
-    '</div>'+
-    '<div class="cardLegs">'+(o.legs||[]).map(legHtml).join('')+'</div>'+
-    '<div class="qualification">'+esc(o.qualification||'')+' · pair '+cents(o.grossCost)+' · modeled fees '+cents(o.estimatedFees)+' · cross-venue buffer '+cents(o.safetyMargin)+'</div>'+
-  '</article>';
-}
-function renderCrossVenue(s){
-  const x=s?.scan?.crossVenue||{};
-  const rows=Array.isArray(x.opportunities)?x.opportunities:[];
-  setText('polyMarketCount',integer(x.scannedPolymarketMarkets||0));
-  setText('strictMatchCount',integer(x.strictMatches||0));
-  setText('crossArbCount',integer(x.qualifiedArbs||0));
-  setText('polyCacheState',x.catalogCached?'CACHED':'FRESH');
-  setText('diagPolyMarkets',integer(x.scannedPolymarketMarkets||0));
-  setText('diagStrictMatches',integer(x.strictMatches||0));
-  const tag=$('crossVenueTag');
-  if(tag){
-    tag.textContent=x.qualifiedArbs>0?'ARB FOUND':x.enabled===false?'OFF':'HUNTING';
-    tag.className='tag '+(x.qualifiedArbs>0?'safe':x.enabled===false?'amber':'');
-  }
-  const el=$('crossVenue');if(!el)return;
-  if(!x.enabled){
-    el.innerHTML='<div class="noEdge"><b>CROSS-VENUE SCANNER OFF</b><span>Polymarket comparison is disabled.</span></div>';
-    return;
-  }
-  if(!rows.length){
-    el.innerHTML='<div class="noEdge"><b>NO STRICT CROSS-VENUE MATCH PRICED YET</b><span>'+integer(x.scannedPolymarketMarkets||0)+' Polymarket markets checked. A similar headline alone is not enough to call an arb.</span></div>';
-    return;
-  }
-  const qualified=rows.filter(o=>o.qualified);
-  const near=rows.filter(o=>!o.qualified).slice(0,6);
-  el.innerHTML=[...qualified.slice(0,10),...near].slice(0,14).map(o=>crossVenueCard(o,s)).join('');
-}
-
-function arbPaperStats(s){
-  const rows=Array.isArray(s?.shadow?.recent)?s.shadow.recent:[];
-  const total=+s?.shadow?.theoreticalLockedProfit||0;
-  const capital=rows.reduce((sum,x)=>sum+(+x.capital||0),0);
-  const cutoff=Date.now()-86_400_000;
-  const recent24=rows.filter(x=>(+x.capturedAt||0)>=cutoff);
-  return{
-    rows,total,capital,
-    roi:capital>0?total/capital:NaN,
-    last24Profit:recent24.reduce((sum,x)=>sum+(+x.lockedProfit||0),0),
-    last24Count:recent24.length
-  };
-}
-function renderPaper(s){
-  const p=arbPaperStats(s);
-  const captures=+s?.shadow?.captures||0;
-  setText('paperArb',money(p.total));
-  setText('arbPnl',money(p.total));
-  setText('arbCaptureCount',integer(captures));
-  setText('captureTopCount',integer(captures));
-  setText('paperCapital',money(p.capital));
-  setText('paperRoi',Number.isFinite(p.roi)?pct(p.roi):'--');
-  setText('paper24h',money(p.last24Profit));
-  setText('paper24hCount',p.last24Count+' capture'+(p.last24Count===1?'':'s'));
-  setClassByValue('paperArb',p.total);setClassByValue('arbPnl',p.total);setClassByValue('paper24h',p.last24Profit);
-  const verdict=$('paperVerdict');
-  if(!verdict)return;
-  if(p.total>0){
-    verdict.className='paperVerdict positive';
-    verdict.innerHTML='<b>ARB PAPER LEDGER IS POSITIVE</b><span>'+money(p.total)+' theoretical locked profit across '+captures+' unique capture'+(captures===1?'':'s')+'. Still fake money until execution is proven.</span>';
-  }else{
-    verdict.className='paperVerdict neutral';
-    verdict.innerHTML='<b>WAITING FOR A QUALIFIED ARB</b><span>No forced trades. Zero is better than fake edge.</span>';
-  }
-}
-function captureRow(x){
-  const payout=(+x.capital||0)+(+x.lockedProfit||0);
-  return '<div class="capture paperTrade">'+
-    '<div class="captureTop"><div><span class="paperLabel">FAKE TRADE · LOCKED MODEL</span><b>'+esc(x.eventTitle||x.eventTicker||'Structural pair')+'</b></div><strong class="green">+'+money(Math.max(0,+x.lockedProfit||0))+'</strong></div>'+
-    '<div class="captureMeta"><span>'+integer(x.contracts)+' pairs</span><span>'+money(x.capital)+' modeled capital</span><span>'+money(payout)+' modeled minimum payout</span><span>'+edge(x.netEdge)+' / pair</span><span>'+dateTime(x.capturedAt)+'</span></div>'+
-    '<div class="captureLegs">'+esc(pairKey(x))+'</div>'+
+function heroLeg(leg){
+  return '<div class="bestLeg">'+
+    '<span>'+esc(legVenue(leg))+' · '+esc(String(leg?.side||'').toUpperCase())+'</span>'+
+    '<b>'+esc(leg?.title||leg?.ticker||'Market leg')+'</b>'+
+    '<small>'+esc(leg?.ticker||'')+'</small>'+
+    '<strong>'+cents(leg?.ask)+'</strong>'+
   '</div>';
 }
-function renderCaptures(s){
-  const p=arbPaperStats(s);
-  setText('captureCount',(s?.shadow?.captures||0)+' ARB CAPTURES');
-  const el=$('captures');
-  if(el)el.innerHTML=p.rows.length?p.rows.slice(0,20).map(captureRow).join(''):'<div class="empty">No qualified arb capture yet. The engine is allowed to stay empty.</div>';
+function renderHero(s){
+  const rows=qualifiedRows(s);
+  const best=rows[0]||null;
+  const near=strongestNearMiss(s);
+  const totalQualified=rows.length;
+  setText('railQualified',integer(totalQualified));
+  setText('orbCount',integer(totalQualified));
+  const orb=$('orb');
+  const kicker=$('heroKicker');
+
+  if(best){
+    if(orb)orb.className='orb locked';
+    if(kicker){kicker.className='heroKicker locked';kicker.innerHTML='<i></i>ARB LOCKED'}
+    setText('orbState','PROVABLE EDGE');
+    setText('heroTitle','Math broke. DreamPredict caught it.');
+    setText('heroCopy','A live price relationship survived contract identity, settlement, book depth, modeled fees, and safety buffer checks. It is still shadow-only until execution is deliberately armed.');
+    const legs=Array.isArray(best.legs)?best.legs:[];
+    const deal=$('heroDeal');
+    if(deal)deal.innerHTML='<div class="bestDeal">'+
+      (legs[0]?heroLeg(legs[0]):'')+'<div class="bestVs">LOCK</div>'+(legs[1]?heroLeg(legs[1]):'')+
+      '</div>';
+    const cap=pairCapacity(best,s);
+    const locked=(n(best.netEdge)||0)*cap;
+    const cost=allInCost(best);
+    setText('heroCost',Number.isFinite(cost)?cents(cost):'--');
+    setText('heroEdge',cents(best.netEdge));
+    setText('heroDepth',Number.isFinite(n(best.depth))?integer(best.depth)+' pairs':'--');
+    setText('heroLocked',money(locked));
+    setText('railEdge',cents(best.netEdge));
+  }else{
+    if(orb)orb.className='orb hunting';
+    if(kicker){kicker.className='heroKicker hunting';kicker.innerHTML='<i></i>HUNTING'}
+    setText('orbState','SCANNING');
+    const hasNear=Boolean(near);
+    setText('heroTitle',hasNear?'Close is not good enough.':'Watching two markets disagree.');
+    setText('heroCopy',hasNear?'DreamPredict sees candidate relationships, but none survive every qualification gate yet. The engine is correctly refusing to turn a near miss into fake profit.':'Cloudflare keeps DreamPredict scanning with this page closed. The console is only telemetry, so browser state has zero control over the autonomous engine.');
+    const deal=$('heroDeal');
+    if(deal)deal.innerHTML='<div class="heroEmpty"><b>'+(hasNear?'BEST NEAR MISS · '+esc(near.qualification||'NOT QUALIFIED'):'NO QUALIFIED ARB RIGHT NOW')+'</b><span>'+(hasNear?'Best observed edge: '+cents(near.netEdge)+' per pair. It stays watch-only until every proof gate passes.':'That is a valid result. DreamPredict is not allowed to invent edge.')+'</span></div>';
+    const edge=near?.netEdge;
+    setText('heroCost',near?cents(allInCost(near)):'--');
+    setText('heroEdge',near?cents(edge):'--');
+    setText('heroDepth',near&&Number.isFinite(n(near.depth))?integer(near.depth)+' pairs':'--');
+    setText('heroLocked','$0.00');
+    setText('railEdge',near?cents(edge):'--');
+  }
+}
+
+function renderFunnel(s){
+  const x=s?.scan?.crossVenue||{};
+  setText('funnelUniverse',integer(x.scannedPolymarketMarkets||0));
+  setText('funnelCandidates',integer(x.candidateMatches||0));
+  setText('funnelTime',integer(x.timeVerifiedMatches||0));
+  setText('funnelRules',integer(x.ruleVerifiedMatches||0));
+  setText('funnelPriced',integer(x.pricedMatches||0));
+  setText('funnelQualified',integer(x.qualifiedArbs||0));
+  const tag=$('proofTag');
+  if(tag){
+    const q=n(x.qualifiedArbs)||0;
+    tag.textContent=q>0?'ARB FOUND':x.enabled===false?'SCANNER OFF':'LIVE PIPELINE';
+    tag.className='tag '+(q>0?'green':x.enabled===false?'amber':'');
+  }
+}
+
+function legCard(leg){
+  return '<div class="leg">'+
+    '<span>'+esc(legVenue(leg))+' · '+esc(String(leg?.side||'').toUpperCase())+'</span>'+
+    '<b title="'+esc(leg?.title||'')+'">'+esc(leg?.title||leg?.ticker||'Market leg')+'</b>'+
+    '<strong>'+cents(leg?.ask)+'</strong>'+
+    '<small>'+esc(leg?.ticker||'')+(Number.isFinite(n(leg?.size))?' · '+integer(leg.size)+' visible':'')+'</small>'+
+  '</div>';
+}
+function opCard(o,s){
+  const q=Boolean(o?.qualified);
+  const source=opSource(o);
+  const cost=allInCost(o);
+  const cap=pairCapacity(o,s);
+  const locked=q?(n(o.netEdge)||0)*cap:0;
+  const roi=Number.isFinite(cost)&&cost>0?(n(o.netEdge)||0)/cost:NaN;
+  const proof=o?.kind==='CROSS_VENUE'
+    ?'match '+pct(o.matchConfidence||0)+' · '+(o.timeVerified?'time ✓':'time ?')+' · '+(o.ruleVerified?'rules ✓':'rules ?')
+    :'nested '+esc(o?.strikeType||'threshold')+' · '+esc(o?.lowerStrike)+' → '+esc(o?.upperStrike);
+  const legs=Array.isArray(o?.legs)?o.legs:[];
+  const copy=legs.map(x=>x?.ticker).filter(Boolean).join(' | ');
+  return '<article class="opCard '+(q?'qualified':'')+'">'+
+    '<div class="opTop"><span class="sourceBadge">'+esc(source)+(source==='CROSS-VENUE'?' · PUBLIC DATA':'')+'</span><span class="qualBadge '+(q?'good':'watch')+'">'+esc(q?'QUALIFIED':o?.qualification||'WATCH')+'</span></div>'+
+    '<h3 title="'+esc(o?.eventTitle||'')+'">'+esc(o?.eventTitle||o?.eventTicker||'Arbitrage candidate')+'</h3>'+
+    '<div class="opProof">'+proof+'</div>'+
+    '<div class="opMetrics">'+
+      '<div><span>NET EDGE</span><b class="'+valueClass(o?.netEdge)+'">'+cents(o?.netEdge)+'</b></div>'+
+      '<div><span>ALL-IN COST</span><b>'+cents(cost)+'</b></div>'+
+      '<div><span>VISIBLE DEPTH</span><b>'+(Number.isFinite(n(o?.depth))?integer(o.depth):'--')+'</b></div>'+
+      '<div><span>LOCKED @ CAP</span><b class="'+(q?'goodText':'')+'">'+money(locked)+'</b></div>'+
+    '</div>'+
+    '<div class="legPair">'+legs.slice(0,2).map(legCard).join('')+'</div>'+
+    '<div class="opBottom"><span>ROI '+(Number.isFinite(roi)?pct(roi):'--')+' · fees '+cents(o?.estimatedFees)+' · buffer '+cents(o?.safetyMargin)+'</span><button class="copyBtn" type="button" data-copy="'+esc(copy)+'">COPY PAIR</button></div>'+
+  '</article>';
+}
+function renderOpportunities(s){
+  const rows=allOpportunities(s);
+  const qualified=rows.filter(x=>x?.qualified);
+  const near=rows.filter(x=>!x?.qualified);
+  const display=[...qualified.slice(0,8),...near.slice(0,8)].slice(0,12);
+  setText('opportunityCount',integer(rows.length)+' OPPORTUNIT'+(rows.length===1?'Y':'IES'));
+  const grid=$('opportunityGrid');
+  if(!grid)return;
+  if(!display.length){
+    grid.innerHTML='<div class="emptyState"><b>NO PRICED ARB CANDIDATES RIGHT NOW</b><span>The engine is still scanning. Empty is better than manufacturing edge.</span></div>';
+    return;
+  }
+  grid.innerHTML=display.map(o=>opCard(o,s)).join('');
+}
+
+function ledgerStats(s){
+  const rows=Array.isArray(s?.shadow?.recent)?s.shadow.recent:[];
+  const profit=n(s?.shadow?.theoreticalLockedProfit)||0;
+  const capital=rows.reduce((sum,x)=>sum+(n(x?.capital)||0),0);
+  const cutoff=Date.now()-86400000;
+  const recent=rows.filter(x=>(n(x?.capturedAt)||0)>=cutoff);
+  const last24=recent.reduce((sum,x)=>sum+(n(x?.lockedProfit)||0),0);
+  return{rows,profit,capital,roi:capital>0?profit/capital:NaN,last24};
+}
+function chartPath(values){
+  const W=700,H=180,pad=10;
+  if(!values.length)values=[0,0];
+  if(values.length===1)values=[0,values[0]];
+  const min=Math.min(0,...values),max=Math.max(1,...values);
+  const range=Math.max(.01,max-min);
+  const points=values.map((v,i)=>{
+    const x=pad+(W-pad*2)*(i/(values.length-1));
+    const y=H-pad-(H-pad*2)*((v-min)/range);
+    return[x,y];
+  });
+  const line='M '+points.map(p=>p.map(x=>x.toFixed(2)).join(' ')).join(' L ');
+  const area=line+' L '+points[points.length-1][0].toFixed(2)+' '+(H-pad)+' L '+points[0][0].toFixed(2)+' '+(H-pad)+' Z';
+  return{line,area};
+}
+function captureRow(x){
+  return '<div class="capture"><div><b>'+esc(x?.eventTitle||x?.eventTicker||'Qualified arb')+'</b><small>'+integer(x?.contracts||0)+' pairs · '+money(x?.capital||0)+' modeled capital · '+cents(x?.netEdge)+' / pair · '+dateTime(x?.capturedAt)+'</small></div><strong>+'+money(Math.max(0,n(x?.lockedProfit)||0))+'</strong></div>';
+}
+function renderLedger(s){
+  const p=ledgerStats(s);
+  const captures=n(s?.shadow?.captures)||0;
+  setText('railProfit',money(p.profit));setText('railCaptures',integer(captures));
+  setText('ledgerProfit',money(p.profit));setText('ledgerCaptureSub',integer(captures)+' capture'+(captures===1?'':'s'));
+  setText('ledgerCapital',money(p.capital));setText('ledgerRoi',Number.isFinite(p.roi)?pct(p.roi):'--');
+  setText('ledger24',money(p.last24));setText('chartValue',money(p.profit));
+  const ordered=[...p.rows].sort((a,b)=>(n(a?.capturedAt)||0)-(n(b?.capturedAt)||0));
+  let running=0;const values=[0];
+  for(const row of ordered){running+=n(row?.lockedProfit)||0;values.push(running)}
+  const path=chartPath(values);
+  $('pnlLine')?.setAttribute('d',path.line);$('pnlArea')?.setAttribute('d',path.area);
+  const feed=$('captureFeed');
+  if(feed)feed.innerHTML=p.rows.length?p.rows.slice(0,8).map(captureRow).join(''):'<div class="emptyState small"><b>NO CAPTURES YET</b><span>The ledger only records qualified, book-verified arbs.</span></div>';
+}
+
+function rejectionReasons(s){
+  const counts=new Map();
+  for(const row of allOpportunities(s)){
+    if(row?.qualified)continue;
+    const reason=String(row?.qualification||'NOT QUALIFIED').trim()||'NOT QUALIFIED';
+    counts.set(reason,(counts.get(reason)||0)+1);
+  }
+  return [...counts.entries()].sort((a,b)=>b[1]-a[1]).slice(0,7);
+}
+function renderIntelligence(s){
+  const reasons=rejectionReasons(s);
+  const max=reasons.length?Math.max(...reasons.map(x=>x[1])):1;
+  const box=$('rejectionBars');
+  if(box)box.innerHTML=reasons.length?reasons.map(([reason,count])=>
+    '<div class="rejectRow"><span title="'+esc(reason)+'">'+esc(reason)+'</span><div class="rejectTrack"><i style="width:'+Math.max(8,(count/max)*100).toFixed(1)+'%"></i></div><b>'+count+'</b></div>'
+  ).join(''):'<div class="emptyState small"><span>No priced rejection reasons in the latest scan.</span></div>';
+  setText('rejectionTag',reasons.length?'FILTERING '+reasons.reduce((a,x)=>a+x[1],0):'CLEAN');
+
+  const closest=Array.isArray(s?.scan?.crossVenue?.closestMatches)?s.scan.crossVenue.closestMatches.slice(0,6):[];
+  setText('closestCount',integer(closest.length));
+  const list=$('closestMatches');
+  if(!list)return;
+  list.innerHTML=closest.length?closest.map(x=>
+    '<div class="closest"><div class="closestTop"><b title="'+esc(x?.kalshiMarketTitle||'')+'">'+esc(x?.kalshiEventTitle||x?.kalshiMarketTitle||'Kalshi market')+'</b><strong>'+pct(x?.score||0)+'</strong></div><small title="'+esc(x?.polymarketQuestion||'')+'">'+esc(x?.polymarketEventTitle||x?.polymarketQuestion||'Polymarket candidate')+'</small><div class="compat"><span class="'+(x?.numbersCompatible?'yes':'no')+'">NUMBERS '+(x?.numbersCompatible?'✓':'×')+'</span><span class="'+(x?.directionCompatible?'yes':'no')+'">DIRECTION '+(x?.directionCompatible?'✓':'×')+'</span></div></div>'
+  ).join(''):'<div class="emptyState small"><span>No near-match data returned.</span></div>';
+}
+
+function renderSystem(s){
+  setText('railMode',s?.focus==='ARB_FIRST'?'ARB-FIRST':String(s?.mode||'SHADOW'));
+  setText('engineThrottle',integer(s?.scanner?.intervalSeconds||45)+'s');
+  setText('sysVersion',s?.version||'--');setText('sysEvents',integer(s?.scan?.scannedEvents||0));
+  setText('sysMarkets',integer(s?.scan?.scannedMarkets||0));setText('sysPoly',integer(s?.scan?.crossVenue?.scannedPolymarketMarkets||0));
+  setText('sysMinEdge',pct(s?.guardrails?.minNetEdge));setText('sysBuffer',cents(s?.guardrails?.safetyMargin));
+  setText('sysMaxPairs',integer(s?.guardrails?.maxContracts||0));setText('sysHorizon',integer(s?.guardrails?.horizonHours||0)+'h');
+  setText('sysCrypto',String(s?.crypto?.mode||'PAUSED'));setText('sysReal',s?.realMoney?'ON':'OFF');
+  const errors=[];
+  if(s?.lastError)errors.push(String(s.lastError));
+  if(Array.isArray(s?.scan?.errors))errors.push(...s.scan.errors.map(String));
+  if(Array.isArray(s?.scan?.crossVenue?.errors))errors.push(...s.scan.crossVenue.errors.map(String));
+  const x=s?.scan?.crossVenue||{};
+  const lines=[
+    'ENGINE: '+String(s?.version||'unknown')+' · '+String(s?.focus||s?.mode||'unknown'),
+    'LAST SCAN: '+dateTime(s?.lastScanAt)+' · '+(Number.isFinite(n(s?.lastScanAt))?ageText(Date.now()-n(s.lastScanAt)):'unknown'),
+    'STRUCTURAL: '+integer((s?.scan?.arbOpportunities||[]).length)+' candidates · '+integer(s?.scan?.qualifiedStructuralArbs||0)+' qualified',
+    'CROSS-VENUE: '+integer(x.scannedPolymarketMarkets||0)+' markets · '+integer(x.candidateMatches||0)+' candidates · '+integer(x.strictMatches||0)+' strict · '+integer(x.qualifiedArbs||0)+' qualified',
+    'SHADOW: '+integer(s?.shadow?.captures||0)+' captures · '+money(s?.shadow?.theoreticalLockedProfit||0)+' theoretical locked profit',
+    'CRYPTO: '+String(s?.crypto?.mode||'PAUSED')+' · real money '+(s?.crypto?.realMoney?'ON':'OFF'),
+    errors.length?'ERRORS: '+errors.join(' | '):'ERRORS: none'
+  ];
+  setText('diagText',lines.join('\n'));
 }
 
 function rewardCard(r){
-  const perDay=Number.isFinite(num(r.rewardPerDay))?money(r.rewardPerDay):'--';
-  const ends=r.endDate?dateTime(r.endDate):'--';
-  return '<article class="rewardCard">'+
-    '<div class="cardTop"><span class="category">LIQUIDITY</span><em class="cyan">'+esc(r.qualification||'WATCH')+'</em></div>'+
-    '<h3>'+esc(r.ticker||'Kalshi market')+'</h3>'+
-    '<p>'+esc(r.description||'Active liquidity incentive')+'</p>'+
-    '<div class="miniMetrics rewardMetrics">'+
-      '<div><span>POOL / PERIOD</span><b>'+money(r.reward)+'</b></div>'+
-      '<div><span>POOL / DAY</span><b>'+perDay+'</b></div>'+
-      '<div><span>TARGET SIZE</span><b>'+integer(r.targetSize)+'</b></div>'+
-      '<div><span>ENDS</span><b>'+esc(ends)+'</b></div>'+
-    '</div>'+
-    '<div class="tradeBar"><span>'+esc(r.ticker||'')+'</span><button type="button" class="copyTicker" data-copy-ticker="'+esc(r.ticker||'')+'">COPY TICKER</button><a href="'+esc(appUrl())+'">OPEN KALSHI ↗</a></div>'+
-  '</article>';
+  return '<article class="rewardCard"><span>'+esc(r?.qualification||'WATCH')+'</span><h3>'+esc(r?.ticker||'Kalshi program')+'</h3><p>'+esc(r?.description||'Liquidity incentive program')+'</p><div class="rewardMeta"><div><span>POOL</span><b>'+money(r?.reward||0)+'</b></div><div><span>PER DAY</span><b>'+money(r?.rewardPerDay||0)+'</b></div><div><span>TARGET SIZE</span><b>'+integer(r?.targetSize||0)+'</b></div><div><span>ENDS</span><b>'+dateTime(r?.endDate)+'</b></div></div></article>';
 }
-function renderLiquidity(s){
-  const rows=Array.isArray(s?.scan?.liquidityOpportunities)?s.scan.liquidityOpportunities:[];
-  const el=$('liquidity');if(!el)return;
-  el.innerHTML=rows.length?rows.slice(0,8).map(rewardCard).join(''):'<div class="noEdge"><b>NO ACTIVE LIQUIDITY PROGRAMS RETURNED</b><span>Liquidity rewards are watch-only anyway.</span></div>';
-}
-
-function cryptoOpenRow(p){
-  const stake=(+p.entryCost||0)*(+p.count||0);
-  return '<div class="cryptoTrade openTrade"><div class="cryptoTradeTop"><div><span>'+esc(p.asset||'CRYPTO')+' · '+esc(String(p.side||'').toUpperCase())+'</span><b>'+esc(p.ticker||'')+'</b></div><strong class="amber">LEGACY OPEN</strong></div><div class="cryptoTradeMeta"><span>Entry '+cents(p.entryCost)+'</span><span>'+integer(p.count)+' contracts</span><span>'+money(stake)+' fake risk</span><span>'+dateTime(p.enteredAt)+'</span></div></div>';
-}
-function cryptoTradeRow(t){
-  const net=+t.netDollars||0;
-  return '<div class="cryptoTrade"><div class="cryptoTradeTop"><div><span>'+esc(t.asset||'CRYPTO')+' · '+esc(String(t.side||'').toUpperCase())+'</span><b>'+esc(t.ticker||'')+'</b></div><strong class="'+(net>0?'green':net<0?'red':'')+'">'+(net>0?'+':'')+money(net)+'</strong></div><div class="cryptoTradeMeta"><span>'+cents(t.entryCost)+' → '+cents(t.exitCost)+'</span><span>'+integer(t.count)+' contracts</span><span>'+esc(t.reason||'exit')+'</span><span>'+dateTime(t.exitedAt)+'</span></div></div>';
-}
-function renderCrypto(s){
-  const c=s?.crypto||{};
-  const rows=Array.isArray(c.recent)?c.recent:[];
-  const open=Array.isArray(c.openPositions)?c.openPositions:[];
-  setText('cryptoEngineState',c.enabled?'PAPER LIVE':'PAUSED');
-  setText('cryptoTotalPnl',money(c.totalPnl||0));
-  setText('cryptoWinLoss',(c.wins||0)+'W / '+(c.losses||0)+'L');
-  setText('cryptoAvgWin',money(c.avgWin||0));
-  setText('cryptoAvgLoss',money(-(c.avgLoss||0)));
-  setText('cryptoProfitFactor',Number.isFinite(num(c.profitFactor))?num(c.profitFactor).toFixed(2):'--');
-  setText('cryptoExpectancy',money(c.expectancyPerTrade||0));
-  setText('cryptoOpenRisk',money(c.openRisk||0));
-  setText('cryptoLastAction',String(c.lastAction||'--').replace(/^paper-scalp-/,'').toUpperCase());
-  setText('cryptoOpenCount',integer(open.length));
-  setText('cryptoTradeCount',integer(c.completed||rows.length));
-  setClassByValue('cryptoTotalPnl',+c.totalPnl||0);setClassByValue('cryptoAvgWin',+c.avgWin||0);setClassByValue('cryptoExpectancy',+c.expectancyPerTrade||0);
-  const loss=$('cryptoAvgLoss');if(loss&&+c.avgLoss>0)loss.className='red';
-  const openEl=$('cryptoOpenPositions');if(openEl)openEl.innerHTML=open.length?open.map(cryptoOpenRow).join(''):'<div class="empty">No open crypto paper position.</div>';
-  const tradeEl=$('cryptoTrades');if(tradeEl)tradeEl.innerHTML=rows.length?rows.slice(0,20).map(cryptoTradeRow).join(''):'<div class="empty">No completed crypto paper scalp.</div>';
-}
-
-function renderGuardrails(s){
-  setText('minEdge',edge(s?.guardrails?.minNetEdge));
-  setText('safetyMargin',cents(s?.guardrails?.safetyMargin));
-  setText('maxContracts',integer(s?.guardrails?.maxContracts));
-  setText('horizonHours',integer(s?.guardrails?.horizonHours)+'h');
-  setText('executionReason',s?.execution?.reason||'Real-money execution is locked.');
-  const tag=$('executionTag');if(tag)tag.textContent=s?.execution?.live?'LIVE':'SHADOW ONLY';
-}
-function blockerSummary(s){
-  const structural=Array.isArray(s?.scan?.arbOpportunities)?s.scan.arbOpportunities:[];
-  const cross=Array.isArray(s?.scan?.crossVenue?.opportunities)?s.scan.crossVenue.opportunities:[];
-  const counts=new Map();
-  for(const row of [...structural,...cross]){
-    if(row?.qualified)continue;
-    const key=String(row?.qualification||'UNSPECIFIED').trim()||'UNSPECIFIED';
-    counts.set(key,(counts.get(key)||0)+1);
-  }
-  return [...counts.entries()].sort((a,b)=>b[1]-a[1]).slice(0,8);
-}
-function renderDiagnostics(s){
-  const structural=Array.isArray(s?.scan?.arbOpportunities)?s.scan.arbOpportunities:[];
-  const cross=s?.scan?.crossVenue||{};
-  setText('engineVersion',s?.version||'--');
-  setText('eventCount',integer(s?.scan?.scannedEvents||0));
-  setText('marketCount',integer(s?.scan?.scannedMarkets||0));
-  setText('arbCandidates',integer(structural.length));
-  setText('autoScan','60s');
-  setText('lastForcedScan',lastScanRequestAt?shortClock(lastScanRequestAt):'--');
-
-  const notes=[
-    'AUTO-SCAN: real /dream-predict/scan every 60s while this dashboard is open.',
-    'STRUCTURAL: '+integer(structural.length)+' candidates → '+integer(structural.filter(x=>x?.qualified).length)+' qualified.',
-    'CROSS-VENUE: '+integer(cross.scannedPolymarketMarkets||0)+' Polymarket markets → '+integer(cross.strictMatches||0)+' strict matches → '+integer(cross.qualifiedArbs||0)+' qualified.'
-  ];
-  const blockers=blockerSummary(s);
-  if(blockers.length){
-    notes.push('TOP REJECTION REASONS:');
-    for(const [reason,count] of blockers)notes.push('  '+count+' × '+reason);
-  }else{
-    notes.push('TOP REJECTION REASONS: none returned by backend.');
-  }
-
-  const errors=[];
-  if(s?.lastError)errors.push(s.lastError);
-  if(Array.isArray(s?.scan?.errors))errors.push(...s.scan.errors);
-  notes.push(errors.length?'API ERRORS: '+errors.join(' | '):'API ERRORS: none.');
-  setText('errors',notes.join('\n'));
+function renderRewards(s){
+  const rows=Array.isArray(s?.scan?.liquidityOpportunities)?s.scan.liquidityOpportunities.slice(0,6):[];
+  const grid=$('rewardGrid');if(grid)grid.innerHTML=rows.length?rows.map(rewardCard).join(''):'<div class="emptyState"><span>No active reward programs returned. They remain watch-only either way.</span></div>';
 }
 
 function render(s){
-  lastPayload=s;
-  health(!!s?.ok,s?.lastError);
-  setText('mode',s?.focus==='ARB_FIRST'?'ARB-FIRST':'SHADOW');
-  setText('arbCount',integer(s?.scan?.qualifiedArbs||0));
-  setText('realProfit',money(0));
-  renderHero(s);
-  renderPaper(s);
-  renderArbs(s);
-  renderCrossVenue(s);
-  renderCaptures(s);
-  renderLiquidity(s);
-  renderCrypto(s);
-  renderGuardrails(s);
-  renderDiagnostics(s);
+  lastPayload=s;lastFetchedAt=Date.now();
+  renderHealth(s);renderHero(s);renderFunnel(s);renderOpportunities(s);renderLedger(s);renderIntelligence(s);renderSystem(s);renderRewards(s);
 }
-async function refresh(force=false){
+
+function updateHeartbeat(){
+  if(!lastPayload)return;
+  const scanAt=n(lastPayload?.lastScanAt);
+  const age=Number.isFinite(scanAt)?Math.max(0,Date.now()-scanAt):NaN;
+  const progress=Number.isFinite(age)?clamp((age%60000)/60000*100,0,100):0;
+  const bar=$('heartbeatBar');if(bar)bar.style.width=progress.toFixed(1)+'%';
+  const fetchAge=lastFetchedAt?Date.now()-lastFetchedAt:NaN;
+  setText('heartbeatText',
+    (Number.isFinite(age)?'Engine scan '+ageText(age):'Engine scan unknown')+
+    (Number.isFinite(fetchAge)?' · console synced '+ageText(fetchAge):'')
+  );
+  setText('railAge',Number.isFinite(age)?ageText(age):'--');
+}
+
+async function refresh(){
   if(busy)return;
-  const now=Date.now();
-  if(force&&lastScanRequestAt&&now-lastScanRequestAt<SCAN_DEBOUNCE_MS)return;
   busy=true;
-  if(force)lastScanRequestAt=now;
-  const btn=$('refreshBtn');
-  if(btn){btn.disabled=true;btn.innerHTML='<span>'+(force?'SCANNING...':'REFRESHING...')+'</span>';}
+  const btn=$('syncBtn');
+  if(btn){btn.disabled=true;btn.textContent='SYNCING...'}
   try{
-    const data=await json(force?'/dream-predict/scan':'/dream-predict/status');
+    const data=await getStatus();
     render(data);
   }catch(error){
     const message=error instanceof Error?error.message:String(error);
-    health(false,message);
+    const pill=$('healthPill');if(pill)pill.className='healthPill bad';
+    setText('healthText','OFFLINE');
+    setText('heartbeatText',message);
     if(!lastPayload){
-      setText('heroTitle','Scanner reconnecting...');
-      setText('heroSubtitle',message);
+      setText('heroTitle','Telemetry link interrupted.');
+      setText('heroCopy','The browser could not read DreamPredict status. This does not control or stop the autonomous Cloudflare scanner.');
     }
   }finally{
     busy=false;
-    if(btn){btn.disabled=false;btn.innerHTML='<span>SCAN NOW</span>';}
+    if(btn){btn.disabled=false;btn.textContent='SYNC TELEMETRY'}
   }
 }
-document.addEventListener('click',async event=>{
-  const button=event.target.closest('[data-copy-ticker]');
-  if(!button)return;
-  const ticker=button.getAttribute('data-copy-ticker')||'';
-  if(!ticker)return;
-  try{
-    await navigator.clipboard.writeText(ticker);
-    const old=button.textContent;button.textContent='COPIED';setTimeout(()=>button.textContent=old,1100);
-  }catch{window.prompt('Copy this Kalshi ticker:',ticker);}
+
+document.addEventListener('click',event=>{
+  const target=event.target.closest('[data-copy]');
+  if(!target)return;
+  const value=target.getAttribute('data-copy')||'';
+  copyText(value).then(()=>{
+    const old=target.textContent;target.textContent='COPIED';setTimeout(()=>target.textContent=old,1000);
+  }).catch(()=>window.prompt('Copy pair:',value));
 });
-document.addEventListener('visibilitychange',()=>{
-  if(!document.hidden&&Date.now()-lastScanRequestAt>=AUTO_SCAN_MS)refresh(true);
-});
-$('refreshBtn')?.addEventListener('click',()=>refresh(true));
-refresh(true);
-setInterval(()=>refresh(false),STATUS_REFRESH_MS);
-setInterval(()=>refresh(true),AUTO_SCAN_MS);
+$('syncBtn')?.addEventListener('click',refresh);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});
+refresh();
+setInterval(refresh,POLL_MS);
+setInterval(updateHeartbeat,1000);

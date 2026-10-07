@@ -5,6 +5,90 @@ import {chromium} from 'playwright';
 
 const origin='http://127.0.0.1:4173';
 const output='_visual';
+const dreamPredictMock=()=>({
+  ok:true,
+  mode:'SHADOW',
+  version:'dream-arb-v3',
+  strategy:'Dream Arb',
+  focus:'ARB_FIRST',
+  realMoney:false,
+  execution:{live:false,orderSubmission:false,atomicExecution:false,reason:'Shadow validation in progress.'},
+  guardrails:{minNetEdge:.02,safetyMargin:.005,maxContracts:10,horizonHours:24,mutuallyExclusiveBasketAssumption:false,nestedThresholdsOnly:true},
+  scanner:{automated:true,intervalSeconds:45},
+  crypto:{enabled:false,mode:'PAUSED',realMoney:false},
+  shadow:{
+    captures:3,
+    theoreticalLockedProfit:1.26,
+    recent:[
+      {eventTitle:'NBA total points ladder',contracts:8,capital:7.12,lockedProfit:.48,netEdge:.06,capturedAt:Date.now()-25*60*1000},
+      {eventTitle:'US temperature threshold',contracts:7,capital:6.44,lockedProfit:.42,netEdge:.06,capturedAt:Date.now()-9*60*1000},
+      {eventTitle:'Cross-venue sports total',contracts:6,capital:5.58,lockedProfit:.36,netEdge:.06,capturedAt:Date.now()-2*60*1000}
+    ]
+  },
+  scan:{
+    scannedEvents:81,
+    scannedMarkets:640,
+    qualifiedArbs:2,
+    qualifiedStructuralArbs:1,
+    arbOpportunities:[
+      {
+        kind:'NESTED_THRESHOLD',eventTicker:'KXTEST',eventTitle:'NBA total points ladder',category:'SPORTS',
+        strikeType:'greater',lowerStrike:221.5,upperStrike:224.5,grossCost:.87,estimatedFees:.03,safetyMargin:.005,
+        guaranteedMinimumPayout:1,netEdge:.095,netEdgeCents:9.5,depth:8,qualified:true,qualification:'STRUCTURAL ARB',
+        legs:[
+          {ticker:'KXTEST-221',title:'Game total over 221.5',side:'yes',ask:.42,fee:.01,size:12,strike:221.5},
+          {ticker:'KXTEST-224',title:'Game total over 224.5',side:'no',ask:.45,fee:.02,size:8,strike:224.5}
+        ]
+      },
+      {
+        kind:'NESTED_THRESHOLD',eventTicker:'KXWATCH',eventTitle:'Weather threshold ladder',category:'WEATHER',
+        strikeType:'greater',lowerStrike:70,upperStrike:72,grossCost:.95,estimatedFees:.03,safetyMargin:.005,
+        guaranteedMinimumPayout:1,netEdge:.015,netEdgeCents:1.5,depth:14,qualified:false,qualification:'EDGE BELOW MINIMUM',
+        legs:[
+          {ticker:'KXWATCH-70',title:'High temperature above 70',side:'yes',ask:.48,fee:.01,size:20,strike:70},
+          {ticker:'KXWATCH-72',title:'High temperature above 72',side:'no',ask:.47,fee:.02,size:14,strike:72}
+        ]
+      }
+    ],
+    crossVenue:{
+      enabled:true,catalogCached:false,catalogAgeMs:0,scannedPolymarketMarkets:342,candidateMatches:17,timeVerifiedMatches:8,
+      ruleVerifiedMatches:5,strictMatches:4,pricedMatches:3,qualifiedArbs:1,
+      opportunities:[
+        {
+          kind:'CROSS_VENUE',eventTicker:'KXNBA',eventTitle:'Lakers vs Warriors total points',category:'CROSS VENUE',
+          grossCost:.88,estimatedFees:.025,safetyMargin:.005,guaranteedMinimumPayout:1,netEdge:.09,netEdgeCents:9,
+          depth:6,qualified:true,qualification:'CROSS-VENUE ARB',matchConfidence:.91,timeVerified:true,ruleVerified:true,
+          legs:[
+            {venue:'KALSHI',ticker:'KXNBA-O228',title:'Lakers vs Warriors over 228.5',side:'yes',ask:.43,fee:.01,size:9},
+            {venue:'POLYMARKET',ticker:'poly-no-token',title:'Lakers vs Warriors over 228.5',side:'no',ask:.45,fee:.015,size:6}
+          ]
+        },
+        {
+          kind:'CROSS_VENUE',eventTicker:'KXMLB',eventTitle:'Padres vs Brewers total runs',category:'CROSS VENUE',
+          grossCost:.93,estimatedFees:.025,safetyMargin:.005,guaranteedMinimumPayout:1,netEdge:.04,netEdgeCents:4,
+          depth:5,qualified:false,qualification:'RULE PARITY UNPROVEN',matchConfidence:.74,timeVerified:true,ruleVerified:false,
+          legs:[
+            {venue:'KALSHI',ticker:'KXMLB-O75',title:'Padres vs Brewers over 7.5',side:'yes',ask:.47,fee:.01,size:8},
+            {venue:'POLYMARKET',ticker:'poly-no-mlb',title:'Padres vs Brewers over 7.5',side:'no',ask:.46,fee:.015,size:5}
+          ]
+        }
+      ],
+      closestMatches:[
+        {kalshiEventTitle:'49ers vs Rams',kalshiMarketTitle:'Total points over 45.5',polymarketEventTitle:'49ers vs Rams',polymarketQuestion:'Will total points exceed 45.5?',score:.82,numbersCompatible:true,directionCompatible:true},
+        {kalshiEventTitle:'Padres vs Brewers',kalshiMarketTitle:'Full game over 7.5',polymarketEventTitle:'Brewers vs Padres',polymarketQuestion:'Total runs over 7.5',score:.74,numbersCompatible:true,directionCompatible:true},
+        {kalshiEventTitle:'Fed decision',kalshiMarketTitle:'Rate cut over 25 bps',polymarketEventTitle:'Federal Reserve',polymarketQuestion:'Will the Fed cut by 25 bps?',score:.61,numbersCompatible:true,directionCompatible:false}
+      ],
+      errors:[]
+    },
+    liquidityOpportunities:[
+      {qualification:'WATCH',ticker:'KXNBA-LIQ',description:'Active liquidity incentive',reward:250,rewardPerDay:35.71,targetSize:100,endDate:new Date(Date.now()+2*86400000).toISOString()}
+    ],
+    errors:[]
+  },
+  lastScanAt:Date.now()-12000,
+  lastError:null
+});
+
 fs.mkdirSync(output,{recursive:true});
 const server=spawn(process.execPath,['scripts/serve.mjs'],{stdio:'inherit'});
 let browser;
@@ -18,9 +102,17 @@ try {
   for(const [width,height] of [[1440,900],[1165,747],[820,1180],[390,844],[320,740]]){
     const page=await browser.newPage({viewport:{width,height},reducedMotion:'reduce'});
     const errors=[];
+    const dreamPredictRequests=[];
     page.on('pageerror',error=>errors.push(error.message));
-    // Visual checks must never initiate a voice session or submit a lead.
-    await page.route(/api\.dreamprotocol\.ai|formsubmit\.co|api\.vapi\.ai/,route=>route.abort());
+    // Visual checks must never initiate a voice session, submit a lead, or force a DreamPredict scan.
+    await page.route(/api\.dreamprotocol\.ai|formsubmit\.co|api\.vapi\.ai/,route=>{
+      const url=route.request().url();
+      if(url.includes('api.dreamprotocol.ai'))dreamPredictRequests.push(url);
+      if(url.includes('/dream-predict/status')){
+        return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(dreamPredictMock())});
+      }
+      return route.abort();
+    });
     await page.goto(origin,{waitUntil:'domcontentloaded'});
     await page.waitForTimeout(900);
     await page.evaluate(()=>document.fonts.ready);
@@ -202,6 +294,29 @@ try {
     assert.equal(await page.locator('#client-login-password').inputValue(),'');
     assert((await page.locator('#client-login-status').innerText()).includes('Private workspace access required.'));
     await page.screenshot({path:`${output}/client-login-access-${width}.png`});
+    await page.goto(origin+'/kalshi/',{waitUntil:'domcontentloaded'});
+    await page.waitForFunction(()=>document.querySelector('#healthText')?.textContent==='LIVE',null,{timeout:5000});
+    const dreamPredictGeometry=await page.evaluate(()=>({
+      overflow:document.documentElement.scrollWidth>innerWidth+1,
+      hero:document.querySelector('.hero').getBoundingClientRect().toJSON(),
+      rail:document.querySelector('.tickerRail').getBoundingClientRect().toJSON(),
+      cards:document.querySelectorAll('.opCard').length,
+      title:document.querySelector('#heroTitle')?.textContent||'',
+      qualified:document.querySelector('#railQualified')?.textContent||'',
+      universe:document.querySelector('#funnelUniverse')?.textContent||'',
+      dashboardRole:[...document.querySelectorAll('.autoRows b')].map(x=>x.textContent).find(x=>x==='READ ONLY')||''
+    }));
+    assert(!dreamPredictGeometry.overflow,`DreamPredict overflows at ${width}px: ${JSON.stringify(dreamPredictGeometry)}`);
+    assert(dreamPredictGeometry.hero.left>=-1 && dreamPredictGeometry.hero.right<=width+1,`DreamPredict hero mispositioned at ${width}px`);
+    assert(dreamPredictGeometry.rail.left>=-1 && dreamPredictGeometry.rail.right<=width+1,`DreamPredict status rail mispositioned at ${width}px`);
+    assert(dreamPredictGeometry.cards>=4,`DreamPredict opportunity matrix did not render at ${width}px`);
+    assert(dreamPredictGeometry.title.includes('Math broke'),`DreamPredict hero did not enter qualified state at ${width}px`);
+    assert.equal(dreamPredictGeometry.qualified,'2');
+    assert.equal(dreamPredictGeometry.universe,'342');
+    assert.equal(dreamPredictGeometry.dashboardRole,'READ ONLY');
+    assert(!dreamPredictRequests.some(url=>url.includes('/dream-predict/scan')),`DreamPredict dashboard forced a scan at ${width}px: ${JSON.stringify(dreamPredictRequests)}`);
+    await page.evaluate(()=>scrollTo(0,0));
+    await page.screenshot({path:`${output}/dreampredict-${width}.png`});
     await page.goto(origin+'/contact/?service=AI%20receptionist',{waitUntil:'networkidle'});
     assert((await page.locator('[name="workflow"]').inputValue()).includes('AI receptionist'));
     await page.screenshot({path:`${output}/contact-${width}.png`});

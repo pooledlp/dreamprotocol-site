@@ -3,254 +3,279 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#020409">
+<meta name="theme-color" content="#020308">
 <meta name="robots" content="noindex,nofollow">
-<title>DreamPredict | Dream Arb v3</title>
-<link rel="stylesheet" href="styles.css?v=command1">
+<title>DreamPredict | Autonomous Arb Console</title>
+<meta name="description" content="DreamPredict autonomous arbitrage intelligence console.">
+<link rel="stylesheet" href="styles.css?v=arb-console-1">
 </head>
 <body>
-<div class="gridGlow"></div>
-<div class="aurora a1"></div><div class="aurora a2"></div><div class="noise"></div>
-<div class="app">
+<div class="backdrop">
+  <div class="grid"></div>
+  <div class="glow glowA"></div>
+  <div class="glow glowB"></div>
+  <div class="grain"></div>
+</div>
+
+<div class="shell">
   <header class="topbar">
-    <div class="brandBlock">
-      <div class="brandMark"><span>D</span></div>
+    <div class="brandWrap">
+      <div class="mark"><span>DP</span><i></i></div>
       <div>
         <div class="brand">DreamPredict</div>
-        <div class="sub">ARB ENGINE V3 · KALSHI + POLYMARKET</div>
+        <div class="brandSub">AUTONOMOUS ARB INTELLIGENCE</div>
       </div>
     </div>
-    <div class="topActions">
-      <span class="shadowBadge">SHADOW EXECUTION</span>
-      <div class="livePill"><i></i><span id="healthText">CONNECTING</span></div>
+    <div class="topRight">
+      <span class="chip cloud"><i></i>CLOUDFLARE AUTOPILOT</span>
+      <span class="chip shadow">SHADOW CAPITAL</span>
+      <div id="healthPill" class="healthPill connecting"><i></i><span id="healthText">CONNECTING</span></div>
     </div>
   </header>
 
-  <section class="statusRail">
-    <div><span>ENGINE</span><b id="mode">ARB-FIRST</b></div>
-    <div><span>QUALIFIED NOW</span><b id="arbCount">0</b></div>
-    <div><span>BEST NET EDGE</span><b id="bestNetEdgeTop">--</b></div>
-    <div><span>ARB PAPER P&L</span><b id="arbPnl">$0.00</b></div>
-    <div><span>CAPTURES</span><b id="captureTopCount">0</b></div>
-    <div><span>REAL P&L</span><b id="realProfit">$0.00</b></div>
+  <section class="tickerRail" aria-label="system status">
+    <div><span>MODE</span><b id="railMode">ARB-FIRST</b></div>
+    <div><span>QUALIFIED</span><b id="railQualified">0</b></div>
+    <div><span>BEST NET EDGE</span><b id="railEdge">--</b></div>
+    <div><span>SHADOW PROFIT</span><b id="railProfit">$0.00</b></div>
+    <div><span>CAPTURES</span><b id="railCaptures">0</b></div>
+    <div><span>LAST ENGINE SCAN</span><b id="railAge">--</b></div>
   </section>
 
   <main>
-    <section class="hero panel arbHero">
-      <div class="heroGrid">
-        <div class="heroCopy">
-          <div class="eyebrow">AUTONOMOUS ARBITRAGE COMMAND CENTER</div>
-          <div id="heroStatus" class="heroStatus hunting">SCANNING</div>
-          <h1 id="heroTitle">We wait for math to break.</h1>
-          <p id="heroSubtitle">Dream Arb continuously scans Kalshi and Polymarket, proves the payout relationship, reprices both books, and ignores anything that cannot survive fees, depth, and execution buffers.</p>
-          <div id="heroRule" class="researchLine">No prediction. No forced trades. No fake edge.</div>
+    <section class="hero panel">
+      <div class="heroLeft">
+        <div class="eyebrow">AUTONOMOUS · READ-ONLY OBSERVABILITY</div>
+        <div id="heroKicker" class="heroKicker hunting"><i></i>HUNTING</div>
+        <h1 id="heroTitle">Watching two markets disagree.</h1>
+        <p id="heroCopy">Cloudflare keeps DreamPredict scanning with this page closed. The console only watches the engine, proves contract equivalence, and surfaces price relationships that survive fees, depth, and safety buffers.</p>
 
-          <div class="heroMetrics">
-            <div><span>NET EDGE / PAIR</span><b id="heroEdge">--</b></div>
-            <div><span>CONSERVATIVE ROI</span><b id="heroRoi">--</b></div>
-            <div><span>MODELED ALL-IN COST</span><b id="heroCost">--</b></div>
-            <div><span>LOCKED $ AT CAP</span><b id="heroLockedProfit">--</b></div>
-          </div>
-          <div id="heroLegs" class="legs">
-            <div class="empty compact">Waiting for a provable price mismatch.</div>
+        <div id="heroDeal" class="heroDeal">
+          <div class="heroEmpty">
+            <b>NO QUALIFIED ARB RIGHT NOW</b>
+            <span>That is a valid result. DreamPredict is not allowed to invent edge.</span>
           </div>
         </div>
 
-        <div class="radarWrap">
-          <div id="arbRadar" class="arbRadar hunting">
-            <div class="radarGrid"></div>
-            <div class="radarRing r1"></div>
-            <div class="radarRing r2"></div>
-            <div class="radarRing r3"></div>
-            <div class="radarSweep"></div>
-            <div class="radarBlip b1"></div>
-            <div class="radarBlip b2"></div>
-            <div class="radarBlip b3"></div>
-            <div class="radarCore">
-              <small id="radarState">HUNTING</small>
-              <b id="radarEdge">0</b>
-              <span>QUALIFIED ARBS</span>
-            </div>
-          </div>
-          <div class="radarStats">
-            <div><span>MARKETS IN PLAY</span><b id="radarMarkets">--</b></div>
-            <div><span>STRICT CROSS MATCHES</span><b id="radarCrossMatches">--</b></div>
-            <div><span>MIN PAYOUT</span><b id="heroPayout">$1.00</b></div>
-            <div><span>LAST SCAN</span><b id="radarUpdated">--</b></div>
-          </div>
+        <div class="heroMetricRow">
+          <div><span>ALL-IN COST</span><b id="heroCost">--</b></div>
+          <div><span>NET EDGE / PAIR</span><b id="heroEdge">--</b></div>
+          <div><span>VISIBLE DEPTH</span><b id="heroDepth">--</b></div>
+          <div><span>LOCKED @ CAP</span><b id="heroLocked">--</b></div>
         </div>
       </div>
-      <div class="heroFooter">
-        <span><i></i> LIVE ORDERBOOKS</span>
-        <span>24H OPPORTUNITY WINDOW</span>
-        <span>STRICT CONTRACT EQUIVALENCE</span>
-        <span>REAL ORDERS OFF</span>
+
+      <div class="heroRight">
+        <div id="orb" class="orb hunting">
+          <div class="orbit o1"><i></i></div>
+          <div class="orbit o2"><i></i></div>
+          <div class="orbit o3"><i></i></div>
+          <div class="beam"></div>
+          <div class="orbCore">
+            <small>QUALIFIED NOW</small>
+            <b id="orbCount">0</b>
+            <span id="orbState">SCANNING</span>
+          </div>
+        </div>
+        <div class="autopilotCard">
+          <div class="autoHead"><span>AUTOPILOT</span><b id="autoState">ACTIVE</b></div>
+          <div class="autoRows">
+            <div><span>Cloud trigger</span><b>60s</b></div>
+            <div><span>Engine throttle</span><b id="engineThrottle">45s</b></div>
+            <div><span>Dashboard role</span><b>READ ONLY</b></div>
+            <div><span>Real orders</span><b class="danger">LOCKED OFF</b></div>
+          </div>
+          <div class="heartbeat"><i id="heartbeatBar"></i></div>
+          <small id="heartbeatText">Waiting for first telemetry packet.</small>
+        </div>
       </div>
     </section>
 
-    <section class="panel crossVenuePanel priorityPanel">
-      <div class="sectionIndex">01</div>
-      <div class="panelHead">
+    <section class="proof panel">
+      <div class="panelHeader">
         <div>
-          <div class="eyebrow">CROSS-VENUE ARBITRAGE · KALSHI ↔ POLYMARKET</div>
-          <h2>Same outcome. Two books. Broken price.</h2>
-          <p>A headline match is not enough. Dream Arb verifies the question, cutoff, resolution source, live orderbook depth, modeled fees, and cross-venue execution buffer before the ARB badge ever turns green.</p>
+          <div class="eyebrow">CONTRACT PROOF FUNNEL</div>
+          <h2>Similarity is cheap. Equivalence is hard.</h2>
+          <p>Every cross-venue candidate must survive identity, cutoff, resolution, live books, depth, fees, and buffer checks before it can become an arb.</p>
         </div>
-        <span id="crossVenueTag" class="tag scannerTag">SCANNING</span>
+        <span id="proofTag" class="tag">LIVE PIPELINE</span>
       </div>
 
-      <div class="crossSummary">
-        <div><span>POLYMARKET UNIVERSE</span><b id="polyMarketCount">0</b><small>public markets scanned</small></div>
-        <div><span>STRICT CONTRACT MATCHES</span><b id="strictMatchCount">0</b><small>equivalence candidates</small></div>
-        <div class="accentMetric"><span>QUALIFIED CROSS ARBS</span><b id="crossArbCount">0</b><small>after books + buffers</small></div>
-        <div><span>CATALOG STATE</span><b id="polyCacheState">--</b><small>cached for efficiency</small></div>
-      </div>
-      <div id="crossVenue" class="arbGrid">
-        <div class="empty">Building strict Kalshi ↔ Polymarket matches...</div>
+      <div class="funnel">
+        <div class="funnelStep">
+          <span>POLY UNIVERSE</span>
+          <b id="funnelUniverse">0</b>
+          <small>markets scanned</small>
+        </div>
+        <i>→</i>
+        <div class="funnelStep">
+          <span>CANDIDATES</span>
+          <b id="funnelCandidates">0</b>
+          <small>text + number match</small>
+        </div>
+        <i>→</i>
+        <div class="funnelStep">
+          <span>TIME VERIFIED</span>
+          <b id="funnelTime">0</b>
+          <small>same cutoff</small>
+        </div>
+        <i>→</i>
+        <div class="funnelStep">
+          <span>RULE VERIFIED</span>
+          <b id="funnelRules">0</b>
+          <small>same resolution</small>
+        </div>
+        <i>→</i>
+        <div class="funnelStep">
+          <span>PRICED</span>
+          <b id="funnelPriced">0</b>
+          <small>both books live</small>
+        </div>
+        <i>→</i>
+        <div class="funnelStep final">
+          <span>QUALIFIED</span>
+          <b id="funnelQualified">0</b>
+          <small>edge survives</small>
+        </div>
       </div>
     </section>
 
-    <section class="panel structuralPanel">
-      <div class="sectionIndex">02</div>
-      <div class="panelHead">
+    <section class="panel opportunities">
+      <div class="panelHeader">
         <div>
-          <div class="eyebrow">STRUCTURAL ARBITRAGE · KALSHI</div>
-          <h2>Same market. Same subject. Impossible pricing.</h2>
-          <p>Nested threshold relationships are repriced from the live book. Only the same underlying subject with matching settlement logic can qualify.</p>
+          <div class="eyebrow">OPPORTUNITY MATRIX</div>
+          <h2>Every arb that matters, one screen.</h2>
+          <p>Cross-venue and structural opportunities ranked by qualification, net edge, and executable depth.</p>
         </div>
-        <button id="refreshBtn" class="refreshBtn" type="button"><span>SCAN NOW</span></button>
+        <div class="headerActions">
+          <span id="opportunityCount" class="tag">0 OPPORTUNITIES</span>
+          <button id="syncBtn" type="button">SYNC TELEMETRY</button>
+        </div>
       </div>
-      <div id="arbs" class="arbGrid">
-        <div class="empty">Scanning live Kalshi events...</div>
+      <div id="opportunityGrid" class="opportunityGrid">
+        <div class="emptyState"><b>WAITING FOR TELEMETRY</b><span>DreamPredict is loading the latest engine state.</span></div>
       </div>
     </section>
 
-    <section class="pnlPanel panel">
-      <div class="sectionIndex">03</div>
-      <div class="pnlHead">
-        <div>
-          <div class="eyebrow">SHADOW PERFORMANCE</div>
-          <h2>Proof before capital.</h2>
-          <p>Only qualified, book-verified opportunities enter the shadow ledger. Crypto is paused and excluded from the headline result.</p>
-        </div>
-        <span class="tag paperTag">FAKE MONEY · REAL BOOKS</span>
-      </div>
-      <div class="pnlGrid">
-        <div class="pnlPrimary"><span>ARB PAPER P&L</span><b id="paperArb">$0.00</b><small>theoretical locked profit</small></div>
-        <div><span>CAPTURES</span><b id="arbCaptureCount">0</b><small>unique qualified pairs</small></div>
-        <div><span>MODELED CAPITAL</span><b id="paperCapital">$0.00</b><small>capital used by captures</small></div>
-        <div><span>PAPER ROI</span><b id="paperRoi">--</b><small>locked P&L ÷ modeled capital</small></div>
-        <div><span>LAST 24 HOURS</span><b id="paper24h">$0.00</b><small id="paper24hCount">0 captures</small></div>
-      </div>
-      <div id="paperVerdict" class="paperVerdict neutral"><b>WAITING FOR A QUALIFIED ARB</b><span>No forced trades. Zero is better than fake edge.</span></div>
-    </section>
-
-    <section class="twoCol">
-      <section class="panel capturesPanel">
-        <div class="panelHead compactHead">
+    <section class="dual">
+      <section class="panel ledgerPanel">
+        <div class="panelHeader compact">
           <div>
-            <div class="eyebrow">CAPTURE LEDGER</div>
-            <h2>What the engine would have locked.</h2>
+            <div class="eyebrow">SHADOW LEDGER</div>
+            <h2>Proof before capital.</h2>
           </div>
-          <span id="captureCount" class="tag">0 CAPTURES</span>
+          <span class="tag violet">FAKE MONEY · REAL BOOKS</span>
         </div>
-        <div id="captures" class="stack"><div class="empty">No qualified arb capture yet.</div></div>
+
+        <div class="ledgerMetrics">
+          <div class="primary"><span>THEORETICAL LOCKED PROFIT</span><b id="ledgerProfit">$0.00</b><small id="ledgerCaptureSub">0 captures</small></div>
+          <div><span>MODELED CAPITAL</span><b id="ledgerCapital">$0.00</b></div>
+          <div><span>MODELED ROI</span><b id="ledgerRoi">--</b></div>
+          <div><span>LAST 24H</span><b id="ledger24">$0.00</b></div>
+        </div>
+
+        <div class="chartWrap">
+          <div class="chartLabels"><span>CUMULATIVE LOCKED P&L</span><b id="chartValue">$0.00</b></div>
+          <svg id="pnlChart" viewBox="0 0 700 180" role="img" aria-label="Cumulative shadow profit chart">
+            <defs>
+              <linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#72f4b0" stop-opacity=".34"/>
+                <stop offset="100%" stop-color="#72f4b0" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <path id="pnlArea" d="" fill="url(#areaFill)"></path>
+            <path id="pnlLine" d="" fill="none" stroke="currentColor" stroke-width="3" vector-effect="non-scaling-stroke"></path>
+          </svg>
+        </div>
+
+        <div id="captureFeed" class="captureFeed">
+          <div class="emptyState small"><b>NO CAPTURES YET</b><span>The ledger only records qualified, book-verified arbs.</span></div>
+        </div>
       </section>
 
-      <section class="panel executionPanel">
-        <div class="panelHead compactHead">
+      <section class="panel intelligencePanel">
+        <div class="panelHeader compact">
           <div>
-            <div class="eyebrow">EXECUTION LOCK</div>
-            <h2>Real money stays gated.</h2>
+            <div class="eyebrow">EDGE INTELLIGENCE</div>
+            <h2>Why DreamPredict says no.</h2>
           </div>
-          <span id="executionTag" class="tag safe">SHADOW ONLY</span>
+          <span id="rejectionTag" class="tag amber">FILTERING</span>
         </div>
-        <div class="guardrailGrid">
-          <div><span>MIN NET EDGE</span><b id="minEdge">--</b></div>
-          <div><span>SAFETY BUFFER</span><b id="safetyMargin">--</b></div>
-          <div><span>MAX PAIRS / CAPTURE</span><b id="maxContracts">--</b></div>
-          <div><span>SCAN HORIZON</span><b id="horizonHours">--</b></div>
+
+        <div id="rejectionBars" class="rejectionBars"></div>
+
+        <div class="closestHead">
+          <span>NEAREST CROSS-VENUE MATCHES</span>
+          <b id="closestCount">0</b>
         </div>
-        <p id="executionReason" class="executionReason">Validating live orderbook behavior before real-money execution is armed.</p>
+        <div id="closestMatches" class="closestMatches">
+          <div class="emptyState small"><span>No near-match data yet.</span></div>
+        </div>
       </section>
     </section>
 
-    <section class="method panel">
-      <div class="eyebrow">THE QUALIFICATION PIPELINE</div>
-      <div class="methodFlow">
-        <div><b>01</b><span>Prove contract identity</span></div><i>→</i>
-        <div><b>02</b><span>Verify settlement logic</span></div><i>→</i>
-        <div><b>03</b><span>Reprice live books</span></div><i>→</i>
-        <div><b>04</b><span>Subtract fees + buffers</span></div><i>→</i>
-        <div><b>05</b><span>Capture only real depth</span></div>
+    <section class="panel architecture">
+      <div class="panelHeader">
+        <div>
+          <div class="eyebrow">ENGINE ARCHITECTURE</div>
+          <h2>Cloudflare runs it. This page watches it.</h2>
+          <p>The scanner remains autonomous when the browser is closed. The UI never calls the forced scan endpoint.</p>
+        </div>
+        <span id="architectureTag" class="tag green">AUTONOMOUS</span>
       </div>
+
+      <div class="architectureFlow">
+        <div class="node active"><span>01</span><b>CLOUDFLARE CRON</b><small>every minute</small></div>
+        <i>→</i>
+        <div class="node"><span>02</span><b>DREAM ARB</b><small>45s throttle</small></div>
+        <i>→</i>
+        <div class="node split"><span>03</span><b>KALSHI + POLYMARKET</b><small>live public books</small></div>
+        <i>→</i>
+        <div class="node"><span>04</span><b>STRICT PROOF</b><small>identity + rules + time</small></div>
+        <i>→</i>
+        <div class="node"><span>05</span><b>SHADOW CAPTURE</b><small>qualified only</small></div>
+      </div>
+
+      <div class="systemGrid">
+        <div><span>VERSION</span><b id="sysVersion">--</b></div>
+        <div><span>EVENTS SCANNED</span><b id="sysEvents">0</b></div>
+        <div><span>KALSHI MARKETS</span><b id="sysMarkets">0</b></div>
+        <div><span>POLY MARKETS</span><b id="sysPoly">0</b></div>
+        <div><span>MIN NET EDGE</span><b id="sysMinEdge">--</b></div>
+        <div><span>SAFETY BUFFER</span><b id="sysBuffer">--</b></div>
+        <div><span>MAX PAIRS</span><b id="sysMaxPairs">--</b></div>
+        <div><span>HORIZON</span><b id="sysHorizon">--</b></div>
+        <div><span>CRYPTO ENGINE</span><b id="sysCrypto">PAUSED</b></div>
+        <div><span>REAL MONEY</span><b id="sysReal" class="danger">OFF</b></div>
+      </div>
+
+      <details class="diagnostics">
+        <summary>Raw diagnostics</summary>
+        <pre id="diagText">Waiting for telemetry...</pre>
+      </details>
     </section>
 
-    <section class="panel liquidityPanel">
-      <div class="panelHead">
+    <section class="panel rewardsPanel">
+      <div class="panelHeader">
         <div>
           <div class="eyebrow">LIQUIDITY REWARDS · WATCH ONLY</div>
-          <h2>Interesting. Not arbitrage.</h2>
-          <p>Reward pools stay separate because fills, quoting obligations, and adverse selection can turn a large headline pool into a loss.</p>
+          <h2>Interesting money. Not arbitrage.</h2>
+          <p>Reward programs stay separate because quoting risk and adverse selection can erase the headline incentive.</p>
         </div>
         <span class="tag amber">NO CAPITAL DEPLOYED</span>
       </div>
-      <div id="liquidity" class="rewardGrid">
-        <div class="empty">Loading active liquidity programs...</div>
+      <div id="rewardGrid" class="rewardGrid">
+        <div class="emptyState"><span>No reward programs returned yet.</span></div>
       </div>
     </section>
-
-    <details class="panel cryptoPanel labPanel">
-      <summary>
-        <span><b>PAUSED CRYPTO LAB</b><small>History retained for comparison · no new entries</small></span>
-        <em id="cryptoEngineState">PAUSED</em>
-      </summary>
-      <div class="labBody">
-        <p class="labNote">The old 15-minute crypto mean-reversion experiment remains visible for comparison, but it is no longer part of DreamPredict's headline strategy or combined P&L.</p>
-        <div class="cryptoMetrics">
-          <div><span>HISTORICAL P&L</span><b id="cryptoTotalPnl">$0.00</b></div>
-          <div><span>RECORD</span><b id="cryptoWinLoss">0W / 0L</b></div>
-          <div><span>AVG WIN</span><b id="cryptoAvgWin">$0.00</b></div>
-          <div><span>AVG LOSS</span><b id="cryptoAvgLoss">$0.00</b></div>
-          <div><span>PROFIT FACTOR</span><b id="cryptoProfitFactor">--</b></div>
-          <div><span>EXPECTANCY</span><b id="cryptoExpectancy">$0.00</b></div>
-          <div><span>OPEN RISK</span><b id="cryptoOpenRisk">$0.00</b></div>
-          <div><span>LAST ACTION</span><b id="cryptoLastAction">--</b></div>
-        </div>
-        <div class="twoCol cryptoBooks">
-          <div>
-            <div class="bookHead"><span>OPEN LEGACY POSITIONS</span><b id="cryptoOpenCount">0</b></div>
-            <div id="cryptoOpenPositions" class="stack"><div class="empty">No open crypto paper position.</div></div>
-          </div>
-          <div>
-            <div class="bookHead"><span>RECENT LEGACY SCALPS</span><b id="cryptoTradeCount">0</b></div>
-            <div id="cryptoTrades" class="stack"><div class="empty">No completed crypto paper scalp.</div></div>
-          </div>
-        </div>
-      </div>
-    </details>
-
-    <details class="panel diagnostics">
-      <summary>System diagnostics</summary>
-      <div class="diagGrid">
-        <div><span>ENGINE</span><b id="engineVersion">--</b></div>
-        <div><span>EVENTS</span><b id="eventCount">0</b></div>
-        <div><span>MARKETS</span><b id="marketCount">0</b></div>
-        <div><span>ARB CANDIDATES</span><b id="arbCandidates">0</b></div>
-        <div><span>POLY MARKETS</span><b id="diagPolyMarkets">0</b></div>
-        <div><span>STRICT CROSS MATCHES</span><b id="diagStrictMatches">0</b></div>
-        <div><span>AUTO SCAN</span><b id="autoScan">60s</b></div>
-        <div><span>LAST FORCED SCAN</span><b id="lastForcedScan">--</b></div>
-      </div>
-      <pre id="errors">No errors.</pre>
-    </details>
   </main>
 
   <footer>
-    <span>Dream Arb v3</span>
-    <span>Experimental shadow scanner · real-money order submission disabled</span>
+    <div>DreamPredict · Dream Arb v3</div>
+    <div>Autonomous Cloudflare scanner · shadow execution · real-money orders disabled</div>
   </footer>
 </div>
-<script src="app.js?v=command2"></script>
+
+<script src="app.js?v=arb-console-1"></script>
 </body>
 </html>
