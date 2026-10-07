@@ -1,0 +1,16 @@
+{
+  "$schema": "../../../node_modules/wrangler/config-schema.json",
+  "name": "dreampredict-edge-scheduler",
+  "main": "src/index.js",
+  "compatibility_date": "2026-10-06",
+  "triggers": {
+    "crons": ["* * * * *"]
+  },
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  },
+  "vars": {
+    "SCAN_URL": "https://api.dreamprotocol.ai/dream-predict/scan"
+  }
+}
