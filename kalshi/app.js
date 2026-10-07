@@ -1,4 +1,7 @@
 const API='https://api.dreamprotocol.ai';
+const STATUS_REFRESH_MS=20_000;
+const AUTO_SCAN_MS=60_000;
+const SCAN_DEBOUNCE_MS=10_000;
 const $=id=>document.getElementById(id);
 const num=v=>v!==null&&v!==undefined&&v!==''&&Number.isFinite(+v)?+v:NaN;
 const money=v=>Number.isFinite(num(v))?new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2}).format(num(v)):'--';
@@ -12,13 +15,14 @@ const appUrl=()=>/Android/i.test(navigator.userAgent)?'intent://kalshi.com/f/ins
 
 let busy=false;
 let lastPayload=null;
+let lastScanRequestAt=0;
 
 function setText(id,value){const el=$(id);if(el)el.textContent=value;}
 function setClassByValue(id,value){const el=$(id);if(el)el.className=value>0?'green':value<0?'red':'';}
 function health(ok,message){
   const pill=document.querySelector('.livePill');
   if(pill)pill.className='livePill '+(ok?'good':'bad');
-  setText('healthText',ok?'LIVE ARB SCANNER':message?'DEGRADED':'RETRYING');
+  setText('healthText',ok?'LIVE ARB SCANNER · AUTO 60s':message?'DEGRADED':'RETRYING');
 }
 async function json(path){
   const r=await fetch(API+path,{cache:'no-store'});
@@ -309,15 +313,45 @@ function renderGuardrails(s){
   setText('executionReason',s?.execution?.reason||'Real-money execution is locked.');
   const tag=$('executionTag');if(tag)tag.textContent=s?.execution?.live?'LIVE':'SHADOW ONLY';
 }
+function blockerSummary(s){
+  const structural=Array.isArray(s?.scan?.arbOpportunities)?s.scan.arbOpportunities:[];
+  const cross=Array.isArray(s?.scan?.crossVenue?.opportunities)?s.scan.crossVenue.opportunities:[];
+  const counts=new Map();
+  for(const row of [...structural,...cross]){
+    if(row?.qualified)continue;
+    const key=String(row?.qualification||'UNSPECIFIED').trim()||'UNSPECIFIED';
+    counts.set(key,(counts.get(key)||0)+1);
+  }
+  return [...counts.entries()].sort((a,b)=>b[1]-a[1]).slice(0,8);
+}
 function renderDiagnostics(s){
+  const structural=Array.isArray(s?.scan?.arbOpportunities)?s.scan.arbOpportunities:[];
+  const cross=s?.scan?.crossVenue||{};
   setText('engineVersion',s?.version||'--');
   setText('eventCount',integer(s?.scan?.scannedEvents||0));
   setText('marketCount',integer(s?.scan?.scannedMarkets||0));
-  setText('arbCandidates',integer((s?.scan?.arbOpportunities||[]).length));
+  setText('arbCandidates',integer(structural.length));
+  setText('autoScan','60s');
+  setText('lastForcedScan',lastScanRequestAt?shortClock(lastScanRequestAt):'--');
+
+  const notes=[
+    'AUTO-SCAN: real /dream-predict/scan every 60s while this dashboard is open.',
+    'STRUCTURAL: '+integer(structural.length)+' candidates → '+integer(structural.filter(x=>x?.qualified).length)+' qualified.',
+    'CROSS-VENUE: '+integer(cross.scannedPolymarketMarkets||0)+' Polymarket markets → '+integer(cross.strictMatches||0)+' strict matches → '+integer(cross.qualifiedArbs||0)+' qualified.'
+  ];
+  const blockers=blockerSummary(s);
+  if(blockers.length){
+    notes.push('TOP REJECTION REASONS:');
+    for(const [reason,count] of blockers)notes.push('  '+count+' × '+reason);
+  }else{
+    notes.push('TOP REJECTION REASONS: none returned by backend.');
+  }
+
   const errors=[];
   if(s?.lastError)errors.push(s.lastError);
   if(Array.isArray(s?.scan?.errors))errors.push(...s.scan.errors);
-  setText('errors',errors.length?errors.join('\n'):'No errors.');
+  notes.push(errors.length?'API ERRORS: '+errors.join(' | '):'API ERRORS: none.');
+  setText('errors',notes.join('\n'));
 }
 
 function render(s){
@@ -338,7 +372,10 @@ function render(s){
 }
 async function refresh(force=false){
   if(busy)return;
+  const now=Date.now();
+  if(force&&lastScanRequestAt&&now-lastScanRequestAt<SCAN_DEBOUNCE_MS)return;
   busy=true;
+  if(force)lastScanRequestAt=now;
   const btn=$('refreshBtn');
   if(btn){btn.disabled=true;btn.innerHTML='<span>'+(force?'SCANNING...':'REFRESHING...')+'</span>';}
   try{
@@ -366,6 +403,10 @@ document.addEventListener('click',async event=>{
     const old=button.textContent;button.textContent='COPIED';setTimeout(()=>button.textContent=old,1100);
   }catch{window.prompt('Copy this Kalshi ticker:',ticker);}
 });
+document.addEventListener('visibilitychange',()=>{
+  if(!document.hidden&&Date.now()-lastScanRequestAt>=AUTO_SCAN_MS)refresh(true);
+});
 $('refreshBtn')?.addEventListener('click',()=>refresh(true));
-refresh(false);
-setInterval(()=>refresh(false),20000);
+refresh(true);
+setInterval(()=>refresh(false),STATUS_REFRESH_MS);
+setInterval(()=>refresh(true),AUTO_SCAN_MS);
