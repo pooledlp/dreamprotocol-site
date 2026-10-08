@@ -16,6 +16,26 @@ const dreamPredictMock=()=>({
   guardrails:{minNetEdge:.02,safetyMargin:.005,maxContracts:10,horizonHours:24,mutuallyExclusiveBasketAssumption:false,nestedThresholdsOnly:true},
   scanner:{automated:true,intervalSeconds:45},
   crypto:{enabled:false,mode:'PAUSED',realMoney:false},
+  forecastLab:{
+    enabled:true,version:'weather-edge-lab-v1',goal:100,
+    modelScans:22,lastModelAt:Date.now()-5*60*1000,
+    pricedMarkets:24,qualifiedSignals:3,sourceErrors:[],lastError:null,
+    evaluations:{
+      total:549,completed:496,pending:53,distinctContracts:26,distinctEvents:5,
+      repeatedContracts:470,qualifiedCompleted:99,qualifiedDistinctContracts:9,
+      qualifiedDistinctEvents:4,qualifiedPositive:2,qualifiedWinRate:2/99,
+      hypotheticalNetOneContract:-22.51
+    },
+    paper:{open:7,completed:0,realized:0,openRisk:20.32,totalNet:-1.76,
+      wins:0,losses:0,positions:[]},
+    topSignals:[{
+      ticker:'KXHIGHTSFO-26OCT08-B77.5',city:'San Francisco',
+      title:'San Francisco high temperature',subtitle:'77.5 degree bucket',
+      side:'yes',probability:.3099,ask:.14,bid:.13,conservativeEdge:.0861,
+      qualified:true,reason:'INDEPENDENT FORECAST EDGE',nws:79,openMeteo:79.5,
+      disagreementF:.5,closeTime:new Date(Date.now()+8*3600000).toISOString()
+    }]
+  },
   shadow:{
     captures:3,
     theoreticalLockedProfit:1.26,
@@ -304,8 +324,16 @@ try {
     assert(dreamPredictGeometry.rail.left>=-1 && dreamPredictGeometry.rail.right<=width+1,`DreamPredict status rail mispositioned at ${width}px`);
     assert(dreamPredictGeometry.cards>=4,`DreamPredict opportunity matrix did not render at ${width}px`);
     assert(dreamPredictGeometry.title.includes('Math broke'),`DreamPredict hero did not enter qualified state at ${width}px`);
-    assert.equal(dreamPredictGeometry.qualified,'2');
+    assert.equal(dreamPredictGeometry.qualified,'3','Header should show model signal count, not arb count');
     assert.equal(dreamPredictGeometry.universe,'342');
+    assert.equal(await page.locator('#forecastProgress').innerText(),'26 / 100',
+      'Forecast goal should use distinct contracts, not repeated quote checks');
+    assert.equal(await page.locator('#forecastTotalMarks').innerText(),'496');
+    assert.equal(await page.locator('#forecastPaperCounts').innerText(),'7 / 0');
+    assert.equal(await page.locator('#railEdge').innerText(),'26');
+    assert.equal(await page.locator('#railCaptures').innerText(),'0');
+    assert.equal(await page.locator('#sprintProgressText').count(),0,
+      'Retired baseline 11/100 progress must not appear in active dashboard');
     assert.equal(dreamPredictGeometry.dashboardRole,'READ ONLY');
     assert(!dreamPredictRequests.some(url=>url.includes('/dream-predict/scan')),`DreamPredict dashboard forced a scan at ${width}px: ${JSON.stringify(dreamPredictRequests)}`);
     await page.evaluate(()=>scrollTo(0,0));
