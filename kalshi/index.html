@@ -7,7 +7,7 @@
 <meta name="robots" content="noindex,nofollow">
 <title>DreamPredict | Live Paper Profit Lab</title>
 <meta name="description" content="DreamPredict paper-trading scoreboard: actual market prices, tracked wins/losses, and realistic net returns after modeled fees.">
-<link rel="stylesheet" href="styles.css?v=profit-audit-3">
+<link rel="stylesheet" href="styles.css?v=independent-weather-4">
 </head>
 <body>
 <div class="backdrop">
@@ -23,7 +23,7 @@
       <div class="mark"><span>DP</span><i></i></div>
       <div>
         <div class="brand">DreamPredict</div>
-        <div class="brandSub">100-TRADE PAPER SPRINT · AUTONOMOUS</div>
+        <div class="brandSub">INDEPENDENT FORECASTS · PAPER RESEARCH</div>
       </div>
     </div>
     <div class="topRight">
@@ -43,11 +43,62 @@
   </section>
 
   <main>
+    <section class="forecastLab panel" id="forecastLab">
+      <div class="forecastHead">
+        <div class="forecastIntro">
+          <div class="eyebrow">DREAMPREDICT · INDEPENDENT MODEL EXPERIMENT</div>
+          <h1>Forecast first. Trade only when there's an edge.</h1>
+          <p>National Weather Service + Open-Meteo versus Kalshi's live prices. The new model subtracts entry fees and forecast uncertainty before allowing a paper pick. No random favorite-side entries, no real-money orders.</p>
+          <div class="forecastPills"><span id="forecastRunState">AWAITING MODEL</span><span>100 FORWARD EVALUATIONS TARGET</span><span>OFFICIAL SETTLEMENT FOR PAPER WINS</span></div>
+        </div>
+        <div class="forecastClock">
+          <span>MODEL STATUS</span>
+          <b id="forecastStatus">WAITING</b>
+          <small id="forecastLastRun">No model refresh yet</small>
+        </div>
+      </div>
+      <div class="forecastSprint">
+        <div class="forecastSprintRow">
+          <div><span>FORWARD QUOTE OBSERVATIONS SCORED</span><b id="forecastProgress">0 / 100</b></div>
+          <div><span>30-MIN PAPER QUOTE RETURN · ONE CONTRACT EACH</span><b id="forecastQuoteNet">--</b></div>
+        </div>
+        <div class="forecastTrack"><i id="forecastProgressBar"></i></div>
+        <p id="forecastCorrelation">Repeated forecasts of the same contracts are correlated. This counter is not a count of independent bets or guaranteed profits.</p>
+      </div>
+      <div class="forecastMetrics">
+        <div><span>INDEPENDENT MODEL SIGNALS</span><b id="forecastSignals">0</b><small>Quoted candidates analyzed</small></div>
+        <div><span>EDGE-QUALIFIED</span><b id="forecastQualified">0</b><small>After fees and uncertainty</small></div>
+        <div><span>MODEL PAPER P&L</span><b id="forecastPaperNet">--</b><small>Official outcomes + marked opens</small></div>
+        <div><span>MODEL PAPER OPEN / SETTLED</span><b id="forecastPaperCounts">0 / 0</b><small id="forecastPaperWins">No verified paper wins</small></div>
+        <div><span>30-MIN MARK HIT RATE</span><b id="forecastHitRate">--</b><small id="forecastDistinct">0 distinct markets</small></div>
+      </div>
+      <div class="forecastBody">
+        <div class="forecastMain">
+          <div class="forecastTitleRow"><div><div class="eyebrow">EXTERNAL FORECAST VS MARKET ASK</div><h2>Independent pricing signals</h2></div><span class="tag">PAPER RESEARCH ONLY</span></div>
+          <div id="forecastSignalRows" class="forecastSignalRows">
+            <div class="emptyState small"><span>Waiting for the first NWS/Open-Meteo model scan.</span></div>
+          </div>
+        </div>
+        <div class="forecastSide">
+          <div class="forecastTitleRow"><div><div class="eyebrow">SETTLEMENT-BASED TRADING RESULTS</div><h2>Weather paper positions</h2></div></div>
+          <div class="forecastMoney">
+            <div><span>REALIZED ON OFFICIAL SETTLEMENT</span><b id="forecastRealized">$0.00</b></div>
+            <div><span>CURRENT OPEN RISK</span><b id="forecastOpenRisk">$0.00</b></div>
+          </div>
+          <div id="forecastPositions" class="forecastPositions">
+            <div class="emptyState small"><span>No model-qualified paper positions yet.</span></div>
+          </div>
+          <div id="forecastError" class="forecastError"></div>
+        </div>
+      </div>
+      <p class="forecastFoot">30-minute observations use displayed asks and later quoted bids, including estimated fees. They do not represent filled orders. Actual model paper profits count only after official Kalshi settlement. The forecast is uncalibrated and has no proven positive expected value.</p>
+    </section>
+
     <section class="profitLab panel" id="profitLab">
       <div class="profitHeading">
         <div>
-          <div class="eyebrow">DREAMPREDICT · PAPER STRATEGY AUDIT</div>
-          <h1>Show the actual edge.</h1>
+          <div class="eyebrow">DREAMPREDICT · RETIRED PAPER BASELINE</div>
+          <h1>Old strategy: why it lost.</h1>
           <p>The market-favorite paper strategy did not have an independent forecast. New paper entries are paused while we evaluate its real cost after spreads and fees. Existing paper positions and losses remain visible.</p>
         </div>
         <div class="profitVerdict">
@@ -384,6 +435,6 @@
   </footer>
 </div>
 
-<script src="app.js?v=profit-audit-3"></script>
+<script src="app.js?v=independent-weather-4"></script>
 </body>
 </html>
