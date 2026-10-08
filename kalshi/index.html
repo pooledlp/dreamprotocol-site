@@ -7,7 +7,7 @@
 <meta name="robots" content="noindex,nofollow">
 <title>DreamPredict | Live Paper Profit Lab</title>
 <meta name="description" content="DreamPredict paper-trading scoreboard: actual market prices, tracked wins/losses, and realistic net returns after modeled fees.">
-<link rel="stylesheet" href="styles.css?v=profit-sprint-2">
+<link rel="stylesheet" href="styles.css?v=profit-audit-3">
 </head>
 <body>
 <div class="backdrop">
@@ -46,9 +46,9 @@
     <section class="profitLab panel" id="profitLab">
       <div class="profitHeading">
         <div>
-          <div class="eyebrow">DREAMPREDICT · HIGH-VOLUME PAPER TEST</div>
-          <h1>100 trades. No fake profits.</h1>
-          <p>Accelerated virtual trading across real Kalshi quotes. Up to 36 open paper positions, timed bid exits, and actual losses included. We'll see whether it can beat the spread and estimated fees.</p>
+          <div class="eyebrow">DREAMPREDICT · PAPER STRATEGY AUDIT</div>
+          <h1>Show the actual edge.</h1>
+          <p>The market-favorite paper strategy did not have an independent forecast. New paper entries are paused while we evaluate its real cost after spreads and fees. Existing paper positions and losses remain visible.</p>
         </div>
         <div class="profitVerdict">
           <span>PAPER TRACK RECORD</span>
@@ -57,6 +57,10 @@
         </div>
       </div>
 
+      <div class="pauseBanner" id="paperPauseBanner">
+        <strong id="paperPauseHeading">Checking paper strategy...</strong>
+        <span id="paperPauseExplanation">No real-money trading. Existing results are preserved.</span>
+      </div>
       <div class="sprintProgress">
         <div class="sprintTop">
           <div><span>100 COMPLETED PAPER TRADES · TEST TARGET</span><b id="sprintProgressText">0 / 100</b></div>
@@ -78,6 +82,12 @@
         <div><span>OPEN / COMPLETED</span><b id="paperTradeCount">0 / 0</b><small id="paperToday">0 paper entries today</small></div>
       </div>
 
+      <div class="costForensics">
+        <div><span>ESTIMATED ENTRY & EXIT FEES</span><b id="costFees">--</b></div>
+        <div><span>TIME-EXIT NET P&L</span><b id="costTimeExitNet">--</b><small id="costTimeExitCount">0 exits</small></div>
+        <div><span>BREAK-EVEN WIN RATE AT OBSERVED PAYOFF</span><b id="costBreakEven">--</b></div>
+        <div><span>AVERAGE WIN / LOSS</span><b id="costPayoff">--</b></div>
+      </div>
       <div class="profitLower">
         <div class="paperData">
           <div class="panelHeader compact">
@@ -374,6 +384,6 @@
   </footer>
 </div>
 
-<script src="app.js?v=profit-sprint-2"></script>
+<script src="app.js?v=profit-audit-3"></script>
 </body>
 </html>
