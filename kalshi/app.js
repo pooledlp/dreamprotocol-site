@@ -273,6 +273,15 @@ function renderPaper(s){
   const positions=Array.isArray(p.positions)?p.positions:[];
   const candidates=Array.isArray(p.candidates)?p.candidates:[];
   const closed=Number(p.completed)||0;
+  const sprint=p.rapidExperiment||{};
+  const sprintClosed=Math.max(0,Number(sprint.completed)||0);
+  const sprintTarget=Math.max(1,Number(sprint.targetCompleted)||100);
+  const sprintPct=Math.max(0,Math.min(100,100*sprintClosed/sprintTarget));
+  setText('sprintProgressText',integer(sprintClosed)+' / '+integer(sprintTarget));
+  setText('sprintNet',(Number(sprint.netPnl)>0?'+':'')+money(sprint.netPnl||0));
+  setText('sprintDetails',integer(sprint.entries||0)+' opened · '+integer(sprint.uniqueMarkets||0)+' distinct closed tickers');
+  setText('sprintCorrelation',integer(sprint.repeatedMarkets||0)+' repeated ticker observations · '+integer(p.marketPoolSize||0)+' market quotes ranked · '+integer(p.maxHoldMinutes||25)+'-minute paper time exit. Target is not a guarantee and repeat contracts are correlated.');
+  const progress=$('sprintProgressBar');if(progress)progress.style.width=sprintPct.toFixed(1)+'%';
   const realized=p.realized==null?0:Number(p.realized);
   const total=p.markedNet,netAvailable=total!==null&&total!==undefined&&Number.isFinite(+total);
   const winRate=p.winRate===null||p.winRate===undefined?'--':pct(p.winRate);
@@ -284,7 +293,7 @@ function renderPaper(s){
   setText('paperWinRate',winRate);
   setText('paperRecord',integer(p.wins||0)+' wins · '+integer(p.losses||0)+' losses');
   setText('paperTradeCount',integer(positions.length)+' / '+integer(closed));
-  setText('paperToday',integer(p.enteredToday||0)+' of '+integer(p.dailyEntryLimit||4)+' paper entries today');
+  setText('paperToday',integer(p.enteredToday||0)+' paper entries today · '+integer(p.eligibleCandidates||0)+' eligible now');
   setText('paperUpside',positions.length?'+'+money(p.possibleProfitIfAllWin):'$0.00');
   setText('paperDownside',money(p.possibleLossIfAllLose||0));
   setText('paperOpenRisk',money(p.openRisk||0));
@@ -297,7 +306,7 @@ function renderPaper(s){
   let verdictText='NOT PROVEN YET', verdictDetail=integer(closed)+' completed paper trades · need at least 30';
   if(closed>=30){
     verdictText=realized>0?'PAPER PROFIT POSITIVE':'PAPER PROFIT NOT POSITIVE';
-    verdictDetail='30+ trades, still hypothetical. No verified out-of-sample edge.';
+    verdictDetail=integer(closed)+' paper exits. Repeated markets can inflate the sample. Not a proven edge.';
   }else if(closed>=5){
     verdictText=realized>0?'EARLY PAPER GAINS':'TRACK RECORD NEGATIVE';
     verdictDetail='Small sample · '+money(realized)+' closed net after estimated fees';
