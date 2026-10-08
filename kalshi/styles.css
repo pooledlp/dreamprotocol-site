@@ -62,3 +62,26 @@ footer{display:flex;justify-content:space-between;gap:20px;padding:22px 4px 0;co
 @media(max-width:420px){
   .topbar{position:relative}.topRight{max-width:160px}.chip.cloud{display:none}.tickerRail{grid-template-columns:1fr 1fr}.tickerRail>div{padding:9px}.hero h1{font-size:40px}.heroMetricRow{grid-template-columns:1fr 1fr}.funnel{grid-template-columns:1fr 1fr}.systemGrid{grid-template-columns:1fr 1fr}
 }
+
+
+/* Real-price radar: informational, never a paper fill or verified arbitrage. */
+.radarStats{position:relative;z-index:2;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;margin-top:17px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--line)}
+.radarStats>div{min-width:0;padding:12px;background:#070b12}
+.radarStats span,.radarMetrics span{display:block;color:var(--muted);font-size:8px;letter-spacing:.08em;font-weight:850}
+.radarStats b{display:block;margin-top:5px;font-size:17px;font-variant-numeric:tabular-nums}
+.radarGrid{position:relative;z-index:2;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;margin-top:13px}
+.radarCard{min-width:0;padding:16px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(145deg,rgba(9,19,30,.9),rgba(4,8,15,.95))}
+.radarHead{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:7px}
+.radarHead .sourceBadge{color:var(--cyan);border-color:rgba(113,220,255,.23)}
+.watchBadge{font-size:8px;color:var(--amber);letter-spacing:.03em}
+.radarCard h3{margin:13px 0 5px;font-size:16px;line-height:1.35;overflow-wrap:anywhere}
+.radarCard p{margin:0;min-height:32px;color:#96a9c0;font-size:11px;line-height:1.45;overflow-wrap:anywhere}
+.radarMetrics{display:grid;grid-template-columns:1fr 1fr;gap:1px;margin-top:14px;background:var(--line);border-radius:9px;overflow:hidden}
+.radarMetrics>div{min-width:0;background:#070d16;padding:11px}
+.radarMetrics b{display:block;margin-top:5px;font-size:13px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.radarFooter{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:13px;padding-top:11px;border-top:1px solid var(--line)}
+.radarFooter span{min-width:0;color:#6a7b90;font:9px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere}
+.radarFooter a{flex-shrink:0;color:var(--cyan);font-size:10px;font-weight:850;text-decoration:none}
+.radarFooter a:hover{text-decoration:underline}
+@media(max-width:1100px){.radarGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:720px){.radarGrid{grid-template-columns:minmax(0,1fr)}.radarStats{grid-template-columns:repeat(2,minmax(0,1fr))}.radarCard p{min-height:0}.radarCard h3{font-size:15px}}
