@@ -269,6 +269,17 @@ function paperTradeRow(t){
 }
 function renderPaper(s){
   const p=s?.paperPerformance||{};
+  const paused=p.entriesEnabled===false;
+  const pauseBanner=$('paperPauseBanner');
+  if(pauseBanner)pauseBanner.style.display=paused?'flex':'none';
+  setText('paperPauseHeading',paused?'PAPER AUTO-ENTRIES PAUSED · NO VERIFIED EDGE':'Paper experimentation active');
+  setText('paperPauseExplanation',paused?'The losing market-favorite baseline cannot open new paper positions. Existing positions can close normally. Real-money orders remain disabled.':'Read-only telemetry.');
+  const d=p.diagnostics||{};
+  setText('costFees',money(d.estimatedTotalFees));
+  setText('costTimeExitNet',money(d.timeExitNet));
+  setText('costTimeExitCount',integer(d.timeExitCount||0)+' forced time exits');
+  setText('costBreakEven',d.breakEvenWinRate==null?'--':pct(d.breakEvenWinRate));
+  setText('costPayoff',(d.averageWin==null?'--':money(d.averageWin))+' / '+(d.averageLoss==null?'--':money(d.averageLoss)));
   const history=Array.isArray(p.recent)?p.recent:[];
   const positions=Array.isArray(p.positions)?p.positions:[];
   const candidates=Array.isArray(p.candidates)?p.candidates:[];
@@ -293,12 +304,12 @@ function renderPaper(s){
   setText('paperWinRate',winRate);
   setText('paperRecord',integer(p.wins||0)+' wins · '+integer(p.losses||0)+' losses');
   setText('paperTradeCount',integer(positions.length)+' / '+integer(closed));
-  setText('paperToday',integer(p.enteredToday||0)+' paper entries today · '+integer(p.eligibleCandidates||0)+' eligible now');
+  setText('paperToday',paused?'AUTO-ENTRIES PAUSED · '+integer(p.enteredToday||0)+' entries earlier today':integer(p.enteredToday||0)+' paper entries today · '+integer(p.eligibleCandidates||0)+' eligible now');
   setText('paperUpside',positions.length?'+'+money(p.possibleProfitIfAllWin):'$0.00');
   setText('paperDownside',money(p.possibleLossIfAllLose||0));
   setText('paperOpenRisk',money(p.openRisk||0));
   setText('paperChartTotal',money(realized));
-  setText('railMode','PAPER + ARB');
+  setText('railMode',paused?'PAPER PAUSED':'PAPER + ARB');
   setText('railEdge',winRate);
   setText('railProfit',totalMoney);
   setText('railCaptures',integer(closed));
@@ -311,14 +322,18 @@ function renderPaper(s){
     verdictText=realized>0?'EARLY PAPER GAINS':'TRACK RECORD NEGATIVE';
     verdictDetail='Small sample · '+money(realized)+' closed net after estimated fees';
   }
-  if(verdict){verdict.textContent=verdictText;verdict.className=realized>0&&closed>=5?'paperPositive':''}
+  if(paused){
+    verdictText='LOSING BASELINE PAUSED';
+    verdictDetail='New entries blocked; old losses retained. No independently verified advantage.';
+  }
+  if(verdict){verdict.textContent=verdictText;verdict.className=!paused&&realized>0&&closed>=5?'paperPositive':''}
   setText('paperVerdictDetail',verdictDetail);
   const sample=$('paperSampleTag');
-  if(sample){sample.textContent=closed>=30?'PRELIMINARY DATA':closed+' CLOSED · COLLECTING';sample.className='tag '+(closed>=30&&realized>0?'green':'amber')}
+  if(sample){sample.textContent=paused?'AUTO-ENTRIES PAUSED':closed>=30?'PRELIMINARY DATA':closed+' CLOSED · COLLECTING';sample.className='tag '+(!paused&&closed>=30&&realized>0?'green':'amber')}
   const open=$('paperOpenPositions');
   if(open)open.innerHTML=positions.length
     ?positions.slice(0,4).map(paperCard).join('')
-    :'<div class="emptyState small"><b>NO PAPER POSITIONS OPEN</b><span>Autopilot opens up to four small paper picks per day only when the price, spread, liquidity and closing-time filters pass.</span></div>';
+    :'<div class="emptyState small"><b>NO PAPER POSITIONS OPEN</b><span>'+(paused?'New entries are disabled. The radar keeps collecting price data.':'No trade currently qualifies under the strategy.')+'</span></div>';
   const historyBox=$('paperHistory');
   if(historyBox)historyBox.innerHTML=history.length
     ?history.slice(0,8).map(paperTradeRow).join('')
@@ -329,7 +344,7 @@ function renderPaper(s){
   if(next){
     const available=candidates.filter(c=>!positions.some(p=>p.ticker===c.ticker)).slice(0,2);
     next.innerHTML=available.length
-      ?'<div class="paperWatchHeading">UPCOMING PAPER SCENARIOS · CONDITIONAL ONLY</div>'+
+      ?'<div class="paperWatchHeading">'+(paused?'UNVERIFIED MARKET WATCHLIST · NO ENTRIES':'UPCOMING PAPER SCENARIOS · CONDITIONAL ONLY')+'</div>'+
         available.map(c=>'<div class="paperScenario"><span>'+esc(c.title)+' · '+esc(c.side.toUpperCase())+
           ' @ '+cents(c.entryAsk)+'</span><b class="goodText">If correct: +'+money(c.potentialIfWin)+
           '</b><b class="badText">If wrong: '+money(c.lossIfWrong)+'</b></div>').join('')
