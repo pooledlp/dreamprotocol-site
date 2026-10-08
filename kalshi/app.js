@@ -238,6 +238,104 @@ function renderRadar(s){
     :'<div class="emptyState"><b>NO LIQUID WATCH MARKETS IN THE LATEST SCAN</b><span>This can mean thin books, no matching cutoffs, or a discovery error. Check the diagnostics below.</span></div>';
 }
 
+
+function paperCard(p){
+  const href=String(p?.url||"").startsWith("https://kalshi.com/markets/")?p.url:"#";
+  const mark=p?.markNet;
+  const markText=mark===null||mark===undefined?"MARK PENDING":money(mark);
+  const winProfit=money(p?.profitIfWon||0);
+  const direction=String(p?.side||"YES").toUpperCase();
+  return '<article class="paperPick">'+
+    '<div class="paperPickTop"><span class="pickMode">'+esc(p?.category||"MARKET")+' · PAPER '+esc(direction)+'</span><span class="paperPickMark '+(mark!==null&&mark!==undefined&&n(mark)>0?'goodText':mark!==null&&mark!==undefined&&n(mark)<0?'badText':'')+'">'+markText+'</span></div>'+
+    '<div class="paperPickTitle">'+esc(p?.title||p?.ticker||"Kalshi market")+'</div>'+
+    '<div class="paperPickSub">'+esc(p?.marketTitle||"")+'</div>'+
+    '<div class="paperPickNumbers">'+
+      '<div><span>ENTRY ASK</span><b>'+cents(p?.entryAsk)+'</b></div>'+
+      '<div><span>CURRENT BID</span><b>'+(p?.markNet===null||p?.markNet===undefined?'--':cents(p?.lastBid))+'</b></div>'+
+      '<div><span>ENTRY + FEES</span><b>'+money(p?.entryCost)+'</b></div>'+
+      '<div><span>IF CORRECT</span><b class="goodText">+'+winProfit+'</b></div>'+
+    '</div>'+
+    '<div class="paperPickFoot"><span>'+integer(p?.contracts)+' contracts · '+dateTime(p?.closeTime)+'</span><a href="'+esc(href)+'" target="_blank" rel="noopener noreferrer">KALSHI ↗</a></div>'+
+  '</article>';
+}
+function paperTradeRow(t){
+  const net=n(t?.netPnl),hasNet=Number.isFinite(net);
+  return '<div class="paperClose">'+
+    '<div class="paperCloseMain"><strong>'+esc(t?.title||t?.ticker||"Completed paper trade")+'</strong>'+
+      '<span>'+esc(String(t?.side||"").toUpperCase())+' · '+integer(t?.contracts)+' contracts · '+
+      esc(String(t?.exitReason||"").replaceAll("_"," "))+' · '+dateTime(t?.exitAt)+'</span></div>'+
+    '<b class="'+(hasNet&&net>0?'goodText':hasNet&&net<0?'badText':'')+'">'+
+    (hasNet&&net>0?'+':'')+money(net)+'</b></div>';
+}
+function renderPaper(s){
+  const p=s?.paperPerformance||{};
+  const history=Array.isArray(p.recent)?p.recent:[];
+  const positions=Array.isArray(p.positions)?p.positions:[];
+  const candidates=Array.isArray(p.candidates)?p.candidates:[];
+  const closed=Number(p.completed)||0;
+  const realized=p.realized==null?0:Number(p.realized);
+  const total=p.markedNet,netAvailable=total!==null&&total!==undefined&&Number.isFinite(+total);
+  const winRate=p.winRate===null||p.winRate===undefined?'--':pct(p.winRate);
+  const totalMoney=netAvailable?money(total):'MARK PENDING';
+  setText('paperNet',totalMoney);
+  setText('paperRealized',money(realized));
+  setText('paperUnrealized',p.unrealized==null?'MARK PENDING':money(p.unrealized));
+  setText('paperNetHint',netAvailable?'Realized + current bid liquidation estimate':'Some open positions lack fresh exit quotes');
+  setText('paperWinRate',winRate);
+  setText('paperRecord',integer(p.wins||0)+' wins · '+integer(p.losses||0)+' losses');
+  setText('paperTradeCount',integer(positions.length)+' / '+integer(closed));
+  setText('paperToday',integer(p.enteredToday||0)+' of '+integer(p.dailyEntryLimit||4)+' paper entries today');
+  setText('paperUpside',positions.length?'+'+money(p.possibleProfitIfAllWin):'$0.00');
+  setText('paperDownside',money(p.possibleLossIfAllLose||0));
+  setText('paperOpenRisk',money(p.openRisk||0));
+  setText('paperChartTotal',money(realized));
+  setText('railMode','PAPER + ARB');
+  setText('railEdge',winRate);
+  setText('railProfit',totalMoney);
+  setText('railCaptures',integer(closed));
+  const verdict=$('paperVerdict');
+  let verdictText='NOT PROVEN YET', verdictDetail=integer(closed)+' completed paper trades · need at least 30';
+  if(closed>=30){
+    verdictText=realized>0?'PAPER PROFIT POSITIVE':'PAPER PROFIT NOT POSITIVE';
+    verdictDetail='30+ trades, still hypothetical. No verified out-of-sample edge.';
+  }else if(closed>=5){
+    verdictText=realized>0?'EARLY PAPER GAINS':'TRACK RECORD NEGATIVE';
+    verdictDetail='Small sample · '+money(realized)+' closed net after estimated fees';
+  }
+  if(verdict){verdict.textContent=verdictText;verdict.className=realized>0&&closed>=5?'paperPositive':''}
+  setText('paperVerdictDetail',verdictDetail);
+  const sample=$('paperSampleTag');
+  if(sample){sample.textContent=closed>=30?'PRELIMINARY DATA':closed+' CLOSED · COLLECTING';sample.className='tag '+(closed>=30&&realized>0?'green':'amber')}
+  const open=$('paperOpenPositions');
+  if(open)open.innerHTML=positions.length
+    ?positions.slice(0,4).map(paperCard).join('')
+    :'<div class="emptyState small"><b>NO PAPER POSITIONS OPEN</b><span>Autopilot opens up to four small paper picks per day only when the price, spread, liquidity and closing-time filters pass.</span></div>';
+  const historyBox=$('paperHistory');
+  if(historyBox)historyBox.innerHTML=history.length
+    ?history.slice(0,8).map(paperTradeRow).join('')
+    :'<div class="emptyState small"><b>NO VERIFIED PAPER OUTCOMES YET</b><span>There is no made-up profit here. Completed paper exits and official Kalshi settlements appear automatically.</span></div>';
+  // Show "possible" and "at risk" even before the first position is entered.
+  // The two outcomes are conditional scenarios, NEVER a forecast.
+  const next=$('paperNextWatch');
+  if(next){
+    const available=candidates.filter(c=>!positions.some(p=>p.ticker===c.ticker)).slice(0,2);
+    next.innerHTML=available.length
+      ?'<div class="paperWatchHeading">UPCOMING PAPER SCENARIOS · CONDITIONAL ONLY</div>'+
+        available.map(c=>'<div class="paperScenario"><span>'+esc(c.title)+' · '+esc(c.side.toUpperCase())+
+          ' @ '+cents(c.entryAsk)+'</span><b class="goodText">If correct: +'+money(c.potentialIfWin)+
+          '</b><b class="badText">If wrong: '+money(c.lossIfWrong)+'</b></div>').join('')
+      :'<p class="paperWatchQuiet">No additional eligible paper scenarios right now.</p>';
+  }
+  const chronological=[...history].reverse();
+  let running=0;
+  const values=[0];
+  for(const trade of chronological){running+=Number(trade?.netPnl)||0;values.push(running)}
+  const paths=chartPath(values.length===1?[0,0]:values);
+  $('paperChartLine')?.setAttribute('d',paths.line);
+  $('paperChartArea')?.setAttribute('d',paths.area);
+  $('paperChartLine')?.setAttribute('stroke',realized<0?'#ff728c':'#72f4b0');
+}
+
 function ledgerStats(s){
   const rows=Array.isArray(s?.shadow?.recent)?s.shadow.recent:[];
   const profit=n(s?.shadow?.theoreticalLockedProfit)||0;
@@ -346,7 +444,7 @@ function renderRewards(s){
 
 function render(s){
   lastPayload=s;lastFetchedAt=Date.now();
-  renderHealth(s);renderHero(s);renderFunnel(s);renderOpportunities(s);renderRadar(s);renderLedger(s);renderIntelligence(s);renderSystem(s);renderRewards(s);
+  renderHealth(s);renderHero(s);renderFunnel(s);renderOpportunities(s);renderRadar(s);renderLedger(s);renderPaper(s);renderIntelligence(s);renderSystem(s);renderRewards(s);
 }
 
 function updateHeartbeat(){
