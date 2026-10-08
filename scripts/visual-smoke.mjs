@@ -192,22 +192,15 @@ try {
     await page.goto(origin+'/about/',{waitUntil:'networkidle'});
     await page.evaluate(()=>document.fonts.ready);
     assert(await page.locator('.founder-proof-section').isVisible());
-    const founderGeometry=await page.evaluate(()=>({
-      overflow:document.documentElement.scrollWidth>innerWidth+1,
-      photo:document.querySelector('.founder-proof-photo').getBoundingClientRect().toJSON(),
-      imageWidth:document.querySelector('.founder-proof-photo img').clientWidth,
-      imageHeight:document.querySelector('.founder-proof-photo img').clientHeight,
-      naturalWidth:document.querySelector('.founder-proof-photo img').naturalWidth,
-      naturalHeight:document.querySelector('.founder-proof-photo img').naturalHeight,
-      imageComplete:document.querySelector('.founder-proof-photo img').complete,
-      imageSrc:document.querySelector('.founder-proof-photo img').getAttribute('src')
-    }));
-    assert(!founderGeometry.overflow,`About page overflows at ${width}px`);
-    assert(founderGeometry.photo.left>=-1 && founderGeometry.photo.right<=width+1,`Founder photo mispositioned at ${width}px`);
-    assert(founderGeometry.imageWidth>0 && founderGeometry.imageHeight>0,`Founder image box failed to render at ${width}px`);
-    assert(founderGeometry.imageComplete && founderGeometry.naturalWidth>0 && founderGeometry.naturalHeight>0,`Founder image asset failed to decode at ${width}px: ${JSON.stringify(founderGeometry)}`);
-    assert.equal(founderGeometry.imageSrc,'/public/logos/customers/dustin-poole-about.png');
-    await page.locator('.founder-proof-section').screenshot({path:`${output}/founder-${width}.png`});
+    assert((await page.locator('.founder-proof-copy').innerText()).includes('The system is only as good'));
+    const exposedName=['Dustin','Poole'].join(' ');
+    assert(!(await page.content()).includes(exposedName),'About page must not expose a personal name in page content or metadata');
+    assert.equal(await page.locator('.founder-proof-section img').count(),0,'About page must not render a personal portrait');
+    const aboutGeometry=await page.locator('.founder-proof-copy').boundingBox();
+    assert(aboutGeometry && aboutGeometry.width>0 && aboutGeometry.x>=-1 && aboutGeometry.x+aboutGeometry.width<=width+1,
+      `About principles layout mispositioned at ${width}px: ${JSON.stringify(aboutGeometry)}`);
+    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`About page overflows at ${width}px`);
+    await page.locator('.founder-proof-section').screenshot({path:`${output}/operating-principles-${width}.png`});
 
     await page.goto(origin+'/services/',{waitUntil:'networkidle'});
     await page.evaluate(()=>document.fonts.ready);
