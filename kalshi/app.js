@@ -1,6 +1,6 @@
 const API='https://api.dreamprotocol.ai';
 const STATUS_PATH='/dream-predict/status';
-const POLL_MS=8000;
+const POLL_MS=60000;
 let lastPayload=null;
 let lastFetchedAt=0;
 let busy=false;
@@ -74,14 +74,15 @@ function renderHealth(s){
   const last=n(s?.lastScanAt);
   const age=Number.isFinite(last)?Date.now()-last:Infinity;
   const pill=$('healthPill');
-  const healthy=s?.ok===true&&age<120000&&!s?.lastError;
-  const stale=s?.ok===true&&age>=120000;
+  const scanInterval=Math.max(60,n(s?.scanner?.intervalSeconds)||300)*1000;
+  const healthy=s?.ok===true&&last>0&&age<scanInterval*2.5&&!s?.lastError;
+  const stale=s?.ok===true&&last>0&&age>=scanInterval*2.5;
   if(pill)pill.className='healthPill '+(healthy?'good':stale?'bad':'connecting');
   setText('healthText',healthy?'LIVE':stale?'STALE':s?.lastError?'DEGRADED':'CONNECTING');
   setText('railAge',Number.isFinite(age)?ageText(age):'--');
-  setText('autoState',healthy||s?.scanner?.automated?'ACTIVE':'CHECKING');
+  setText('autoState',healthy?'ACTIVE':'CHECKING');
   const arch=$('architectureTag');
-  if(arch){arch.textContent=s?.scanner?.automated?'AUTONOMOUS':'CHECK ENGINE';arch.className='tag '+(s?.scanner?.automated?'green':'amber')}
+  if(arch){arch.textContent=healthy?'AUTONOMOUS':'CHECK ENGINE';arch.className='tag '+(healthy?'green':'amber')}
 }
 
 function heroLeg(leg){
@@ -126,8 +127,9 @@ function renderHero(s){
     if(kicker){kicker.className='heroKicker hunting';kicker.innerHTML='<i></i>HUNTING'}
     setText('orbState','SCANNING');
     const hasNear=Boolean(near);
-    setText('heroTitle',hasNear?'Close is not good enough.':'Watching two markets disagree.');
-    setText('heroCopy',hasNear?'DreamPredict sees candidate relationships, but none survive every qualification gate yet. The engine is correctly refusing to turn a near miss into fake profit.':'Cloudflare keeps DreamPredict scanning with this page closed. The console is only telemetry, so browser state has zero control over the autonomous engine.');
+    const radarCount=Array.isArray(s?.scan?.marketRadar)?s.scan.marketRadar.length:0;
+    setText('heroTitle',hasNear?'Close is not good enough.':radarCount?'The radar has markets. No verified arb yet.':'Scanning for a real edge.');
+    setText('heroCopy',hasNear?'DreamPredict found an arbitrage candidate, but it failed at least one safety gate. Check the rejection reason below.':radarCount?radarCount+' live Kalshi watch candidates are ranked below with bids, asks, spread, volume, and cutoff. These are not modeled profitable trades.':'The scanner runs without this browser. If the radar remains empty after a scheduled scan, open diagnostics for market discovery counts and upstream errors.');
     const deal=$('heroDeal');
     if(deal)deal.innerHTML='<div class="heroEmpty"><b>'+(hasNear?'BEST NEAR MISS · '+esc(near.qualification||'NOT QUALIFIED'):'NO QUALIFIED ARB RIGHT NOW')+'</b><span>'+(hasNear?'Best observed edge: '+cents(near.netEdge)+' per pair. It stays watch-only until every proof gate passes.':'That is a valid result. DreamPredict is not allowed to invent edge.')+'</span></div>';
     const edge=near?.netEdge;
@@ -204,6 +206,38 @@ function renderOpportunities(s){
   grid.innerHTML=display.map(o=>opCard(o,s)).join('');
 }
 
+function radarCard(m){
+  const url=String(m?.url||'');
+  const safeUrl=url.startsWith('https://kalshi.com/markets/')?url:'#';
+  const isTight=Number.isFinite(n(m?.spread))&&n(m.spread)<=.05;
+  return '<article class="radarCard">'+
+    '<div class="radarHead"><span class="sourceBadge">'+esc(m?.category||'OTHER')+'</span><span class="watchBadge">WATCH ONLY · NO VERIFIED EDGE</span></div>'+
+    '<h3 title="'+esc(m?.title||'')+'">'+esc(m?.title||'Kalshi event')+'</h3>'+
+    '<p title="'+esc(m?.marketTitle||'')+'">'+esc(m?.marketTitle||m?.ticker||'Market')+'</p>'+
+    '<div class="radarMetrics">'+
+      '<div><span>YES BID / ASK</span><b>'+cents(m?.yesBid)+' / '+cents(m?.yesAsk)+'</b></div>'+
+      '<div><span>SPREAD</span><b class="'+(isTight?'goodText':'amberText')+'">'+cents(m?.spread)+'</b></div>'+
+      '<div><span>24H VOLUME</span><b>'+integer(m?.volume24h||0)+'</b></div>'+
+      '<div><span>CLOSE</span><b>'+dateTime(m?.closeTime)+'</b></div>'+
+    '</div>'+
+    '<div class="radarFooter"><span>'+esc(m?.ticker||'')+'</span><a href="'+esc(safeUrl)+'" target="_blank" rel="noopener noreferrer">VIEW ON KALSHI ↗</a></div>'+
+  '</article>';
+}
+function renderRadar(s){
+  const rows=Array.isArray(s?.scan?.marketRadar)?s.scan.marketRadar:[];
+  const discovery=s?.scan?.discovery||{};
+  setText('radarCount',integer(rows.length)+' MARKETS');
+  setText('radarInspected',integer(discovery.marketsInspected||0));
+  setText('radarEligible',integer(s?.scan?.scannedMarkets||0));
+  setText('radarScansToday',integer(s?.scanner?.scansToday||0));
+  const ms=n(s?.scanner?.lastDurationMs);
+  setText('radarLatency',Number.isFinite(ms)&&ms>0?(ms/1000).toFixed(1)+'s':'--');
+  const grid=$('radarGrid');
+  if(grid)grid.innerHTML=rows.length
+    ?rows.slice(0,12).map(radarCard).join('')
+    :'<div class="emptyState"><b>NO LIQUID WATCH MARKETS IN THE LATEST SCAN</b><span>This can mean thin books, no matching cutoffs, or a discovery error. Check the diagnostics below.</span></div>';
+}
+
 function ledgerStats(s){
   const rows=Array.isArray(s?.shadow?.recent)?s.shadow.recent:[];
   const profit=n(s?.shadow?.theoreticalLockedProfit)||0;
@@ -276,7 +310,7 @@ function renderIntelligence(s){
 
 function renderSystem(s){
   setText('railMode',s?.focus==='ARB_FIRST'?'ARB-FIRST':String(s?.mode||'SHADOW'));
-  setText('engineThrottle',integer(s?.scanner?.intervalSeconds||45)+'s');
+  setText('engineThrottle',integer(s?.scanner?.intervalSeconds||300)+'s');
   setText('sysVersion',s?.version||'--');setText('sysEvents',integer(s?.scan?.scannedEvents||0));
   setText('sysMarkets',integer(s?.scan?.scannedMarkets||0));setText('sysPoly',integer(s?.scan?.crossVenue?.scannedPolymarketMarkets||0));
   setText('sysMinEdge',pct(s?.guardrails?.minNetEdge));setText('sysBuffer',cents(s?.guardrails?.safetyMargin));
@@ -290,6 +324,9 @@ function renderSystem(s){
   const lines=[
     'ENGINE: '+String(s?.version||'unknown')+' · '+String(s?.focus||s?.mode||'unknown'),
     'LAST SCAN: '+dateTime(s?.lastScanAt)+' · '+(Number.isFinite(n(s?.lastScanAt))?ageText(Date.now()-n(s.lastScanAt)):'unknown'),
+    'DISCOVERY: '+integer(s?.scan?.discovery?.pages||0)+' pages · '+integer(s?.scan?.discovery?.marketsInspected||0)+' markets inspected · '+integer(s?.scan?.scannedMarkets||0)+' in horizon',
+    'RADAR: '+integer((s?.scan?.marketRadar||[]).length)+' live priced watch candidates',
+    'SCAN COST GUARD: '+integer(s?.scanner?.scansToday||0)+' runs today · '+integer(s?.scanner?.intervalSeconds||300)+'s minimum · '+integer(s?.scanner?.lastDurationMs||0)+'ms last run',
     'STRUCTURAL: '+integer((s?.scan?.arbOpportunities||[]).length)+' candidates · '+integer(s?.scan?.qualifiedStructuralArbs||0)+' qualified',
     'CROSS-VENUE: '+integer(x.scannedPolymarketMarkets||0)+' markets · '+integer(x.candidateMatches||0)+' candidates · '+integer(x.strictMatches||0)+' strict · '+integer(x.qualifiedArbs||0)+' qualified',
     'SHADOW: '+integer(s?.shadow?.captures||0)+' captures · '+money(s?.shadow?.theoreticalLockedProfit||0)+' theoretical locked profit',
@@ -309,14 +346,15 @@ function renderRewards(s){
 
 function render(s){
   lastPayload=s;lastFetchedAt=Date.now();
-  renderHealth(s);renderHero(s);renderFunnel(s);renderOpportunities(s);renderLedger(s);renderIntelligence(s);renderSystem(s);renderRewards(s);
+  renderHealth(s);renderHero(s);renderFunnel(s);renderOpportunities(s);renderRadar(s);renderLedger(s);renderIntelligence(s);renderSystem(s);renderRewards(s);
 }
 
 function updateHeartbeat(){
   if(!lastPayload)return;
   const scanAt=n(lastPayload?.lastScanAt);
   const age=Number.isFinite(scanAt)?Math.max(0,Date.now()-scanAt):NaN;
-  const progress=Number.isFinite(age)?clamp((age%60000)/60000*100,0,100):0;
+  const cycleMs=Math.max(60,n(lastPayload?.scanner?.intervalSeconds)||300)*1000;
+  const progress=Number.isFinite(age)?clamp((age%cycleMs)/cycleMs*100,0,100):0;
   const bar=$('heartbeatBar');if(bar)bar.style.width=progress.toFixed(1)+'%';
   const fetchAge=lastFetchedAt?Date.now()-lastFetchedAt:NaN;
   setText('heartbeatText',
@@ -360,5 +398,5 @@ document.addEventListener('click',event=>{
 $('syncBtn')?.addEventListener('click',refresh);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});
 refresh();
-setInterval(refresh,POLL_MS);
+setInterval(()=>{if(!document.hidden)refresh()},POLL_MS);
 setInterval(updateHeartbeat,1000);
