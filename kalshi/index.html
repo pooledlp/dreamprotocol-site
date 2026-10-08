@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#020308">
 <meta name="robots" content="noindex,nofollow">
-<title>DreamPredict | Autonomous Arb Console</title>
-<meta name="description" content="DreamPredict autonomous arbitrage intelligence console.">
-<link rel="stylesheet" href="styles.css?v=arb-radar-2">
+<title>DreamPredict | Live Paper Profit Lab</title>
+<meta name="description" content="DreamPredict paper-trading scoreboard: actual market prices, tracked wins/losses, and realistic net returns after modeled fees.">
+<link rel="stylesheet" href="styles.css?v=profit-lab-1">
 </head>
 <body>
 <div class="backdrop">
@@ -23,29 +23,98 @@
       <div class="mark"><span>DP</span><i></i></div>
       <div>
         <div class="brand">DreamPredict</div>
-        <div class="brandSub">AUTONOMOUS ARB INTELLIGENCE</div>
+        <div class="brandSub">PAPER PERFORMANCE · AUTONOMOUS SCANNER</div>
       </div>
     </div>
     <div class="topRight">
       <span class="chip cloud"><i></i>CLOUDFLARE AUTOPILOT</span>
-      <span class="chip shadow">SHADOW CAPITAL</span>
+      <span class="chip shadow">PAPER ONLY · NO REAL BETS</span>
       <div id="healthPill" class="healthPill connecting"><i></i><span id="healthText">CONNECTING</span></div>
     </div>
   </header>
 
   <section class="tickerRail" aria-label="system status">
-    <div><span>MODE</span><b id="railMode">ARB-FIRST</b></div>
-    <div><span>QUALIFIED</span><b id="railQualified">0</b></div>
-    <div><span>BEST NET EDGE</span><b id="railEdge">--</b></div>
-    <div><span>MODELED PROFIT</span><b id="railProfit">$0.00</b></div>
-    <div><span>CAPTURES</span><b id="railCaptures">0</b></div>
+    <div><span>MODE</span><b id="railMode">PAPER + ARB</b></div>
+    <div><span>ARB QUALIFIED</span><b id="railQualified">0</b></div>
+    <div><span>PAPER WIN RATE</span><b id="railEdge">--</b></div>
+    <div><span>PAPER NET P&L</span><b id="railProfit">--</b></div>
+    <div><span>COMPLETED PICKS</span><b id="railCaptures">0</b></div>
     <div><span>LAST ENGINE SCAN</span><b id="railAge">--</b></div>
   </section>
 
   <main>
+    <section class="profitLab panel" id="profitLab">
+      <div class="profitHeading">
+        <div>
+          <div class="eyebrow">DREAMPREDICT · FORWARD-ONLY PAPER PERFORMANCE</div>
+          <h1>Can it actually make money?</h1>
+          <p>Now we measure it. Every paper entry uses the displayed ask, estimated taker fees, and the bid to mark an exit. Profits only count after a simulated exit or confirmed market result.</p>
+        </div>
+        <div class="profitVerdict">
+          <span>PAPER TRACK RECORD</span>
+          <strong id="paperVerdict">COLLECTING EVIDENCE</strong>
+          <small id="paperVerdictDetail">No proven edge yet</small>
+        </div>
+      </div>
+
+      <div class="profitMetrics">
+        <div class="profitPrimary">
+          <span>NET PAPER P&L · AFTER FEES</span>
+          <b id="paperNet">--</b>
+          <small id="paperNetHint">Realized + marked-to-bid position value</small>
+        </div>
+        <div><span>REALIZED P&L</span><b id="paperRealized">$0.00</b><small>Only exited or settled</small></div>
+        <div><span>UNREALIZED P&L</span><b id="paperUnrealized">--</b><small>Bid liquidation, estimated fee</small></div>
+        <div><span>WIN RATE</span><b id="paperWinRate">--</b><small id="paperRecord">0 wins · 0 losses</small></div>
+        <div><span>OPEN / COMPLETED</span><b id="paperTradeCount">0 / 0</b><small id="paperToday">0 of 4 paper entries today</small></div>
+      </div>
+
+      <div class="profitLower">
+        <div class="paperData">
+          <div class="panelHeader compact">
+            <div>
+              <div class="eyebrow">THE EXPERIMENT</div>
+              <h2>Live paper positions</h2>
+            </div>
+            <span class="tag violet">NO REAL ORDERS</span>
+          </div>
+          <div id="paperOpenPositions" class="paperPositions">
+            <div class="emptyState small"><span>Waiting for the next autonomous paper scan.</span></div>
+          </div>
+          <div class="paperConditional">
+            <div><span>IF EVERY OPEN PICK WINS</span><b id="paperUpside">--</b></div>
+            <div><span>IF EVERY OPEN PICK LOSES</span><b id="paperDownside">--</b></div>
+            <div><span>OPEN HYPOTHETICAL RISK</span><b id="paperOpenRisk">--</b></div>
+          </div>
+          <p class="conditionalDisclaimer">Those two outcomes are hypothetical extremes, not expected profits. Market-favorite paper picks do not demonstrate independent predictive edge.</p>
+        </div>
+
+        <div class="paperData paperResults">
+          <div class="panelHeader compact">
+            <div>
+              <div class="eyebrow">REAL ACCOUNTING · VIRTUAL FUNDS</div>
+              <h2>Results after fees</h2>
+            </div>
+            <span id="paperSampleTag" class="tag amber">NOT PROVEN</span>
+          </div>
+          <div class="paperChartWrap">
+            <div class="paperChartHeader"><span>CUMULATIVE CLOSED PAPER P&L</span><b id="paperChartTotal">$0.00</b></div>
+            <svg viewBox="0 0 700 180" id="paperChart" aria-label="Cumulative paper profit after fees">
+              <path id="paperChartArea" fill="rgba(114,244,176,.10)"></path>
+              <path id="paperChartLine" stroke="#72f4b0" fill="none" stroke-width="3" vector-effect="non-scaling-stroke"></path>
+            </svg>
+          </div>
+          <div id="paperHistory" class="paperHistory">
+            <div class="emptyState small"><span>No positions have exited or settled yet. Wins and losses will appear here as they happen.</span></div>
+          </div>
+          <div id="paperNextWatch" class="paperNextWatch"></div>
+        </div>
+      </div>
+      <div class="paperHonesty">Forward-only benchmark · hypothetical displayed-ask entries · bid exits · modeled taker fees · no verified order-book depth or slippage · <b>paper profits are not real earnings</b></div>
+    </section>
     <section class="hero panel">
       <div class="heroLeft">
-        <div class="eyebrow">AUTONOMOUS · READ-ONLY OBSERVABILITY</div>
+        <div class="eyebrow">VERIFIED ARBITRAGE · SECONDARY STRATEGY</div>
         <div id="heroKicker" class="heroKicker hunting"><i></i>HUNTING</div>
         <h1 id="heroTitle">Finding markets worth watching.</h1>
         <p id="heroCopy">Cloudflare keeps DreamPredict scanning with this page closed. The console only watches the engine, proves contract equivalence, and surfaces price relationships that survive fees, depth, and safety buffers.</p>
@@ -291,11 +360,11 @@
   </main>
 
   <footer>
-    <div>DreamPredict · Dream Arb Radar</div>
+    <div>DreamPredict · Live Paper Performance + Dream Arb</div>
     <div>Autonomous Cloudflare scanner · shadow execution · real-money orders disabled</div>
   </footer>
 </div>
 
-<script src="app.js?v=arb-radar-2"></script>
+<script src="app.js?v=profit-lab-1"></script>
 </body>
 </html>
