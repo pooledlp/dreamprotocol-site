@@ -147,3 +147,15 @@ footer{display:flex;justify-content:space-between;gap:20px;padding:22px 4px 0;co
 .paperHonesty b{color:#c5d5df}
 @media(max-width:1120px){.profitMetrics{grid-template-columns:repeat(4,minmax(0,1fr))}.profitMetrics .profitPrimary{grid-column:span 4}.profitLower{grid-template-columns:1fr}.paperPositions{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:720px){.profitLab{padding:16px!important}.profitHeading{grid-template-columns:1fr}.profitHeading h1{font-size:34px}.profitHeading p{font-size:11px}.profitVerdict{padding:12px}.profitMetrics{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:14px}.profitMetrics .profitPrimary{grid-column:span 2}.profitMetrics>div{padding:13px}.profitMetrics b{font-size:21px}.profitMetrics .profitPrimary b{font-size:32px}.profitLower{gap:10px}.paperData{padding:13px}.paperPositions{grid-template-columns:1fr}.paperConditional{grid-template-columns:1fr 1fr}.paperConditional>div:last-child{grid-column:span 2}.paperConditional b{font-size:16px}.paperData .panelHeader h2{font-size:20px}.paperPickTitle{font-size:14px}.paperPickSub{font-size:11px}}
+
+/* Paper sprint: trading sample goal, not promised returns. */
+.sprintProgress{position:relative;z-index:2;margin-top:16px;border-radius:14px;border:1px solid rgba(114,244,176,.21);background:linear-gradient(112deg,rgba(7,28,26,.88),rgba(7,13,24,.92));padding:17px 19px}
+.sprintTop{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px}
+.sprintTop>div{min-width:0;display:flex;flex-direction:column;gap:3px}
+.sprintTop span{font-size:9px;letter-spacing:.09em;color:#90a5b6;font-weight:850}
+.sprintTop b{font-size:27px;line-height:1.1;letter-spacing:-.035em;font-variant-numeric:tabular-nums}
+.sprintTop .sprintRight{text-align:right}.sprintRight b{color:var(--green);font-size:20px}.sprintRight span{font-size:9px;letter-spacing:0}
+.sprintTrack{height:9px;background:rgba(155,177,211,.12);border-radius:99px;margin-top:14px;overflow:hidden}
+.sprintTrack i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--green));border-radius:99px;box-shadow:0 0 18px rgba(114,244,176,.27);transition:width .5s ease}
+.sprintProgress p{margin:9px 0 0;color:#8095a8;font-size:10px;line-height:1.5}
+@media(max-width:720px){.sprintProgress{padding:14px}.sprintTop{align-items:flex-start}.sprintTop b{font-size:25px}.sprintTop .sprintRight{text-align:left}.sprintRight b{font-size:18px}}
