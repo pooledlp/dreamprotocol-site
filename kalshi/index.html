@@ -7,7 +7,7 @@
 <meta name="robots" content="noindex,nofollow">
 <title>DreamPredict | Autonomous Arb Console</title>
 <meta name="description" content="DreamPredict autonomous arbitrage intelligence console.">
-<link rel="stylesheet" href="styles.css?v=arb-console-1">
+<link rel="stylesheet" href="styles.css?v=arb-radar-2">
 </head>
 <body>
 <div class="backdrop">
@@ -37,7 +37,7 @@
     <div><span>MODE</span><b id="railMode">ARB-FIRST</b></div>
     <div><span>QUALIFIED</span><b id="railQualified">0</b></div>
     <div><span>BEST NET EDGE</span><b id="railEdge">--</b></div>
-    <div><span>SHADOW PROFIT</span><b id="railProfit">$0.00</b></div>
+    <div><span>MODELED PROFIT</span><b id="railProfit">$0.00</b></div>
     <div><span>CAPTURES</span><b id="railCaptures">0</b></div>
     <div><span>LAST ENGINE SCAN</span><b id="railAge">--</b></div>
   </section>
@@ -47,7 +47,7 @@
       <div class="heroLeft">
         <div class="eyebrow">AUTONOMOUS · READ-ONLY OBSERVABILITY</div>
         <div id="heroKicker" class="heroKicker hunting"><i></i>HUNTING</div>
-        <h1 id="heroTitle">Watching two markets disagree.</h1>
+        <h1 id="heroTitle">Finding markets worth watching.</h1>
         <p id="heroCopy">Cloudflare keeps DreamPredict scanning with this page closed. The console only watches the engine, proves contract equivalence, and surfaces price relationships that survive fees, depth, and safety buffers.</p>
 
         <div id="heroDeal" class="heroDeal">
@@ -80,8 +80,8 @@
         <div class="autopilotCard">
           <div class="autoHead"><span>AUTOPILOT</span><b id="autoState">ACTIVE</b></div>
           <div class="autoRows">
-            <div><span>Cloud trigger</span><b>60s</b></div>
-            <div><span>Engine throttle</span><b id="engineThrottle">45s</b></div>
+            <div><span>Cloud trigger</span><b>5 minutes</b></div>
+            <div><span>Engine throttle</span><b id="engineThrottle">300s</b></div>
             <div><span>Dashboard role</span><b>READ ONLY</b></div>
             <div><span>Real orders</span><b class="danger">LOCKED OFF</b></div>
           </div>
@@ -157,6 +157,26 @@
       </div>
     </section>
 
+    <section class="panel marketRadar">
+      <div class="panelHeader">
+        <div>
+          <div class="eyebrow">LIVE MARKET RADAR · NO EXTRA API CALLS</div>
+          <h2>Actual markets. Real prices. No imaginary profit.</h2>
+          <p>Liquid Kalshi markets coming up within 24 hours, ranked by interest, spread, and proximity. A market on this list is a watch candidate, not a prediction or verified arbitrage.</p>
+        </div>
+        <span id="radarCount" class="tag">0 MARKETS</span>
+      </div>
+      <div class="radarStats">
+        <div><span>INSPECTED</span><b id="radarInspected">0</b></div>
+        <div><span>IN WINDOW</span><b id="radarEligible">0</b></div>
+        <div><span>SCANS TODAY</span><b id="radarScansToday">0</b></div>
+        <div><span>LAST SCAN DURATION</span><b id="radarLatency">--</b></div>
+      </div>
+      <div id="radarGrid" class="radarGrid">
+        <div class="emptyState"><b>WAITING FOR MARKET DATA</b><span>Radar populates after the next autonomous scan.</span></div>
+      </div>
+    </section>
+
     <section class="dual">
       <section class="panel ledgerPanel">
         <div class="panelHeader compact">
@@ -225,9 +245,9 @@
       </div>
 
       <div class="architectureFlow">
-        <div class="node active"><span>01</span><b>CLOUDFLARE CRON</b><small>every minute</small></div>
+        <div class="node active"><span>01</span><b>CLOUDFLARE CRON</b><small>every 5 minutes</small></div>
         <i>→</i>
-        <div class="node"><span>02</span><b>DREAM ARB</b><small>45s throttle</small></div>
+        <div class="node"><span>02</span><b>DREAM ARB</b><small>5-minute throttle</small></div>
         <i>→</i>
         <div class="node split"><span>03</span><b>KALSHI + POLYMARKET</b><small>live public books</small></div>
         <i>→</i>
@@ -271,11 +291,11 @@
   </main>
 
   <footer>
-    <div>DreamPredict · Dream Arb v3</div>
+    <div>DreamPredict · Dream Arb Radar</div>
     <div>Autonomous Cloudflare scanner · shadow execution · real-money orders disabled</div>
   </footer>
 </div>
 
-<script src="app.js?v=arb-console-1"></script>
+<script src="app.js?v=arb-radar-2"></script>
 </body>
 </html>
