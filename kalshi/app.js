@@ -239,6 +239,88 @@ function renderRadar(s){
 }
 
 
+
+function forecastSignalCard(x){
+  const ticker=String(x?.ticker||'');
+  const url='https://kalshi.com/markets/'+encodeURIComponent(ticker);
+  const priced=n(x?.ask);
+  const margin=n(x?.conservativeEdge);
+  const model=n(x?.probability);
+  const source1=n(x?.nws),source2=n(x?.openMeteo);
+  const state=x?.qualified?'MODEL EDGE · PAPER ELIGIBLE':'NO ENTRY';
+  return '<article class="forecastSignal '+(x?.qualified?'forecastEligible':'')+'">'+
+    '<div class="forecastSignalTop"><span>'+esc(x?.city||'WEATHER')+
+    ' · MODEL '+esc(String(x?.side||'').toUpperCase())+'</span>'+
+    '<b class="'+(x?.qualified?'goodText':'amberText')+'">'+esc(state)+'</b></div>'+
+    '<h3>'+esc(x?.subtitle||x?.title||ticker)+'</h3>'+
+    '<p>'+esc(x?.reason||'Not qualified')+'</p>'+
+    '<div class="forecastDataGrid">'+
+    '<div><span>MODEL PROBABILITY</span><b>'+pct(model)+'</b></div>'+
+    '<div><span>MARKET ASK</span><b>'+cents(priced)+'</b></div>'+
+    '<div><span>CONSERVATIVE EDGE</span><b class="'+(margin>=0?'goodText':'badText')+'">'+pct(margin)+'</b></div>'+
+    '<div><span>NWS / OPEN-METEO</span><b>'+((Number.isFinite(source1)?source1.toFixed(1):'--')+'° / '+(Number.isFinite(source2)?source2.toFixed(1):'--')+'°')+'</b></div>'+
+    '</div>'+
+    '<div class="forecastSignalBottom"><span>Forecast difference '+(Number.isFinite(n(x?.disagreementF))?n(x.disagreementF).toFixed(1)+'°F':'unknown')+
+    ' · '+dateTime(x?.closeTime)+'</span>'+
+    '<a href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">KALSHI ↗</a></div>'+
+  '</article>';
+}
+function forecastPositionCard(x){
+  const mtm=x?.markNet===null||x?.markNet===undefined?null:n(x.markNet);
+  return '<div class="forecastPosition">'+
+    '<div><b>'+esc(x?.city||x?.ticker||'Model pick')+
+    ' · '+esc(String(x?.side||'').toUpperCase())+'</b>'+
+    '<small>'+integer(x?.contracts||0)+' paper contracts · '+dateTime(x?.closeTime)+
+    ' · forecast '+pct(x?.modelProbability)+'</small></div>'+
+    '<strong class="'+(mtm!==null&&mtm<0?'badText':mtm!==null&&mtm>0?'goodText':'')+'">'+
+    (mtm===null?'MARK PENDING':money(mtm))+'</strong></div>';
+}
+function renderForecastLab(s){
+  const f=s?.forecastLab||{};
+  const evals=f.evaluations||{};
+  const paper=f.paper||{};
+  const goal=Math.max(1,Number(f.goal)||100);
+  const completed=Math.max(0,Number(evals.completed)||0);
+  const modelRuns=Number(f.modelScans)||0;
+  setText('forecastProgress',integer(completed)+' / '+integer(goal));
+  const progress=$('forecastProgressBar');
+  if(progress)progress.style.width=Math.max(0,Math.min(100,completed/goal*100)).toFixed(1)+'%';
+  setText('forecastQuoteNet',(n(evals.hypotheticalNetOneContract)>0?'+':'')+money(evals.hypotheticalNetOneContract||0));
+  setText('forecastCorrelation',integer(evals.distinctContracts||0)+' distinct quoted contracts · '+
+    integer(evals.distinctEvents||0)+' events · '+integer(evals.repeatedContracts||0)+
+    ' repeat observations. These are 30-minute paper marks, not independent settlement results.');
+  setText('forecastSignals',integer(f.pricedMarkets||0));
+  setText('forecastQualified',integer(f.qualifiedSignals||0));
+  setText('forecastHitRate',evals.winRate==null?'--':pct(evals.winRate));
+  setText('forecastDistinct',integer(evals.distinctContracts||0)+' distinct contracts scored');
+  setText('forecastPaperCounts',integer(paper.open||0)+' / '+integer(paper.completed||0));
+  setText('forecastPaperWins',integer(paper.wins||0)+' official settlement wins · '+integer(paper.losses||0)+' losses');
+  setText('forecastRealized',money(paper.realized||0));
+  setText('forecastOpenRisk',money(paper.openRisk||0));
+  const net=paper.totalNet;
+  setText('forecastPaperNet',net===null||net===undefined?'MARK PENDING':money(net));
+  const active=f.enabled===true&&modelRuns>0;
+  setText('forecastStatus',active?'RESEARCH LIVE':'AWAITING SCAN');
+  setText('forecastRunState',active?'TWO-SOURCE FORECAST ENGINE':'FORECAST ENGINE STARTING');
+  setText('forecastLastRun',modelRuns+' model refreshes · '+dateTime(f.lastModelAt));
+  const signals=Array.isArray(f.topSignals)?f.topSignals:[];
+  const cards=$('forecastSignalRows');
+  if(cards)cards.innerHTML=signals.length
+    ?signals.slice(0,10).map(forecastSignalCard).join('')
+    :'<div class="emptyState small"><b>'+(
+      modelRuns?'NO VALID INDEPENDENT FORECAST QUOTES YET':'AWAITING NWS/OPEN-METEO RESEARCH')+
+      '</b><span>Cloudflare scans autonomously every five minutes; the external forecast model refreshes every fifteen.</span></div>';
+  const positions=Array.isArray(paper.positions)?paper.positions:[];
+  const slot=$('forecastPositions');
+  if(slot)slot.innerHTML=positions.length?positions.slice(0,12).map(forecastPositionCard).join('')
+    :'<div class="emptyState small"><b>NO MODEL-QUALIFIED PAPER ENTRIES YET</b><span>Only forecast probabilities that clear fees and uncertainty enter. No forced trades to reach 100.</span></div>';
+  const errors=Array.isArray(f.sourceErrors)?f.sourceErrors:[];
+  const errorText=[f.lastError,...errors].filter(Boolean).slice(0,3);
+  const e=$('forecastError');
+  if(e)e.textContent=errorText.length?'DATA WARNINGS: '+errorText.join(' | '):
+    modelRuns?'Independent forecast provider checks recorded. No model execution error.':'Waiting for first model response.';
+}
+
 function paperCard(p){
   const href=String(p?.url||"").startsWith("https://kalshi.com/markets/")?p.url:"#";
   const mark=p?.markNet;
@@ -468,7 +550,7 @@ function renderRewards(s){
 
 function render(s){
   lastPayload=s;lastFetchedAt=Date.now();
-  renderHealth(s);renderHero(s);renderFunnel(s);renderOpportunities(s);renderRadar(s);renderLedger(s);renderPaper(s);renderIntelligence(s);renderSystem(s);renderRewards(s);
+  renderForecastLab(s);renderHealth(s);renderHero(s);renderFunnel(s);renderOpportunities(s);renderRadar(s);renderLedger(s);renderPaper(s);renderIntelligence(s);renderSystem(s);renderRewards(s);
 }
 
 function updateHeartbeat(){
