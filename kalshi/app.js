@@ -281,18 +281,23 @@ function renderForecastLab(s){
   const paper=f.paper||{};
   const goal=Math.max(1,Number(f.goal)||100);
   const completed=Math.max(0,Number(evals.completed)||0);
+  const distinct=Math.max(0,Number(evals.distinctContracts)||0);
   const modelRuns=Number(f.modelScans)||0;
-  setText('forecastProgress',integer(completed)+' / '+integer(goal));
+  setText('forecastProgress',integer(distinct)+' / '+integer(goal));
+  setText('forecastTotalMarks',integer(completed));
   const progress=$('forecastProgressBar');
-  if(progress)progress.style.width=Math.max(0,Math.min(100,completed/goal*100)).toFixed(1)+'%';
+  if(progress)progress.style.width=Math.max(0,Math.min(100,distinct/goal*100)).toFixed(1)+'%';
   setText('forecastQuoteNet',(n(evals.hypotheticalNetOneContract)>0?'+':'')+money(evals.hypotheticalNetOneContract||0));
-  setText('forecastCorrelation',integer(evals.distinctContracts||0)+' distinct quoted contracts · '+
-    integer(evals.distinctEvents||0)+' events · '+integer(evals.repeatedContracts||0)+
-    ' repeat observations. These are 30-minute paper marks, not independent settlement results.');
+  setText('forecastCorrelation',integer(completed)+' 30-minute quote marks, but only '+
+    integer(distinct)+' different contracts from '+integer(evals.distinctEvents||0)+
+    ' weather events ('+integer(evals.repeatedContracts||0)+
+    ' overlapping repeated marks). Not settled trades; contracts within an event are correlated.');
   setText('forecastSignals',integer(f.pricedMarkets||0));
   setText('forecastQualified',integer(f.qualifiedSignals||0));
-  setText('forecastHitRate',evals.winRate==null?'--':pct(evals.winRate));
-  setText('forecastDistinct',integer(evals.distinctContracts||0)+' distinct contracts scored');
+  setText('forecastHitRate',evals.qualifiedWinRate==null?'--':pct(evals.qualifiedWinRate));
+  setText('forecastDistinct',integer(evals.qualifiedPositive||0)+' positive of '+
+    integer(evals.qualifiedCompleted||0)+' model-qualified 30-minute marks · '+
+    integer(evals.qualifiedDistinctContracts||0)+' distinct qualified contracts');
   setText('forecastPaperCounts',integer(paper.open||0)+' / '+integer(paper.completed||0));
   setText('forecastPaperWins',integer(paper.wins||0)+' official settlement wins · '+integer(paper.losses||0)+' losses');
   setText('forecastRealized',money(paper.realized||0));
@@ -300,8 +305,8 @@ function renderForecastLab(s){
   const net=paper.totalNet;
   setText('forecastPaperNet',net===null||net===undefined?'MARK PENDING':money(net));
   const active=f.enabled===true&&modelRuns>0;
-  setText('forecastStatus',active?'RESEARCH LIVE':'AWAITING SCAN');
-  setText('forecastRunState',active?'TWO-SOURCE FORECAST ENGINE':'FORECAST ENGINE STARTING');
+  setText('forecastStatus',active?'UNPROVEN · RUNNING':'AWAITING SCAN');
+  setText('forecastRunState',active?'TWO-SOURCE FORECAST · PAPER ONLY':'FORECAST ENGINE STARTING');
   setText('forecastLastRun',modelRuns+' model refreshes · '+dateTime(f.lastModelAt));
   const signals=Array.isArray(f.topSignals)?f.topSignals:[];
   const cards=$('forecastSignalRows');
@@ -319,6 +324,18 @@ function renderForecastLab(s){
   const e=$('forecastError');
   if(e)e.textContent=errorText.length?'DATA WARNINGS: '+errorText.join(' | '):
     modelRuns?'Independent forecast provider checks recorded. No model execution error.':'Waiting for first model response.';
+}
+
+function renderForecastRail(s){
+  const f=s?.forecastLab||{};
+  const e=f.evaluations||{};
+  const p=f.paper||{};
+  setText('railMode','WEATHER MODEL');
+  setText('railQualified',integer(f.qualifiedSignals||0));
+  setText('railEdge',integer(e.distinctContracts||0));
+  const net=p.totalNet;
+  setText('railProfit',net===null||net===undefined?'MARK PENDING':money(net));
+  setText('railCaptures',integer(p.completed||0));
 }
 
 function paperCard(p){
@@ -550,7 +567,7 @@ function renderRewards(s){
 
 function render(s){
   lastPayload=s;lastFetchedAt=Date.now();
-  renderForecastLab(s);renderHealth(s);renderHero(s);renderFunnel(s);renderOpportunities(s);renderRadar(s);renderLedger(s);renderPaper(s);renderIntelligence(s);renderSystem(s);renderRewards(s);
+  renderForecastLab(s);renderHealth(s);renderHero(s);renderFunnel(s);renderOpportunities(s);renderRadar(s);renderLedger(s);renderPaper(s);renderIntelligence(s);renderSystem(s);renderRewards(s);renderForecastRail(s);
 }
 
 function updateHeartbeat(){
