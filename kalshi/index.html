@@ -7,7 +7,7 @@
 <meta name="robots" content="noindex,nofollow">
 <title>DreamPredict | Live Paper Profit Lab</title>
 <meta name="description" content="DreamPredict paper-trading scoreboard: actual market prices, tracked wins/losses, and realistic net returns after modeled fees.">
-<link rel="stylesheet" href="styles.css?v=independent-weather-4">
+<link rel="stylesheet" href="styles.css?v=forecast-truth-5">
 </head>
 <body>
 <div class="backdrop">
@@ -49,7 +49,7 @@
           <div class="eyebrow">DREAMPREDICT · INDEPENDENT MODEL EXPERIMENT</div>
           <h1>Forecast first. Trade only when there's an edge.</h1>
           <p>National Weather Service + Open-Meteo versus Kalshi's live prices. The new model subtracts entry fees and forecast uncertainty before allowing a paper pick. No random favorite-side entries, no real-money orders.</p>
-          <div class="forecastPills"><span id="forecastRunState">AWAITING MODEL</span><span>100 FORWARD EVALUATIONS TARGET</span><span>OFFICIAL SETTLEMENT FOR PAPER WINS</span></div>
+          <div class="forecastPills"><span id="forecastRunState">AWAITING MODEL</span><span>100 DISTINCT WEATHER CONTRACTS TARGET</span><span>NO PAPER WIN UNTIL OFFICIAL SETTLEMENT</span></div>
         </div>
         <div class="forecastClock">
           <span>MODEL STATUS</span>
@@ -59,18 +59,19 @@
       </div>
       <div class="forecastSprint">
         <div class="forecastSprintRow">
-          <div><span>FORWARD QUOTE OBSERVATIONS SCORED</span><b id="forecastProgress">0 / 100</b></div>
-          <div><span>30-MIN PAPER QUOTE RETURN · ONE CONTRACT EACH</span><b id="forecastQuoteNet">--</b></div>
+          <div><span>DIFFERENT WEATHER CONTRACTS SCORED · TARGET 100</span><b id="forecastProgress">0 / 100</b></div>
+          <div><span>TOTAL 30-MIN QUOTE MARKS, INCLUDING REPEATS</span><b id="forecastTotalMarks">0</b></div>
+          <div><span>MARK-TO-BID COST OF REPEATED QUOTE TESTS · NOT REALIZED</span><b id="forecastQuoteNet">--</b></div>
         </div>
         <div class="forecastTrack"><i id="forecastProgressBar"></i></div>
-        <p id="forecastCorrelation">Repeated forecasts of the same contracts are correlated. This counter is not a count of independent bets or guaranteed profits.</p>
+        <p id="forecastCorrelation">Different contracts can still depend on the same weather outcome. Repeated 30-minute checks are not independent bets, and none count as a settled trade.</p>
       </div>
       <div class="forecastMetrics">
         <div><span>INDEPENDENT MODEL SIGNALS</span><b id="forecastSignals">0</b><small>Quoted candidates analyzed</small></div>
         <div><span>EDGE-QUALIFIED</span><b id="forecastQualified">0</b><small>After fees and uncertainty</small></div>
         <div><span>MODEL PAPER P&L</span><b id="forecastPaperNet">--</b><small>Official outcomes + marked opens</small></div>
         <div><span>MODEL PAPER OPEN / SETTLED</span><b id="forecastPaperCounts">0 / 0</b><small id="forecastPaperWins">No verified paper wins</small></div>
-        <div><span>30-MIN MARK HIT RATE</span><b id="forecastHitRate">--</b><small id="forecastDistinct">0 distinct markets</small></div>
+        <div><span>MODEL-QUALIFIED 30-MIN POSITIVE MARKS</span><b id="forecastHitRate">--</b><small id="forecastDistinct">0 model-qualified marks scored</small></div>
       </div>
       <div class="forecastBody">
         <div class="forecastMain">
@@ -112,14 +113,7 @@
         <strong id="paperPauseHeading">Checking paper strategy...</strong>
         <span id="paperPauseExplanation">No real-money trading. Existing results are preserved.</span>
       </div>
-      <div class="sprintProgress">
-        <div class="sprintTop">
-          <div><span>100 COMPLETED PAPER TRADES · TEST TARGET</span><b id="sprintProgressText">0 / 100</b></div>
-          <div class="sprintRight"><b id="sprintNet">--</b><span id="sprintDetails">Building a forward track record</span></div>
-        </div>
-        <div class="sprintTrack"><i id="sprintProgressBar"></i></div>
-        <p id="sprintCorrelation">The number of observations matters, but repeated contracts in the same event are correlated. A profit isn't proven by trade count alone.</p>
-      </div>
+      <p class="retiredStrategyNotice">Archived paper strategy: its 100-trade target was cancelled. The losses and completed trade history remain below for comparison, but this strategy no longer makes entries.</p>
 
       <div class="profitMetrics">
         <div class="profitPrimary">
@@ -435,6 +429,6 @@
   </footer>
 </div>
 
-<script src="app.js?v=independent-weather-4"></script>
+<script src="app.js?v=forecast-truth-5"></script>
 </body>
 </html>
