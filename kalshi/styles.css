@@ -175,3 +175,84 @@ footer{display:flex;justify-content:space-between;gap:20px;padding:22px 4px 0;co
 .costForensics small{display:block;margin-top:4px;font-size:9px;color:#8190a0}
 @media(max-width:900px){.costForensics{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:450px){.costForensics b{font-size:18px}.costForensics>div{padding:12px 10px}}
+
+/* Independent external-weather forecast paper lab. */
+.forecastLab{padding:26px!important;border:1px solid rgba(105,213,255,.23)!important;
+ background:radial-gradient(ellipse at 80% 0%,rgba(110,216,255,.085),transparent 32%),
+ linear-gradient(170deg,rgba(8,20,30,.99),rgba(4,10,18,.99))!important}
+.forecastHead{display:grid;grid-template-columns:minmax(0,1fr) 220px;align-items:center;gap:22px;position:relative;z-index:2}
+.forecastHead h1{font-size:clamp(31px,3.4vw,49px);line-height:1.07;letter-spacing:-.052em;margin:9px 0 0}
+.forecastIntro>p{color:#9daec1;font-size:12px;line-height:1.6;margin:10px 0 0;max-width:900px}
+.forecastPills{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}
+.forecastPills span{font-size:8px;font-weight:870;letter-spacing:.075em;border-radius:99px;
+border:1px solid rgba(116,194,221,.24);padding:6px 9px;color:#b7d7e2}
+.forecastClock{border:1px solid rgba(116,215,255,.26);border-radius:13px;
+ background:rgba(6,25,33,.65);padding:18px;display:flex;flex-direction:column;gap:7px}
+.forecastClock span,.forecastSprint span,.forecastMetrics span,.forecastMoney span{font-size:8px;font-weight:900;
+ color:#92aebf;letter-spacing:.09em}
+.forecastClock b{font-size:18px;color:var(--cyan)}
+.forecastClock small{color:#8398a9;font-size:10px}
+.forecastSprint{position:relative;z-index:2;margin-top:20px;border:1px solid rgba(113,220,255,.24);
+ border-radius:14px;background:rgba(3,18,26,.78);padding:16px}
+.forecastSprintRow{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.forecastSprintRow>div{display:grid;gap:7px}.forecastSprintRow b{font-size:28px;font-variant-numeric:tabular-nums;
+ letter-spacing:-.05em}.forecastSprintRow>div:last-child{text-align:right}.forecastSprintRow>div:last-child b{font-size:22px}
+.forecastTrack{height:8px;border-radius:20px;overflow:hidden;background:rgba(100,173,194,.15);margin-top:14px}
+.forecastTrack i{display:block;width:0;height:100%;border-radius:20px;transition:width .5s;
+ background:linear-gradient(90deg,var(--cyan),var(--green))}
+.forecastSprint p{color:#8ba4b8;font-size:10px;line-height:1.5;margin:9px 0 0}
+.forecastMetrics{position:relative;z-index:2;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));
+ gap:1px;background:var(--line);border:1px solid var(--line);border-radius:13px;overflow:hidden;margin-top:13px}
+.forecastMetrics>div{padding:15px 12px;background:rgba(5,12,19,.95);min-width:0}
+.forecastMetrics b{font-size:22px;display:block;margin:7px 0 4px;letter-spacing:-.045em;
+ font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.forecastMetrics small{color:#7f96a7;font-size:9px;line-height:1.35}
+.forecastBody{position:relative;z-index:2;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr);
+ gap:14px;margin-top:17px}
+.forecastMain,.forecastSide{min-width:0;border:1px solid var(--line);padding:17px;
+ background:rgba(5,11,20,.71);border-radius:14px}
+.forecastTitleRow{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.forecastTitleRow h2{font-size:22px;line-height:1.1;letter-spacing:-.04em;margin:6px 0 0}
+.forecastSignalRows{margin-top:14px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.forecastSignal{border:1px solid rgba(123,174,193,.2);border-radius:11px;
+ padding:13px;min-width:0;background:rgba(2,12,21,.86)}
+.forecastSignal.forecastEligible{border-color:rgba(114,244,176,.31);background:rgba(3,25,20,.76)}
+.forecastSignalTop{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:5px}
+.forecastSignalTop span{font-size:9px;color:#a7c6d0;letter-spacing:.04em;font-weight:800}
+.forecastSignalTop b{font-size:8px}
+.forecastSignal h3{font-size:13px;line-height:1.4;margin:11px 0 4px}
+.forecastSignal p{color:#94a7b7;font-size:10px;margin:0;line-height:1.35}
+.forecastDataGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;
+ background:var(--line);border-radius:9px;overflow:hidden;margin-top:12px}
+.forecastDataGrid>div{padding:9px;background:#06121c;min-width:0}
+.forecastDataGrid span{font-size:8px;color:#8199ad;letter-spacing:.05em;font-weight:820}
+.forecastDataGrid b{font-size:13px;display:block;margin-top:5px;font-variant-numeric:tabular-nums}
+.forecastSignalBottom{display:flex;align-items:center;justify-content:space-between;
+ flex-wrap:wrap;gap:8px;margin-top:11px;padding-top:10px;border-top:1px solid var(--line)}
+.forecastSignalBottom span{font-size:9px;color:#8195a9}
+.forecastSignalBottom a{text-decoration:none;font-size:9px;font-weight:850;color:var(--cyan)}
+.forecastMoney{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);
+ border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:13px}
+.forecastMoney>div{padding:12px;background:rgba(5,16,22,.94);min-width:0}
+.forecastMoney b{font-size:21px;display:block;margin-top:6px;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.forecastPositions{display:grid;gap:7px;margin-top:14px;max-height:490px;overflow-y:auto}
+.forecastPosition{display:flex;align-items:center;justify-content:space-between;gap:10px;
+ border:1px solid rgba(148,178,190,.14);border-radius:10px;padding:11px;background:rgba(7,16,23,.75)}
+.forecastPosition>div{min-width:0}.forecastPosition b{font-size:10px;overflow-wrap:anywhere}
+.forecastPosition small{display:block;color:#8297a9;font-size:9px;line-height:1.4;margin-top:5px}
+.forecastPosition strong{font-size:14px;white-space:nowrap}
+.forecastError{color:#92a9b8;font-size:9px;line-height:1.5;margin-top:13px;overflow-wrap:anywhere}
+.forecastFoot{position:relative;z-index:2;color:#90a3b4;font-size:10px;line-height:1.6;
+ margin:17px 0 0;padding-top:12px;border-top:1px solid var(--line)}
+@media(max-width:1120px){.forecastMetrics{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .forecastBody{grid-template-columns:1fr}}
+@media(max-width:720px){.forecastLab{padding:15px!important}
+ .forecastHead{grid-template-columns:1fr}.forecastHead h1{font-size:34px}
+ .forecastIntro>p{font-size:11px}.forecastClock{padding:12px}
+ .forecastSprint{padding:13px}.forecastSprintRow>div:last-child{text-align:left}
+ .forecastMetrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .forecastMetrics b{font-size:20px}.forecastSignalRows{grid-template-columns:1fr}
+ .forecastMain,.forecastSide{padding:12px}
+ .forecastTitleRow h2{font-size:20px}
+ .forecastPosition strong{font-size:12px}
+}
