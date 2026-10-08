@@ -7,7 +7,7 @@
 <meta name="robots" content="noindex,nofollow">
 <title>DreamPredict | Live Paper Profit Lab</title>
 <meta name="description" content="DreamPredict paper-trading scoreboard: actual market prices, tracked wins/losses, and realistic net returns after modeled fees.">
-<link rel="stylesheet" href="styles.css?v=profit-lab-1">
+<link rel="stylesheet" href="styles.css?v=profit-sprint-2">
 </head>
 <body>
 <div class="backdrop">
@@ -23,7 +23,7 @@
       <div class="mark"><span>DP</span><i></i></div>
       <div>
         <div class="brand">DreamPredict</div>
-        <div class="brandSub">PAPER PERFORMANCE · AUTONOMOUS SCANNER</div>
+        <div class="brandSub">100-TRADE PAPER SPRINT · AUTONOMOUS</div>
       </div>
     </div>
     <div class="topRight">
@@ -46,15 +46,24 @@
     <section class="profitLab panel" id="profitLab">
       <div class="profitHeading">
         <div>
-          <div class="eyebrow">DREAMPREDICT · FORWARD-ONLY PAPER PERFORMANCE</div>
-          <h1>Can it actually make money?</h1>
-          <p>Now we measure it. Every paper entry uses the displayed ask, estimated taker fees, and the bid to mark an exit. Profits only count after a simulated exit or confirmed market result.</p>
+          <div class="eyebrow">DREAMPREDICT · HIGH-VOLUME PAPER TEST</div>
+          <h1>100 trades. No fake profits.</h1>
+          <p>Accelerated virtual trading across real Kalshi quotes. Up to 36 open paper positions, timed bid exits, and actual losses included. We'll see whether it can beat the spread and estimated fees.</p>
         </div>
         <div class="profitVerdict">
           <span>PAPER TRACK RECORD</span>
           <strong id="paperVerdict">COLLECTING EVIDENCE</strong>
           <small id="paperVerdictDetail">No proven edge yet</small>
         </div>
+      </div>
+
+      <div class="sprintProgress">
+        <div class="sprintTop">
+          <div><span>100 COMPLETED PAPER TRADES · TEST TARGET</span><b id="sprintProgressText">0 / 100</b></div>
+          <div class="sprintRight"><b id="sprintNet">--</b><span id="sprintDetails">Building a forward track record</span></div>
+        </div>
+        <div class="sprintTrack"><i id="sprintProgressBar"></i></div>
+        <p id="sprintCorrelation">The number of observations matters, but repeated contracts in the same event are correlated. A profit isn't proven by trade count alone.</p>
       </div>
 
       <div class="profitMetrics">
@@ -66,7 +75,7 @@
         <div><span>REALIZED P&L</span><b id="paperRealized">$0.00</b><small>Only exited or settled</small></div>
         <div><span>UNREALIZED P&L</span><b id="paperUnrealized">--</b><small>Bid liquidation, estimated fee</small></div>
         <div><span>WIN RATE</span><b id="paperWinRate">--</b><small id="paperRecord">0 wins · 0 losses</small></div>
-        <div><span>OPEN / COMPLETED</span><b id="paperTradeCount">0 / 0</b><small id="paperToday">0 of 4 paper entries today</small></div>
+        <div><span>OPEN / COMPLETED</span><b id="paperTradeCount">0 / 0</b><small id="paperToday">0 paper entries today</small></div>
       </div>
 
       <div class="profitLower">
@@ -110,7 +119,7 @@
           <div id="paperNextWatch" class="paperNextWatch"></div>
         </div>
       </div>
-      <div class="paperHonesty">Forward-only benchmark · hypothetical displayed-ask entries · bid exits · modeled taker fees · no verified order-book depth or slippage · <b>paper profits are not real earnings</b></div>
+      <div class="paperHonesty">High-volume forward-only benchmark · hypothetical ask entries · actual quoted bid exits at modeled fees · no verified executable depth, slippage, or filled orders · repeated markets may be correlated · <b>paper profits are not real earnings</b></div>
     </section>
     <section class="hero panel">
       <div class="heroLeft">
@@ -365,6 +374,6 @@
   </footer>
 </div>
 
-<script src="app.js?v=profit-lab-1"></script>
+<script src="app.js?v=profit-sprint-2"></script>
 </body>
 </html>
