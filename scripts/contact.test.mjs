@@ -3,13 +3,13 @@ import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import fs from 'node:fs';
 const script=fs.readFileSync(new URL('../assets/site.js',import.meta.url),'utf8');
-function fixture(response){
+function fixture(response,{search='?service=AI%20training',leadType=''}={}){
  const listeners={};const classes=()=>({add(){},remove(){},contains:()=>false});const button={disabled:false,innerHTML:'Submit <span>→</span>',classList:classes()};const status={textContent:'',innerHTML:'',classList:classes(),scrollIntoView(){}};
  const fields={name:'Test Person',company:'Example Company',email:'test@example.com',workflow:'Connect our inquiry process'};
  let reset=false;let payload;
- const form={elements:{workflow:{value:''}},querySelector:()=>button,addEventListener:(name,fn)=>listeners[name]=fn,reset:()=>{reset=true;}};
+ const form={dataset:{leadType},elements:{workflow:{value:''},service_interest:{value:''}},querySelector:()=>button,addEventListener:(name,fn)=>listeners[name]=fn,reset:()=>{reset=true;}};
  const noop={addEventListener(){},classList:{contains:()=>false}};
- const context={document:{body:{dataset:{}},documentElement:{},querySelectorAll:()=>[],querySelector:s=>({'#lead-form':form,'#form-status':status,'.menu-button':noop,'#primary-nav':noop}[s]),addEventListener(){}},location:{pathname:'/contact/',search:'?service=AI%20training'},window:{DREAMPROTOCOL_ATTRIBUTION:{landing_page:'/ai-training/',utm_source:'search'}},URLSearchParams,AbortSignal,FormData:class{*[Symbol.iterator](){yield*Object.entries(fields);}},setTimeout:fn=>{fn();return 1;},fetch:async(url,options)=>{payload={url,body:JSON.parse(options.body)};return response;}};
+ const context={document:{body:{dataset:{}},documentElement:{},querySelectorAll:()=>[],querySelector:s=>({'#lead-form':form,'#form-status':status,'.menu-button':noop,'#primary-nav':noop}[s]),addEventListener(){}},location:{pathname:leadType==='subscription'?'/start-monthly-ai/':'/contact/',search},window:{DREAMPROTOCOL_ATTRIBUTION:{landing_page:'/ai-training/',utm_source:'search'}},URLSearchParams,AbortSignal,FormData:class{*[Symbol.iterator](){yield*Object.entries(fields);}},setTimeout:fn=>{fn();return 1;},fetch:async(url,options)=>{payload={url,body:JSON.parse(options.body)};return response;}};
  vm.runInNewContext(script,context);
  return {form,button,status,submit:()=>listeners.submit({preventDefault(){}}),get reset(){return reset;},get payload(){return payload;}};
 }
@@ -29,4 +29,19 @@ test('Contact form preserves the inquiry and permits retry after rejected delive
 });
 test('HTTP failure also preserves the inquiry',async()=>{
  const f=fixture({ok:false});await f.submit();assert.equal(f.reset,false);assert.match(f.status.innerHTML,/Couldn’t send/);
+});
+
+test('Monthly plan form preserves service choice, source, and no-payment acknowledgement',async()=>{
+ const f=fixture({ok:true,json:async()=>({success:true})},{search:'?service=AI%20receptionist&source=offer-primary',leadType:'subscription'});
+ assert.equal(f.form.elements.service_interest.value,'AI phone receptionist');
+ await f.submit();
+ assert.match(f.payload.body._subject,/monthly AI plan/);
+ assert.equal(f.payload.body.campaign_source,'offer-primary');
+ assert.equal(f.payload.body.source_page,'/start-monthly-ai/');
+ assert.match(f.status.innerHTML,/No payment was collected/);
+});
+
+test('Managed AI monthly plan is selected from referral link',()=>{
+ const f=fixture({ok:true,json:async()=>({success:true})},{search:'?service=Managed%20AI%20Operations',leadType:'subscription'});
+ assert.equal(f.form.elements.service_interest.value,'Managed AI operations');
 });

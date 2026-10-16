@@ -74,3 +74,54 @@
 .lead-form .lead-form-privacy a{text-decoration:underline;text-underline-offset:3px}
 @media(max-width:1050px){.sales-vertical-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.sales-related .sales-vertical-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:780px){.sales-path-grid,.sales-page .sales-hero,.sales-example,.sales-price-feature{grid-template-columns:1fr}.sales-path-grid{gap:20px}.sales-vertical-grid,.sales-steps,.sales-problem-list{grid-template-columns:1fr}.sales-vertical-card{min-height:0}.sales-related .sales-vertical-grid{grid-template-columns:1fr}.sales-price-feature-actions{width:100%}.sales-bottom-cta{display:block}.sales-bottom-cta .cta-actions{margin-top:20px}.sales-page .sales-hero{padding-bottom:55px}.sales-hero-panel{padding:24px}.sales-path-side{padding:21px}}
+
+/* Monthly recurring offers & pre-activation enrollment. Shared Dream Protocol design tokens. */
+.monthly-plan-page .monthly-plans-intro{padding-block:70px 42px}
+.monthly-plan-page .monthly-plans-intro .eyebrow{color:#63834f}
+.monthly-plan-page .monthly-plans-intro h1{max-width:900px;font-size:clamp(2.9rem,5.4vw,5.8rem)}
+.monthly-plan-page .monthly-plans-intro>p:not(.eyebrow){max-width:760px;font-size:1.05rem;color:#576a5c}
+.monthly-plans-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:19px;margin-bottom:40px}
+.monthly-plan-card{min-width:0;display:flex;flex-direction:column;padding:clamp(22px,3vw,35px);border:1px solid #b9cbb0;background:#f1f3e9;border-radius:7px}
+.monthly-plan-card:first-child{background:#192921;color:#eef6e8;border-color:#46694b;box-shadow:0 20px 55px #0d221a16}
+.monthly-plan-card .monthly-plan-stage{font-size:.63rem;letter-spacing:.16em;text-transform:uppercase;color:#66845b;font-weight:750}
+.monthly-plan-card:first-child .monthly-plan-stage{color:#c6eba2}
+.monthly-plan-card h2{font-size:clamp(1.5rem,2.5vw,2.2rem);margin:21px 0 17px;line-height:1.16}
+.monthly-plan-card .monthly-price{font-family:Manrope,Arial,sans-serif;font-size:clamp(2.5rem,4vw,3.8rem);letter-spacing:-.06em;font-weight:650;line-height:1.05}
+.monthly-plan-card .monthly-price span{font-family:'DM Sans',Arial,sans-serif;font-size:.82rem;letter-spacing:0;font-weight:500}
+.monthly-plan-card .monthly-setup{margin:12px 0 19px;font-size:.8rem;color:#5f7161}
+.monthly-plan-card:first-child .monthly-setup{color:#c0d1be}
+.monthly-plan-card .monthly-summary{font-size:.9rem;line-height:1.6;min-height:90px}
+.monthly-plan-card ul{padding-left:20px;margin:8px 0 20px;font-size:.82rem;line-height:1.6}
+.monthly-plan-card li{margin:8px 0}
+.monthly-plan-card .monthly-plan-boundary{font-size:.73rem;margin-top:auto;color:#5a695d;line-height:1.55;padding-bottom:24px}
+.monthly-plan-card:first-child .monthly-plan-boundary{color:#c9d5c7}
+.monthly-plan-card .button{margin-top:auto;white-space:normal;text-align:center;min-height:58px}
+.monthly-plan-card:first-child .button{background:#d1ec91;color:#18221c;border-color:#d1ec91}
+.monthly-plan-card:first-child .button:hover{background:#e4f6b4}
+.monthly-plan-caption{max-width:1000px;font-size:.82rem;color:#647067;margin:0 0 35px}
+.monthly-journey{padding:clamp(60px,6vw,90px) 0}
+.monthly-journey-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;margin-top:30px}
+.monthly-journey-grid article{border-top:1px solid #b6c7ab;padding-top:16px}
+.monthly-journey-grid article span{font-size:.7rem;color:#65865b}
+.monthly-journey-grid article h3{font-size:1.35rem;margin:26px 0 12px}
+.monthly-journey-grid article p{color:#5b6c60;font-size:.88rem}
+.monthly-plans-close{padding-block:66px 78px}
+.monthly-plans-close-inner{display:grid;grid-template-columns:1.15fr .85fr;align-items:center;gap:36px;background:#182a21;color:#eef7ea;border-radius:8px;padding:clamp(24px,4vw,51px)}
+.monthly-plans-close h2{font-size:clamp(1.9rem,3.7vw,3.9rem);color:#f3f9ed}
+.monthly-plans-close p{color:#cad7c8}
+.monthly-plans-close .button{background:#d1ec91;color:#18251a;border-color:#d1ec91}
+.monthly-activation .monthly-activation-hero{padding-block:63px 28px}
+.monthly-activation .monthly-activation-hero h1{max-width:870px}
+.monthly-activation .monthly-activation-hero>p:not(.eyebrow){max-width:780px;color:#566b59;font-size:1.06rem}
+.monthly-activation .monthly-activation-grid{display:grid;grid-template-columns:minmax(0,.78fr) minmax(0,1.22fr);gap:clamp(25px,5vw,70px);align-items:start;padding-bottom:85px}
+.monthly-activation .monthly-activation-aside{background:#1a2d22;color:#f1f8ef;border:1px solid #35543b;border-radius:6px;padding:clamp(22px,3vw,34px)}
+.monthly-activation .monthly-activation-aside .eyebrow{color:#c3e9a6}
+.monthly-activation .monthly-activation-aside h2{font-size:clamp(1.65rem,2.5vw,2.65rem);color:#f1f8ef}
+.monthly-activation .monthly-activation-aside ol{padding-left:20px;color:#d0e0d0;font-size:.91rem}
+.monthly-activation .monthly-activation-aside li{margin:0 0 18px}
+.monthly-activation .monthly-activation-aside p{color:#c7d7c8;font-size:.82rem}
+.monthly-activation .monthly-activation-aside a{color:#d1ec91;text-decoration:underline;text-underline-offset:4px}
+.monthly-activation .monthly-enrollment-form{margin:0}
+.monthly-activation .monthly-enrollment-form .lead-form-privacy{font-size:.74rem}
+@media(max-width:1000px){.monthly-plans-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.monthly-plan-card .monthly-summary{min-height:0}}
+@media(max-width:780px){.monthly-plans-grid,.monthly-journey-grid,.monthly-activation .monthly-activation-grid,.monthly-plans-close-inner{grid-template-columns:1fr}.monthly-plan-card{padding:24px}.monthly-activation .monthly-activation-hero{padding-top:45px}.monthly-activation .monthly-activation-grid{padding-bottom:60px}}
