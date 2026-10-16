@@ -328,7 +328,7 @@
     const v=service.toLowerCase();
     interest.value=/receptionist|front desk|dental|veterinary|property|home services/.test(v) ? 'AI phone receptionist' :
       /lead/.test(v) ? 'Lead follow-up' : /schedul|dispatch/.test(v) ? 'Scheduling' :
-      /dreamboard/.test(v) ? 'DreamBoard' : /workflow|office manager/.test(v) ? 'Workflow automation' : 'Other AI project';
+      /managed|maintenance|monitoring/.test(v) ? 'Managed AI operations' : /dreamboard/.test(v) ? 'DreamBoard' : /workflow|office manager/.test(v) ? 'Workflow automation' : 'Other AI project';
   }
   form.addEventListener('submit',async e => {
     e.preventDefault();
@@ -336,6 +336,7 @@
     const status=document.querySelector('#form-status');
     const values=Object.fromEntries(new FormData(form));
     const originalButton=button.innerHTML;
+    const isMonthlyPlan = form.dataset?.leadType === 'subscription';
     let sent=false;
 
     button.disabled=true;
@@ -351,7 +352,7 @@
         signal:AbortSignal.timeout(20000),
         body:JSON.stringify({
           ...values,
-          _subject:`Dream Protocol workflow — ${values.company}`,
+          _subject:`Dream Protocol ${isMonthlyPlan?'monthly AI plan':'workflow'} — ${values.company}`,
           _template:'table',
           _captcha:'false',
           source_page:location.pathname,
@@ -367,7 +368,7 @@
       button.classList.add('is-sent');
       button.innerHTML='Sent <span aria-hidden="true">✓</span>';
       status.classList.add('is-success');
-      status.innerHTML='<strong>✓ Request sent</strong><span>Thanks. We’ll review your workflow and get back to you shortly.</span>';
+      status.innerHTML=isMonthlyPlan ? '<strong>✓ Plan request received</strong><span>We’ll review the details and follow up with a scope and pricing proposal. No payment was collected.</span>' : '<strong>✓ Request sent</strong><span>Thanks. We’ll review your workflow and get back to you shortly.</span>';
       status.scrollIntoView?.({behavior:media('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'nearest'});
       setTimeout(()=>form.reset(),1200);
     } catch {
