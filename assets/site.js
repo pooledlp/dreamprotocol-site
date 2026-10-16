@@ -318,7 +318,9 @@
 
   const form = document.querySelector('#lead-form');
   if (!form) return;
-  const service = new URLSearchParams(location.search).get('service');
+  const landingParams = new URLSearchParams(location.search);
+  const service = landingParams.get('service');
+  const campaignSource = (landingParams.get('source') || '').slice(0,100);
   if(service) form.elements.workflow.value = `I'm interested in ${service.slice(0,100)}. `;
   form.addEventListener('submit',async e => {
     e.preventDefault();
@@ -345,6 +347,7 @@
           _template:'table',
           _captcha:'false',
           source_page:location.pathname,
+          ...(campaignSource ? {campaign_source:campaignSource} : {}),
           ...(window.DREAMPROTOCOL_ATTRIBUTION||{})
         })
       });
