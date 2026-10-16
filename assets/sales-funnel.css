@@ -1,0 +1,76 @@
+/* Dream Protocol unified commercial flow. Built on the existing site tokens. */
+.sales-path{background:#15221e;color:#f2f5ed;position:relative;overflow:hidden}
+.sales-path:before{content:"";position:absolute;right:-10%;top:-130px;width:530px;height:530px;border-radius:50%;background:radial-gradient(circle,#6e966035,transparent 67%);pointer-events:none}
+.sales-path .shell{position:relative}
+.sales-path-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(270px,.9fr);align-items:center;gap:45px;padding-block:clamp(48px,6vw,90px)}
+.sales-path .eyebrow{color:#c5e3a8}
+.sales-path h2{font-size:clamp(2rem,4.4vw,4.4rem);line-height:1.08;max-width:720px;color:#f3f8eb}
+.sales-path h2 em{color:#cbe999}
+.sales-path p{max-width:640px;color:#c8d6c7;font-size:1rem}
+.sales-path .text-link{color:#d1eeac}
+.sales-path-actions{display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin-top:25px}
+.sales-path .button{background:#d1ec91;color:#19241d;border-color:#d1ec91}
+.sales-path .button:hover{background:#e4f5bb}
+.sales-path-side{border:1px solid #4f6a54;border-radius:8px;background:#26372d;padding:28px;display:grid;gap:16px}
+.sales-path-side div{border-bottom:1px solid #536a54;padding-bottom:13px}.sales-path-side div:last-child{border:0;padding:0}
+.sales-path-side span{display:block;text-transform:uppercase;letter-spacing:.13em;font-size:.62rem;color:#c4e29d}
+.sales-path-side strong{font-size:clamp(1.05rem,2vw,1.45rem);font-weight:550;line-height:1.45}
+.sales-offer-anchor{padding:20px 0;font-size:.82rem}
+.sales-offer-anchor a{text-decoration:underline;text-underline-offset:4px}
+.sales-vertical-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin:25px 0 0}
+.sales-vertical-card{display:flex;flex-direction:column;min-width:0;gap:13px;padding:24px 20px;background:#f4f5ef;border:1px solid #d8e0cf;border-radius:6px;transition:transform .2s,border-color .2s}
+.sales-vertical-card:hover{transform:translateY(-4px);border-color:#8fa47b}
+.sales-vertical-card .eyebrow{font-size:.56rem;line-height:1.4;min-height:24px;margin:0;color:#547258}
+.sales-vertical-card strong{font-size:1.14rem;letter-spacing:-.04em;line-height:1.25}
+.sales-vertical-card small{font-size:.76rem;color:#5c665d;line-height:1.55;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
+.sales-card-arrow{margin-top:auto;font-size:.72rem;font-weight:650;border-top:1px solid #d6dfd0;padding-top:12px}
+.sales-page .sales-hero{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(300px,.88fr);align-items:center;gap:clamp(28px,5vw,74px)}
+.sales-page .sales-hero h1{font-size:clamp(2.75rem,5vw,5.2rem);max-width:730px}
+.sales-page .sales-hero-copy>p:not(.eyebrow):not(.sales-fineprint){font-size:1.08rem;max-width:590px;color:#52635a}
+.sales-fineprint{font-size:.76rem;color:#68736b;margin-top:18px;max-width:680px}
+.sales-hero-panel{padding:28px;border:1px solid #536558;border-radius:8px;background:linear-gradient(160deg,#283d33,#101b19);color:#e9f3e8;box-shadow:0 20px 60px #12251a1a}
+.sales-console-top{display:flex;align-items:center;gap:9px;color:#bfe5ad;font-size:.66rem;letter-spacing:.14em}
+.sales-console-top i{width:8px;height:8px;border-radius:50%;background:#cbe99c;box-shadow:0 0 16px #cbe99c}
+.sales-console-event{border:1px solid #405348;border-radius:5px;margin-top:20px;padding:20px;background:#21332b}
+.sales-console-event.active{background:#37543d;border-color:#829c73}
+.sales-console-event small{display:block;font-size:.58rem;letter-spacing:.15em;color:#bfd8ac;margin-bottom:8px}
+.sales-console-event strong{font-size:1.09rem;font-weight:550;line-height:1.5}
+.sales-console-arrow{text-align:center;color:#b3d695;margin-top:13px;font-size:24px;line-height:1}
+.sales-console-status{display:flex;gap:12px;justify-content:space-between;flex-wrap:wrap;color:#c6d7c7;font-size:.63rem;margin-top:20px}
+.sales-problem-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.sales-problem-list>div{padding:24px 10px 26px 0;border-top:1px solid #aabd9d}
+.sales-problem-list span{color:#738c66;font-size:.72rem}
+.sales-problem-list p{font-size:1.1rem;line-height:1.48;margin:17px 0 0;max-width:360px}
+.sales-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:25px}
+.sales-step{border-top:1px solid #9bad8f;padding:18px 12px 4px 0}
+.sales-step-num{font-size:.69rem;color:#69845c}.sales-step h3{font-size:1.42rem;margin-top:26px}
+.sales-step p{font-size:.88rem;color:#5d6a5f}
+.sales-example{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,.85fr);gap:clamp(24px,5vw,75px);align-items:start}
+.sales-example>div:first-child>p:not(.eyebrow){max-width:650px;font-size:1.04rem}
+.sales-offer-box{display:flex;flex-direction:column;align-items:start;background:#1a2922;color:#f1f7eb;border-radius:6px;padding:32px}
+.sales-offer-box .eyebrow{color:#bce29e}
+.sales-offer-box>strong{display:block;font-size:clamp(2.8rem,5vw,4.5rem);line-height:1.2;letter-spacing:-.07em}
+.sales-offer-box>strong small{font-size:.82rem;letter-spacing:0;color:#c3d0c5;font-weight:400}
+.sales-offer-box p{font-size:.86rem;color:#c3d0c5}
+.sales-offer-box .button{background:#d1ec91;color:#19241d;border-color:#d1ec91}
+.sales-offer-box .text-link{margin-top:17px;color:#e5f3d8}
+.sales-faq-list{max-width:900px}.sales-faq-list details{border-bottom:1px solid #ced8c5;padding:18px 0}
+.sales-faq-list summary{display:flex;justify-content:space-between;gap:20px;cursor:pointer;font-weight:650;font-size:1.05rem;list-style:none}
+.sales-faq-list summary::-webkit-details-marker{display:none}
+.sales-faq-list details[open] summary span{transform:rotate(45deg)}
+.sales-faq-list details p{max-width:760px;color:#606b61;margin:15px 0 0}
+.sales-related{padding-bottom:95px}.sales-related .sales-vertical-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+.sales-bottom-cta{display:flex;align-items:center;justify-content:space-between;gap:35px;padding-block:55px}
+.sales-bottom-cta h2{max-width:700px;font-size:clamp(1.8rem,3.5vw,3.6rem)}
+.sales-bottom-cta p{max-width:690px}
+.sales-price-feature{background:#e0e9d5;border:1px solid #b9caa8;border-radius:6px;padding:35px;margin-bottom:32px;display:grid;grid-template-columns:1fr auto;gap:30px;align-items:center}
+.sales-price-feature h2{font-size:clamp(1.7rem,3vw,3rem);margin:8px 0 12px}
+.sales-price-feature p{max-width:750px;margin:0;color:#4e6555}
+.sales-price-feature .eyebrow{margin:0;color:#567c4e}
+.sales-price-feature-actions{display:flex;flex-direction:column;gap:12px;align-items:stretch}
+.sales-contact-note{background:#ebf0e5;padding:17px 20px;border-left:3px solid #78996a;border-radius:3px;font-size:.81rem;margin:20px 0}
+.lead-form select{display:block;min-height:51px;width:100%;padding:12px;background:#ffffffcc;border:1px solid #cbd5c0;border-radius:4px;color:var(--ink);font:inherit}
+.lead-form .lead-form-privacy{font-size:.74rem;color:#536455;margin:0}
+.lead-form .lead-form-privacy a{text-decoration:underline;text-underline-offset:3px}
+@media(max-width:1050px){.sales-vertical-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.sales-related .sales-vertical-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:780px){.sales-path-grid,.sales-page .sales-hero,.sales-example,.sales-price-feature{grid-template-columns:1fr}.sales-path-grid{gap:20px}.sales-vertical-grid,.sales-steps,.sales-problem-list{grid-template-columns:1fr}.sales-vertical-card{min-height:0}.sales-related .sales-vertical-grid{grid-template-columns:1fr}.sales-price-feature-actions{width:100%}.sales-bottom-cta{display:block}.sales-bottom-cta .cta-actions{margin-top:20px}.sales-page .sales-hero{padding-bottom:55px}.sales-hero-panel{padding:24px}.sales-path-side{padding:21px}}
