@@ -1,0 +1,37 @@
+/* Sales page integrates with the site's existing color, type, header and footer. */
+.offer-page{--offer-accent:#a7e3ca}
+.offer-page .offer-hero{padding-top:clamp(44px,6vw,90px);padding-bottom:clamp(48px,6vw,85px);display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:clamp(24px,4vw,54px);align-items:center}
+.offer-page h1{font-size:clamp(42px,6vw,76px);line-height:1.06;letter-spacing:-.055em;margin:18px 0 23px}
+.offer-page h1 em,.offer-page h2 em{color:var(--offer-accent);font-style:normal}
+.offer-page .offer-lead{font-size:clamp(17px,2vw,20px);line-height:1.65;max-width:620px}
+.offer-page .offer-visual{background:linear-gradient(155deg,#172d2b,#142121);color:#eef7f2;border:1px solid #41615b;border-radius:22px;padding:clamp(20px,3vw,32px);box-shadow:0 24px 80px #0003}
+.offer-page .offer-pill{letter-spacing:.16em;font-size:11px;color:#a4efd0;font-weight:700}
+.offer-page .offer-dialog{background:#294242;border-radius:12px;padding:15px 18px;margin-top:15px;max-width:90%;font-size:15px}
+.offer-page .offer-dialog.agent{background:#264139;margin-left:auto}
+.offer-page .offer-dialog small{display:block;font-size:11px;color:#bed3cb;margin-bottom:5px}
+.offer-page .offer-flow{display:flex;gap:12px;flex-wrap:wrap;justify-content:space-between;color:#9ed7bd;font-size:11px;margin-top:20px}
+.offer-page .offer-section{padding-top:clamp(52px,6vw,85px);padding-bottom:clamp(52px,6vw,85px);border-top:1px solid rgba(120,150,140,.2)}
+.offer-page h2{font-size:clamp(30px,4vw,52px);line-height:1.15;letter-spacing:-.04em;margin:12px 0 20px}
+.offer-page h3{font-size:22px;margin:12px 0}
+.offer-page .offer-muted,.offer-page .offer-lead{opacity:.84}
+.offer-page .offer-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:30px}
+.offer-page .offer-card,.offer-page .offer-controls{border:1px solid rgba(120,150,140,.35);border-radius:18px;padding:clamp(22px,3vw,32px);background:rgba(130,170,150,.065)}
+.offer-page .offer-num{font-weight:750;letter-spacing:.15em;font-size:12px;color:#369a7c}
+.offer-page .offer-calc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(25px,5vw,60px);align-items:start}
+.offer-page .offer-field{margin-bottom:25px}
+.offer-page .offer-field label{display:flex;justify-content:space-between;gap:12px;font-size:14px;font-weight:650}
+.offer-page .offer-field output{font-variant-numeric:tabular-nums}
+.offer-page .offer-field input[type=range]{width:100%;accent-color:#3aa482;margin-top:14px}
+.offer-page .offer-result{background:#193a32;color:#f5fbf7;border-radius:16px;padding:clamp(22px,3vw,32px)}
+.offer-page .offer-big{font-size:clamp(38px,5vw,62px);line-height:1.1;letter-spacing:-.04em;font-weight:800;color:#bff2d6;margin:12px 0}
+.offer-page .offer-price{display:grid;grid-template-columns:1fr 1fr;gap:30px;align-items:center;border:1px solid rgba(120,150,140,.4);border-radius:20px;padding:clamp(24px,4vw,50px);background:rgba(130,170,150,.06)}
+.offer-page .offer-price strong{display:block;font-size:46px;letter-spacing:-.05em}
+.offer-page .offer-price strong small{font-size:15px;font-weight:400}
+.offer-page .offer-price li{margin:8px 0}
+.offer-page .offer-faq details{padding:18px 0;border-bottom:1px solid rgba(120,150,140,.3)}
+.offer-page .offer-faq summary{cursor:pointer;font-weight:700}
+.offer-page .offer-faq details p{margin-top:13px}
+.offer-page .offer-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
+.offer-page .offer-note,.offer-page .offer-disclaimer{font-size:13px;opacity:.72;margin-top:15px}
+.offer-page .offer-disclaimer{font-size:12px}
+@media(max-width:780px){.offer-page .offer-hero,.offer-page .offer-calc,.offer-page .offer-price{grid-template-columns:1fr}.offer-page .offer-cards{grid-template-columns:1fr}.offer-page .offer-hero{padding-top:42px}}
