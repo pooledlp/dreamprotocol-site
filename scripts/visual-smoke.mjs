@@ -286,6 +286,34 @@ try {
     assert(workforceGeometry.firstRole.width>Math.min(250,width*.72),`DreamWorkforce first role collapsed at ${width}px`);
     assert(workforceGeometry.bench.left>=-1 && workforceGeometry.bench.right<=width+1,`DreamWorkforce role index mispositioned at ${width}px`);
     await page.screenshot({path:`${output}/dreamworkforce-${width}.png`});
+
+    // One shared branded sales path across all five high-intent verticals.
+    for(const route of [
+      'ai-receptionist-for-dental-offices',
+      'ai-receptionist-for-veterinary-clinics',
+      'ai-receptionist-for-home-services',
+      'ai-receptionist-for-tax-accounting',
+      'ai-receptionist-for-property-management'
+    ]){
+      await page.goto(origin+'/'+route+'/',{waitUntil:'networkidle'});
+      await page.evaluate(()=>document.fonts.ready);
+      assert.equal(await page.locator('h1').count(),1,`${route}: only one H1`);
+      assert(await page.locator('.site-header').isVisible(),`${route}: shared site navigation`);
+      assert(await page.locator('.sales-hero-panel').isVisible(),`${route}: branded call path`);
+      assert(await page.locator('.sales-offer-box').isVisible(),`${route}: published starting price`);
+      assert.equal(await page.locator('.sales-vertical-card').count(),4,`${route}: related industry routes`);
+      assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`${route}: no viewport overflow at ${width}px`);
+      if(route==='ai-receptionist-for-dental-offices')
+        await page.screenshot({path:`${output}/dental-sales-${width}.png`});
+      await page.locator('.sales-hero .button').first().click();
+      await page.waitForURL('**/contact/?*');
+      assert((await page.locator('[name="workflow"]').inputValue()).includes('AI receptionist -'),`${route}: prefilled inquiry`);
+      assert.equal(await page.locator('[name="service_interest"]').inputValue(),'AI phone receptionist');
+    }
+    await page.goto(origin+'/pricing/',{waitUntil:'networkidle'});
+    assert(await page.locator('.sales-price-feature a[href="/ai-receptionist-offer/"]').isVisible(),'Pricing links to front desk offer');
+    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`Pricing: no overflow at ${width}px`);
+
     await page.goto(origin+'/client-login/',{waitUntil:'networkidle'});
     await page.evaluate(()=>document.fonts.ready);
     assert((await page.locator('h1').innerText()).includes('One secure place.'));
