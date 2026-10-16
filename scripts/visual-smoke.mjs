@@ -168,6 +168,11 @@ try {
       await page.waitForURL(origin+'/');
     }
     await page.locator('.hero-primary').click();
+    await page.waitForURL('**/ai-receptionist-offer/');
+    assert(await page.locator('#total').isVisible(), 'Sales calculator is visible');
+    await page.goBack();
+    await page.waitForURL(origin+'/');
+    await page.locator('.presence-actions a[href="#product-proof"]').click();
     await page.waitForURL('**/#product-proof');
     assert(await page.locator('#product-proof').isVisible());
     assert(await page.locator('.presence-thesis').isVisible());
