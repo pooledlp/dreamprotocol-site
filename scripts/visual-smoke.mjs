@@ -314,6 +314,27 @@ try {
     assert(await page.locator('.sales-price-feature a[href="/ai-receptionist-offer/"]').isVisible(),'Pricing links to front desk offer');
     assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`Pricing: no overflow at ${width}px`);
 
+    // Monthly service plans remain one consistent Dream Protocol journey.
+    await page.goto(origin+'/monthly-ai-plans/',{waitUntil:'networkidle'});
+    await page.evaluate(()=>document.fonts.ready);
+    assert.equal(await page.locator('.monthly-plan-card').count(),3,'Published monthly package choices');
+    assert((await page.locator('h1').innerText()).includes('AI on duty.'));
+    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`Monthly plans overflow at ${width}px`);
+    await page.screenshot({path:`${output}/monthly-plans-${width}.png`});
+    await page.locator('.monthly-plan-card .button').first().click();
+    await page.waitForURL('**/start-monthly-ai/?*');
+    assert.equal(await page.locator('[name="service_interest"]').inputValue(),'AI phone receptionist');
+    assert(await page.locator('.monthly-activation .site-header').count()===0); // Shared header stays outside main activation wrapper.
+    assert(await page.locator('.site-header').isVisible());
+    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`Monthly enrollment overflows at ${width}px`);
+    await page.screenshot({path:`${output}/monthly-enrollment-${width}.png`});
+    await page.goto(origin+'/start-monthly-ai/?service=Managed%20AI%20Operations',{waitUntil:'networkidle'});
+    assert.equal(await page.locator('[name="service_interest"]').inputValue(),'Managed AI operations');
+    await page.goto(origin+'/ai-receptionist-offer/',{waitUntil:'networkidle'});
+    await page.locator('.offer-page .offer-actions .button').first().click();
+    await page.waitForURL('**/start-monthly-ai/?*');
+    assert.equal(await page.locator('[name="service_interest"]').inputValue(),'AI phone receptionist');
+    await page.goto(origin+'/ai-workforce/',{waitUntil:'networkidle'});
     await page.goto(origin+'/client-login/',{waitUntil:'networkidle'});
     await page.evaluate(()=>document.fonts.ready);
     assert((await page.locator('h1').innerText()).includes('One secure place.'));
