@@ -16,7 +16,7 @@ export const verticalLanding = (v, esc, verticals) => {
 <section class="page-hero shell sales-hero">
  <div class="sales-hero-copy">
   <p class="eyebrow">${esc(v.eyebrow)} / BAY AREA</p>
-  <h1>${esc(v.headline).replace('\\n','<br>')}</h1>
+  <h1>${esc(v.headline).replace('\n','<br>')}</h1>
   <p>${esc(v.lead)}</p>
   <div class="actions"><a class="button" href="${contact}">Get my AI receptionist ↗</a><a class="text-link" href="/#demo">Try the live voice demo ↗</a></div>
   <p class="sales-fineprint">Plans from $399/month · Setup from $995 · Usage and integrations quoted upfront</p>
