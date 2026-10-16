@@ -322,6 +322,14 @@
   const service = landingParams.get('service');
   const campaignSource = (landingParams.get('source') || '').slice(0,100);
   if(service) form.elements.workflow.value = `I'm interested in ${service.slice(0,100)}. `;
+  // Keep the quick sales form preselected when a campaign or product page supplied context.
+  const interest = form.elements.service_interest;
+  if(interest && service){
+    const v=service.toLowerCase();
+    interest.value=/receptionist|front desk|dental|veterinary|property|home services/.test(v) ? 'AI phone receptionist' :
+      /lead/.test(v) ? 'Lead follow-up' : /schedul|dispatch/.test(v) ? 'Scheduling' :
+      /dreamboard/.test(v) ? 'DreamBoard' : /workflow|office manager/.test(v) ? 'Workflow automation' : 'Other AI project';
+  }
   form.addEventListener('submit',async e => {
     e.preventDefault();
     const button=form.querySelector('button');
