@@ -168,12 +168,18 @@ try {
       await page.waitForURL(origin+'/');
     }
     await page.locator('.hero-primary').click();
-    await page.waitForURL('**/ai-receptionist-offer/');
-    assert(await page.locator('#total').isVisible(), 'Sales calculator is visible');
-    await page.goBack();
-    await page.waitForURL(origin+'/');
-    await page.locator('.presence-actions a[href="#product-proof"]').click();
-    await page.waitForURL('**/#product-proof');
+    await page.waitForURL('**/#day-in-motion');
+    assert(await page.locator('#day-in-motion').isVisible(), 'New business-day story is visible');
+    assert.equal(await page.locator('[data-day-select]').count(),4);
+    await page.locator('[data-day-select="2"]').click();
+    assert(await page.locator('[data-day-panel="2"]').isVisible(), 'Day story responds to tab selection');
+    assert.equal(await page.locator('[data-day-select="2"]').getAttribute('aria-selected'),'true');
+    await page.goto(origin+'/ai-receptionist-offer/',{waitUntil:'domcontentloaded'});
+    assert(await page.locator('#total').isVisible(), 'Sales calculator remains visible');
+    await page.goto(origin,{waitUntil:'domcontentloaded'});
+    await page.locator('.presence-actions a[href="#demo"]').click();
+    await page.waitForURL('**/#demo');
+    assert(await page.locator('#demo').isVisible());
     assert(await page.locator('#product-proof').isVisible());
     assert(await page.locator('.presence-thesis').isVisible());
     assert(await page.locator('.hero-film').isVisible());
