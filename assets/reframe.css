@@ -108,3 +108,27 @@ body[data-home="true"] .cinematic-contact .contact-copy h2{letter-spacing:-.065e
 @media(prefers-reduced-motion:reduce){
  body[data-home="true"] .day-step{transition:none}
 }
+
+
+/* Fold discipline: keep the primary action visible on laptops and small phones. */
+@media(min-width:761px) and (max-width:1350px){
+ body[data-home="true"] .presence-hero-shell{padding-top:16px;padding-bottom:14px}
+ body[data-home="true"] .video-presence-grid{min-height:575px;padding-block:25px 20px}
+ body[data-home="true"] .video-hero-copy{padding:25px 0 38px}
+ body[data-home="true"] .video-hero-copy h1{font-size:clamp(3.8rem,6.1vw,6.2rem)}
+ body[data-home="true"] .video-hero-copy .hero-reframe-label{margin-bottom:15px}
+ body[data-home="true"] .video-hero-copy .hero-counterline{margin-top:16px;font-size:clamp(1.16rem,1.7vw,1.56rem)}
+ body[data-home="true"] .video-hero-copy .hero-reframe-intro{margin-top:15px;line-height:1.56}
+ body[data-home="true"] .video-hero-copy .presence-actions{margin-top:23px}
+ body[data-home="true"] .hipaa-hero-ribbon{margin-top:18px}
+}
+@media(max-width:420px){
+ body[data-home="true"] .video-presence-grid{padding:20px 0 30px}
+ body[data-home="true"] .video-hero-copy{padding:20px 0 24px}
+ body[data-home="true"] .video-hero-copy h1{font-size:clamp(2.7rem,10.5vw,4rem)}
+ body[data-home="true"] .video-hero-copy .hero-reframe-label{margin-bottom:12px;font-size:.7rem}
+ body[data-home="true"] .video-hero-copy .hero-counterline{margin-top:15px;font-size:1.13rem}
+ body[data-home="true"] .video-hero-copy .hero-reframe-intro{margin-top:15px;font-size:.92rem;line-height:1.54}
+ body[data-home="true"] .video-hero-copy .presence-actions{margin-top:18px}
+ body[data-home="true"] .hipaa-hero-ribbon{margin-top:18px}
+}
