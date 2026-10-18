@@ -150,11 +150,11 @@ try {
       overflow:document.documentElement.scrollWidth>innerWidth+1,
       overflowing:[...document.querySelectorAll('body *')].map(el=>({tag:el.tagName,cls:el.className,left:el.getBoundingClientRect().left,right:el.getBoundingClientRect().right})).filter(el=>el.left< -1||el.right>innerWidth+1).slice(0,30),
       cta:document.querySelector('.hero-primary').getBoundingClientRect().toJSON(),
-      productIndex:document.querySelector('.hero-film').getBoundingClientRect().toJSON()
+      productIndex:document.querySelector('.hero-sculpture').getBoundingClientRect().toJSON()
     }));
     assert(!geometry.overflow,`Homepage overflows at ${width}px: ${JSON.stringify(geometry.overflowing)}`);
     assert(geometry.cta.bottom<=height,`Primary CTA is below first viewport at ${width}px`);
-    assert(geometry.productIndex.left<width && geometry.productIndex.right>width*.55,`Homepage hero film mispositioned at ${width}px`);
+    assert(geometry.productIndex.left<width && geometry.productIndex.right>width*.55,`Homepage sculpture mispositioned at ${width}px`);
     const menu=page.locator('.menu-button');
     if(await menu.isVisible()){
       await menu.click();
@@ -182,40 +182,26 @@ try {
     assert(await page.locator('#demo').isVisible());
     assert(await page.locator('#product-proof').isVisible());
     assert(await page.locator('.presence-thesis').isVisible());
-    assert(await page.locator('.hero-film').isVisible());
-    await page.waitForFunction(() => {
-      const video=document.querySelector('.hero-film video');
-      return Boolean(video && video.readyState>=2 && video.videoWidth>0 && video.videoHeight>0 && video.currentTime>0.15);
-    }, null, {timeout:15000});
-    const playbackState=await page.locator('.hero-film video').evaluate(video=>({
-      paused:video.paused,
-      currentTime:video.currentTime,
-      readyState:video.readyState,
-      videoWidth:video.videoWidth,
-      videoHeight:video.videoHeight,
-      currentSrc:video.currentSrc
+    assert(await page.locator('.hero-sculpture').isVisible(), 'New signature artwork is visible');
+    assert.equal(await page.locator('.hero-sculpture video').count(),0,
+      'Hero must not load any stock video');
+    assert.equal(await page.locator('.hero-sculpture .sculpture-ring').count(),3);
+    assert.equal(await page.locator('.hero-sculpture .sculpture-note').count(),3);
+    const sculptureStyles=await page.locator('.sculpture-heart').evaluate(el=>({
+      display:getComputedStyle(el).display,
+      animation:getComputedStyle(el).animationName,
+      width:el.getBoundingClientRect().width
     }));
-    assert(playbackState.readyState>=2 && playbackState.videoWidth===1080 && playbackState.videoHeight===1920 && playbackState.currentTime>0.15,
-      `Hero video is not actually playing at ${width}px: ${JSON.stringify(playbackState)}`);
-    const heroVideoState=await page.locator('.hero-film video').evaluate(video=>({
-      readyState:video.readyState,
-      currentSrc:video.currentSrc,
-      poster:video.poster,
-      width:video.videoWidth,
-      height:video.videoHeight
-    }));
-    assert(heroVideoState.currentSrc.includes('7989667-hd_1080_1920_25fps.mp4'),`Hero video source mismatch at ${width}px: ${JSON.stringify(heroVideoState)}`);
-    assert(heroVideoState.poster.includes('pexels-photo-7989667.jpeg'),`Hero video poster missing at ${width}px`);
-    const heroFilmBackground=await page.locator('.hero-film').evaluate(el=>getComputedStyle(el).backgroundImage);
-    assert(heroFilmBackground.includes('pexels-photo-7989667.jpeg'),`Hero film poster fallback missing at ${width}px`);
-    assert.equal(await page.locator('[data-film-event]').count(),4);
+    assert(sculptureStyles.display!=='none' && sculptureStyles.width>0,
+      'Custom artwork must render at every viewport');
+    assert(sculptureStyles.animation==='none', 'Reduced-motion preference must disable the sculpture motion');
     assert.equal(await page.locator('[data-proof-target]').count(),3);
     await page.locator('[data-proof-target="board"]').click();
     assert(await page.locator('[data-proof-panel="board"]').isVisible());
     await page.locator('[data-proof-target="perio"]').click();
     assert(await page.locator('[data-proof-panel="perio"]').isVisible());
     assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`Cinematic homepage overflows at ${width}px`);
-    await page.locator('.hero-film').screenshot({path:`${output}/cinematic-hero-${width}.png`});
+    await page.locator('.hero-sculpture').screenshot({path:`${output}/signature-sculpture-${width}.png`});
     await page.locator('.proof-stories').screenshot({path:`${output}/product-proof-${width}.png`});
     await page.locator('.presence-thesis').screenshot({path:`${output}/presence-thesis-${width}.png`});
     await page.locator('[data-proof-target="board"]').click();
