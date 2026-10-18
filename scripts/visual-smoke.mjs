@@ -150,11 +150,11 @@ try {
       overflow:document.documentElement.scrollWidth>innerWidth+1,
       overflowing:[...document.querySelectorAll('body *')].map(el=>({tag:el.tagName,cls:el.className,left:el.getBoundingClientRect().left,right:el.getBoundingClientRect().right})).filter(el=>el.left< -1||el.right>innerWidth+1).slice(0,30),
       cta:document.querySelector('.hero-primary').getBoundingClientRect().toJSON(),
-      productIndex:document.querySelector('.hero-sculpture').getBoundingClientRect().toJSON()
+      productIndex:document.querySelector('.hero-cinema').getBoundingClientRect().toJSON()
     }));
     assert(!geometry.overflow,`Homepage overflows at ${width}px: ${JSON.stringify(geometry.overflowing)}`);
     assert(geometry.cta.bottom<=height,`Primary CTA is below first viewport at ${width}px`);
-    assert(geometry.productIndex.left<width && geometry.productIndex.right>width*.55,`Homepage sculpture mispositioned at ${width}px`);
+    assert(geometry.productIndex.left<width && geometry.productIndex.right>width*.55,`Homepage cinema mispositioned at ${width}px`);
     const menu=page.locator('.menu-button');
     if(await menu.isVisible()){
       await menu.click();
@@ -182,26 +182,30 @@ try {
     assert(await page.locator('#demo').isVisible());
     assert(await page.locator('#product-proof').isVisible());
     assert(await page.locator('.presence-thesis').isVisible());
-    assert(await page.locator('.hero-sculpture').isVisible(), 'New signature artwork is visible');
-    assert.equal(await page.locator('.hero-sculpture video').count(),0,
-      'Hero must not load any stock video');
-    assert.equal(await page.locator('.hero-sculpture .sculpture-ring').count(),3);
-    assert.equal(await page.locator('.hero-sculpture .sculpture-note').count(),3);
-    const sculptureStyles=await page.locator('.sculpture-heart').evaluate(el=>({
-      display:getComputedStyle(el).display,
-      animation:getComputedStyle(el).animationName,
-      width:el.getBoundingClientRect().width
-    }));
-    assert(sculptureStyles.display!=='none' && sculptureStyles.width>0,
-      'Custom artwork must render at every viewport');
-    assert(sculptureStyles.animation==='none', 'Reduced-motion preference must disable the sculpture motion');
+    assert(await page.locator('.hero-cinema').isVisible(), 'Cinematic hero must be visible');
+    assert.equal(await page.locator('.hero-cinema video').count(),2, 'Two widescreen film scenes are present');
+    const media=await page.locator('.hero-cinema video').evaluateAll(videos=>videos.map(video=>({
+      src:video.querySelector('source')?.getAttribute('src')||'',
+      poster:video.getAttribute('poster'),
+      muted:video.muted,
+      paused:video.paused,
+      width:video.getBoundingClientRect().width,
+      height:video.getBoundingClientRect().height
+    })));
+    assert(media.every(video=>video.src.includes('hd_1920_1080_25fps.mp4')),
+      'Both clips must use verified widescreen footage');
+    assert(media.every(video=>video.muted && video.paused),
+      'Reduced-motion preference must pause all hero videos');
+    assert(media.every(video=>video.width>0 && video.height>0), 'Film must render at every viewport');
+    assert.equal(await page.locator('[data-cinema-progress]').count(),4);
+    assert.equal(await page.locator('.cinema-shot.is-live').count(),1);
     assert.equal(await page.locator('[data-proof-target]').count(),3);
     await page.locator('[data-proof-target="board"]').click();
     assert(await page.locator('[data-proof-panel="board"]').isVisible());
     await page.locator('[data-proof-target="perio"]').click();
     assert(await page.locator('[data-proof-panel="perio"]').isVisible());
     assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`Cinematic homepage overflows at ${width}px`);
-    await page.locator('.hero-sculpture').screenshot({path:`${output}/signature-sculpture-${width}.png`});
+    await page.locator('.hero-cinema').screenshot({path:`${output}/cinematic-film-${width}.png`});
     await page.locator('.proof-stories').screenshot({path:`${output}/product-proof-${width}.png`});
     await page.locator('.presence-thesis').screenshot({path:`${output}/presence-thesis-${width}.png`});
     await page.locator('[data-proof-target="board"]').click();
