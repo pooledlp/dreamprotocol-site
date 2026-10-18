@@ -150,11 +150,11 @@ try {
       overflow:document.documentElement.scrollWidth>innerWidth+1,
       overflowing:[...document.querySelectorAll('body *')].map(el=>({tag:el.tagName,cls:el.className,left:el.getBoundingClientRect().left,right:el.getBoundingClientRect().right})).filter(el=>el.left< -1||el.right>innerWidth+1).slice(0,30),
       cta:document.querySelector('.hero-primary').getBoundingClientRect().toJSON(),
-      productIndex:document.querySelector('.hero-cinema').getBoundingClientRect().toJSON()
+      productIndex:document.querySelector('.dp-momentum').getBoundingClientRect().toJSON()
     }));
     assert(!geometry.overflow,`Homepage overflows at ${width}px: ${JSON.stringify(geometry.overflowing)}`);
     assert(geometry.cta.bottom<=height,`Primary CTA is below first viewport at ${width}px`);
-    assert(geometry.productIndex.left<width && geometry.productIndex.right>width*.55,`Homepage cinema mispositioned at ${width}px`);
+    assert(geometry.productIndex.left<width && geometry.productIndex.right>width*.55,`Homepage new artwork mispositioned at ${width}px`);
     const menu=page.locator('.menu-button');
     if(await menu.isVisible()){
       await menu.click();
@@ -182,57 +182,34 @@ try {
     assert(await page.locator('#demo').isVisible());
     assert(await page.locator('#product-proof').isVisible());
     assert(await page.locator('.presence-thesis').isVisible());
-    assert(await page.locator('.hero-cinema').isVisible(), 'Cinematic hero must be visible');
-    assert.equal(await page.locator('.hero-cinema video').count(),4,
-      'Hero should provide two widescreen and two mobile-specific scenes');
-    const media=await page.locator('.hero-cinema video').evaluateAll(videos=>videos.map(video=>({
-      source:video.dataset.src||'',
-      variant:video.dataset.filmVariant,
-      muted:video.muted,
-      paused:video.paused,
-      loops:video.loop,
-      width:video.getBoundingClientRect().width,
-      height:video.getBoundingClientRect().height
-    })));
-    assert.equal(media.filter(video=>video.variant==='desktop').length,2);
-    assert.equal(media.filter(video=>video.variant==='mobile').length,2);
-    assert(media.filter(video=>video.variant==='desktop').every(video=>video.source.includes('hd_1920_1080_25fps.mp4')),
-      'Desktop scenes must remain wide-format');
-    assert(media.filter(video=>video.variant==='mobile').every(video=>video.source.includes('hd_720_1280_25fps.mp4')&&!video.loops),
-      'Mobile scenes must be portrait format and play only once');
-    assert(media.every(video=>video.muted && video.paused),
-      'Reduced-motion preference must pause all hero videos');
-    const visibleMedia=media.filter(video=>video.variant===(width<=760?'mobile':'desktop'));
-    assert(visibleMedia.every(video=>video.width>0 && video.height>0),
-      'Device-specific film must have actual on-screen geometry');
-    assert.equal(await page.locator('[data-cinema-progress]').count(),4);
-    if(width<=760){
-      const mobileScene=await page.evaluate(()=>{
-        const film=document.querySelector('.hero-cinema');
-        const heading=document.querySelector('.video-hero-copy h1');
-        const image=document.querySelector('.shot-mobile-one');
-        return {
-          videoBottom:film.getBoundingClientRect().bottom,
-          headingTop:heading.getBoundingClientRect().top,
-          filmHeight:film.getBoundingClientRect().height,
-          opacity:getComputedStyle(film).opacity,
-          filter:getComputedStyle(image).filter,
-          signature:getComputedStyle(document.querySelector('.mobile-film-signature')).display
-        };
-      });
-      assert(mobileScene.filmHeight>=175 && mobileScene.videoBottom<=mobileScene.headingTop,
-        'The brighter mobile film must sit above its headline, not under a dark overlay');
-      assert.equal(Number(mobileScene.opacity),1,'Mobile film should not be faded');
-      assert(mobileScene.filter.includes('brightness(1.08)') && mobileScene.signature!=='none',
-        'Mobile video should show natural-color footage with a quiet brand signature');
-    }
+    assert(await page.locator('.dp-momentum').isVisible(), 'Custom business story must render');
+    assert.equal(await page.locator('.dp-momentum video').count(),0,
+      'Hero must not load any video or stock footage');
+    assert.equal(await page.locator('.dp-momentum img').count(),0,
+      'Hero must not include stock portraits or photos');
+    assert.equal(await page.locator('[data-momentum-select]').count(),3,
+      'Three user-controlled examples must be available');
+    assert.equal(await page.locator('[data-momentum-select="calls"]').getAttribute('aria-pressed'),'true');
+    await page.locator('[data-momentum-select="booking"]').click();
+    assert.equal(await page.locator('[data-momentum-select="booking"]').getAttribute('aria-pressed'),'true');
+    assert((await page.locator('[data-momentum-result]').innerText()).includes('Availability checked'),
+      'Example switches to booking without repeating a film loop');
+    await page.locator('[data-momentum-select="followup"]').click();
+    assert((await page.locator('[data-momentum-title]').innerText()).includes('Nothing'),
+      'User can explore a third business moment');
+    const art=await page.locator('.momentum-stage').evaluate(el=>({
+      width:el.getBoundingClientRect().width,height:el.getBoundingClientRect().height,
+      background:getComputedStyle(el).backgroundColor
+    }));
+    assert(art.width>200 && art.height>190,
+      'The outcome visual must remain prominent at each screen width');
     assert.equal(await page.locator('[data-proof-target]').count(),3);
     await page.locator('[data-proof-target="board"]').click();
     assert(await page.locator('[data-proof-panel="board"]').isVisible());
     await page.locator('[data-proof-target="perio"]').click();
     assert(await page.locator('[data-proof-panel="perio"]').isVisible());
     assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`Cinematic homepage overflows at ${width}px`);
-    await page.locator('.hero-cinema').screenshot({path:`${output}/cinematic-film-${width}.png`});
+    await page.locator('.dp-momentum').screenshot({path:`${output}/work-in-motion-${width}.png`});
     await page.locator('.proof-stories').screenshot({path:`${output}/product-proof-${width}.png`});
     await page.locator('.presence-thesis').screenshot({path:`${output}/presence-thesis-${width}.png`});
     await page.locator('[data-proof-target="board"]').click();
