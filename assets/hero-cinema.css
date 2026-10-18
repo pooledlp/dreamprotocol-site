@@ -80,3 +80,185 @@ body[data-home="true"] .cinema-moment.cinema-transition strong{animation:cinemaL
  body[data-home="true"] .cinema-editorial-head b i,body[data-home="true"] .cinema-moment-foot i{animation:none}
  body[data-home="true"] .cinema-moment.cinema-transition strong{animation:none}
 }
+
+
+/* Mobile director's cut: the people are the hero, not darkened background footage.
+   The mobile story is a visible film above separate copy, with no full-screen black grading. */
+body[data-home="true"] .cinema-shot[data-film-variant="mobile"],
+body[data-home="true"] .mobile-film-signature{display:none}
+@media(max-width:760px){
+  body[data-home="true"] .cinematic-video-hero{
+    min-height:0;
+    background:
+      radial-gradient(ellipse at 50% 25%,rgba(121,154,119,.1),transparent 50%),
+      #0c130f;
+  }
+  body[data-home="true"] .presence-hero-shell{
+    padding-top:12px;
+    padding-bottom:0;
+    width:calc(100% - 36px);
+  }
+  body[data-home="true"] .presence-hero-top{
+    gap:10px;
+    padding-bottom:16px;
+    color:#b5c6b1;
+    font-size:.68rem;
+    letter-spacing:.08em;
+  }
+  body[data-home="true"] .video-presence-grid{
+    display:flex;
+    flex-direction:column;
+    align-items:stretch;
+    gap:0;
+    min-height:0;
+    padding:0 0 18px;
+  }
+  body[data-home="true"] .hero-cinema{
+    position:relative;
+    inset:auto;
+    right:auto;
+    top:auto;
+    bottom:auto;
+    flex:none;
+    order:0;
+    width:calc(100% + 36px);
+    height:clamp(184px,51vw,252px);
+    margin:0 -18px;
+    overflow:hidden;
+    border:1px solid rgba(225,255,204,.14);
+    border-top:0;
+    border-radius:0 0 17px 17px;
+    opacity:1;
+    box-shadow:0 16px 44px rgba(0,0,0,.20);
+    background:linear-gradient(0deg,rgba(8,16,11,.5),transparent 65%),
+      url("https://images.pexels.com/videos/8061672/pexels-photo-8061672.jpeg?auto=compress&dpr=1&w=900") center 26%/cover no-repeat,
+      #24392d;
+  }
+  body[data-home="true"] .hero-cinema .cinema-shot[data-film-variant="desktop"]{display:none}
+  body[data-home="true"] .hero-cinema .cinema-shot[data-film-variant="mobile"]{
+    display:block;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    object-position:50% 24%;
+    transform:none;
+    filter:brightness(1.08) saturate(1.04) contrast(1.025);
+    opacity:0;
+    transition:opacity 1.65s cubic-bezier(.4,0,.2,1);
+    will-change:opacity;
+  }
+  body[data-home="true"] .hero-cinema .cinema-shot[data-film-variant="mobile"].is-live{opacity:1}
+  body[data-home="true"] .hero-cinema .shot-mobile-two{object-position:50% 18%}
+  body[data-home="true"] .hero-cinema .cinema-grading{
+    background:
+      linear-gradient(0deg,rgba(7,17,10,.58) 0%,rgba(7,17,10,.10) 36%,transparent 66%),
+      linear-gradient(90deg,rgba(7,17,10,.045),transparent 40%);
+  }
+  body[data-home="true"] .hero-cinema .cinema-scanline{display:none}
+  body[data-home="true"] .hero-cinema .cinema-edge{display:block;inset:10px;border-color:rgba(241,255,228,.28);opacity:.70}
+  body[data-home="true"] .hero-cinema .cinema-editorial{display:none}
+  body[data-home="true"] .mobile-film-signature{
+    display:flex;
+    position:absolute;
+    z-index:6;
+    left:20px;
+    right:20px;
+    bottom:16px;
+    align-items:center;
+    gap:10px;
+    color:#fff;
+    font:650 .68rem var(--dp-mono,monospace);
+    letter-spacing:.08em;
+    text-shadow:0 1px 8px rgba(0,0,0,.65);
+  }
+  body[data-home="true"] .mobile-film-signature b{
+    margin-left:auto;
+    white-space:nowrap;
+    color:#d8ff9f;
+    font-weight:550;
+    font-size:.63rem;
+  }
+  body[data-home="true"] .mobile-film-pulse{
+    flex:none;
+    width:8px;height:8px;
+    border-radius:50%;
+    background:#d2ff89;
+    box-shadow:0 0 0 5px rgba(210,255,137,.18);
+  }
+  body[data-home="true"] .video-hero-copy{
+    position:relative;
+    order:1;
+    z-index:7;
+    align-self:stretch;
+    width:100%;
+    max-width:none;
+    margin:0;
+    padding:22px 0 26px;
+  }
+  body[data-home="true"] .video-hero-copy .hero-reframe-label{
+    margin:0 0 12px;
+    font-size:.69rem;
+    line-height:1.45;
+    color:#d5ff80;
+  }
+  body[data-home="true"] .video-hero-copy h1{
+    max-width:none;
+    margin:0;
+    font-size:clamp(2.9rem,11.7vw,4.8rem);
+    line-height:1.03;
+    text-wrap:balance;
+    letter-spacing:-.065em;
+  }
+  body[data-home="true"] .video-hero-copy .hero-counterline{
+    margin:11px 0 0;
+    color:#f1f8ec;
+    font-size:clamp(1.15rem,4.1vw,1.34rem);
+    line-height:1.22;
+  }
+  body[data-home="true"] .video-hero-copy .hero-reframe-intro{
+    max-width:620px;
+    margin:13px 0 0;
+    color:#cdddc9;
+    font-size:clamp(.93rem,3.8vw,1.03rem);
+    line-height:1.55;
+    text-shadow:none;
+  }
+  body[data-home="true"] .video-hero-copy .presence-actions{
+    margin-top:17px;
+    gap:8px;
+    align-items:stretch;
+  }
+  body[data-home="true"] .video-hero-copy .presence-actions .button{
+    min-height:49px;
+    border-radius:12px;
+    width:100%;
+    justify-content:center;
+    font-size:.9rem;
+  }
+  body[data-home="true"] .video-hero-copy .presence-actions .text-link{
+    padding:6px 0;
+    text-align:center;
+    font-size:.91rem;
+  }
+  body[data-home="true"] .video-hero-copy .hipaa-hero-ribbon{margin-top:12px}
+}
+@media(min-width:560px) and (max-width:760px){
+  body[data-home="true"] .hero-cinema{height:275px}
+  body[data-home="true"] .video-hero-copy h1{font-size:clamp(3.8rem,9vw,5.4rem)}
+  body[data-home="true"] .video-hero-copy .presence-actions{flex-direction:row}
+  body[data-home="true"] .video-hero-copy .presence-actions .button{width:auto}
+}
+@media(max-width:360px){
+  body[data-home="true"] .presence-hero-top span:last-child{display:none}
+  body[data-home="true"] .hero-cinema{height:177px}
+  body[data-home="true"] .mobile-film-signature{left:13px;right:13px;font-size:.59rem}
+  body[data-home="true"] .mobile-film-signature b{font-size:.56rem}
+  body[data-home="true"] .video-hero-copy{padding-top:16px}
+  body[data-home="true"] .video-hero-copy h1{font-size:clamp(2.67rem,12.25vw,3.3rem);line-height:1.01}
+  body[data-home="true"] .video-hero-copy .hero-reframe-intro{font-size:.91rem;line-height:1.46}
+  body[data-home="true"] .video-hero-copy .presence-actions{margin-top:13px}
+}
+@media(prefers-reduced-motion:reduce){
+  body[data-home="true"] .hero-cinema .cinema-shot{transition:none;will-change:auto}
+}

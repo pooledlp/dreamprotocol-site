@@ -183,22 +183,49 @@ try {
     assert(await page.locator('#product-proof').isVisible());
     assert(await page.locator('.presence-thesis').isVisible());
     assert(await page.locator('.hero-cinema').isVisible(), 'Cinematic hero must be visible');
-    assert.equal(await page.locator('.hero-cinema video').count(),2, 'Two widescreen film scenes are present');
+    assert.equal(await page.locator('.hero-cinema video').count(),4,
+      'Hero should provide two widescreen and two mobile-specific scenes');
     const media=await page.locator('.hero-cinema video').evaluateAll(videos=>videos.map(video=>({
-      src:video.querySelector('source')?.getAttribute('src')||'',
-      poster:video.getAttribute('poster'),
+      source:video.dataset.src||'',
+      variant:video.dataset.filmVariant,
       muted:video.muted,
       paused:video.paused,
+      loops:video.loop,
       width:video.getBoundingClientRect().width,
       height:video.getBoundingClientRect().height
     })));
-    assert(media.every(video=>video.src.includes('hd_1920_1080_25fps.mp4')),
-      'Both clips must use verified widescreen footage');
+    assert.equal(media.filter(video=>video.variant==='desktop').length,2);
+    assert.equal(media.filter(video=>video.variant==='mobile').length,2);
+    assert(media.filter(video=>video.variant==='desktop').every(video=>video.source.includes('hd_1920_1080_25fps.mp4')),
+      'Desktop scenes must remain wide-format');
+    assert(media.filter(video=>video.variant==='mobile').every(video=>video.source.includes('hd_720_1280_25fps.mp4')&&!video.loops),
+      'Mobile scenes must be portrait format and play only once');
     assert(media.every(video=>video.muted && video.paused),
       'Reduced-motion preference must pause all hero videos');
-    assert(media.every(video=>video.width>0 && video.height>0), 'Film must render at every viewport');
+    const visibleMedia=media.filter(video=>video.variant===(width<=760?'mobile':'desktop'));
+    assert(visibleMedia.every(video=>video.width>0 && video.height>0),
+      'Device-specific film must have actual on-screen geometry');
     assert.equal(await page.locator('[data-cinema-progress]').count(),4);
-    assert.equal(await page.locator('.cinema-shot.is-live').count(),1);
+    if(width<=760){
+      const mobileScene=await page.evaluate(()=>{
+        const film=document.querySelector('.hero-cinema');
+        const heading=document.querySelector('.video-hero-copy h1');
+        const image=document.querySelector('.shot-mobile-one');
+        return {
+          videoBottom:film.getBoundingClientRect().bottom,
+          headingTop:heading.getBoundingClientRect().top,
+          filmHeight:film.getBoundingClientRect().height,
+          opacity:getComputedStyle(film).opacity,
+          filter:getComputedStyle(image).filter,
+          signature:getComputedStyle(document.querySelector('.mobile-film-signature')).display
+        };
+      });
+      assert(mobileScene.filmHeight>=175 && mobileScene.videoBottom<=mobileScene.headingTop,
+        'The brighter mobile film must sit above its headline, not under a dark overlay');
+      assert.equal(Number(mobileScene.opacity),1,'Mobile film should not be faded');
+      assert(mobileScene.filter.includes('brightness(1.08)') && mobileScene.signature!=='none',
+        'Mobile video should show natural-color footage with a quiet brand signature');
+    }
     assert.equal(await page.locator('[data-proof-target]').count(),3);
     await page.locator('[data-proof-target="board"]').click();
     assert(await page.locator('[data-proof-panel="board"]').isVisible());
