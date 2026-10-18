@@ -247,3 +247,12 @@ body[data-home="true"] .momentum-stage.is-changing .momentum-description{animati
  body[data-home="true"] .momentum-stage.is-changing .momentum-description,
  body[data-home="true"] .momentum-choice{animation:none;transition:none}
 }
+
+/* Desktop: editorial text left, outcome art right, regardless of DOM order. */
+@media(min-width:761px){
+ body[data-home="true"] .presence-hero-grid.video-presence-grid{
+  display:grid;grid-template-columns:minmax(0,1.02fr) minmax(0,.98fr);align-items:center;gap:4%;min-height:660px;
+ }
+ body[data-home="true"] .video-hero-copy{grid-column:1;grid-row:1;max-width:710px;min-width:0}
+ body[data-home="true"] .dp-momentum{grid-column:2;grid-row:1;max-width:720px;min-width:0}
+}
