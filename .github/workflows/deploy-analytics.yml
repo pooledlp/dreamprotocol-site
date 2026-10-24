@@ -1,0 +1,117 @@
+name: Deploy private analytics
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dreamprotocol-private-analytics
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Confirm Cloudflare connection and security settings
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          DP_D1_DATABASE_ID: ${{ vars.DP_D1_DATABASE_ID }}
+          DP_ACCESS_TEAM_DOMAIN: ${{ secrets.DP_ACCESS_TEAM_DOMAIN }}
+          DP_ACCESS_AUD: ${{ secrets.DP_ACCESS_AUD }}
+          DP_ACCESS_ALLOWED_EMAIL: ${{ secrets.DP_ACCESS_ALLOWED_EMAIL }}
+        run: |
+          set -euo pipefail
+          for v in CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID DP_D1_DATABASE_ID DP_ACCESS_TEAM_DOMAIN DP_ACCESS_AUD DP_ACCESS_ALLOWED_EMAIL; do
+            if [ -z "${!v}" ]; then
+              echo "::error title=Missing Cloudflare setting::Configure $v in repository Settings > Secrets and variables > Actions."
+              exit 1
+            fi
+          done
+          if ! [[ "$DP_D1_DATABASE_ID" =~ ^[0-9a-fA-F-]{36}$ ]]; then
+            echo "::error::DP_D1_DATABASE_ID must be a valid Cloudflare D1 UUID."
+            exit 1
+          fi
+          if ! [[ "$DP_ACCESS_TEAM_DOMAIN" =~ ^[a-zA-Z0-9-]+\.cloudflareaccess\.com$ ]]; then
+            echo "::error::DP_ACCESS_TEAM_DOMAIN must look like team-name.cloudflareaccess.com."
+            exit 1
+          fi
+          if ! [[ "$DP_ACCESS_ALLOWED_EMAIL" =~ ^[^[:space:]@]+@[^[:space:]@]+\.[^[:space:]@]+$ ]]; then
+            echo "::error::DP_ACCESS_ALLOWED_EMAIL must be an email address."
+            exit 1
+          fi
+
+      - name: Render private Worker configuration
+        working-directory: analytics-worker
+        shell: bash
+        env:
+          DP_D1_DATABASE_ID: ${{ vars.DP_D1_DATABASE_ID }}
+        run: |
+          set -euo pipefail
+          cp wrangler.toml.example wrangler.toml
+          sed -i "s/REPLACE_WITH_YOUR_D1_DATABASE_ID/$DP_D1_DATABASE_ID/" wrangler.toml
+
+      - name: Apply D1 database migrations
+        working-directory: analytics-worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx --yes wrangler@4.102.0 d1 migrations apply dreamprotocol-metrics --remote --config wrangler.toml
+
+      - name: Deploy the collector and private command center
+        working-directory: analytics-worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx --yes wrangler@4.102.0 deploy --config wrangler.toml
+
+      - name: Upload Access verification secrets (no values in logs)
+        working-directory: analytics-worker
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          DP_ACCESS_TEAM_DOMAIN: ${{ secrets.DP_ACCESS_TEAM_DOMAIN }}
+          DP_ACCESS_AUD: ${{ secrets.DP_ACCESS_AUD }}
+          DP_ACCESS_ALLOWED_EMAIL: ${{ secrets.DP_ACCESS_ALLOWED_EMAIL }}
+        run: |
+          set -euo pipefail
+          node -e 'process.stdout.write(JSON.stringify({
+            ACCESS_TEAM_DOMAIN:process.env.DP_ACCESS_TEAM_DOMAIN,
+            ACCESS_AUD:process.env.DP_ACCESS_AUD,
+            ACCESS_ALLOWED_EMAIL:process.env.DP_ACCESS_ALLOWED_EMAIL
+          }))' | npx --yes wrangler@4.102.0 secret bulk --config wrangler.toml
+
+      - name: Check analytics and dashboard safety
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Checking public events preflight and unauthenticated dashboard denial."
+          for attempt in {1..12}; do
+            headers="$(curl -sS --max-time 12 -X OPTIONS -H 'Origin: https://dreamprotocol.ai' -D - -o /dev/null https://metrics.dreamprotocol.ai/collect || true)"
+            if [[ "$headers" == *"204 No Content"* ]] && echo "$headers" | grep -qi 'access-control-allow-origin: https://dreamprotocol.ai'; then
+              echo "Collector responds to authorized site preflight."
+              break
+            fi
+            if [ "$attempt" -eq 12 ]; then echo "::error::Collector not reachable. Check domain provisioning and Worker routes."; exit 1; fi
+            sleep 5
+          done
+          status="$(curl -sS --max-time 15 -o /dev/null -w '%{http_code}' https://command.dreamprotocol.ai/ || true)"
+          if [ "$status" == "200" ]; then
+            echo "::error::Anonymous dashboard unexpectedly returned HTTP 200. Block production access."
+            exit 1
+          fi
+          if [[ "$status" == "000" ]]; then
+            echo "::error::Cannot reach the dashboard domain."
+            exit 1
+          fi
+          echo "Dashboard denies unauthenticated visitors (HTTP $status)."
