@@ -4,7 +4,7 @@
   // visitor IPs, email addresses, scanned URLs, or recorded audio are sent.
   if (navigator.doNotTrack === '1' || navigator.globalPrivacyControl === true) return;
   const endpoint = 'https://metrics.dreamprotocol.ai/collect';
-  const events = new Set(['page_view','cta_click','demo_started','demo_scanned','demo_scan_failed','demo_voice_started','lead_submit','lead_success','lead_error']);
+  const events = new Set(['page_view','cta_click','demo_started','demo_scanned','demo_scan_failed','demo_voice_started','lead_submit','lead_success','lead_error','call_click']);
   const normalize = (v, max=80) => String(v || '').slice(0,max).replace(/[\r\n\t]/g,' ').trim();
   const getSession = () => {
     try {
@@ -60,6 +60,10 @@
       try { label += ':'+ new URL(action.href).pathname.slice(0,60); } catch {}
     }
     track('cta_click',{label});
+  },{capture:true,passive:true});
+  document.addEventListener('click', event => {
+    const phone = event.target.closest('a[href^="tel:"]');
+    if(phone) track('call_click',{label:phone.closest('.presence-hero')?'hero':phone.closest('.live-phone-demo')?'phone_demo':phone.closest('.contact-section')?'contact':'sitewide'});
   },{capture:true,passive:true});
   document.addEventListener('click', event => {
     if(event.target.closest('#alex-start-button') && !event.target.closest('#alex-start-button')?.disabled) track('demo_voice_started');

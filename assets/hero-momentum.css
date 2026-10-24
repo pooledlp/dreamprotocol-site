@@ -271,3 +271,22 @@ body[data-home="true"] .momentum-stage.is-changing .momentum-description{animati
  body[data-home="true"] .video-hero-copy h1{font-size:clamp(2.35rem,8.5vw,3.7rem);letter-spacing:-.06em}
  body[data-home="true"] .hero-conversion-note{font-size:.77rem;margin:9px 0 0}
 }
+
+/* Call the real Dream Protocol AI / first-screen and mobile enhancements */
+body[data-home="true"] .hero-live-phone{display:inline-flex;align-items:center;gap:7px;color:#e5ffb8!important;font-weight:800!important;text-decoration:underline;text-underline-offset:5px}
+body[data-home="true"] .live-phone-pulse{width:9px;height:9px;flex:none;background:#d5ff80;border-radius:50%;box-shadow:0 0 0 4px #d5ff8030}
+body[data-home="true"] .hero-conversion-note a{color:#d5ff80;font-weight:700;text-underline-offset:3px}
+body[data-home="true"] .hero-offer-note{color:#c2d1c2;font-size:.78rem;margin:4px 0 0}
+.footer-contact-actions{display:flex;flex-direction:column;align-items:flex-start;gap:10px}
+body[data-home="true"] .live-phone-demo{padding:clamp(48px,6vw,90px) 0;color:#edf4e7;background:linear-gradient(105deg,#152619,#102118 70%,#263c23);border-block:1px solid #4a6b41}
+body[data-home="true"] .live-phone-inner{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(240px,.7fr);gap:clamp(20px,4vw,65px);align-items:center}
+body[data-home="true"] .live-phone-demo h2{font-size:clamp(2rem,4vw,3.7rem);letter-spacing:-.06em;line-height:1.07;margin:12px 0}
+body[data-home="true"] .live-phone-demo h2 em{color:#d5ff80;font-style:normal}
+body[data-home="true"] .live-phone-demo p{max-width:720px;color:#d9e7d2;font-size:1rem;line-height:1.7}
+body[data-home="true"] .live-phone-demo .eyebrow{color:#d5ff80;font-size:.74rem;letter-spacing:.14em}
+body[data-home="true"] .live-phone-demo small{display:block;color:#b4cbb0;line-height:1.55;font-size:.81rem;max-width:680px}
+body[data-home="true"] .live-phone-actions{display:flex;flex-direction:column;gap:16px}
+body[data-home="true"] .live-phone-actions .button{justify-content:center;min-height:62px;font-size:1.04rem;line-height:1.2;white-space:normal;text-align:center}
+body[data-home="true"] .live-phone-actions .text-link{align-self:center;text-align:center;color:#ebf7e8}
+@media(max-width:780px){body[data-home="true"] .live-phone-inner{grid-template-columns:1fr}body[data-home="true"] .live-phone-actions .button{width:100%}}
+@media(max-width:400px){body[data-home="true"] .hero-live-phone{font-size:.84rem!important}}

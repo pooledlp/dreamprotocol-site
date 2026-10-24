@@ -167,6 +167,8 @@ try {
       await page.goBack();
       await page.waitForURL(origin+'/');
     }
+    assert.equal(await page.locator('.hero-live-phone').getAttribute('href'),'tel:+16282513616');
+    assert(await page.locator('.hero-live-phone').isVisible(), 'Public live demo phone is visible');
     await page.locator('.hero-primary').click();
     await page.waitForURL('**/contact/?source=home-hero');
     assert(await page.locator('#lead-form').isVisible(), 'Primary CTA opens a real inquiry form');
@@ -180,9 +182,10 @@ try {
     await page.goto(origin+'/ai-receptionist-offer/',{waitUntil:'domcontentloaded'});
     assert(await page.locator('#total').isVisible(), 'Sales calculator remains visible');
     await page.goto(origin,{waitUntil:'domcontentloaded'});
-    await page.locator('.presence-actions a[href="#demo"]').click();
+    await page.locator('.hero-conversion-note a[href="#demo"]').click();
     await page.waitForURL('**/#demo');
     assert(await page.locator('#demo').isVisible());
+    assert.equal(await page.locator('.live-phone-demo a[href="tel:+16282513616"]').count(),1, 'Secondary live phone CTA is present');
     assert(await page.locator('#product-proof').isVisible());
     assert(await page.locator('.presence-thesis').isVisible());
     assert(await page.locator('.dp-momentum').isVisible(), 'Custom business story must render');

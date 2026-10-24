@@ -40,3 +40,13 @@ test('scheduled retention removes old analytics automatically',async()=>{
   assert.match(query,/DELETE FROM analytics_events WHERE created_at < \?/);
   assert.match(cutoff,/^\d{4}-\d{2}-\d{2}T/);
 });
+
+test('phone demo tap event is accepted without contact information',async()=>{
+  let received;
+  const env={DB:{prepare(){return {bind(...args){received=args;return {async run(){return {success:true}}}}}}}};
+  const reqBody={event:'call_click',session:'7e53d2ce-3a88-41c8-b77d-d00eac8f4fea',page:'/',label:'hero'};
+  const result=await worker.fetch(req('https://metrics.dreamprotocol.ai/collect',{method:'POST',headers:{Origin:'https://dreamprotocol.ai', 'Content-Type':'text/plain'},body:JSON.stringify(reqBody)}),env);
+  assert.equal(result.status,204);
+  assert.equal(received[1],'call_click');
+  assert.equal(received[8],'hero');
+});
