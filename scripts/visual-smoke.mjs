@@ -182,7 +182,7 @@ try {
     await page.goto(origin+'/ai-receptionist-offer/',{waitUntil:'domcontentloaded'});
     assert(await page.locator('#total').isVisible(), 'Sales calculator remains visible');
     await page.goto(origin,{waitUntil:'domcontentloaded'});
-    await page.locator('.presence-actions a[href="#demo"]').click();
+    await page.locator('.hero-conversion-note a[href="#demo"]').click();
     await page.waitForURL('**/#demo');
     assert(await page.locator('#demo').isVisible());
     assert.equal(await page.locator('.live-phone-demo a[href="tel:+16282513616"]').count(),1, 'Secondary live phone CTA is present');
