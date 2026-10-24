@@ -256,3 +256,18 @@ body[data-home="true"] .momentum-stage.is-changing .momentum-description{animati
  body[data-home="true"] .video-hero-copy{grid-column:1;grid-row:1;max-width:710px;min-width:0}
  body[data-home="true"] .dp-momentum{grid-column:2;grid-row:1;max-width:720px;min-width:0}
 }
+
+/* Conversion-first hero: keeps the decision and primary CTA in the first viewport. */
+@media(min-width:761px){
+ body[data-home="true"] .video-hero-copy{padding:24px 0 32px}
+ body[data-home="true"] .video-hero-copy h1{font-size:clamp(2.85rem,4.05vw,4.25rem);line-height:1.02;letter-spacing:-.063em}
+ body[data-home="true"] .video-hero-copy .hero-reframe-label{margin-bottom:13px}
+ body[data-home="true"] .video-hero-copy .hero-counterline{margin-top:15px;font-size:1.4rem}
+ body[data-home="true"] .video-hero-copy .hero-reframe-intro{margin-top:13px;line-height:1.55;font-size:1rem}
+ body[data-home="true"] .video-hero-copy .presence-actions{margin-top:20px}
+ body[data-home="true"] .video-hero-copy .hipaa-hero-ribbon{margin-top:16px}
+}
+@media(max-width:760px){
+ body[data-home="true"] .video-hero-copy h1{font-size:clamp(2.35rem,8.5vw,3.7rem);letter-spacing:-.06em}
+ body[data-home="true"] .hero-conversion-note{font-size:.77rem;margin:9px 0 0}
+}
