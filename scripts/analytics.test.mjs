@@ -32,3 +32,11 @@ test('preflight only permits the authorized public origin',async()=>{
   assert.equal(result.status,204);
   assert.equal(result.headers.get('Access-Control-Allow-Origin'),'https://www.dreamprotocol.ai');
 });
+
+test('scheduled retention removes old analytics automatically',async()=>{
+  let query='',cutoff='';
+  const env={DB:{prepare(sql){query=sql;return {bind(value){cutoff=value;return {async run(){return {success:true}}};}}}}};
+  await worker.scheduled({},env);
+  assert.match(query,/DELETE FROM analytics_events WHERE created_at < \?/);
+  assert.match(cutoff,/^\d{4}-\d{2}-\d{2}T/);
+});
