@@ -21,5 +21,5 @@ test('irrelevant Vapi events are acknowledged but ignored',async()=>{
 });
 test('other clients are not recorded',async()=>{
  const result=await worker.fetch(request({message:{type:'end-of-call-report',call:{id:'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',assistantId:'client-different-id'}}}),env,{});
- assert.equal(result.status,503);
+ assert.equal(result.status,200);
 });
