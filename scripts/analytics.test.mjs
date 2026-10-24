@@ -50,3 +50,34 @@ test('phone demo tap event is accepted without contact information',async()=>{
   assert.equal(received[1],'call_click');
   assert.equal(received[8],'hero');
 });
+
+test('Vapi phone report requires its own bearer key and ignores all client assistants',async()=>{
+ const token='01234567890123456789012345678901';
+ let inserted=[];
+ const env={VAPI_WEBHOOK_TOKEN:token,DB:{prepare(sql){return {bind(...args){return {
+ async run(){inserted.push({sql,args});return{success:true}},
+ async first(){return null}
+ };}}}}};
+ const message={message:{type:'end-of-call-report',call:{id:'37dd1e60-7a44-45eb-8fd1-aa73e8faadd0',assistantId:'2dc04098-ce55-4aa9-a98b-f5d5d87484d4',phoneNumberId:'8b939452-5fda-4d5c-9c4f-231bcf1cafbb',customer:{number:'+14155550111'}},analysis:{summary:'Caller asks about AI phone receptionist pricing and would like a quote.'}}};
+ const url='https://metrics.dreamprotocol.ai/vapi/end-call';
+ const call=(payload,h={})=>worker.fetch(req(url,{method:'POST',headers:{'Content-Type':'application/json',...h},body:JSON.stringify(payload)}),env);
+ assert.equal((await call(message)).status,401);
+ const h={Authorization:'Bearer '+token};
+ assert.equal((await call(message,h)).status,200);
+ assert.equal(inserted.length,1);
+ assert.equal(inserted[0].args[5],'sales');
+ assert.equal(inserted[0].args[4],'+14155550111');
+ const foreign=structuredClone(message);
+ foreign.message.call.assistantId='0f76adec-0e0c-4839-849b-b575b2674ec5';
+ assert.equal((await call(foreign,h)).status,200);
+ assert.equal(inserted.length,1);
+});
+test('Vapi repeated webhook does not send a duplicate notification',async()=>{
+ const token='01234567890123456789012345678901';
+ let found=false,sends=0;
+ const env={VAPI_WEBHOOK_TOKEN:token,CALL_MAIL:{async send(){sends++}},NOTIFY_EMAIL:'owner@example.com',NOTIFY_FROM:'alerts@myexample.com',DB:{prepare(sql){return{bind(){return{async run(){found=true},async first(){return found?{call_id:'x'}:null}}}}}}};
+ const message={message:{type:'end-of-call-report',call:{id:'37dd1e60-7a44-45eb-8fd1-aa73e8faadd0',assistantId:'2dc04098-ce55-4aa9-a98b-f5d5d87484d4',phoneNumberId:'8b939452-5fda-4d5c-9c4f-231bcf1cafbb'}}};
+ const endpoint='https://metrics.dreamprotocol.ai/vapi/end-call';
+ for(let i=0;i<2;i++){const x=await worker.fetch(req(endpoint,{method:'POST',headers:{Authorization:'Bearer '+token},body:JSON.stringify(message)}),env);assert.equal(x.status,200)}
+ assert.equal(sends,1);
+});
