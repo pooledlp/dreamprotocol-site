@@ -73,7 +73,6 @@ async function webhook(req,env,ctx){
  if(req.method!=="POST")return new Response("Method not allowed",{status:405});
  const auth=req.headers.get("x-vapi-secret")||req.headers.get("authorization")?.replace(/^Bearer\s+/i,"")||"";
  if(!await okSecret(auth,env.VAPI_WEBHOOK_SECRET))return new Response("Forbidden",{status:403});
- if(!env.DB)return resp({error:"DB unavailable"},503);
  if(Number(req.headers.get("content-length")||0)>300000)return resp({error:"too large"},413);
  let raw;try{raw=await req.text();if(raw.length>300000)return resp({error:"too large"},413)}catch{return resp({error:"invalid input"},400)}
  let payload;try{payload=JSON.parse(raw)}catch{return resp({error:"invalid JSON"},400)}
@@ -85,6 +84,7 @@ async function webhook(req,env,ctx){
  if(!validId(event.id))return resp({error:"invalid call"},400);
  if(event.assistantId!==env.VAPI_ASSISTANT_ID)return resp({ok:true,ignored:true});
  if(event.numberId&&event.numberId!==env.VAPI_PHONE_ID)return resp({ok:true,ignored:true});
+ if(!env.DB)return resp({error:"DB unavailable"},503);
  await env.DB.prepare("INSERT OR IGNORE INTO call_reports (call_id,created_at,caller,category,urgent,summary,duration,ended_reason,email_status,sms_status) VALUES (?,?,?,?,?,?,?,?,?,?)")
  .bind(event.id,event.createdAt,event.caller,event.category,event.urgent,event.summary,event.duration,event.endedReason,"pending","pending").run();
  ctx.waitUntil(flush(env.DB,env,event.id));
