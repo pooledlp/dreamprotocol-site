@@ -1,3 +1,4 @@
+import {handleVapiEndCall,callHistory,pruneCallHistory} from './call-webhook.mjs';
 // Dream Protocol analytics collector + Access-protected command center.
 // Cloudflare Worker + D1. No IP addresses, full user agents, form values,
 // customer names, or demo website URLs are stored.
@@ -84,19 +85,28 @@ const DASHBOARD = [
 '<h1>Your business.<br>In real numbers.</h1><p>Traffic, engagement and inquiries across DreamProtocol.ai.</p><div id="status" role="status">Loading…</div><div class="kpis" id="kpis"></div><div class="layout"><section class="panel"><h2>Daily traffic</h2><div class="bars" id="daily"></div><div class="legend">Page views per day · UTC</div></section><section class="panel"><h2>Top pages</h2><div id="pages"></div></section><section class="panel"><h2>Traffic sources</h2><div id="sources"></div></section><section class="panel"><h2>Clicks that matter</h2><div id="actions"></div></section><section class="panel"><h2>Devices</h2><div id="devices"></div></section><section class="panel"><h2>Countries</h2><div id="countries"></div></section></div><p class="fine">Privacy-minded metrics: no IPs, form submissions, customer data or full browser histories stored. A session is an estimate, not an identified person. Cloudflare Access protects this dashboard.</p></div>',
 '<script>(function(){const $=s=>document.querySelector(s);const make=(tag,cls,txt)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=String(txt);return n};function rows(id,data){const root=$("#"+id);root.replaceChildren();if(!data.length){root.append(make("p","empty","No events yet."));return}data.forEach(r=>{const line=make("div","line");line.append(make("span","",r.name||"Unknown"),make("b","",Number(r.total||0).toLocaleString()));root.append(line)})}function draw(s){$("#status").textContent="Updated "+new Date(s.updated).toLocaleString()+" · "+s.days+"-day window";const totals=s.totals||{};const metrics=[["Visitors",totals.visitors,"Estimated sessions"],["Page views",totals.pageviews,"Total pages opened"],["Demo scans",totals.demo_scanned,"Completed scans"],["Demo voice starts",totals.voice,"Voice demo interactions"],["Form attempts",totals.lead_submit,"Submission attempts"],["Delivered leads",totals.lead_success,"Accepted by form provider"],["Lead errors",totals.lead_error,"Failed submissions"],["CTA clicks",totals.clicks,"Offer and action clicks"],["Phone demo taps",totals.phone_taps,"Click-to-call taps, not confirmed calls"]];const k=$("#kpis");k.replaceChildren();metrics.forEach(m=>{const card=make("div","kpi");card.append(make("small","",m[0]),make("strong","",Number(m[1]||0).toLocaleString()),make("span","",m[2]));k.append(card)});const daily=$("#daily");daily.replaceChildren();const max=Math.max(1,...s.daily.map(v=>Number(v.total)||0));if(!s.daily.length)daily.append(make("p","empty","No traffic yet."));s.daily.forEach(item=>{const bar=make("div","bar");bar.style.height=Math.max(3,Math.round(Number(item.total||0)/max*150))+"px";bar.title=item.name+": "+item.total+" page views";daily.append(bar)});["pages","sources","actions","devices","countries"].forEach(k=>rows(k,s[k]||[]))}async function load(days){$("#status").textContent="Loading metrics…";try{const res=await fetch("/api/summary?days="+days,{credentials:"same-origin",cache:"no-store"});if(!res.ok)throw Error("Dashboard access or database unavailable ("+res.status+")");draw(await res.json())}catch(e){$("#status").textContent=e.message}}document.querySelectorAll("[data-days]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-days]").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));load(Number(b.dataset.days))}));load(7)})()</script></body></html>'
 ].join('');
+
+const CALL_LOG_PANEL = '<section class="panel" style="grid-column:1 / -1"><h2>Real phone calls · (628) 251-3616</h2><p>Incoming call summaries. Email status is shown only after a verified provider send. Stored for 30 days, no recordings or transcripts.</p><div id="call-history" role="status">Loading call log…</div></section>';
+const CALL_LOG_SCRIPT = '<script>(function(){let days=7;const box=document.querySelector("#call-history");const create=(tag,txt)=>{const n=document.createElement(tag);n.textContent=txt;return n};async function refresh(){try{const r=await fetch("/api/calls?days="+days,{credentials:"same-origin",cache:"no-store"});if(!r.ok)throw Error("Call log unavailable");const j=await r.json();box.replaceChildren();if(!j.rows.length){box.append(create("p","No calls yet. Try the live phone demo and refresh."));return}for(const c of j.rows){const item=create("article","");item.style.cssText="padding:16px 0;border-bottom:1px solid #344234";const hd=create("strong",(c.priority==="urgent"?"URGENT · ":"")+String(c.category||"general").toUpperCase()+" · "+new Date(c.received_at).toLocaleString());const meta=create("p","Caller: "+(c.caller_number||"Unavailable")+" · "+(c.duration_seconds??"?")+" sec · Email: "+c.email_status);const summary=create("p",c.summary||"No summary available");summary.style.color="#e9f5e9";item.append(hd,meta,summary);box.append(item)}}catch(e){box.textContent=e.message}}document.querySelectorAll("[data-days]").forEach(b=>b.addEventListener("click",()=>{days=Number(b.dataset.days);refresh()}));refresh()})()</script>';
+const CALL_DASHBOARD = DASHBOARD.replace('</div><p class="fine">',CALL_LOG_PANEL+'</div><p class="fine">').replace('</body>',CALL_LOG_SCRIPT+'</body>');
+
 export default {
   async scheduled(event,env){
     // Cloudflare Cron: limit retained analytics to the last 90 days.
     if(!env.DB)return;
     const cutoff = new Date(Date.now()-90*86400000).toISOString();
     await env.DB.prepare('DELETE FROM analytics_events WHERE created_at < ?').bind(cutoff).run();
+    await pruneCallHistory(env);
   },
-  async fetch(request,env){
+  async fetch(request,env,ctx){
     const url=new URL(request.url);
     const metricsHost=(env.INGEST_HOSTNAME||'metrics.dreamprotocol.ai').toLowerCase();
     const commandHost=(env.DASHBOARD_HOSTNAME||'command.dreamprotocol.ai').toLowerCase();
     if(url.hostname===metricsHost){
       const origin=request.headers.get('Origin')||'';
+      // End-of-call webhooks authenticate with the dedicated Vapi bearer secret.
+      // No browser Origin is required or trusted for server-to-server events.
+      if(url.pathname==='/vapi/end-call')return handleVapiEndCall(request,env,ctx);
       if(!ALLOWED_ORIGINS.has(origin))return new Response('Forbidden',{status:403});
       if(url.pathname!=='/collect')return new Response('Not found',{status:404});
       return collect(request,env,origin);
@@ -104,7 +114,13 @@ export default {
     if(url.hostname===commandHost){
       if(!await verifyAccess(request,env))return new Response('Access denied',{status:403,headers:{'Cache-Control':'no-store'}});
       if(request.method!=='GET')return new Response('Method not allowed',{status:405});
-      if(url.pathname==='/'||url.pathname==='/dashboard')return new Response(DASHBOARD,{headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','X-Robots-Tag':'noindex,nofollow','X-Frame-Options':'DENY','Content-Security-Policy':"default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'"}});
+      if(url.pathname==='/'||url.pathname==='/dashboard')return new Response(CALL_DASHBOARD,{headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','X-Robots-Tag':'noindex,nofollow','X-Frame-Options':'DENY','Content-Security-Policy':"default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'"}});
+      if(url.pathname==='/api/calls'){
+        if(!env.DB)return jsonResponse({error:'Storage unavailable'},503);
+        const days=[1,7,30].includes(Number(url.searchParams.get('days')))?Number(url.searchParams.get('days')):7;
+        try{return jsonResponse({rows:await callHistory(env,days),days});}
+        catch{return jsonResponse({error:'Call log unavailable'},503);}
+      }
       if(url.pathname==='/api/summary'){
         if(!env.DB)return jsonResponse({error:'D1 not configured'},503);
         const days=[1,7,30].includes(Number(url.searchParams.get('days')))?Number(url.searchParams.get('days')):7;
