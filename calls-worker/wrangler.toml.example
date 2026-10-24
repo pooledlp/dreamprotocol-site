@@ -1,0 +1,31 @@
+name = "dreamprotocol-call-alerts"
+main = "src/worker.mjs"
+compatibility_date = "2026-10-01"
+workers_dev = false
+routes = [{ pattern = "calls.dreamprotocol.ai", custom_domain = true }]
+
+[triggers]
+crons = ["*/15 * * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "dreamprotocol-metrics"
+database_id = "REPLACE_WITH_EXISTING_D1_ID"
+migrations_dir = "migrations"
+
+[vars]
+CALLS_HOST = "calls.dreamprotocol.ai"
+VAPI_ASSISTANT_ID = "2dc04098-ce55-4aa9-a98b-f5d5d87484d4"
+VAPI_PHONE_ID = "8b939452-5fda-4d5c-9c4f-231bcf1cafbb"
+
+# Set as Cloudflare Worker secrets:
+# VAPI_WEBHOOK_SECRET
+# OWNER_EMAIL
+# OWNER_CELL
+# SMS_ACCOUNT_SID / SMS_AUTH_TOKEN / SMS_FROM (only if SMS provider connected)
+#
+# After Cloudflare Email Service is enabled for the domain,
+# uncomment the send_email binding and deploy:
+# [[send_email]]
+# name = "EMAIL"
+# destination_address = "REPLACE_VERIFIED_EMAIL"
