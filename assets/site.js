@@ -335,6 +335,7 @@
     const button=form.querySelector('button');
     const status=document.querySelector('#form-status');
     const values=Object.fromEntries(new FormData(form));
+    window.DPTrack?.('lead_submit');
     const originalButton=button.innerHTML;
     const isMonthlyPlan = form.dataset?.leadType === 'subscription';
     let sent=false;
@@ -365,6 +366,7 @@
       if(result.success!==true&&result.success!=='true')throw Error('Delivery failed');
 
       sent=true;
+      window.DPTrack?.('lead_success');
       button.classList.add('is-sent');
       button.innerHTML='Sent <span aria-hidden="true">✓</span>';
       status.classList.add('is-success');
@@ -372,6 +374,7 @@
       status.scrollIntoView?.({behavior:media('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'nearest'});
       setTimeout(()=>form.reset(),1200);
     } catch {
+      window.DPTrack?.('lead_error');
       status.classList.add('is-error');
       status.innerHTML='<strong>Couldn’t send.</strong><span>Try again or email <a href="mailto:hello@dreamprotocol.ai">hello@dreamprotocol.ai</a>.</span>';
       button.innerHTML=originalButton;
