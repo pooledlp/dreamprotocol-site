@@ -1,0 +1,23 @@
+name = "dreamprotocol-analytics"
+main = "src/worker.mjs"
+compatibility_date = "2026-10-01"
+workers_dev = false
+routes = [
+  { pattern = "metrics.dreamprotocol.ai/*", zone_name = "dreamprotocol.ai" },
+  { pattern = "command.dreamprotocol.ai/*", zone_name = "dreamprotocol.ai" }
+]
+
+# Fill the database_id from the output of: npx wrangler d1 create dreamprotocol-metrics
+[[d1_databases]]
+binding = "DB"
+database_name = "dreamprotocol-metrics"
+database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+
+[vars]
+INGEST_HOSTNAME = "metrics.dreamprotocol.ai"
+DASHBOARD_HOSTNAME = "command.dreamprotocol.ai"
+
+# Set these as Worker secrets, never in the repository:
+# npx wrangler secret put ACCESS_TEAM_DOMAIN
+# npx wrangler secret put ACCESS_AUD
+# npx wrangler secret put ACCESS_ALLOWED_EMAIL

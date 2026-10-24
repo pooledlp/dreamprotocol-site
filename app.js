@@ -544,10 +544,13 @@
     const animation = animateAnalysis(stopSignal);
     let usedFallback = false;
     try {
+      window.DPTrack?.('demo_started');
       const data = await requestAnalysis(url);
       profile = parseProfile(data, url);
+      window.DPTrack?.('demo_scanned');
     } catch {
       profile = fallbackProfile(url);
+      window.DPTrack?.('demo_scan_failed');
       usedFallback = true;
     }
     stopSignal.stopped = true;
@@ -734,6 +737,7 @@
     const button = leadForm.querySelector('button');
     const status = $('#form-status');
     const values = Object.fromEntries(new FormData(leadForm));
+    window.DPTrack?.('lead_submit');
     const originalButton = button.innerHTML;
     let sent = false;
 
@@ -755,6 +759,7 @@
       if (result.success !== true && result.success !== 'true') throw new Error('send failed');
 
       sent = true;
+      window.DPTrack?.('lead_success');
       button.classList.add('is-sent');
       button.innerHTML = 'Sent <span aria-hidden="true">✓</span>';
       status.classList.add('is-success');
@@ -762,6 +767,7 @@
       status.scrollIntoView?.({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'nearest' });
       setTimeout(() => leadForm.reset(), 1200);
     } catch {
+      window.DPTrack?.('lead_error');
       status.classList.add('is-error');
       status.innerHTML = '<strong>Couldn’t send.</strong><span>Try again or email <a href="mailto:hello@dreamprotocol.ai">hello@dreamprotocol.ai</a>.</span>';
       button.innerHTML = originalButton;

@@ -168,7 +168,10 @@ try {
       await page.waitForURL(origin+'/');
     }
     await page.locator('.hero-primary').click();
-    await page.waitForURL('**/#day-in-motion');
+    await page.waitForURL('**/contact/?source=home-hero');
+    assert(await page.locator('#lead-form').isVisible(), 'Primary CTA opens a real inquiry form');
+    await page.goto(origin+'/#day-in-motion',{waitUntil:'domcontentloaded'});
+    assert.equal(await page.locator('.conversion-gateway .cg-card').count(),3, 'Homepage presents three specific sales entry points');
     assert(await page.locator('#day-in-motion').isVisible(), 'New business-day story is visible');
     assert.equal(await page.locator('[data-day-select]').count(),4);
     await page.locator('[data-day-select="2"]').click();
