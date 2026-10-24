@@ -2,10 +2,16 @@ name = "dreamprotocol-analytics"
 main = "src/worker.mjs"
 compatibility_date = "2026-10-01"
 workers_dev = false
+# Custom Domains create their own Cloudflare DNS records and TLS certificates.
+# There must be no conflicting CNAME on either hostname.
 routes = [
-  { pattern = "metrics.dreamprotocol.ai/*", zone_name = "dreamprotocol.ai" },
-  { pattern = "command.dreamprotocol.ai/*", zone_name = "dreamprotocol.ai" }
+  { pattern = "metrics.dreamprotocol.ai", custom_domain = true },
+  { pattern = "command.dreamprotocol.ai", custom_domain = true }
 ]
+
+# Automatically purge analytics older than 90 days every morning (UTC).
+[triggers]
+crons = ["15 7 * * *"]
 
 # Fill the database_id from the output of: npx wrangler d1 create dreamprotocol-metrics
 [[d1_databases]]
