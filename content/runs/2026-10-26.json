@@ -1,6 +1,9 @@
 {
   "week": "2026-10-26",
   "date": "2026-10-29",
-  "status": "reserved",
-  "runId": "40400514593"
+  "status": "held",
+  "runId": "40400514593",
+  "calls": 1,
+  "reviewReasons": [],
+  "reason": "Research did not explicitly open two approved primary sources"
 }
