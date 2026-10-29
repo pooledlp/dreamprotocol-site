@@ -217,7 +217,7 @@ async function main(){
   }else article=await generate({date,existing,request,audit});
   save(path.join(root,'_editorial/approved.json'),article);
   save(path.join(root,'content/generated',week+'.json'),article);
-  save(record,{...run,status:'approved',slug:article.slug,calls});
+  save(record,{...run,status:'approved',slug:article.slug,calls,reason:undefined,reviewReasons:undefined});
   console.log('Approved one researched article for publication.');
  }catch(error){
   save(record,{...run,status:'held',calls,reviewReasons,reason:String(error.message).replace(/[\r\n]/g,' ').slice(0,220)});
