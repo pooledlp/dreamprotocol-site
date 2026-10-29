@@ -5,13 +5,15 @@ import os from 'node:os';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
-import {weekKey,safeSource,responseText,validateArticle,generate,loadGenerated,openedSources,topicContext} from './editorial.mjs';
+import {weekKey,safeSource,responseText,validateArticle,generate,loadGenerated,openedSources,topicContext,retrieveSources} from './editorial.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const sources=[{title:'Microsoft integration documentation',url:'https://learn.microsoft.com/power-automate/getting-started'},{title:'Google Workspace support documentation',url:'https://support.google.com/a/answer/12345'}];
 // Deliberately synthetic fixture; never deployed or represented as researched content.
 const section='A business can begin by identifying the owner of each incoming request and the information needed for the next decision. This hypothetical workflow illustrates a planning method rather than a promised product feature. Write down what should happen when information is missing, who reviews the exception, and how the team records the outcome. Test the process with sample requests before connecting live systems. The person responsible for the workflow should confirm access and routing with the administrator. Keep the first trial limited to a single process so the team can understand why a request reaches a particular person. Review the sample results together and revise the written handoff instructions before expanding the trial. ';
 const fixture=()=>({slug:'shared-inbox-routing-ownership',title:'How to assign ownership in a shared business inbox',category:'Workflow planning',service:'workflow-automation',description:'Map shared inbox ownership, define exception handling, and prepare a small trial before connecting your business systems together.',takeaway:'Start with a named owner and a written handoff rule, then test the process using sample requests before connecting live customer information.',sections:Array.from({length:4},(_,i)=>({heading:'Planning step '+(i+1)+' for your team',body:section+section.slice(0,350),sourceIndexes:[i%2]})),checklist:['Name a person responsible for reviewing incoming requests.','Write down which details the next team member needs.','Test a small set of sample requests before launch.','Confirm how staff should handle missing information.'],sources:structuredClone(sources)});
 const response=(value,withSources=false)=>({status:'completed',output:[...(withSources?sources.map(s=>({type:'web_search_call',status:'completed',action:{type:'open_page',url:s.url}})):[]),{type:'message',content:[{type:'output_text',text:typeof value==='string'?value:JSON.stringify(value)}]}],usage:{input_tokens:1,output_tokens:1}});
+const plan={decision:'Distinct operational decision',notes:'Synthetic research notes',sources};
+const evidence=urls=>Promise.resolve(urls.map(url=>({url,text:section+section,sha256:'fixture'})));
 test('Weekly boundaries and primary-source URL checks are strict',()=>{
  assert.equal(weekKey('2026-09-13'),'2026-09-07');assert.equal(weekKey('2026-09-14'),'2026-09-14');
  assert.throws(()=>weekKey('2026-02-30'));
@@ -28,20 +30,22 @@ test('Publication rejects malformed, duplicate, unsourced, and unsupported conte
  assert.throws(()=>responseText({...response(a),status:'incomplete'}));
 });
 test('Three-stage pipeline publishes only after independent sourced approval',async()=>{
- const requests=[];const results=[response('Research notes',true),response(fixture()),response({approved:true,reasons:[]},true)];
- const a=await generate({date:'2026-09-13',existing:[],request:async r=>{requests.push(r);return results.shift();}});
+ const requests=[];const results=[response(plan,true),response(fixture()),response({approved:true,reasons:[]},true)];
+ const a=await generate({retrieve:evidence,date:'2026-09-13',existing:[],request:async r=>{requests.push(r);return results.shift();}});
  assert.equal(requests.length,3);assert.equal(a.review.approved,true);assert.equal(a.publishOn,'2026-09-13');
  assert.equal(requests[0].tool_choice,'required');assert.equal(requests[2].tool_choice,'required');
  assert.equal(requests[1].text.format.strict,true);
  const openedReview=response({approved:true,reasons:[]});
  openedReview.output.unshift(...sources.map(s=>({type:'web_search_call',status:'completed',action:{type:'open_page',url:s.url}})));
- const opened=[response('Research notes',true),response(fixture()),openedReview];
- const openedArticle=await generate({date:'2026-09-13',existing:[],request:async()=>opened.shift()});
+ const opened=[response(plan,true),response(fixture()),openedReview];
+ const openedArticle=await generate({retrieve:evidence,date:'2026-09-13',existing:[],request:async()=>opened.shift()});
  assert.equal(openedArticle.review.approved,true,'Directly opened source pages count as reviewed evidence');
- const rejected=[response('Research notes',true),response(fixture()),response({approved:false,reasons:['Unsupported assertion']},true)];
- await assert.rejects(()=>generate({date:'2026-09-13',existing:[],request:async()=>rejected.shift()}),/did not approve/);
- const missing=[response('Research notes',true),response(fixture()),response({approved:true,reasons:[]})];
- await assert.rejects(()=>generate({date:'2026-09-13',existing:[],request:async()=>missing.shift()}),/every cited source/);
+ const rejected=[response(plan,true),response(fixture()),response({approved:false,reasons:['Unsupported assertion']},true)];
+ await assert.rejects(()=>generate({retrieve:evidence,date:'2026-09-13',existing:[],request:async()=>rejected.shift()}),/did not approve/);
+ const missing=[response(plan,true),response(fixture()),response({approved:true,reasons:[]})];
+ let reads=0;
+ await assert.rejects(()=>generate({retrieve:async urls=>{if(++reads===2)throw Error('Evidence page returned HTTP 403');return evidence(urls);},date:'2026-09-13',existing:[],request:async()=>missing.shift()}),/HTTP 403/);
+
 });
 test('Approved JSON integrates into site, citations, service links, and discovery',()=>{
  const temp=fs.mkdtempSync(path.join(os.tmpdir(),'dream-researched-'));
@@ -75,18 +79,33 @@ test('Reservation persists once and missing credentials never reserve paid work'
  }finally{fs.rmSync(temp,{recursive:true,force:true});}
 });
 
-test('Search discovery and citations cannot satisfy explicit source opening',async()=>{
- const searchOnly=response({approved:true,reasons:[]});
- searchOnly.output.unshift({type:'web_search_call',status:'completed',action:{type:'search',sources:sources.map(s=>({url:s.url}))}});
- searchOnly.output[1].content[0].annotations=sources.map(s=>({type:'url_citation',url:s.url}));
- assert.deepEqual(openedSources(searchOnly),[]);
- const rejectedResearch=[{...searchOnly,output:[...searchOnly.output.slice(0,1),...response('Research notes').output]}];
- await assert.rejects(()=>generate({date:'2026-10-26',existing:[],request:async()=>rejectedResearch.shift()}),/explicitly open/);
- for(const review of [searchOnly,{...searchOnly,output:[...searchOnly.output,{type:'web_search_call',status:'completed',action:{type:'open_page',url:sources[0].url}}]}]){
-  const results=[response('Research notes',true),response(fixture()),review];
-  await assert.rejects(()=>generate({date:'2026-10-26',existing:[],request:async()=>results.shift()}),/every cited source/);
- }
- assert.deepEqual(openedSources({output:[{type:'web_search_call',status:'failed',action:{type:'open_page',url:sources[0].url}}]}),[]);
+test('Search-only discovery is followed by application downloads for writer and reviewer',async()=>{
+ const research=response(plan);
+ research.output.unshift({type:'web_search_call',status:'completed',action:{type:'search',sources:sources.map(s=>({url:s.url}))}});
+ assert.deepEqual(openedSources(research),[]);
+ const results=[research,response(fixture()),response({approved:true,reasons:[]})];
+ const requests=[],reads=[];
+ const article=await generate({date:'2026-10-26',existing:[],retrieve:async urls=>{reads.push(urls);return evidence(urls);},request:async r=>{requests.push(r);return results.shift();}});
+ assert(article.review.approved);assert.equal(reads.length,2);
+ assert.deepEqual(reads[0],sources.map(s=>s.url));assert.deepEqual(reads[1],reads[0]);
+ assert(requests[1].input.includes(section));assert(requests[2].input.includes(section));
+ const undiscovered=[response(plan)];
+ await assert.rejects(()=>generate({date:'2026-10-26',existing:[],retrieve:evidence,request:async()=>undiscovered.shift()}),/discovered primary sources/);
+});
+test('Evidence downloads validate redirects, errors, content and size',async()=>{
+ const urls=sources.map(s=>s.url);
+ const html='<script>bad-script</script><main>'+section+section+'</main><footer>noise</footer>';
+ const good=()=>new Response(html,{headers:{'content-type':'text/html'}});
+ const pages=await retrieveSources(urls,{fetchImpl:async()=>good()});
+ assert.equal(pages.length,2);assert.equal(pages[0].sha256.length,64);assert(!pages[0].text.includes('bad-script'));assert(!pages[0].text.includes('noise'));
+ for(const [fetchImpl,pattern] of [
+  [async()=>new Response('',{status:403}),/HTTP 403/],
+  [async()=>new Response('short',{headers:{'content-type':'text/html'}}),/insufficient/],
+  [async()=>new Response('pdf',{headers:{'content-type':'application\/pdf'}}),/HTML or plain text/],
+  [async()=>new Response('x'.repeat(1000001),{headers:{'content-type':'text/plain'}}),/too large/],
+  [async()=>new Response(null,{status:302,headers:{location:'http://127.0.0.1/private'}}),/Unsafe/],
+  [async()=>new Response(null,{status:302,headers:{location:urls[0]}}),/Too many/]
+ ])await assert.rejects(()=>retrieveSources(urls,{fetchImpl}),pattern);
 });
 test('October rejection stays held and diagnostics retain research and specific reasons',async()=>{
  const historical=JSON.parse(fs.readFileSync(path.join(root,'docs/editorial-incidents/2026-10-26/review.json'),'utf8'));
@@ -97,14 +116,14 @@ test('October rejection stays held and diagnostics retain research and specific 
  assert.deepEqual(context[0].checklist,existing[0].checklist);
  assert.deepEqual(topicContext([{title:'Prepared',sections:[['Heading','Body']]}])[0].sectionHeadings,['Heading']);
  const requests=[],audit=[];
- const results=[response('A distinct decision brief and claim-to-source map',true),response(fixture()),response(historical,true)];
- await assert.rejects(()=>generate({date:'2026-10-26',existing,request:async r=>{requests.push(r);return results.shift();},audit:(stage,value)=>audit.push({stage,value})}),/did not approve/);
+ const results=[response(plan,true),response(fixture()),response(historical,true)];
+ await assert.rejects(()=>generate({retrieve:evidence,date:'2026-10-26',existing,request:async r=>{requests.push(r);return results.shift();},audit:(stage,value)=>audit.push({stage,value})}),/did not approve/);
  assert.equal(requests.length,3);
  assert.equal(requests[0].max_tool_calls+requests[2].max_tool_calls,7);
  for(const request of requests)assert(JSON.stringify(request).includes(context[0].takeaway));
- assert.deepEqual(audit.map(a=>a.stage),['research','draft','review']);
- assert.deepEqual(audit[2].value.reasons,historical.reasons);
- assert.deepEqual(audit[0].value.openedSources,sources.map(s=>s.url));
+ assert.deepEqual(audit.map(a=>a.stage),['research','research-evidence','draft','review-evidence','review']);
+ assert.deepEqual(audit[4].value.reasons,historical.reasons);
+ assert.deepEqual(audit[0].value.consultedSources,sources.map(s=>s.url));
 });
 test('Draft numeric citation markers are held rather than rendered as broken citations',()=>{
  const draft=JSON.parse(fs.readFileSync(path.join(root,'docs/editorial-incidents/2026-10-26/draft.json'),'utf8'));
@@ -117,9 +136,10 @@ test('CLI persists reviewer reasons and cannot reuse a held weekly reservation',
  try{
   for(const p of ['content','scripts'])fs.cpSync(path.join(root,p),path.join(temp,p),{recursive:true});
   fs.rmSync(path.join(temp,'content/runs'),{recursive:true,force:true});
-  const results=[response('Distinct research notes',true),response(fixture()),response({approved:false,reasons:['Repeated operational decision']},true)];
+  fs.rmSync(path.join(temp,'content/generated'),{recursive:true,force:true});
+  const results=[response(plan,true),response(fixture()),response({approved:false,reasons:['Repeated operational decision']},true)];
   const mock=path.join(temp,'mock-fetch.mjs');
-  fs.writeFileSync(mock,`const results=${JSON.stringify(results)};globalThis.fetch=async()=>{if(!results.length)throw Error('Unexpected extra API request');return {ok:true,json:async()=>results.shift()};};`);
+  fs.writeFileSync(mock,`const results=${JSON.stringify(results)};globalThis.fetch=async url=>{if(!url.includes('api.openai.com'))return new Response(${JSON.stringify(section+section)},{headers:{'content-type':'text/plain'}});if(!results.length)throw Error('Unexpected extra API request');return {ok:true,json:async()=>results.shift()};};`);
   const env={...process.env,OPENAI_API_KEY:'fake-test-key-no-network',GITHUB_RUN_ID:'regression',GITHUB_OUTPUT:path.join(temp,'outputs.txt')};
   execFileSync(process.execPath,['scripts/editorial.mjs','reserve'],{cwd:temp,env,stdio:'pipe'});
   const run=()=>execFileSync(process.execPath,['--import',mock,'scripts/editorial.mjs','generate'],{cwd:temp,env,stdio:'pipe'});
