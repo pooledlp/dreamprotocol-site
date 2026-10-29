@@ -64,3 +64,9 @@ References:
 - https://developers.google.com/search/docs/fundamentals/using-gen-ai-content
 - https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages
 - https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows
+
+### Authorized review-only recovery
+
+An operator may preserve a diagnostic draft and research evidence metadata in a checksum-pinned recovery manifest, then mark its weekly record `review-pending` with `calls: 2`. This is an explicit recovery action, never an automatic retry. Reservation consumes that state once. Generation revalidates the draft, downloads both sources again, and spends only the third request on independent review. Rejection remains held. A changed manifest, unsafe path, wrong call count, or failed validation prevents recovery. The wording “not a guarantee” is treated as a disclaimer; positive guarantee claims still fail local validation.
+
+Pages artifacts are named per build attempt, and deployment receives the name from the build job output. This avoids duplicate-artifact ambiguity during workflow retries.

@@ -86,6 +86,8 @@ jobs:
           exit 1
 
   build:
+    outputs:
+      pages_artifact: github-pages-${{ github.run_attempt }}
     needs: editorial
     if: always() && !cancelled()
     runs-on: ubuntu-latest
@@ -125,6 +127,7 @@ jobs:
       - name: Upload website artifact
         uses: actions/upload-pages-artifact@v4
         with:
+          name: github-pages-${{ github.run_attempt }}
           path: _site
 
   deploy:
@@ -141,3 +144,5 @@ jobs:
       - name: Deploy the tested website
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          artifact_name: ${{ needs.build.outputs.pages_artifact }}

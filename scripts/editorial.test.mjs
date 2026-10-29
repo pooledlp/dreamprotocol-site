@@ -1,4 +1,5 @@
 import test from 'node:test';
+import {createHash} from 'node:crypto';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -163,4 +164,33 @@ test('Only matched trailing citation markers are normalized before review',()=>{
  assert.deepEqual(normalized.sections[0].sourceIndexes,[0,1]);
  a.sections[0].body+=' [99]';
  assert.throws(()=>validateArticle(normalizeDraft(a)),/numeric citation markers/);
+});
+
+test('A denial of a guarantee is allowed but a guarantee claim is still rejected',()=>{
+ const a=fixture();a.sections[0].body+=' This is not a guarantee of immediate delivery.';validateArticle(a);
+ a.sections[0].body+=' We guarantee immediate delivery.';
+ assert.throws(()=>validateArticle(a),/Unsupported claims/);
+ const recovery=JSON.parse(fs.readFileSync(path.join(root,'docs/editorial-incidents/2026-10-26/review-recovery.json'),'utf8'));
+ validateArticle(recovery.draft,[],recovery.researchEvidence.map(e=>e.url));
+});
+test('Authorized recovery consumes only the remaining review request and still holds rejection',()=>{
+ const temp=fs.mkdtempSync(path.join(os.tmpdir(),'dream-recovery-'));
+ try{
+  for(const p of ['content','scripts'])fs.cpSync(path.join(root,p),path.join(temp,p),{recursive:true});
+  fs.rmSync(path.join(temp,'content/runs'),{recursive:true,force:true});fs.mkdirSync(path.join(temp,'content/runs'));
+  fs.rmSync(path.join(temp,'content/generated'),{recursive:true,force:true});
+  const recoveryPath='docs/editorial-incidents/test.json';fs.mkdirSync(path.join(temp,'docs/editorial-incidents'),{recursive:true});
+  const raw=JSON.stringify({draft:fixture(),researchEvidence:sources,priorUsage:[null,null]});fs.writeFileSync(path.join(temp,recoveryPath),raw);
+  const date=new Date().toISOString().slice(0,10),week=weekKey(date),recordPath=path.join(temp,'content/runs',week+'.json');
+  fs.writeFileSync(recordPath,JSON.stringify({week,date,status:'review-pending',calls:2,recovery:{path:recoveryPath,sha256:createHash('sha256').update(raw).digest('hex')}}));
+  const mock=path.join(temp,'mock.mjs');
+  fs.writeFileSync(mock,`let calls=0;globalThis.fetch=async url=>{if(!url.includes('api.openai.com'))return new Response(${JSON.stringify(section+section)},{headers:{'content-type':'text/plain'}});if(++calls>1)throw Error('Repeated paid work');return {ok:true,json:async()=>(${JSON.stringify(response({approved:false,reasons:['Unsupported claim']}))})};};`);
+  const env={...process.env,OPENAI_API_KEY:'fake-no-network',GITHUB_RUN_ID:'recovery',GITHUB_OUTPUT:path.join(temp,'output')};
+  const cli=command=>execFileSync(process.execPath,['--import',mock,'scripts/editorial.mjs',command],{cwd:temp,env,stdio:'pipe'});
+  cli('reserve');cli('reserve');assert.equal(fs.readFileSync(env.GITHUB_OUTPUT,'utf8'),'reserved=true\nreserved=false\n');
+  assert.throws(()=>cli('generate'));
+  const record=JSON.parse(fs.readFileSync(recordPath,'utf8'));
+  assert.equal(record.calls,3);assert.equal(record.status,'held');assert.deepEqual(record.reviewReasons,['Unsupported claim']);
+  assert.throws(()=>cli('generate'),/No matching weekly reservation/);
+ }finally{fs.rmSync(temp,{recursive:true,force:true});}
 });

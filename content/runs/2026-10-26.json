@@ -1,9 +1,13 @@
 {
   "week": "2026-10-26",
   "date": "2026-10-29",
-  "status": "held",
+  "status": "review-pending",
   "runId": "40400514593",
   "calls": 2,
   "reviewReasons": [],
-  "reason": "Unsupported claims, inline links, or pricing need human review"
+  "reason": "Unsupported claims, inline links, or pricing need human review",
+  "recovery": {
+    "path": "docs/editorial-incidents/2026-10-26/review-recovery.json",
+    "sha256": "7e2ab716934873f80ac43bd62221d6f6e1be7f712cec39a8a17040128e78d7d9"
+  }
 }
