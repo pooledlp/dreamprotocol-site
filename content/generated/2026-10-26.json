@@ -1,0 +1,134 @@
+{
+  "slug": "gmail-push-vs-polling-for-inbox-automation",
+  "title": "Should your Gmail automation use push notifications or polling?",
+  "category": "Integrations",
+  "service": "ai-ready-it-projects",
+  "description": "A practical way to choose between Gmail push notifications and scheduled polling before you build a Google Workspace inbox automation.",
+  "takeaway": "Use Gmail push for backend workflows that need faster pickup and can operate Cloud Pub/Sub, watch renewal, and sync recovery. Use polling when some delay is acceptable and a simpler first version matters more.",
+  "sections": [
+    {
+      "heading": "Define the decision before you design the rest of the workflow",
+      "body": "If your business wants to automate work from a Gmail inbox, the first technical decision is not the AI prompt or the routing rule. It is how your system learns that the mailbox changed. Google’s Gmail API documentation describes two synchronization patterns: a full synchronization the first time a client connects, and partial synchronization later by calling history.list with a recent startHistoryId. The same documentation also says push notifications can trigger that partial synchronization in real time and avoid needless polling. In other words, push and polling are both valid starting points for detecting change, but they create different operating responsibilities. Google also draws a boundary around use case: the push-notification guide describes server push for a backend server application, while noting that poll-based synchronization is still the recommended retrieval approach for notifications to user-owned devices such as installed apps, mobile devices, or browsers. That makes this a business design choice about your operating model, not just a coding preference.",
+      "sourceIndexes": [
+        0,
+        1
+      ]
+    },
+    {
+      "heading": "Choose push when the inbox is time-sensitive and you can run the extra moving parts",
+      "body": "Push is the better fit when the inbox matters enough that you want your backend to react soon after a message arrives, and your team is prepared to operate the pieces Google requires. The push guide says Gmail uses Cloud Pub/Sub for delivery. You need a topic, a subscription, permissions that let gmail-api-push@system.gserviceaccount.com publish to that topic, and a watch request on each mailbox. Google says the watch response returns a historyId and an expiration timestamp, sends an immediate notification after a successful watch call, and requires renewal at least every 7 days, with a daily renewal recommended. The notification itself does not give you the full mailbox change; it gives you a new historyId, which your system then uses with history.list to retrieve the actual change details. That means push is not “set it and forget it.” It is a real-time trigger wrapped around the same history-based sync model. For a customer-facing backend workflow, that tradeoff can be worthwhile, but only if you accept the watch lifecycle, acknowledgement handling, and recovery work that come with it.",
+      "sourceIndexes": [
+        1,
+        0
+      ]
+    },
+    {
+      "heading": "Choose polling when acceptable delay matters less than operational simplicity",
+      "body": "Scheduled polling is usually the safer first version when your inbox can tolerate some delay and you want fewer infrastructure obligations. The sync guide says the first connection requires a full sync, after which a recently synchronized client can use history.list for a lightweight partial sync instead of repeating a full mailbox read. That means polling does not have to mean re-reading everything every time. A practical polling design can store the last known recent historyId and use partial synchronization on later runs, falling back to a full sync only when Gmail returns HTTP 404 because the supplied startHistoryId is outside the available history range. Compared with push, this path avoids Cloud Pub/Sub topic setup, mailbox watch renewal, and notification acknowledgement behavior. The tradeoff is that your system learns about changes on your chosen schedule rather than when Gmail publishes an event. If your workflow is an internal queue, a shared administrative inbox, or any process where immediate pickup is not essential, polling is often the more controlled place to start because the sync rules stay the same while the event-delivery layer stays simpler.",
+      "sourceIndexes": [
+        0,
+        1
+      ]
+    },
+    {
+      "heading": "A concrete hypothetical workflow for a shared business inbox",
+      "body": "Hypothetical example: a company wants its contact@ inbox to trigger an internal lead-triage workflow. In a push design, a backend service calls Gmail’s watch method for that mailbox, receives the initial historyId and expiration, and renews the watch on an ongoing schedule. When Cloud Pub/Sub delivers a notification, the backend acknowledges it, decodes the PubsubMessage payload to get the mailbox email address and new historyId, then calls history.list starting from the last stored historyId to learn what changed. After processing those changes, it stores the newer historyId for the next cycle. In a polling design, the same business could skip Cloud Pub/Sub entirely. The backend would do an initial full sync, store a recent historyId, and on each scheduled run call history.list from that stored point forward. The downstream lead-triage rules could be identical in both versions; the real difference is how mailbox change is detected. That is why this decision should be made before you scope drafting, classification, or routing logic. The detection layer shapes reliability expectations, recovery paths, and day-to-day ownership.",
+      "sourceIndexes": [
+        0,
+        1
+      ]
+    },
+    {
+      "heading": "Limits and failure cases should shape the scope from day one",
+      "body": "Neither option is perfect, and Google’s documented limits should directly affect your scoping. For synchronization, history records are typically available for at least one week and often longer, but the sync guide says availability can be significantly shorter and records can be unavailable in rare cases. If your saved startHistoryId falls outside the available range, Gmail returns HTTP 404 and your client must perform a full sync again. For push, Google says delivery is typically within a few seconds, but notifications can be delayed or dropped, so your application should still sync by periodically calling history.list after a period with no notifications. The push guide also sets a maximum notification rate of one event per second for each watched Gmail user, and says notifications above that rate are dropped. Those limitations lead to a clear business conclusion: push is not a guarantee of perfect immediacy, and polling is not a guarantee of permanent light-touch sync. Whichever path you choose, store mailbox state carefully, expect recovery events, and make sure a missed signal produces visible follow-up rather than silent inbox drift.",
+      "sourceIndexes": [
+        0,
+        1
+      ]
+    }
+  ],
+  "checklist": [
+    "Decide whether this inbox automation is a backend server workflow or a user-device experience before choosing push.",
+    "Classify the mailbox as time-sensitive or delay-tolerant so the detection method matches the business need.",
+    "Plan where the last known Gmail historyId will be stored and how it will be updated after each successful sync.",
+    "Choose push only if you are prepared to operate Cloud Pub/Sub setup, notification acknowledgement, and watch renewal.",
+    "Test the recovery path for a stale startHistoryId so the team knows when a full sync is required.",
+    "Include a fallback sync check even with push, because Gmail notifications can be delayed or dropped."
+  ],
+  "sources": [
+    {
+      "title": "Synchronize clients with Gmail",
+      "url": "https://developers.google.com/workspace/gmail/api/guides/sync?authuser=19&hl=en"
+    },
+    {
+      "title": "Configure push notifications with the Gmail API",
+      "url": "https://developers.google.com/workspace/gmail/api/guides/push"
+    }
+  ],
+  "publishOn": "2026-10-29",
+  "status": "scheduled",
+  "week": "2026-10-26",
+  "review": {
+    "approved": true,
+    "model": "gpt-5.4",
+    "reviewedOn": "2026-10-29"
+  },
+  "generation": {
+    "model": "gpt-5.4",
+    "sourceCheckedOn": "2026-10-29",
+    "evidence": [
+      {
+        "url": "https://developers.google.com/workspace/gmail/api/guides/sync?authuser=19&hl=en",
+        "finalUrl": "https://developers.google.com/workspace/gmail/api/guides/sync?authuser=19&hl=en",
+        "retrievedAt": "2026-10-29T05:53:32.440Z",
+        "sha256": "21512ae3b2ef563f0ee76649142de1d36e2d91c0bf81e1b3384db42c200185ef",
+        "truncated": false
+      },
+      {
+        "url": "https://developers.google.com/workspace/gmail/api/guides/push",
+        "finalUrl": "https://developers.google.com/workspace/gmail/api/guides/push",
+        "retrievedAt": "2026-10-29T05:53:31.508Z",
+        "sha256": "6d86740f44930702a16385209b0511dd91d0e3ecacaeec17aff736f100f03b33",
+        "truncated": false
+      }
+    ],
+    "usage": [
+      {
+        "input_tokens": 23217,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 7552
+        },
+        "output_tokens": 8695,
+        "output_tokens_details": {
+          "reasoning_tokens": 7112
+        },
+        "total_tokens": 31912
+      },
+      {
+        "input_tokens": 8751,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 3239,
+        "output_tokens_details": {
+          "reasoning_tokens": 1757
+        },
+        "total_tokens": 11990
+      },
+      {
+        "input_tokens": 21221,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 1367,
+        "output_tokens_details": {
+          "reasoning_tokens": 1348
+        },
+        "total_tokens": 22588
+      }
+    ]
+  }
+}
