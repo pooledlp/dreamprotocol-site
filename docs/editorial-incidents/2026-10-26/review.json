@@ -1,0 +1,116 @@
+{
+  "approved": false,
+  "reasons": [
+    "Reject as a repeated topic: it substantially overlaps with the already-approved existing topic “How to automate invoice intake in Microsoft 365 without overbuilding it,” so it does not feel like a sufficiently new publication angle.",
+    "The article is broadly consistent with Microsoft’s document-processing documentation, but that makes it a safe summary rather than a fresh operational decision piece; the core guidance—train and publish a model, start with five documents, use Power Automate, and handle outputs as strings with confidence scores—comes directly from the vendor docs rather than offering materially new editorial value. ([learn.microsoft.com](https://learn.microsoft.com/en-us/ai-builder/form-processing-model-overview))",
+    "The piece is too close to generic implementation advice for this publication slot and does not add a distinct, decision-driving perspective beyond the existing invoice-intake article and the documented product constraints. ([learn.microsoft.com](https://learn.microsoft.com/en-us/ai-builder/form-processing-model-overview))"
+  ],
+  "consultedSources": [
+    "https://learn.microsoft.com/en-us/ai-builder/form-processing-model-overview",
+    "https://learn.microsoft.com/en-us/ai-builder/form-processing-model-in-flow",
+    "https://learn.microsoft.com/ai-builder/create-form-processing-model",
+    "https://learn.microsoft.com/ai-builder/form-processing-faq",
+    "https://learn.microsoft.com/en-us/ai-builder/form-processing-model-requirements",
+    "https://learn.microsoft.com/en-us/ai-builder/form-processor-component-in-powerapps",
+    "https://learn.microsoft.com/en-us/ai-builder/prebuilt-contract-processing",
+    "https://learn.microsoft.com/en-us/microsoft-365/documentprocessing/form-processing-overview?view=o365-worldwide",
+    "https://learn.microsoft.com/en-us/ai-builder/form-processing-model-in-flow?trk=article-ssr-frontend-pulse_little-text-block",
+    "https://learn.microsoft.com/en-us/ai-builder/custom-overview",
+    "https://learn.microsoft.com/ai-builder/improve-form-processing-performance",
+    "https://learn.microsoft.com/en-us/ai-builder/flow-invoice-processing",
+    "https://learn.microsoft.com/en-us/azure/databricks/_extras/documents/reference-architecture-databricks-on-azure.pdf",
+    "https://learn.microsoft.com/en-us/%20Azure/databricks/_extras/documents/reference-architecture-databricks-on-azure.pdf",
+    "https://learn.microsoft.com/azure/databricks/_extras/documents/reference-architecture-databricks-on-azure.pdf",
+    "https://learn.microsoft.com/sv-se/azure/databricks/_extras/documents/reference-use-case-gen-ai-agent-for-azure.pdf",
+    "https://learn.microsoft.com/azure/databricks/_extras/documents/reference-use-case-bi-for-azure.pdf",
+    "https://learn.microsoft.com/id-id/azure/databricks/_extras/documents/reference-architecture-databricks-generic.pdf"
+  ],
+  "webActions": [
+    {
+      "type": "search",
+      "queries": [
+        "site:learn.microsoft.com AI Builder form processing model overview Power Automate five documents strings confidence Process documents",
+        "site:learn.microsoft.com AI Builder form processing model requirements PDF password protected 20 MB split page rows break across pages"
+      ],
+      "query": "site:learn.microsoft.com AI Builder form processing model overview Power Automate five documents strings confidence Process documents",
+      "sources": [
+        {
+          "type": "url",
+          "url": "https://learn.microsoft.com/en-us/ai-builder/form-processing-model-overview"
+        },
+        {
+          "type": "url",
+          "url": "https://learn.microsoft.com/en-us/ai-builder/form-processing-model-in-flow"
+        },
+        {
+          "type": "url",
+          "url": "https://learn.microsoft.com/ai-builder/create-form-processing-model"
+        },
+        {
+          "type": "url",
+          "url": "https://learn.microsoft.com/ai-builder/form-processing-faq"
+        },
+        {
+          "type": "url",
+          "url": "https://learn.microsoft.com/en-us/ai-builder/form-processing-model-requirements"
+        },
+        {
+          "type": "url",
+          "url": "https://learn.microsoft.com/en-us/ai-builder/form-processor-component-in-powerapps"
+        },
+        {
+          "type": "url",
+          "url": "https://learn.microsoft.com/en-us/ai-builder/prebuilt-contract-processing"
+        },
+        {
+          "type": "url",
+          "url": "https://learn.microsoft.com/en-us/microsoft-365/documentprocessing/form-processing-overview?view=o365-worldwide"
+        },
+        {
+          "type": "url",
+          "url": "https://learn.microsoft.com/en-us/ai-builder/form-processing-model-in-flow?trk=article-ssr-frontend-pulse_little-text-block"
+        },
+        {
+          "type": "url",
+          "url": "https://learn.microsoft.com/en-us/ai-builder/custom-overview"
+        },
+        {
+          "type": "url",
+          "url": "https://learn.microsoft.com/ai-builder/improve-form-processing-performance"
+        },
+        {
+          "type": "url",
+          "url": "https://learn.microsoft.com/en-us/ai-builder/flow-invoice-processing"
+        },
+        {
+          "type": "url",
+          "url": "https://learn.microsoft.com/en-us/azure/databricks/_extras/documents/reference-architecture-databricks-on-azure.pdf"
+        },
+        {
+          "type": "url",
+          "url": "https://learn.microsoft.com/en-us/%20Azure/databricks/_extras/documents/reference-architecture-databricks-on-azure.pdf"
+        },
+        {
+          "type": "url",
+          "url": "https://learn.microsoft.com/azure/databricks/_extras/documents/reference-architecture-databricks-on-azure.pdf"
+        },
+        {
+          "type": "url",
+          "url": "https://learn.microsoft.com/sv-se/azure/databricks/_extras/documents/reference-use-case-gen-ai-agent-for-azure.pdf"
+        },
+        {
+          "type": "url",
+          "url": "https://learn.microsoft.com/azure/databricks/_extras/documents/reference-use-case-bi-for-azure.pdf"
+        },
+        {
+          "type": "url",
+          "url": "https://learn.microsoft.com/id-id/azure/databricks/_extras/documents/reference-architecture-databricks-generic.pdf"
+        }
+      ]
+    },
+    {
+      "type": "open_page",
+      "url": "https://learn.microsoft.com/en-us/ai-builder/form-processing-model-overview"
+    }
+  ]
+}

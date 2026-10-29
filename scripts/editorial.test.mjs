@@ -5,13 +5,13 @@ import os from 'node:os';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
-import {weekKey,safeSource,responseText,validateArticle,generate,loadGenerated} from './editorial.mjs';
+import {weekKey,safeSource,responseText,validateArticle,generate,loadGenerated,openedSources,topicContext} from './editorial.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const sources=[{title:'Microsoft integration documentation',url:'https://learn.microsoft.com/power-automate/getting-started'},{title:'Google Workspace support documentation',url:'https://support.google.com/a/answer/12345'}];
 // Deliberately synthetic fixture; never deployed or represented as researched content.
 const section='A business can begin by identifying the owner of each incoming request and the information needed for the next decision. This hypothetical workflow illustrates a planning method rather than a promised product feature. Write down what should happen when information is missing, who reviews the exception, and how the team records the outcome. Test the process with sample requests before connecting live systems. The person responsible for the workflow should confirm access and routing with the administrator. Keep the first trial limited to a single process so the team can understand why a request reaches a particular person. Review the sample results together and revise the written handoff instructions before expanding the trial. ';
 const fixture=()=>({slug:'shared-inbox-routing-ownership',title:'How to assign ownership in a shared business inbox',category:'Workflow planning',service:'workflow-automation',description:'Map shared inbox ownership, define exception handling, and prepare a small trial before connecting your business systems together.',takeaway:'Start with a named owner and a written handoff rule, then test the process using sample requests before connecting live customer information.',sections:Array.from({length:4},(_,i)=>({heading:'Planning step '+(i+1)+' for your team',body:section+section.slice(0,350),sourceIndexes:[i%2]})),checklist:['Name a person responsible for reviewing incoming requests.','Write down which details the next team member needs.','Test a small set of sample requests before launch.','Confirm how staff should handle missing information.'],sources:structuredClone(sources)});
-const response=(value,withSources=false)=>({status:'completed',output:[...(withSources?[{type:'web_search_call',status:'completed',action:{sources:sources.map(s=>({url:s.url}))}}]:[]),{type:'message',content:[{type:'output_text',text:typeof value==='string'?value:JSON.stringify(value)}]}],usage:{input_tokens:1,output_tokens:1}});
+const response=(value,withSources=false)=>({status:'completed',output:[...(withSources?sources.map(s=>({type:'web_search_call',status:'completed',action:{type:'open_page',url:s.url}})):[]),{type:'message',content:[{type:'output_text',text:typeof value==='string'?value:JSON.stringify(value)}]}],usage:{input_tokens:1,output_tokens:1}});
 test('Weekly boundaries and primary-source URL checks are strict',()=>{
  assert.equal(weekKey('2026-09-13'),'2026-09-07');assert.equal(weekKey('2026-09-14'),'2026-09-14');
  assert.throws(()=>weekKey('2026-02-30'));
@@ -71,6 +71,67 @@ test('Reservation persists once and missing credentials never reserve paid work'
   env.OPENAI_API_KEY='fake-test-key-no-network';
   for(let i=0;i<2;i++)execFileSync(process.execPath,['scripts/editorial.mjs','reserve'],{cwd:temp,env,stdio:'pipe'});
   assert.equal(fs.readdirSync(path.join(temp,'content/runs')).length,1);
+  assert.equal(fs.readFileSync(env.GITHUB_OUTPUT,'utf8'),'reserved=true\nreserved=false\n');
+ }finally{fs.rmSync(temp,{recursive:true,force:true});}
+});
+
+test('Search discovery and citations cannot satisfy explicit source opening',async()=>{
+ const searchOnly=response({approved:true,reasons:[]});
+ searchOnly.output.unshift({type:'web_search_call',status:'completed',action:{type:'search',sources:sources.map(s=>({url:s.url}))}});
+ searchOnly.output[1].content[0].annotations=sources.map(s=>({type:'url_citation',url:s.url}));
+ assert.deepEqual(openedSources(searchOnly),[]);
+ const rejectedResearch=[{...searchOnly,output:[...searchOnly.output.slice(0,1),...response('Research notes').output]}];
+ await assert.rejects(()=>generate({date:'2026-10-26',existing:[],request:async()=>rejectedResearch.shift()}),/explicitly open/);
+ for(const review of [searchOnly,{...searchOnly,output:[...searchOnly.output,{type:'web_search_call',status:'completed',action:{type:'open_page',url:sources[0].url}}]}]){
+  const results=[response('Research notes',true),response(fixture()),review];
+  await assert.rejects(()=>generate({date:'2026-10-26',existing:[],request:async()=>results.shift()}),/every cited source/);
+ }
+ assert.deepEqual(openedSources({output:[{type:'web_search_call',status:'failed',action:{type:'open_page',url:sources[0].url}}]}),[]);
+});
+test('October rejection stays held and diagnostics retain research and specific reasons',async()=>{
+ const historical=JSON.parse(fs.readFileSync(path.join(root,'docs/editorial-incidents/2026-10-26/review.json'),'utf8'));
+ const existing=[JSON.parse(fs.readFileSync(path.join(root,'content/generated/2026-09-28.json'),'utf8'))];
+ const context=topicContext(existing);
+ assert(context[0].takeaway.includes('invoice'));
+ assert(context[0].sectionHeadings.includes('Treat the extracted fields as raw inputs, not final answers'));
+ assert.deepEqual(context[0].checklist,existing[0].checklist);
+ assert.deepEqual(topicContext([{title:'Prepared',sections:[['Heading','Body']]}])[0].sectionHeadings,['Heading']);
+ const requests=[],audit=[];
+ const results=[response('A distinct decision brief and claim-to-source map',true),response(fixture()),response(historical,true)];
+ await assert.rejects(()=>generate({date:'2026-10-26',existing,request:async r=>{requests.push(r);return results.shift();},audit:(stage,value)=>audit.push({stage,value})}),/did not approve/);
+ assert.equal(requests.length,3);
+ assert.equal(requests[0].max_tool_calls+requests[2].max_tool_calls,7);
+ for(const request of requests)assert(JSON.stringify(request).includes(context[0].takeaway));
+ assert.deepEqual(audit.map(a=>a.stage),['research','draft','review']);
+ assert.deepEqual(audit[2].value.reasons,historical.reasons);
+ assert.deepEqual(audit[0].value.openedSources,sources.map(s=>s.url));
+});
+test('Draft numeric citation markers are held rather than rendered as broken citations',()=>{
+ const draft=JSON.parse(fs.readFileSync(path.join(root,'docs/editorial-incidents/2026-10-26/draft.json'),'utf8'));
+ assert.throws(()=>validateArticle(draft),/numeric citation markers/);
+ const a=fixture();a.sections[0].body+=' [0][1]';
+ assert.throws(()=>validateArticle(a),/numeric citation markers/);
+});
+test('CLI persists reviewer reasons and cannot reuse a held weekly reservation',()=>{
+ const temp=fs.mkdtempSync(path.join(os.tmpdir(),'dream-held-'));
+ try{
+  for(const p of ['content','scripts'])fs.cpSync(path.join(root,p),path.join(temp,p),{recursive:true});
+  fs.rmSync(path.join(temp,'content/runs'),{recursive:true,force:true});
+  const results=[response('Distinct research notes',true),response(fixture()),response({approved:false,reasons:['Repeated operational decision']},true)];
+  const mock=path.join(temp,'mock-fetch.mjs');
+  fs.writeFileSync(mock,`const results=${JSON.stringify(results)};globalThis.fetch=async()=>{if(!results.length)throw Error('Unexpected extra API request');return {ok:true,json:async()=>results.shift()};};`);
+  const env={...process.env,OPENAI_API_KEY:'fake-test-key-no-network',GITHUB_RUN_ID:'regression',GITHUB_OUTPUT:path.join(temp,'outputs.txt')};
+  execFileSync(process.execPath,['scripts/editorial.mjs','reserve'],{cwd:temp,env,stdio:'pipe'});
+  const run=()=>execFileSync(process.execPath,['--import',mock,'scripts/editorial.mjs','generate'],{cwd:temp,env,stdio:'pipe'});
+  assert.throws(run);
+  const date=new Date().toISOString().slice(0,10),week=weekKey(date);
+  const record=JSON.parse(fs.readFileSync(path.join(temp,'content/runs',week+'.json'),'utf8'));
+  assert.equal(record.status,'held');assert.equal(record.calls,3);
+  assert.deepEqual(record.reviewReasons,['Repeated operational decision']);
+  assert(!fs.existsSync(path.join(temp,'content/generated',week+'.json')));
+  assert(fs.existsSync(path.join(temp,'_editorial/research.json')));
+  assert.throws(run,/No matching weekly reservation/);
+  execFileSync(process.execPath,['scripts/editorial.mjs','reserve'],{cwd:temp,env,stdio:'pipe'});
   assert.equal(fs.readFileSync(env.GITHUB_OUTPUT,'utf8'),'reserved=true\nreserved=false\n');
  }finally{fs.rmSync(temp,{recursive:true,force:true});}
 });
