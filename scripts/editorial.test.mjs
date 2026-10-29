@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
-import {weekKey,safeSource,responseText,validateArticle,generate,loadGenerated,openedSources,topicContext,retrieveSources} from './editorial.mjs';
+import {weekKey,safeSource,responseText,validateArticle,generate,loadGenerated,openedSources,topicContext,retrieveSources,normalizeDraft} from './editorial.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const sources=[{title:'Microsoft integration documentation',url:'https://learn.microsoft.com/power-automate/getting-started'},{title:'Google Workspace support documentation',url:'https://support.google.com/a/answer/12345'}];
 // Deliberately synthetic fixture; never deployed or represented as researched content.
@@ -121,8 +121,8 @@ test('October rejection stays held and diagnostics retain research and specific 
  assert.equal(requests.length,3);
  assert.equal(requests[0].max_tool_calls+requests[2].max_tool_calls,7);
  for(const request of requests)assert(JSON.stringify(request).includes(context[0].takeaway));
- assert.deepEqual(audit.map(a=>a.stage),['research','research-evidence','draft','review-evidence','review']);
- assert.deepEqual(audit[4].value.reasons,historical.reasons);
+ assert.deepEqual(audit.map(a=>a.stage),['research','research-evidence','draft','normalized-draft','review-evidence','review']);
+ assert.deepEqual(audit[5].value.reasons,historical.reasons);
  assert.deepEqual(audit[0].value.consultedSources,sources.map(s=>s.url));
 });
 test('Draft numeric citation markers are held rather than rendered as broken citations',()=>{
@@ -154,4 +154,13 @@ test('CLI persists reviewer reasons and cannot reuse a held weekly reservation',
   execFileSync(process.execPath,['scripts/editorial.mjs','reserve'],{cwd:temp,env,stdio:'pipe'});
   assert.equal(fs.readFileSync(env.GITHUB_OUTPUT,'utf8'),'reserved=true\nreserved=false\n');
  }finally{fs.rmSync(temp,{recursive:true,force:true});}
+});
+
+test('Only matched trailing citation markers are normalized before review',()=>{
+ const a=fixture();a.sections[0].sourceIndexes=[0,1];a.sections[0].body+=' [0][1]';
+ const normalized=normalizeDraft(a);validateArticle(normalized);
+ assert(a.sections[0].body.endsWith('[0][1]'));
+ assert.deepEqual(normalized.sections[0].sourceIndexes,[0,1]);
+ a.sections[0].body+=' [99]';
+ assert.throws(()=>validateArticle(normalizeDraft(a)),/numeric citation markers/);
 });

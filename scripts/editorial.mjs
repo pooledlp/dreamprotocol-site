@@ -6,7 +6,7 @@ import {services} from '../content/services.mjs';
 import {guides as prepared} from '../content/guides.mjs';
 
 export const domains=['openai.com','learn.microsoft.com','microsoft.com','workspace.google.com','workspaceupdates.googleblog.com','support.google.com','developers.google.com','salesforce.com','hubspot.com'];
-export const model='gpt-5.4-mini';
+export const model='gpt-5.4';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const string={type:'string'};
 const array=items=>({type:'array',items});
@@ -82,6 +82,19 @@ export function topicContext(existing){
  }));
 }
 function text(value,min,max){return typeof value==='string'&&value.trim().length>=min&&value.length<=max&&!/[<>\u0000-\u0008]/.test(value);}
+export function normalizeDraft(candidate){
+ const a=structuredClone(candidate);
+ // Only remove redundant trailing markers whose indexes already exist on that section.
+ // Never invent citations or strip an unmatched marker to hide missing evidence.
+ for(const section of a?.sections||[]){
+  if(typeof section.body!=='string'||!Array.isArray(section.sourceIndexes))continue;
+  section.body=section.body.replace(/(?:\s*\[\d+\])+\s*$/g,suffix=>{
+   const indexes=[...suffix.matchAll(/\[(\d+)\]/g)].map(m=>Number(m[1]));
+   return indexes.every(i=>section.sourceIndexes.includes(i))?'':suffix;
+  }).trim();
+ }
+ return a;
+}
 export function validateArticle(a,existing=[],consulted=null){
  const fail=message=>{throw Error(message);};
  if(!a||!text(a.slug,8,85)||!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(a.slug))fail('Invalid article slug');
@@ -133,9 +146,10 @@ export async function generate({date,existing,request,retrieve=retrieveSources,a
  const sources=plan.sources.map(s=>norm(s.url));
  const evidence=await retrieve(sources);audit('research-evidence',evidence);
  const researchText=JSON.stringify({decision:plan.decision,notes:plan.notes});
- const draft=await request({instructions:policy,input:'Write a 750–1100 word practical guide based ONLY on the downloaded source evidence and approved context. Research notes are a proposal, not evidence; discard any note not supported by the downloaded pages. Four to seven sections of 200–2300 characters each; plain prose without Markdown or HTML. Choose exactly TWO supporting sources from retrievedSources and put them in your returned sources array. Section sourceIndexes refer to YOUR TWO returned sources: 0 means your first source, 1 means your second; these are NOT indexes into retrievedSources. Every section needs at least one reference. 90–180 character description. Four to seven actionable checklist items. Follow the decision brief: compare real options, explain when each is appropriate, and offer a distinct business decision beyond existingTopics. Include limitations and a concrete hypothetical workflow. Cite only claims actually supported by the selected two pages; omit implementation details that require other sources. Hypothetical workflows must still use accurate vendor terminology and capabilities. Do not write numeric citation markers such as [0] in prose; sourceIndexes render the citations. Use exact source URLs. Return the article schema. '+JSON.stringify({context:JSON.parse(context),researchNotes:researchText,retrievedSources:sources,evidence}),text:{format:{type:'json_schema',name:'business_guide',strict:true,schema:articleSchema}},max_output_tokens:6500});
+ const draft=await request({instructions:policy,input:'Write a 750–1100 word practical guide based ONLY on the downloaded source evidence and approved context. Research notes are a proposal, not evidence; discard any note not supported by the downloaded pages. Four to seven sections of 200–2300 characters each; plain prose without Markdown or HTML. Choose exactly TWO supporting sources from retrievedSources and put them in your returned sources array. Section sourceIndexes refer to YOUR TWO returned sources: 0 means your first source, 1 means your second; these are NOT indexes into retrievedSources. Every section needs at least one reference. 90–180 character description. Four to seven actionable checklist items. Follow the decision brief: compare real options, explain when each is appropriate, and offer a distinct business decision beyond existingTopics. Include limitations and a concrete hypothetical workflow. Cite only claims actually supported by the selected two pages; omit implementation details that require other sources. Hypothetical workflows must still use accurate vendor terminology and capabilities. Do not transfer a desktop-flow feature to a cloud flow, or confuse connector types. Write a complete short title; never truncate a word or sentence to meet length limits. Do not write numeric citation markers such as [0] in prose; sourceIndexes render the citations. Use exact source URLs. Return the article schema. '+JSON.stringify({context:JSON.parse(context),researchNotes:researchText,retrievedSources:sources,evidence}),text:{format:{type:'json_schema',name:'business_guide',strict:true,schema:articleSchema}},max_output_tokens:6500});
  const candidate=JSON.parse(responseText(draft));audit('draft',candidate);
- const article=validateArticle(candidate,existing,sources);
+ const article=validateArticle(normalizeDraft(candidate),existing,sources);
+ audit('normalized-draft',article);
  const reviewEvidence=await retrieve(article.sources.map(s=>s.url));audit('review-evidence',reviewEvidence);
  const reviewResponse=await request({instructions:policy+' You are now the independent publication reviewer. Reject any unsupported vendor capability, inaccurate or uncited factual claim, close paraphrase, thin or generic content, repeated topic, invented company experience, or advice outside scope. The application independently downloaded both cited pages again immediately before this review. Read the supplied reviewEvidence in full and use web search for additional verification where useful. Reject if page text is a login, error, irrelevant page, or does not support a claim. A hypothetical example never excuses inaccurate vendor terminology. General operational recommendations may be original analysis; they must be clearly framed as recommendations, not attributed to a vendor. Do not reject original analysis merely because a vendor does not prescribe it. Check each section against its indexed sources, including trigger types and other implementation details in hypothetical examples. Compare the operational decision against existingTopics, not just title wording; reject a renamed version of an existing workflow. A plausible article is insufficient; approve only if evidence supports it and it helps a business make a concrete decision. Return approved true with an empty reasons array only if every check passes; otherwise return approved false with the specific rejection reasons.',input:JSON.stringify({article,reviewEvidence,approvedContext:JSON.parse(context)}),tools:[{type:'web_search',filters:{allowed_domains:domains}}],tool_choice:'required',max_tool_calls:3,include:['web_search_call.action.sources'],text:{format:{type:'json_schema',name:'publication_review',strict:true,schema:reviewSchema}},max_output_tokens:3500});
  const review=JSON.parse(responseText(reviewResponse));
@@ -169,7 +183,7 @@ async function main(){
  const request=async body=>{
   if(JSON.stringify(body).length>160000)throw Error('Editorial input limit reached; review the topic archive');
   if(++calls>3)throw Error('Weekly request limit reached');
-  const response=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{Authorization:'Bearer '+process.env.OPENAI_API_KEY,'Content-Type':'application/json'},body:JSON.stringify({model,store:false,reasoning:{effort:'low'},...body}),signal:AbortSignal.timeout(180000)});
+  const response=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{Authorization:'Bearer '+process.env.OPENAI_API_KEY,'Content-Type':'application/json'},body:JSON.stringify({model,store:false,reasoning:{effort:'medium'},...body}),signal:AbortSignal.timeout(180000)});
   // Do not log response bodies: errors may contain request data. No automatic retries.
   if(!response.ok)throw Error('AI service returned HTTP '+response.status);
   return response.json();
