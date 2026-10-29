@@ -1,0 +1,65 @@
+{
+  "slug": "should-small-businesses-automate-invoice-intake-with-ai-builder-or-keep-it-manual",
+  "title": "When to Automate Invoice or Intake-Form Extraction with Power Automate and AI Builder",
+  "category": "workflow automation",
+  "service": "workflow-automation",
+  "description": "A practical guide for deciding whether AI Builder document processing is a good fit for invoice or intake-form handling, and how to keep exceptions under control.",
+  "takeaway": "Use document automation when the input is repeatable enough to train, validate, and route; keep manual review for messy scans, shifting layouts, and edge cases.",
+  "sections": [
+    {
+      "heading": "Start with the shape of the work, not the tool",
+      "body": "The first decision is whether the incoming documents are consistent enough to justify automation. Microsoft’s guidance frames AI Builder document processing as a fit for repeatable document types where you want to extract fields into Power Automate or Power Apps after training and publishing a model. That means the business question is not “can AI read paperwork?” but “do we receive enough of the same paperwork to standardize the workflow?” In a small business, the best candidates are forms or invoices with stable fields, predictable labels, and a clear downstream destination for the data. If staff still have to interpret every document differently, the process is usually too variable for a clean first build. A practical rule is to automate the extraction step only when the team can agree on what the system should capture, where it should send the data, and what happens when confidence is low or the file is unusual. That keeps the project tied to an operational outcome instead of a vague automation experiment. Microsoft notes you can get started with five documents, which makes the barrier to testing low, but low setup effort does not remove the need for a real review process. [0]",
+      "sourceIndexes": [
+        0
+      ]
+    },
+    {
+      "heading": "Check the document limits before promising automation",
+      "body": "The most common implementation mistake is assuming every PDF is equally usable. Microsoft documents specific input constraints: JPG, PNG, and PDF are supported; password-protected PDFs are not; file size is capped at 20 MB; and the quality of scans matters. It also notes that fields split across page boundaries and rows that break across pages are not supported. Those limits shape the operational decision. If your invoices arrive as clean PDFs from the same vendor, the workflow can be straightforward. If they arrive as phone photos, skewed scans, or messy multi-page packets, you need more exception handling, or you may want to keep the process manual. A useful internal test is to gather a small sample of the real files you receive, not a polished subset, and ask whether the hardest examples still look manageable. If a document regularly needs human interpretation because a table continues onto the next page or key values are buried in inconsistent layouts, the automation should be designed to route those cases to review instead of forcing a bad extract into your system. That is how you keep the build reliable without overpromising what the model can do. [1]",
+      "sourceIndexes": [
+        1
+      ]
+    },
+    {
+      "heading": "Design the flow around confidence, cleanup, and review",
+      "body": "In Power Automate, Microsoft now refers to the action as Process documents, and the extracted values are returned as strings. That matters because the workflow does not end at extraction. Numbers may need conversion, dates may need parsing, and confidence scores may need branching logic before anything is written into a ledger, spreadsheet, or case record. This is where a small business can make the process safer: use the AI output to speed up the first pass, then add conditions so low-confidence or oddly formatted results are reviewed by a person. A strong pattern is to extract the fields, convert or normalize them, and then compare those results against simple rules, such as whether the total is present, whether the invoice number exists, and whether the confidence level is acceptable. If not, the flow should stop and hand off to staff instead of silently continuing. That approach keeps the automation useful while preserving human control over exceptions. In other words, AI should reduce typing and sorting, not remove judgment from a process that still depends on accuracy. [0]",
+      "sourceIndexes": [
+        0
+      ]
+    },
+    {
+      "heading": "A concrete hypothetical workflow for a bookkeeping team",
+      "body": "Imagine a Bay Area bookkeeping team that receives vendor invoices by email. The team builds an instant cloud flow that triggers when an invoice arrives, sends the file to Process documents, extracts invoice number, vendor name, due date, and total, and then converts the total into a numeric format for downstream use. If the extracted fields pass basic checks and the confidence is acceptable, the flow posts the details to a review channel for a staff member to approve before the data is written into the accounting tracker. If the file is a clean, password-free PDF under 20 MB with a consistent layout, the flow can move quickly. If the invoice is a phone photo, a badly scanned PDF, or a multi-page packet where the amount table breaks across pages, the flow should route the item to manual review. That workflow is practical because it matches the documented limits rather than pretending the model can handle any input. It also keeps a human in the loop for approvals, which is important when the extracted information affects payments or recordkeeping. The result is not full automation of accounting judgment; it is a controlled handoff from document to data, with exceptions clearly separated from routine cases. [1][0]",
+      "sourceIndexes": [
+        1,
+        0
+      ]
+    },
+    {
+      "heading": "When manual review is still the better choice",
+      "body": "This kind of automation is not a universal replacement for staff. Manual handling is often the better option when the document set is small, highly variable, or frequently outside the supported limits. It is also the safer choice when the business has not yet defined the downstream rules for what to do with incomplete, ambiguous, or low-confidence extractions. Microsoft’s documentation makes clear that training and publishing a model are part of the process, which means the system needs upkeep, sample review, and a way to handle exceptions over time. For a small business, the real comparison is not automation versus no automation; it is whether the time saved on repetitive typing outweighs the time needed to manage model quality and edge cases. If your current process already works and the documents are inconsistent, keep it manual for now. If the process is repetitive, the input is stable, and the team can agree on validation rules, AI Builder can remove a lot of routine entry without taking away operational control. The right answer is the one that matches the document reality you actually have, not the one that sounds most advanced. [0][1]",
+      "sourceIndexes": [
+        0,
+        1
+      ]
+    }
+  ],
+  "checklist": [
+    "Collect 10 to 20 real documents and test them against the documented file limits before building anything.",
+    "Define the exact fields you want extracted and where each field should go after review.",
+    "Add confidence-based routing so low-quality or unusual documents go to a person.",
+    "Convert string outputs into the correct number, date, or text formats before writing to another system.",
+    "Keep a manual fallback for password-protected, oversized, split-field, or messy scans.",
+    "Pilot the flow on one document type first, then expand only if the exception rate stays manageable."
+  ],
+  "sources": [
+    {
+      "title": "AI Builder form processing model overview",
+      "url": "https://learn.microsoft.com/en-us/ai-builder/form-processing-model-overview"
+    },
+    {
+      "title": "AI Builder form processing model requirements",
+      "url": "https://learn.microsoft.com/en-us/ai-builder/form-processing-model-requirements"
+    }
+  ]
+}
