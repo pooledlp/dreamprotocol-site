@@ -1,5 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
 import worker from '../analytics-worker/src/worker.mjs';
 
 const req=(url,options={})=>new Request(url,options);
@@ -49,4 +51,29 @@ test('phone demo tap event is accepted without contact information',async()=>{
   assert.equal(result.status,204);
   assert.equal(received[1],'call_click');
   assert.equal(received[8],'hero');
+});
+
+test('campaign tagging handles Outlook-corrupted and one-parameter email links',()=>{
+  const js=fs.readFileSync(new URL('../assets/telemetry.js',import.meta.url),'utf8');
+  for(const [search,campaign] of [
+    ['?utm_source=outbound&utm;_medium=email&utm;_campaign=nov2026_blitz_a','nov2026_blitz_a'],
+    ['?utm_campaign=nov2026_blitz_b','nov2026_blitz_b']
+  ]){
+    const events=[];
+    const store=new Map();
+    const fake={
+      navigator:{doNotTrack:'0',globalPrivacyControl:false,sendBeacon:(_endpoint,blob)=>{events.push(JSON.parse(blob.parts[0]));return true}},
+      location:{search,pathname:'/',hostname:'dreamprotocol.ai'},
+      document:{referrer:'',addEventListener(){}},
+      sessionStorage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,v)},
+      crypto:{randomUUID:()=> '7e53d2ce-3a88-41c8-b77d-d00eac8f4fea'},
+      Blob:class{constructor(parts){this.parts=parts}},
+      URLSearchParams,URL,window:{},Date
+    };
+    vm.runInNewContext(js,fake);
+    assert.equal(events[0].event,'page_view');
+    assert.equal(events[0].campaign,campaign);
+    assert.equal(events[0].source,'outbound');
+    assert.equal(events[0].medium,'email');
+  }
 });
