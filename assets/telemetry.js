@@ -22,8 +22,16 @@
   try {
     const saved = sessionStorage.getItem('dp_utm');
     campaign = saved ? JSON.parse(saved) : {};
-    if (params.get('utm_source') || params.get('utm_campaign')) {
-      campaign = {utm_source:normalize(params.get('utm_source')),utm_medium:normalize(params.get('utm_medium')),utm_campaign:normalize(params.get('utm_campaign'))};
+    // Outlook sometimes turns &utm_medium and &utm_campaign into
+    // &utm;_medium and &utm;_campaign in outgoing plain-text messages.
+    // Accept both, and prefer a single-parameter campaign link going forward.
+    const tagged = key => normalize(params.get(key) || params.get(key.replace('utm_', 'utm;_')));
+    const campaignName = tagged('utm_campaign');
+    const emailBlitz = /^nov2026_blitz_[ab]$/.test(campaignName);
+    const source = tagged('utm_source') || (emailBlitz ? 'outbound' : '');
+    const medium = tagged('utm_medium') || (emailBlitz ? 'email' : '');
+    if (source || campaignName) {
+      campaign = {utm_source:source,utm_medium:medium,utm_campaign:campaignName};
       sessionStorage.setItem('dp_utm',JSON.stringify(campaign));
     }
   } catch {}
