@@ -4,11 +4,11 @@
 Generate qualified conversations from a live public-site voice demo, not generic awareness impressions.
 
 ## Live link
-Use the already-published homepage demo until the /try/ campaign page is deployed:
-https://dreamprotocol.ai/?utm_source=outbound&utm_medium=email&utm_campaign=nov2026_blitz_a#demo
+Use the live homepage's anchored demo and exactly ONE query parameter, because Outlook rewrites multi-parameter UTM URLs in outbound plain-text messages:
+A: https://dreamprotocol.ai/?utm_campaign=nov2026_blitz_a#demo
+B: https://dreamprotocol.ai/?utm_campaign=nov2026_blitz_b#demo
 
-Variant B uses nov2026_blitz_b as utm_campaign.
-Use clean URL ampersands in plain text. Never paste HTML-escaped ampersand strings or malformed tracking parameters.
+The site's first-party telemetry recognizes both campaign names as outbound/email, and tolerates the malformed parameter spelling in previously sent November 6 messages. Never re-email an otherwise valid prospect solely to fix tracking. Verify the actual sent message's URL after each batch.
 
 ## Offer
 "Enter your business website. Try a sample AI receptionist based on public details. Talk to it."
@@ -31,7 +31,7 @@ Send each prospect only one variant. Compare website sessions, scans, voice-demo
 - Address from November 3 outbound footers: Dream Protocol LLC, 1005 Northgate Drive, Suite 131, San Rafael, CA 94903.
 - Honor unsubscribe requests before new sends.
 - Do not email sensitive patient/client data or put it into the public demo.
-- Track utm_source, utm_medium, utm_campaign in first-party analytics; the /try/ landing page includes assets/telemetry.js.
+- Track utm_campaign in first-party analytics for Outlook; infer outbound/email from the known variant name. The /try/ landing page includes assets/telemetry.js.
 - Allow 4-5 business days before one polite follow-up; stop on response or opt-out.
 - Reporting: attempted, sent, bounced, qualified replies, unique website sessions, demo_scanned, demo_voice_started, lead_success.
 
