@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dream Protocol Live | Build Your AI Business Demo</title>
+<meta name="description" content="Scan your public business website, explore a personalized AI front desk, simulate an approved workflow, and request an automation plan.">
+<link rel="canonical" href="https://dreamprotocol.ai/live/">
+<meta name="theme-color" content="#101717">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Dream Protocol Live | See AI Working for Your Business">
+<meta property="og:description" content="A guided, interactive AI business demo built from your public website.">
+<meta property="og:url" content="https://dreamprotocol.ai/live/">
+<meta property="og:image" content="https://dreamprotocol.ai/public/dream-protocol-abstract.webp">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/live.css">
+<script defer src="/attribution.js"></script>
+<script defer src="/assets/telemetry.js"></script>
+<script defer src="/assets/live.js"></script>
+<script defer src="/assets/webmcp.js"></script>
+</head>
+<body data-page="live">
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <div class="shell topbar-inner">
+    <a class="brand" href="/" aria-label="Dream Protocol home"><span class="brand-mark" aria-hidden="true">✳</span><span>dream<strong>protocol</strong></span></a>
+    <nav aria-label="Primary navigation"><a href="/#demo">Voice demo</a><a href="/pricing/">Pricing</a><a href="/contact/">Contact</a></nav>
+    <a class="top-cta" href="#workspace">Start my demo <span aria-hidden="true">↗</span></a>
+  </div>
+</header>
+<main id="main">
+<section class="hero shell">
+  <div class="hero-copy">
+    <span class="eyebrow"><span class="pulse" aria-hidden="true"></span>DREAM PROTOCOL / LIVE BUSINESS STUDIO</span>
+    <h1>What if your business <em>started working for you?</em></h1>
+    <p>Show us your public website. We'll build a first-look profile, demonstrate how an AI front desk could work, and map a practical next step. No canned sales slideshow.</p>
+    <div class="hero-actions"><a class="button primary" href="#workspace">Build my business demo <span aria-hidden="true">↗</span></a><a class="button ghost" href="tel:+16282513616">Call the live AI <span aria-hidden="true">↗</span></a></div>
+    <p class="micro">Free exploratory demo · Public business information only · Human approval for real actions</p>
+  </div>
+  <div class="hero-visual" aria-label="Illustrative AI workflow preview">
+    <div class="console-head"><span><i class="signal"></i> DREAMPROTOCOL / SYSTEM PREVIEW</span><span>ILLUSTRATIVE</span></div>
+    <div class="pulse-orb" aria-hidden="true"><span>DP</span></div>
+    <div class="console-event"><span class="event-no">01</span><div><strong>Customer reaches out</strong><small>New request recognized</small></div><span class="event-state">RECEIVED</span></div>
+    <div class="console-event"><span class="event-no">02</span><div><strong>AI gathers context</strong><small>Useful details organized</small></div><span class="event-state">CAPTURED</span></div>
+    <div class="console-event"><span class="event-no">03</span><div><strong>Team keeps control</strong><small>Reviewed handoff prepared</small></div><span class="event-state">READY</span></div>
+  </div>
+</section>
+<section class="trust-strip" aria-label="Demo capabilities"><div class="shell"><span>01 / BUSINESS SCAN</span><span>02 / VOICE PREVIEW</span><span>03 / WORKFLOW SIMULATION</span><span>04 / ACTION PLAN</span></div></section>
+<section class="workspace shell" id="workspace">
+  <div class="section-heading"><div><span class="eyebrow">01 / YOUR BUSINESS</span><h2>Let's start with <em>your reality.</em></h2></div><p>The AI uses public information from your website, not assumptions about your business.</p></div>
+  <div class="panel scan-panel">
+    <form id="scan-form" novalidate>
+      <label for="business-url">Your business website</label>
+      <div class="scan-row"><input id="business-url" name="website" type="url" inputmode="url" autocomplete="url" autocapitalize="none" spellcheck="false" maxlength="300" placeholder="yourbusiness.com" aria-describedby="scan-help" required><button class="button primary" id="scan-button" type="submit">Analyze my business <span aria-hidden="true">↗</span></button></div>
+      <p class="micro" id="scan-help">Only public websites. Do not enter patient, customer, employee, financial or confidential information.</p>
+    </form>
+    <div id="scan-status" role="status" aria-live="polite" class="status-line">Ready when you are.</div>
+    <div id="business-panel" hidden>
+      <div class="business-heading"><div><span class="eyebrow">VERIFIED FROM PUBLIC WEBSITE</span><h3 id="business-name">Your business</h3><p id="business-summary"></p></div><span class="verified-chip">PUBLIC SCAN</span></div>
+      <div class="business-facts"><div><span>Industry</span><strong id="business-industry">Not found</strong></div><div><span>Hours</span><strong id="business-hours">Not found</strong></div><div><span>Services</span><strong id="business-services">Not found</strong></div><div><span>Locations</span><strong id="business-locations">Not found</strong></div></div>
+      <div class="inline-actions"><a id="voice-link" class="button primary" href="/#demo">Speak to my AI front desk <span aria-hidden="true">↗</span></a><p>Opens the existing real Vapi browser voice demo. You approve microphone access before speaking.</p></div>
+    </div>
+  </div>
+</section>
+<section class="workspace shell" id="workflow">
+  <div class="section-heading"><div><span class="eyebrow">02 / SEE THE WORK</span><h2>One request. <em>Less busywork.</em></h2></div><p>Explore a simulated handoff. No calls, messages, appointments, or CRM writes occur here.</p></div>
+  <div class="flow-layout">
+    <div class="panel flow-control">
+      <label for="workflow-type">Choose your biggest interruption</label>
+      <select id="workflow-type">
+        <option value="reception">Missed customer calls</option>
+        <option value="leads">New inquiries and follow-up</option>
+        <option value="dispatch">Urgent service requests</option>
+        <option value="operations">Repetitive office requests</option>
+      </select>
+      <p id="workflow-description">Answer approved questions, capture the request, and prepare a clear team handoff.</p>
+      <button class="button primary" id="run-workflow" type="button">Run example workflow <span aria-hidden="true">↗</span></button>
+      <p class="micro">Demonstration only; your real setup requires business rules, integrations and human approvals.</p>
+    </div>
+    <div class="panel flow-results" aria-live="polite" aria-atomic="true">
+      <div class="console-head"><span>WORKFLOW / EXAMPLE</span><span id="flow-state">READY</span></div>
+      <ol id="workflow-steps" class="step-list"><li><strong>Choose a workflow to explore.</strong><p>We'll show each step from request to human-approved next action.</p></li></ol>
+      <div class="result-footer"><span>Systems touched</span><strong id="systems-touched">None — simulation</strong></div>
+    </div>
+  </div>
+</section>
+<section class="workspace shell" id="solutions">
+  <div class="section-heading"><div><span class="eyebrow">03 / THE STARTING POINT</span><h2>Clear options. <em>No mystery.</em></h2></div><p>Real published starting prices. Exact scope, usage, and integrations are quoted before launch.</p></div>
+  <div class="solution-grid">
+    <button class="solution active" type="button" data-solution="reception" aria-pressed="true"><span class="eyebrow">01 / ANSWER</span><strong>AI receptionist</strong><span>From <b>$399/mo</b></span><small>One-location setup from $995</small><em>Capture calls &amp; route requests →</em></button>
+    <button class="solution" type="button" data-solution="leads" aria-pressed="false"><span class="eyebrow">02 / FOLLOW THROUGH</span><strong>Lead follow-up</strong><span>From <b>$499/mo</b></span><small>Setup from $1,500</small><em>Qualify inquiries &amp; hand off →</em></button>
+    <button class="solution" type="button" data-solution="managed" aria-pressed="false"><span class="eyebrow">03 / IMPROVE</span><strong>Managed AI operations</strong><span>From <b>$750/mo</b></span><small>Onboarding quoted separately</small><em>Maintain &amp; improve workflows →</em></button>
+  </div>
+  <div class="scope-note panel"><div><span class="eyebrow">YOUR STARTING SCENARIO</span><h3 id="scope-title">AI receptionist</h3><p id="scope-description">An AI front desk trained on approved public business information and handoff rules.</p></div><div class="scope-price"><span>Published starting price</span><strong id="scope-price">$399/mo</strong><small id="scope-setup">Setup from $995</small></div></div>
+</section>
+<section class="workspace shell" id="plan">
+  <div class="section-heading"><div><span class="eyebrow">04 / MAKE IT REAL</span><h2>Get a plan built <em>around your business.</em></h2></div><p>Tell us where work gets stuck. A person reviews your request before any production setup or outreach beyond your requested reply.</p></div>
+  <div class="panel lead-panel">
+    <div class="lead-copy"><div class="lead-icon" aria-hidden="true">✳</div><h3>You've seen the possibility.<br>Let's scope the useful part.</h3><p>Get a practical first step, pricing discussion and implementation path. No account required.</p><ul><li>Choose your first workflow</li><li>Confirm approved systems and limits</li><li>Agree on human handoffs and launch testing</li></ul></div>
+    <form id="live-lead-form">
+      <label for="lead-name">Your name</label><input id="lead-name" name="name" maxlength="100" autocomplete="name" required>
+      <label for="lead-email">Work email</label><input id="lead-email" name="email" type="email" maxlength="160" autocomplete="email" required>
+      <label for="lead-company">Business name</label><input id="lead-company" name="company" maxlength="120" autocomplete="organization" required>
+      <label for="lead-goal">What should we automate first?</label><textarea id="lead-goal" name="goal" maxlength="700" rows="3" placeholder="For example, capture after-hours calls and prepare callback requests" required></textarea>
+      <div class="honeypot" aria-hidden="true"><label for="lead-extra">Leave blank</label><input id="lead-extra" name="extra" tabindex="-1" autocomplete="off"></div>
+      <label class="consent"><input id="lead-consent" type="checkbox" required><span>I agree to be contacted about this request. I have not included private, patient or confidential information. <a href="/privacy/">Privacy notice</a>.</span></label>
+      <button id="lead-submit" class="button primary full" type="submit">Request my automation plan <span aria-hidden="true">↗</span></button>
+      <p class="micro">This does not purchase a subscription or authorize access to your business systems.</p>
+      <p id="lead-status" class="status-line" role="status" aria-live="polite"></p>
+    </form>
+  </div>
+</section>
+</main>
+<footer><div class="shell footer-inner"><span>Dream Protocol LLC · San Francisco Bay Area</span><span>Business without the busywork.</span><span><a href="/privacy/">Privacy</a> · <a href="/security/">Security</a> · <a href="/">Home</a></span></div></footer>
+</body></html>
