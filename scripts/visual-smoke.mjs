@@ -404,6 +404,16 @@ try {
     assert(await page.locator('#lead-form').evaluate(form=>form.scrollWidth<=form.clientWidth+1),`Form content clips at ${width}px`);
     await page.locator('#lead-form').screenshot({path:`${output}/form-${width}.png`});
     assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`Contact overflows at ${width}px`);
+    // The Live Studio is a production sitemap route. Verify its essential
+    // actions in the same real Chromium/mobile viewports, without touching APIs.
+    await page.goto(origin+'/live/',{waitUntil:'domcontentloaded'});
+    assert.equal(await page.locator('h1').count(),1,`Live Studio H1 at ${width}px`);
+    await page.locator('#run-workflow').click();
+    assert.equal(await page.locator('#workflow-steps li').count(),4,`Workflow simulation at ${width}px`);
+    await page.locator('[data-solution="leads"]').click();
+    assert.equal((await page.locator('#scope-price').textContent()).trim(),'$499/mo',`Published lead price at ${width}px`);
+    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),`Live Studio overflows at ${width}px`);
+    await page.screenshot({path:`${output}/live-studio-${width}.png`,fullPage:true});
     assert.deepEqual(errors,[],`Uncaught browser errors at ${width}px`);
     await page.close();
     console.log(`Visual smoke passed at ${width}x${height}`);
