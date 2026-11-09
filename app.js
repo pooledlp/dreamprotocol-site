@@ -577,6 +577,18 @@
     input.focus();
   });
 
+  // A scan requested from the Live Studio still uses this existing verified
+  // homepage Vapi integration. Never start microphone capture automatically.
+  const incomingDemoWebsite = new URLSearchParams(window.location.search).get('business');
+  if (incomingDemoWebsite) {
+    try {
+      $('#business-url').value = normalizeUrl(incomingDemoWebsite);
+      queueMicrotask(() => websiteForm.requestSubmit());
+    } catch {
+      // Invalid public URLs are ignored. The user can enter one manually.
+    }
+  }
+
   window.addEventListener('pagehide', removeAlexVoice);
 
   const audio = $('.audio-card audio');
