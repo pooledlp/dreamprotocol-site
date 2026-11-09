@@ -89,6 +89,10 @@
         !host.split('.').every((part) => /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/i.test(part))) {
       throw new Error('Use a public business website domain, such as example.com.');
     }
+    // A visitor's private query strings and deep paths never leave this studio.
+    // The analyzer only needs the public business domain.
+    url.pathname = '/';
+    url.search = '';
     url.hash = '';
     return url.href;
   }
