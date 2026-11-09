@@ -25,6 +25,8 @@
         !host.split('.').every((part) => /^[a-z\d](?:[a-z\d-]*[a-z\d])?$/i.test(part))) {
       throw new Error('A public business domain is required');
     }
+    url.pathname = '/';
+    url.search = '';
     url.hash = '';
     return url.href;
   }
