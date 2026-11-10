@@ -17,7 +17,7 @@
      const copy=document.createElement('p');copy.textContent=p.angle;
      const meta=document.createElement('div');meta.className='meta';
      const tag=document.createElement('span');tag.className='pill';tag.textContent='Research stage';
-     const small=document.createElement('span');small.className='rating';small.textContent='Viral test score: '+score(p);
+     const small=document.createElement('span');small.className='rating';small.textContent='Research priority: '+score(p);
      meta.append(tag,small);body.append(cat,name,copy,meta);article.append(visual,body);grid.append(article);
    }
  };
