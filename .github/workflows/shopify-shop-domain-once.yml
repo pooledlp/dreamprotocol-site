@@ -1,0 +1,71 @@
+name: One-time Dream Commerce Shopify DNS
+on:
+  push:
+    branches: [ops/shopify-shop-domain-20261109]
+    paths:
+      - '.github/workflows/shopify-shop-domain-once.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  configure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - name: Safely add only shop.dreamprotocol.ai CNAME
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const domain='dreamprotocol.ai';
+          const hostname='shop.dreamprotocol.ai';
+          const target='shops.myshopify.com';
+          const token=process.env.CLOUDFLARE_API_TOKEN;
+          if(!token){console.error('BLOCKED: GitHub Cloudflare API token secret unavailable.');process.exit(1)}
+          const api=async (path,method='GET',body)=>{
+            const r=await fetch('https://api.cloudflare.com/client/v4'+path,{
+              method,
+              headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},
+              body:body?JSON.stringify(body):undefined,
+              signal:AbortSignal.timeout(20000)
+            });
+            let payload={};
+            try{payload=await r.json()}catch{}
+            if(!r.ok || payload.success!==true){
+              const codes=(payload.errors||[]).map(e=>e.code).filter(Boolean).join(',');
+              throw Error('Cloudflare API '+method+' '+path.split('?')[0]+' failed: HTTP '+r.status+(codes?' error codes '+codes:'')+'. Required: Zone Read and DNS Write for dreamprotocol.ai.');
+            }
+            return payload.result;
+          };
+          (async()=>{
+            const zones=await api('/zones?name='+encodeURIComponent(domain)+'&per_page=10');
+            if(!Array.isArray(zones)||zones.length!==1||zones[0].name!==domain)throw Error('Expected exactly one accessible dreamprotocol.ai zone; cannot proceed.');
+            const zone=zones[0];
+            if(zone.status!=='active')throw Error('Cloudflare zone not active; DNS creation aborted.');
+            const list=()=>api('/zones/'+zone.id+'/dns_records?name='+encodeURIComponent(hostname)+'&per_page=100');
+            const current=await list();
+            if(!Array.isArray(current))throw Error('Cannot inspect existing shop DNS records.');
+            if(current.length){
+              if(current.length===1 && current[0].type==='CNAME'
+                && String(current[0].content).replace(/\.$/,'').toLowerCase()===target
+                && current[0].proxied===false){
+                  console.log('ALREADY_CONFIGURED: shop.dreamprotocol.ai -> shops.myshopify.com (DNS only)');
+                  return;
+              }
+              throw Error('EXISTING_SHOP_RECORD: No DNS records were altered. Inspect shop.dreamprotocol.ai manually.');
+            }
+            await api('/zones/'+zone.id+'/dns_records','POST',{
+              type:'CNAME',name:hostname,content:target,ttl:1,proxied:false,
+              comment:'Dream Commerce Shopify storefront — requested 2026-11-09'
+            });
+            const verification=await list();
+            const ok=verification.length===1&&verification[0].type==='CNAME'&&
+              String(verification[0].content).replace(/\.$/,'').toLowerCase()===target&&
+              verification[0].proxied===false;
+            if(!ok)throw Error('Created DNS but read-back verification failed; inspect Cloudflare.');
+            console.log('SUCCESS: created and verified shop.dreamprotocol.ai CNAME -> shops.myshopify.com (DNS only)');
+            console.log('NEXT: Shopify admin Settings > Domains > Connect existing domain > shop.dreamprotocol.ai > set as primary.');
+          })().catch(e=>{console.error(String(e.message));process.exitCode=1});
+          NODE
