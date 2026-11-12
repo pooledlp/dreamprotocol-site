@@ -1,0 +1,71 @@
+name: Build and stage independent Dream Commerce storefront
+
+on:
+  pull_request:
+    paths:
+      - 'commerce/**'
+      - 'shop-worker/**'
+      - 'scripts/build-commerce-worker.mjs'
+      - '.github/workflows/deploy-commerce.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'commerce/**'
+      - 'shop-worker/**'
+      - 'scripts/build-commerce-worker.mjs'
+      - '.github/workflows/deploy-commerce.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Generate standalone assets
+        run: node scripts/build-commerce-worker.mjs
+      - name: Test Worker and payment safeguards
+        run: |
+          node --check shop-worker/src/index.mjs
+          node --check shop-worker/public/shop.js
+          node --test shop-worker/shop.test.mjs
+      - name: Retain staged shop preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: standalone-commerce-preview
+          path: shop-worker/public
+          retention-days: 7
+
+  deploy-preview:
+    needs: validate
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Confirm existing Cloudflare connection
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::error::Missing Cloudflare Actions credentials. Preview built but not deployed."
+            exit 1
+          fi
+      - name: Generate standalone assets
+        run: node scripts/build-commerce-worker.mjs
+      - name: Deploy Worker staging without touching DNS
+        working-directory: shop-worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx --yes wrangler@4.102.0 deploy --config wrangler.toml
