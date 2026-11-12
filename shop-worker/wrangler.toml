@@ -1,0 +1,16 @@
+name = "dream-commerce-shop"
+main = "src/index.mjs"
+compatibility_date = "2026-11-10"
+workers_dev = true
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+run_worker_first = true
+
+# Stage independently first. Do NOT attach shop.dreamprotocol.ai until
+# the existing Shopify DNS record has been identified and removed safely.
+# After a working preview and verified payments/fulfillment:
+# [[routes]]
+# pattern = "shop.dreamprotocol.ai"
+# custom_domain = true
