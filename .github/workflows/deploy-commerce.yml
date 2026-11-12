@@ -70,7 +70,7 @@ jobs:
           if(!response.ok||payload.success!==true||!Array.isArray(payload.result)||payload.result.length!==1)throw Error('Cannot resolve the dedicated dreamprotocol.ai Cloudflare zone');
           const zone=payload.result[0];
           if(zone.name!=='dreamprotocol.ai'||zone.status!=='active'||!zone.account?.id)throw Error('Cloudflare domain missing active zone or account');
-          fs.appendFileSync(process.env.GITHUB_ENV,'CLOUDFLARE_ACCOUNT_ID='+zone.account.id+'\\n');
+          fs.appendFileSync(process.env.GITHUB_ENV,'CLOUDFLARE_ACCOUNT_ID='+zone.account.id+'\n');
           console.log('Cloudflare account verified using the existing dreamprotocol.ai zone.');
           NODE
       - name: Generate standalone assets
