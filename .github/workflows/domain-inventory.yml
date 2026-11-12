@@ -101,3 +101,33 @@ jobs:
           }));
           for(const r of results)console.log('HTTP_PROBE',JSON.stringify(r));
           NODE
+
+      - name: Inspect non-sensitive health flags and last scan timestamps
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          const endpoints=[
+            ['business-analyzer','https://api.dreamprotocol.ai/health'],
+            ['dreamboard','https://api.dreamprotocol.ai/dreamboard/status'],
+            ['dreampredict','https://api.dreamprotocol.ai/dream-predict/status'],
+            ['call-alerts','https://calls.dreamprotocol.ai/health']
+          ];
+          for(const [name,url] of endpoints){
+            try{
+              const r=await fetch(url,{signal:AbortSignal.timeout(12000)});
+              if(!r.ok){console.log('SERVICE_HEALTH',JSON.stringify({name,status:r.status}));continue}
+              const d=await r.json();
+              const limited=name==='dreampredict'?{
+                mode:d.mode,realMoney:d.realMoney,lastScanAt:d.lastScanAt,
+                scanner:{scansToday:d.scanner?.scansToday,totalScans:d.scanner?.totalScans,
+                  lastDurationMs:d.scanner?.lastDurationMs},
+                forecastLab:{enabled:d.forecastLab?.enabled,lastModelAt:d.forecastLab?.lastModelAt},
+                execution:{live:d.execution?.live,orderSubmission:d.execution?.orderSubmission},
+                lastError:typeof d.lastError==='string'?d.lastError.slice(0,180):null
+              }:name==='call-alerts'?{up:d.up,email:d.email,sms:d.sms}
+              :name==='dreamboard'?{enabled:d.enabled,configured:d.configured,status:d.status}
+              :{status:d.status};
+              console.log('SERVICE_HEALTH',JSON.stringify({name,http:r.status,...limited}));
+            }catch(e){console.log('SERVICE_HEALTH',JSON.stringify({name,error:e.name||'unavailable'}))}
+          }
+          NODE
