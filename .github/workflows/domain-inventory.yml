@@ -72,3 +72,32 @@ jobs:
           }
           console.log('READ_ONLY_COMPLETE');
           NODE
+      - name: Check public endpoint reachability without reading private content
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          const urls=[
+            'https://dreamprotocol.ai/',
+            'https://dreamprotocol.ai/commerce/',
+            'https://dreamprotocol.ai/kalshi/',
+            'https://dreamprotocol.ai/btc/',
+            'https://dreamprotocol.ai/try/',
+            'https://dreamprotocol.ai/live/',
+            'https://shop.dreamprotocol.ai/',
+            'https://perio.dreamprotocol.ai/',
+            'https://api.dreamprotocol.ai/',
+            'https://api.dreamprotocol.ai/health',
+            'https://calls.dreamprotocol.ai/health',
+            'https://command.dreamprotocol.ai/',
+            'https://metrics.dreamprotocol.ai/collect'
+          ];
+          const results=await Promise.all(urls.map(async u=>{
+            try{
+              const r=await fetch(u,{signal:AbortSignal.timeout(12000),redirect:'follow'});
+              const final=new URL(r.url);
+              await r.body?.cancel();
+              return {url:u,status:r.status,final:final.hostname+final.pathname};
+            }catch(e){return {url:u,error:e.name||'unavailable'}}
+          }));
+          for(const r of results)console.log('HTTP_PROBE',JSON.stringify(r));
+          NODE
