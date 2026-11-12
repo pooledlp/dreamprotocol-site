@@ -1,0 +1,40 @@
+name: One-time check Cloudflare shop forwarding permissions
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/shop-forwarding-probe-once.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Inspect existing rules and shop DNS (read-only)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          const token=process.env.CLOUDFLARE_API_TOKEN;
+          if(!token)throw Error('Missing Cloudflare token');
+          const headers={Authorization:'Bearer '+token};
+          const base='https://api.cloudflare.com/client/v4';
+          async function get(path){
+            const r=await fetch(base+path,{headers,signal:AbortSignal.timeout(15000)});
+            const data=await r.json().catch(()=>({}));
+            return {status:r.status,ok:r.ok&&data.success===true,result:data.result,errors:(data.errors||[]).map(x=>x.code)};
+          }
+          const z=await get('/zones?name=dreamprotocol.ai&per_page=10');
+          if(!z.ok||z.result?.length!==1||z.result[0].name!=='dreamprotocol.ai')throw Error('Cannot verify zone');
+          const id=z.result[0].id;
+          const [dns,pages,rules]=await Promise.all([
+            get('/zones/'+id+'/dns_records?name=shop.dreamprotocol.ai'),
+            get('/zones/'+id+'/pagerules'),
+            get('/zones/'+id+'/rulesets/phases/http_request_dynamic_redirect/entrypoint')
+          ]);
+          console.log('SHOP_DNS',JSON.stringify({status:dns.status,records:dns.result?.map(x=>({type:x.type,name:x.name,content:x.content,proxied:x.proxied}))}));
+          console.log('PAGE_RULES',JSON.stringify({status:pages.status,errors:pages.errors,items:pages.result?.map(x=>({id:x.id,status:x.status,targets:x.targets?.map(y=>y.constraint?.value),actions:x.actions?.map(a=>a.id)}))}));
+          console.log('REDIRECT_RULESET',JSON.stringify({status:rules.status,errors:rules.errors,numberOfRules:rules.result?.rules?.length}));
+          NODE
