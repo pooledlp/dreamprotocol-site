@@ -1,0 +1,41 @@
+name: Activate existing Dream Commerce Worker route
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/activate-commerce-route-once.yml']
+permissions:
+  contents: read
+jobs:
+  activate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Move only shop DNS off Shopify
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          node --input-type=module <<'NODE'
+          const token = process.env.CLOUDFLARE_API_TOKEN;
+          if (!token) throw Error("Missing configured Cloudflare token");
+          const api = async (path, method="GET", body) => {
+            const r = await fetch("https://api.cloudflare.com/client/v4"+path, {
+              method, headers: {Authorization:"Bearer "+token,"Content-Type":"application/json"},
+              body: body ? JSON.stringify(body) : undefined, signal:AbortSignal.timeout(15000)
+            });
+            const data = await r.json();
+            if (!r.ok || !data.success) throw Error("Cloudflare HTTP "+r.status+" codes "+JSON.stringify((data.errors||[]).map(x=>x.code)));
+            return data.result;
+          };
+          const zones = await api("/zones?name=dreamprotocol.ai");
+          if (zones.length!==1 || zones[0].status!=="active") throw Error("Active zone not uniquely identified");
+          const prefix="/zones/"+zones[0].id+"/dns_records";
+          const records=await api(prefix+"?name=shop.dreamprotocol.ai");
+          if(records.length!==1) throw Error("Expected exactly one shop DNS record");
+          const record=records[0];
+          if(record.type!=="CNAME" || record.content!=="shops.myshopify.com") throw Error("Shop DNS changed; stop for review");
+          console.log("Updating confirmed Shopify CNAME to a proxied Worker route.");
+          // The shared Worker owns every path; a reserved origin prevents fallback to Shopify.
+          const updated=await api(prefix+"/"+record.id,"PUT",{type:"A",name:record.name,content:"192.0.2.1",proxied:true,ttl:1,comment:"Dream Commerce served by dreamprotocol-business-analyzer Worker route"});
+          console.log("DNS update confirmed:",updated.name,updated.type,updated.content,"proxied="+updated.proxied);
+          
+          NODE
