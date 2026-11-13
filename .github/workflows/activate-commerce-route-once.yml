@@ -1,4 +1,4 @@
-name: Activate existing Dream Commerce Worker route
+name: Verify Dream Commerce domain
 on:
   push:
     branches: [main]
@@ -6,36 +6,30 @@ on:
 permissions:
   contents: read
 jobs:
-  activate:
+  verify:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Move only shop DNS off Shopify
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      - name: Verify public shop and API
         run: |
           node --input-type=module <<'NODE'
-          const token = process.env.CLOUDFLARE_API_TOKEN;
-          if (!token) throw Error("Missing configured Cloudflare token");
-          const api = async (path, method="GET", body) => {
-            const r = await fetch("https://api.cloudflare.com/client/v4"+path, {
-              method, headers: {Authorization:"Bearer "+token,"Content-Type":"application/json"},
-              body: body ? JSON.stringify(body) : undefined, signal:AbortSignal.timeout(15000)
-            });
-            const data = await r.json();
-            if (!r.ok || !data.success) throw Error("Cloudflare HTTP "+r.status+" codes "+JSON.stringify((data.errors||[]).map(x=>x.code)));
-            return data.result;
-          };
-          const zones = await api("/zones?name=dreamprotocol.ai");
-          if (zones.length!==1 || zones[0].status!=="active") throw Error("Active zone not uniquely identified");
-          const prefix="/zones/"+zones[0].id+"/dns_records";
-          const records=await api(prefix+"?name=shop.dreamprotocol.ai");
-          if(records.length!==1) throw Error("Expected exactly one shop DNS record");
-          const record=records[0];
-          if(record.type!=="CNAME" || record.content!=="shops.myshopify.com") throw Error("Shop DNS changed; stop for review");
-          console.log("Updating confirmed Shopify CNAME to a proxied Worker route.");
-          // The shared Worker owns every path; a reserved origin prevents fallback to Shopify.
-          const updated=await api(prefix+"/"+record.id,"PUT",{type:"A",name:record.name,content:"192.0.2.1",proxied:true,ttl:1,comment:"Dream Commerce served by dreamprotocol-business-analyzer Worker route"});
-          console.log("DNS update confirmed:",updated.name,updated.type,updated.content,"proxied="+updated.proxied);
-          
+          for(let attempt=0;attempt<12;attempt++){
+            try{
+              const health=await fetch('https://shop.dreamprotocol.ai/health',{signal:AbortSignal.timeout(10000)});
+              const data=await health.json();
+              if(data.service!=='dream-commerce')throw Error('DNS still resolving old store');
+              const page=await fetch('https://shop.dreamprotocol.ai/',{signal:AbortSignal.timeout(10000)});
+              const html=await page.text();
+              if(page.status!==200||!html.includes('Dream Commerce')||html.includes('shopify.exit_interstitial'))throw Error('Unexpected storefront');
+              for(const path of ['/commerce/shop.css','/commerce/shop.js','/commerce/catalog.json']){
+                const r=await fetch('https://shop.dreamprotocol.ai'+path,{signal:AbortSignal.timeout(10000)});
+                if(!r.ok)throw Error('Asset failed: '+path);
+              }
+              const api=await fetch('https://api.dreamprotocol.ai/health');
+              if((await api.json()).status!=='ok')throw Error('Shared API health failed');
+              console.log('VERIFIED: Shop HTML and all assets return 200; Shopify removed; existing API healthy.');
+              console.log('COMMERCE STATUS: '+JSON.stringify(data));process.exit(0);
+            }catch(e){console.log('Attempt '+(attempt+1)+': '+e.message);await new Promise(r=>setTimeout(r,10000));}
+          }
+          throw Error('Public shop verification failed');
           NODE
