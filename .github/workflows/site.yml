@@ -3,15 +3,7 @@ on:
   pull_request:
   push:
     branches: [main]
-  schedule:
-    # Mondays at 16:17 UTC. GitHub schedules may be delayed.
-    - cron: '17 16 * * 1'
   workflow_dispatch:
-    inputs:
-      recover_failed_editorial:
-        description: 'Allow one recovery of a rejected first API request this week (uses paid API)'
-        type: boolean
-        default: false
 
 permissions:
   contents: read
@@ -22,7 +14,9 @@ concurrency:
 
 jobs:
   editorial:
-    if: github.ref == 'refs/heads/main' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
+    # Legacy article generation is retired. Keep history and build/deploy intact.
+    # An unconditional guard also prevents paid calls from manual dispatch.
+    if: ${{ false }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
