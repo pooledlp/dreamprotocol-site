@@ -76,7 +76,7 @@ test('Reservation persists once and missing credentials never reserve paid work'
   env.OPENAI_API_KEY='fake-test-key-no-network';
   for(let i=0;i<2;i++)execFileSync(process.execPath,['scripts/editorial.mjs','reserve'],{cwd:temp,env,stdio:'pipe'});
   assert.equal(fs.readdirSync(path.join(temp,'content/runs')).length,1);
-  assert.equal(fs.readFileSync(env.GITHUB_OUTPUT,'utf8'),'reserved=true\nreserved=false\n');
+  assert.equal(fs.readFileSync(env.GITHUB_OUTPUT,'utf8').replace(/^date=.*\n/gm,''),'reserved=true\nreserved=false\n');
  }finally{fs.rmSync(temp,{recursive:true,force:true});}
 });
 
@@ -153,7 +153,7 @@ test('CLI persists reviewer reasons and cannot reuse a held weekly reservation',
   assert(fs.existsSync(path.join(temp,'_editorial/research.json')));
   assert.throws(run,/No matching weekly reservation/);
   execFileSync(process.execPath,['scripts/editorial.mjs','reserve'],{cwd:temp,env,stdio:'pipe'});
-  assert.equal(fs.readFileSync(env.GITHUB_OUTPUT,'utf8'),'reserved=true\nreserved=false\n');
+  assert.equal(fs.readFileSync(env.GITHUB_OUTPUT,'utf8').replace(/^date=.*\n/gm,''),'reserved=true\nreserved=false\n');
  }finally{fs.rmSync(temp,{recursive:true,force:true});}
 });
 
@@ -187,7 +187,7 @@ test('Authorized recovery consumes only the remaining review request and still h
   fs.writeFileSync(mock,`let calls=0;globalThis.fetch=async url=>{if(!url.includes('api.openai.com'))return new Response(${JSON.stringify(section+section)},{headers:{'content-type':'text/plain'}});if(++calls>1)throw Error('Repeated paid work');return {ok:true,json:async()=>(${JSON.stringify(response({approved:false,reasons:['Unsupported claim']}))})};};`);
   const env={...process.env,OPENAI_API_KEY:'fake-no-network',GITHUB_RUN_ID:'recovery',GITHUB_OUTPUT:path.join(temp,'output')};
   const cli=command=>execFileSync(process.execPath,['--import',mock,'scripts/editorial.mjs',command],{cwd:temp,env,stdio:'pipe'});
-  cli('reserve');cli('reserve');assert.equal(fs.readFileSync(env.GITHUB_OUTPUT,'utf8'),'reserved=true\nreserved=false\n');
+  cli('reserve');cli('reserve');assert.equal(fs.readFileSync(env.GITHUB_OUTPUT,'utf8').replace(/^date=.*\n/gm,''),'reserved=true\nreserved=false\n');
   assert.throws(()=>cli('generate'));
   const record=JSON.parse(fs.readFileSync(recordPath,'utf8'));
   assert.equal(record.calls,3);assert.equal(record.status,'held');assert.deepEqual(record.reviewReasons,['Unsupported claim']);
