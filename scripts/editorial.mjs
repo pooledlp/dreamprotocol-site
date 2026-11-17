@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import {createRequester} from './editorial-request.mjs';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
@@ -164,9 +165,20 @@ export async function reviewArticle({date,existing,article,request,retrieve=retr
  if(reviewEvidence.length!==2||article.sources.some(s=>!reviewEvidence.some(e=>norm(e.url)===norm(s.url)&&e.text.length>=500)))throw Error('Reviewer did not receive every cited source');
  return {...article,publishOn:date,status:'scheduled',week:weekKey(date),review:{approved:true,model,reviewedOn:date},generation:{model,sourceCheckedOn:date,evidence:reviewEvidence.map(({text,...metadata})=>metadata),usage:[...priorUsage,reviewResponse.usage||null]}};
 }
+// A rejected first request has no saved content to regenerate. Recovery is explicit,
+// one-time, and never bypasses review or an existing generated article.
+export function reservationDecision(previous,{manual=false,recover=false,hasArticle=false}={}){
+ if(hasArticle)return {reserved:false};
+ if(!previous)return {reserved:true};
+ if(previous.status==='review-pending'&&previous.calls===2&&previous.recovery)return {reserved:true};
+ const rejectedFirst=previous.status==='held'&&previous.calls===1&&!previous.recovery&&
+  /^AI service (?:returned )?HTTP 429(?:;|$)/.test(previous.reason||'');
+ if(manual&&recover&&rejectedFirst&&!previous.retryRecovery)return {reserved:true,retryRecovery:true};
+ return {reserved:false};
+}
 const save=(file,value)=>{fs.mkdirSync(path.dirname(file),{recursive:true});fs.writeFileSync(file,JSON.stringify(value,null,2)+'\n');};
 async function main(){
- const date=new Date().toISOString().slice(0,10);const week=weekKey(date);
+ const date=process.env.EDITORIAL_DATE||new Date().toISOString().slice(0,10);const week=weekKey(date);
  const record=path.join(root,'content/runs',week+'.json');
  const command=process.argv[2];
  if(command==='finalize'){
@@ -177,24 +189,21 @@ async function main(){
  if(!process.env.OPENAI_API_KEY)throw Error('Add the OPENAI_API_KEY repository secret to activate researched articles');
  if(command==='reserve'){
   const previous=fs.existsSync(record)?JSON.parse(fs.readFileSync(record,'utf8')):null;
-  const reserved=!previous||Boolean(previous.status==='review-pending'&&previous.calls===2&&previous.recovery);
-  if(reserved)save(record,{...(previous||{}),week,date,status:'reserved',runId:process.env.GITHUB_RUN_ID||'local'});
-  if(process.env.GITHUB_OUTPUT)fs.appendFileSync(process.env.GITHUB_OUTPUT,'reserved='+Boolean(reserved)+'\n');
+  const decision=reservationDecision(previous,{manual:process.env.GITHUB_EVENT_NAME==='workflow_dispatch',recover:process.env.EDITORIAL_RECOVER==='true',hasArticle:fs.existsSync(path.join(root,'content/generated',week+'.json'))});
+  const {reserved}=decision;
+  if(reserved)save(record,{...(previous||{}),week,date,...(decision.retryRecovery?{retryRecovery:true,priorFailure:{runId:previous.runId,calls:previous.calls,reason:previous.reason}}:{}),status:'reserved',runId:process.env.GITHUB_RUN_ID||'local'});
+  if(process.env.GITHUB_OUTPUT)fs.appendFileSync(process.env.GITHUB_OUTPUT,'reserved='+Boolean(reserved)+'\ndate='+date+'\n');
   console.log(reserved?'Reserved this week’s single article attempt.':'This week already has an attempt; no additional AI calls.');return;
  }
  if(command!=='generate')throw Error('Use reserve or generate');
  const run=JSON.parse(fs.readFileSync(record,'utf8'));
  if(run.status!=='reserved'||run.runId!==(process.env.GITHUB_RUN_ID||'local'))throw Error('No matching weekly reservation');
- let calls=run.recovery?run.calls:0;
+ const client=createRequester(process.env.OPENAI_API_KEY,{model,initialCalls:run.recovery?run.calls:0});
  let reviewReasons=[];
  const request=async body=>{
   if(JSON.stringify(body).length>160000)throw Error('Editorial input limit reached; review the topic archive');
-  if(++calls>3)throw Error('Weekly request limit reached');
-  const response=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{Authorization:'Bearer '+process.env.OPENAI_API_KEY,'Content-Type':'application/json'},body:JSON.stringify({model,store:false,reasoning:{effort:'medium'},...body}),signal:AbortSignal.timeout(240000)});
-  // Do not log response bodies: errors may contain request data. No automatic retries.
-  if(!response.ok)throw Error('AI service returned HTTP '+response.status);
-  const result=await response.json();
-  save(path.join(root,'_editorial','request-'+calls+'.json'),{model,status:result.status,incompleteDetails:result.incomplete_details||null,usage:result.usage||null});
+  const result=await client.request(body);
+  save(path.join(root,'_editorial','request-'+client.calls+'.json'),{model,status:result.status,incompleteDetails:result.incomplete_details||null,usage:result.usage||null});
   return result;
  };
  try{
@@ -205,7 +214,7 @@ async function main(){
   const existing=[...prepared,...loadGenerated()];
   let article;
   if(run.recovery){
-   if(calls!==2)throw Error('Recovery requires exactly two prior requests');
+   if(client.calls!==2)throw Error('Recovery requires exactly two prior requests');
    const file=path.resolve(root,run.recovery.path);
    if(!file.startsWith(path.join(root,'docs/editorial-incidents')+path.sep))throw Error('Invalid recovery path');
    const raw=fs.readFileSync(file);
@@ -217,10 +226,12 @@ async function main(){
   }else article=await generate({date,existing,request,audit});
   save(path.join(root,'_editorial/approved.json'),article);
   save(path.join(root,'content/generated',week+'.json'),article);
-  save(record,{...run,status:'approved',slug:article.slug,calls,reason:undefined,reviewReasons:undefined});
+  save(record,{...run,status:'approved',slug:article.slug,calls:client.calls,attempts:client.attempts,reason:undefined,reviewReasons:undefined});
   console.log('Approved one researched article for publication.');
  }catch(error){
-  save(record,{...run,status:'held',calls,reviewReasons,reason:String(error.message).replace(/[\r\n]/g,' ').slice(0,220)});
+  // Requester errors are sanitized; never print arbitrary model/source error text.
+  if(/^AI service HTTP \d{3}; code=/.test(error.message))console.error(error.message);
+  save(record,{...run,status:'held',calls:client.calls,attempts:client.attempts,reviewReasons,reason:String(error.message).replace(/[\r\n]/g,' ').slice(0,220)});
   throw Error('Weekly article held. Existing site content remains available; inspect the run record.');
  }
 }

@@ -7,6 +7,11 @@ on:
     # Mondays at 16:17 UTC. GitHub schedules may be delayed.
     - cron: '17 16 * * 1'
   workflow_dispatch:
+    inputs:
+      recover_failed_editorial:
+        description: 'Allow one recovery of a rejected first API request this week (uses paid API)'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -35,6 +40,7 @@ jobs:
         id: reserve
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          EDITORIAL_RECOVER: ${{ inputs.recover_failed_editorial }}
         run: node scripts/editorial.mjs reserve
       - name: Persist reservation before using the paid AI service
         if: steps.reserve.outputs.reserved == 'true'
@@ -50,7 +56,11 @@ jobs:
         continue-on-error: true
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: node scripts/editorial.mjs generate
+          EDITORIAL_DATE: ${{ steps.reserve.outputs.date }}
+        run: |
+          mkdir -p _editorial
+          set -o pipefail
+          node scripts/editorial.mjs generate 2>&1 | tee _editorial/diagnostics.log
       - name: Validate the proposed article in the complete website
         if: steps.generate.outcome == 'success'
         id: validate
@@ -68,6 +78,8 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
       - name: Save the outcome and only commit validated articles
+        env:
+          EDITORIAL_DATE: ${{ steps.reserve.outputs.date }}
         if: always() && steps.reserve.outputs.reserved == 'true'
         run: |
           node scripts/editorial.mjs finalize '${{ steps.validate.outcome }}'
