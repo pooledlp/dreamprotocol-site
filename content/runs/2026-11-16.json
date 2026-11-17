@@ -1,6 +1,9 @@
 {
   "week": "2026-11-16",
   "date": "2026-11-17",
-  "status": "reserved",
-  "runId": "43985791655"
+  "status": "held",
+  "runId": "43985791655",
+  "calls": 1,
+  "reviewReasons": [],
+  "reason": "AI service returned HTTP 429"
 }
